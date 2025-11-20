@@ -9,8 +9,6 @@ cc_binary {
     init_rc: ["android.hardware.automotive.vehicle@snap-service.rc"],
     vintf_fragments: ["android.hardware.automotive.vehicle@snap-service.xml"],
 
-    // 1. GEBRUIK DE DEFAULTS (uit je grep resultaat)
-    // Dit stelt automatisch de juiste C++ flags en standaarden in.
     defaults: [
         "VehicleHalDefaults",
     ],
@@ -27,29 +25,19 @@ cc_binary {
         "libbinder_ndk",
         "liblog",
         "libutils",
-        // Zorg dat dit matcht met wat je systeem gebruikt (check eventueel V1 vs V3)
-        // Voor Android 15 is dit meestal V3.
         "android.hardware.automotive.vehicle-V3-ndk",
     ],
 
     static_libs: [
-        // 2. HIER IS DE BOOSDOENER (uit je grep resultaat)
-        // Dit is de library die de DefaultVehicleHal wrapper bevat.
         "DefaultVehicleHal",
         "VehicleHalUtils",
     ],
     
-    // Vaak nodig in Android 15 om headers van de DefaultVehicleHal te vinden
     header_libs: [
         "IVehicleHardware",
     ],
     
     cflags: [
         "-DLOG_TAG=\"SnapVehicleHal\"",
-    ],
-    arch: {
-        x86_64: {
-            cflags: ["-DEMULATOR"],
-        },
-    },
+    ]
 }

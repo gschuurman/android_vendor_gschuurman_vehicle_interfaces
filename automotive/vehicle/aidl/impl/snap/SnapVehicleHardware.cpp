@@ -4,6 +4,7 @@
 #include <android-base/properties.h>
 #include <chrono>
 #include <fstream>
+#include <thread> // Toegevoegd voor std::this_thread::sleep_for
 
 #include <aidl/android/hardware/automotive/vehicle/VehicleGear.h>
 #include <aidl/android/hardware/automotive/vehicle/VehiclePropertyAccess.h>
@@ -18,7 +19,7 @@ namespace android
             namespace vehicle
             {
 
-                // --- NAMESPACE ALIASSEN VOOR IMPLEMENTATIE (FIX) ---
+                // --- NAMESPACE ALIASSEN ---
                 using ::aidl::android::hardware::automotive::vehicle::VehicleGear;
                 using ::aidl::android::hardware::automotive::vehicle::VehiclePropertyAccess;
                 using ::aidl::android::hardware::automotive::vehicle::VehiclePropertyChangeMode;
@@ -56,7 +57,9 @@ namespace android
                 {
                     mShuttingDown = true;
                     if (mPollThread.joinable())
+                    {
                         mPollThread.join();
+                    }
                 }
 
                 std::vector<VehiclePropConfig> SnapVehicleHardware::getAllPropertyConfigs() const
@@ -177,7 +180,6 @@ namespace android
 
                 void SnapVehicleHardware::registerOnPropertySetErrorEvent(std::unique_ptr<const PropertySetErrorCallback> callback)
                 {
-                    // DIT WAS DE FOUT: mOnSetError was niet gedefinieerd in de header
                     mOnSetError = std::move(callback);
                 }
 
@@ -187,12 +189,14 @@ namespace android
                 StatusCode SnapVehicleHardware::updateSampleRate(int32_t /*propId*/, int32_t /*areaId*/, float /*sampleRate*/) { return StatusCode::OK; }
 
                 // Hardware Logica
-                void SnapVehicleHardware::initPwm() {
+                void SnapVehicleHardware::initPwm()
+                {
                     writeSysFs(mPathPwmPeriod, "50000");
                     writeSysFs(mPathPwmEnable, "1");
                 }
 
-                void SnapVehicleHardware::writePwm(int percentage) {
+                void SnapVehicleHardware::writePwm(int percentage)
+                {
                     int duty = (percentage * 50000) / 100;
                     writeSysFs(mPathPwmDuty, std::to_string(duty));
                 }
@@ -231,12 +235,16 @@ namespace android
                 {
                     std::ofstream file(path);
                     if (file.is_open())
+                    {
                         file << val;
+                    }
                     else
-                        LOG(ERROR) << "Kan niet schrijven naar: " << path;
+                    {
+                        LOG(WARNING) << "Failed to write to path: " << path;
+                    }
                 }
 
-            } // namespace vehicle
-        } // namespace automotive
-    } // namespace hardware
-} // namespace android
+            }
+        }
+    }
+}
