@@ -4,7 +4,12 @@
 #include <chrono>
 #include <fstream>
 
-// Definieer paden (Pas deze aan naar jouw werkelijke VIM3 paden!)
+// --- CRUCIALE INCLUDES VOOR ENUMS (FIX) ---
+#include <aidl/android/hardware/automotive/vehicle/VehicleGear.h>
+#include <aidl/android/hardware/automotive/vehicle/VehiclePropertyAccess.h>
+#include <aidl/android/hardware/automotive/vehicle/VehiclePropertyChangeMode.h>
+
+// Pas deze paden aan naar jouw werkelijke VIM3 paden!
 #define PATH_GPIO_REVERSE   "/sys/class/gpio/gpio496/value"
 #define PATH_PWM_BRIGHTNESS "/sys/class/pwm/pwmchip0/pwm0/duty_cycle"
 #define PATH_PWM_PERIOD     "/sys/class/pwm/pwmchip0/pwm0/period"
@@ -15,7 +20,11 @@ namespace hardware {
 namespace automotive {
 namespace vehicle {
 
-// Helper om timestamps te krijgen
+// --- NAMESPACE ALIASSEN VOOR IMPLEMENTATIE (FIX) ---
+using ::aidl::android::hardware::automotive::vehicle::VehicleGear;
+using ::aidl::android::hardware::automotive::vehicle::VehiclePropertyAccess;
+using ::aidl::android::hardware::automotive::vehicle::VehiclePropertyChangeMode;
+
 static int64_t elapsedRealtimeNano() {
     auto now = std::chrono::steady_clock::now();
     return std::chrono::duration_cast<std::chrono::nanoseconds>(now.time_since_epoch()).count();
@@ -34,7 +43,6 @@ SnapVehicleHardware::~SnapVehicleHardware() {
     if (mPollThread.joinable()) mPollThread.join();
 }
 
-// 1. Configuraties
 std::vector<VehiclePropConfig> SnapVehicleHardware::getAllPropertyConfigs() const {
     std::vector<VehiclePropConfig> configs;
 
@@ -50,37 +58,29 @@ std::vector<VehiclePropConfig> SnapVehicleHardware::getAllPropertyConfigs() cons
     brightConfig.prop = static_cast<int32_t>(VehicleProperty::DISPLAY_BRIGHTNESS);
     brightConfig.access = VehiclePropertyAccess::READ_WRITE;
     brightConfig.changeMode = VehiclePropertyChangeMode::ON_CHANGE;
-    brightConfig.areaConfigs = {
-        {.minInt32Value = 0, .maxInt32Value = 100}
-    };
+    brightConfig.areaConfigs = {{.minInt32Value = 0, .maxInt32Value = 100}};
     configs.push_back(brightConfig);
 
     return configs;
 }
 
-// 2. Batch Get Values (Nieuw in A15)
-StatusCode SnapVehicleHardware::getValues(const std::vector<GetValueRequest>& requests,
-                                          std::vector<GetValueResult>* results) const {
-    // Loop door alle aanvragen heen
+StatusCode SnapVehicleHardware::getValues(std::shared_ptr<const GetValuesCallback> callback,
+                                          const std::vector<GetValueRequest>& requests) const {
+    std::vector<GetValueResult> results;
     for (const auto& req : requests) {
         GetValueResult result;
         result.requestId = req.requestId;
-        result.status = StatusCode::OK;
-        
-        // Roep onze interne helper aan
-        // In A15 zit de 'prop' data in req.prop
-        VehiclePropValue responseValue = req.prop; 
+        VehiclePropValue responseValue = req.prop;
         result.status = getValueInternal(req.prop, &responseValue);
-        
         if (result.status == StatusCode::OK) {
             result.prop = responseValue;
         }
-        results->push_back(result);
+        results.push_back(result);
     }
+    (*callback)(std::move(results));
     return StatusCode::OK;
 }
 
-// Interne helper voor Get (Oude logica)
 StatusCode SnapVehicleHardware::getValueInternal(const VehiclePropValue& request, VehiclePropValue* response) const {
     int32_t propId = request.prop;
     response->timestamp = elapsedRealtimeNano();
@@ -92,33 +92,28 @@ StatusCode SnapVehicleHardware::getValueInternal(const VehiclePropValue& request
         response->value.int32Values = {mCurrentBrightness};
         return StatusCode::OK;
     }
-    
     return StatusCode::INVALID_ARG;
 }
 
-// 3. Batch Set Values (Nieuw in A15)
-StatusCode SnapVehicleHardware::setValues(const std::vector<SetValueRequest>& requests,
-                                          std::vector<SetValueResult>* results) {
+StatusCode SnapVehicleHardware::setValues(std::shared_ptr<const SetValuesCallback> callback,
+                                          const std::vector<SetValueRequest>& requests) {
+    std::vector<SetValueResult> results;
     for (const auto& req : requests) {
         SetValueResult result;
         result.requestId = req.requestId;
-        result.status = StatusCode::OK;
-
         VehiclePropValue updatedValue = req.value;
         result.status = setValueInternal(req.value, &updatedValue);
-        
-        results->push_back(result);
+        results.push_back(result);
     }
+    (*callback)(std::move(results));
     return StatusCode::OK;
 }
 
-// Interne helper voor Set (Oude logica)
 StatusCode SnapVehicleHardware::setValueInternal(const VehiclePropValue& request, VehiclePropValue* updatedValue) {
     int32_t propId = request.prop;
 
     if (propId == static_cast<int32_t>(VehicleProperty::DISPLAY_BRIGHTNESS)) {
         if (request.value.int32Values.empty()) return StatusCode::INVALID_ARG;
-        
         int brightness = request.value.int32Values[0];
         if (brightness < 0 || brightness > 100) return StatusCode::INVALID_ARG;
 
@@ -131,37 +126,32 @@ StatusCode SnapVehicleHardware::setValueInternal(const VehiclePropValue& request
         }
         return StatusCode::OK;
     }
-
     return StatusCode::ACCESS_DENIED;
 }
 
-// 4. Dump
 DumpResult SnapVehicleHardware::dump(const std::vector<std::string>& /*options*/) {
-    // Voor nu lege dump
     return {};
 }
 
-// 5. Health
 StatusCode SnapVehicleHardware::checkHealth() {
     return StatusCode::OK;
 }
 
-// 6. Callbacks
 void SnapVehicleHardware::registerOnPropertyChangeEvent(std::unique_ptr<const PropertyChangeCallback> callback) {
     mOnPropChange = std::move(callback);
 }
 
 void SnapVehicleHardware::registerOnPropertySetErrorEvent(std::unique_ptr<const PropertySetErrorCallback> callback) {
+    // DIT WAS DE FOUT: mOnSetError was niet gedefinieerd in de header
     mOnSetError = std::move(callback);
 }
 
-// 7. Subscriptions (Stubs)
-StatusCode SnapVehicleHardware::subscribe(const SubscribeOptions& /*options*/) { return StatusCode::OK; }
-StatusCode SnapVehicleHardware::unsubscribe(int32_t /*propId*/) { return StatusCode::OK; }
-StatusCode SnapVehicleHardware::updateSampleRate(int32_t /*propId*/, float /*sampleRate*/) { return StatusCode::OK; }
+// Stubs
+StatusCode SnapVehicleHardware::subscribe(SubscribeOptions /*options*/) { return StatusCode::OK; }
+StatusCode SnapVehicleHardware::unsubscribe(int32_t /*propId*/, int32_t /*areaId*/) { return StatusCode::OK; }
+StatusCode SnapVehicleHardware::updateSampleRate(int32_t /*propId*/, int32_t /*areaId*/, float /*sampleRate*/) { return StatusCode::OK; }
 
-// --- Hardware Logica ---
-
+// Hardware Logica
 void SnapVehicleHardware::initPwm() {
     writeSysFs(PATH_PWM_PERIOD, "50000");
     writeSysFs(PATH_PWM_ENABLE, "1");
