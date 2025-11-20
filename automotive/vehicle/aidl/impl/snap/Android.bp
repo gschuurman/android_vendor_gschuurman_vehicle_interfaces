@@ -1,0 +1,42 @@
+package {
+    default_applicable_licenses: ["Android-Apache-2.0"],
+}
+
+cc_binary {
+    // De naam van jouw binary. Dit komt in /vendor/bin/hw/ terecht.
+    name: "android.hardware.automotive.vehicle@snap-service",
+    vendor: true,                          // Dit is cruciaal: het is een vendor module
+    relative_install_path: "hw",           // Installeert in /vendor/bin/hw/
+    init_rc: ["android.hardware.automotive.vehicle@snap-service.rc"],
+    vintf_fragments: ["android.hardware.automotive.vehicle@snap-service.xml"],
+
+    srcs: [
+        "Main.cpp",
+        "SnapVehicleHardware.cpp",
+    ],
+
+    // Include paden zodat je headers gevonden worden
+    local_include_dirs: [
+        ".",
+    ],
+
+    shared_libs: [
+        "libbase",
+        "libbinder_ndk",
+        "liblog",
+        "libutils",
+        // De standaard VHAL interface definition library (AIDL)
+        "android.hardware.automotive.vehicle-V1-ndk",
+    ],
+
+    static_libs: [
+        // We hergebruiken de Google Default Implementation logica
+        "android.hardware.automotive.vehicle-aidl-default-impl-lib",
+    ],
+
+    cflags: [
+        "-Wall",
+        "-Werror",
+        "-DLOG_TAG=\"SnapVehicleHal\"",
+    ],
+}
