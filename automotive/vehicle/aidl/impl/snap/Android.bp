@@ -7,8 +7,12 @@ cc_binary {
     name: "android.hardware.automotive.vehicle@snap-service",
     vendor: true,                          // Dit is cruciaal: het is een vendor module
     relative_install_path: "hw",           // Installeert in /vendor/bin/hw/
-    init_rc: ["android.hardware.automotive.vehicle@snap-service.rc"],
-    vintf_fragments: ["android.hardware.automotive.vehicle@snap-service.xml"],
+    init_rc: [
+        "android.hardware.automotive.vehicle@snap-service.rc"
+        ],
+    vintf_fragments: [
+        "android.hardware.automotive.vehicle@snap-service.xml"
+        ],
 
     srcs: [
         "Main.cpp",
@@ -26,12 +30,12 @@ cc_binary {
         "liblog",
         "libutils",
         // De standaard VHAL interface definition library (AIDL)
-        "android.hardware.automotive.vehicle-V1-ndk",
+        "android.hardware.automotive.vehicle-V3-ndk",
     ],
 
     static_libs: [
         // We hergebruiken de Google Default Implementation logica
-        "android.hardware.automotive.vehicle-aidl-default-impl-lib",
+        "android.hardware.automotive.vehicle@default-vehicle-hal-lib",
     ],
 
     cflags: [
