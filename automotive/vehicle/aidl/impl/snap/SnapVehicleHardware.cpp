@@ -1,184 +1,211 @@
 #include "SnapVehicleHardware.h"
 
 #include <android-base/logging.h>
-#include <android-base/properties.h>
-#include <fstream>
-#include <thread>
 #include <chrono>
-#include <vector>
+#include <fstream>
 
-#include "IVehicleHardware.h"
-#include "VehicleUtils.h"
-
-// Definieer hardware paden (Check dit op je VIM3 met 'ls /sys/class/...')
-#define PATH_GPIO_REVERSE   "/sys/class/gpio/gpio496/value" // Voorbeeld GPIO
+// Definieer paden (Pas deze aan naar jouw werkelijke VIM3 paden!)
+#define PATH_GPIO_REVERSE   "/sys/class/gpio/gpio496/value"
 #define PATH_PWM_BRIGHTNESS "/sys/class/pwm/pwmchip0/pwm0/duty_cycle"
 #define PATH_PWM_PERIOD     "/sys/class/pwm/pwmchip0/pwm0/period"
 #define PATH_PWM_ENABLE     "/sys/class/pwm/pwmchip0/pwm0/enable"
 
-using namespace android::hardware::automotive::vehicle;
-using namespace android::hardware::automotive::vehicle::aidl_utils;
+namespace android {
+namespace hardware {
+namespace automotive {
+namespace vehicle {
 
-class SnapVehicleHardware : public IVehicleHardware {
-public:
-    SnapVehicleHardware() {
-        // Initialiseer hardware bij opstarten
-        initPwm();
-        // Start de polling thread voor input (Reverse gear)
-        mPollThread = std::thread(&SnapVehicleHardware::pollInputs, this);
-    }
+// Helper om timestamps te krijgen
+static int64_t elapsedRealtimeNano() {
+    auto now = std::chrono::steady_clock::now();
+    return std::chrono::duration_cast<std::chrono::nanoseconds>(now.time_since_epoch()).count();
+}
 
-    ~SnapVehicleHardware() {
-        mShuttingDown = true;
-        if (mPollThread.joinable()) mPollThread.join();
-    }
+SnapVehicleHardware::SnapVehicleHardware()
+    : mCurrentGear(static_cast<int32_t>(VehicleGear::GEAR_PARK)),
+      mCurrentBrightness(50),
+      mShuttingDown(false) {
+    initPwm();
+    mPollThread = std::thread(&SnapVehicleHardware::pollInputs, this);
+}
 
-    // 1. Definieer welke properties wij ondersteunen
-    std::vector<VehiclePropConfig> getAllPropertyConfigs() const override {
-        std::vector<VehiclePropConfig> configs;
+SnapVehicleHardware::~SnapVehicleHardware() {
+    mShuttingDown = true;
+    if (mPollThread.joinable()) mPollThread.join();
+}
 
-        // Config: GEAR_SELECTION (Alleen Lezen)
-        VehiclePropConfig gearConfig;
-        gearConfig.prop = toInt(VehicleProperty::GEAR_SELECTION);
-        gearConfig.access = VehiclePropertyAccess::READ;
-        gearConfig.changeMode = VehiclePropertyChangeMode::ON_CHANGE;
-        configs.push_back(gearConfig);
+// 1. Configuraties
+std::vector<VehiclePropConfig> SnapVehicleHardware::getAllPropertyConfigs() const {
+    std::vector<VehiclePropConfig> configs;
 
-        // Config: DISPLAY_BRIGHTNESS (Lezen en Schrijven)
-        VehiclePropConfig brightConfig;
-        brightConfig.prop = toInt(VehicleProperty::DISPLAY_BRIGHTNESS);
-        brightConfig.access = VehiclePropertyAccess::READ_WRITE;
-        brightConfig.changeMode = VehiclePropertyChangeMode::ON_CHANGE;
-        brightConfig.areaConfigs = {
-            {.minInt32Value = 0, .maxInt32Value = 100} // 0% tot 100%
-        };
-        configs.push_back(brightConfig);
+    // GEAR_SELECTION
+    VehiclePropConfig gearConfig;
+    gearConfig.prop = static_cast<int32_t>(VehicleProperty::GEAR_SELECTION);
+    gearConfig.access = VehiclePropertyAccess::READ;
+    gearConfig.changeMode = VehiclePropertyChangeMode::ON_CHANGE;
+    configs.push_back(gearConfig);
 
-        return configs;
-    }
+    // DISPLAY_BRIGHTNESS
+    VehiclePropConfig brightConfig;
+    brightConfig.prop = static_cast<int32_t>(VehicleProperty::DISPLAY_BRIGHTNESS);
+    brightConfig.access = VehiclePropertyAccess::READ_WRITE;
+    brightConfig.changeMode = VehiclePropertyChangeMode::ON_CHANGE;
+    brightConfig.areaConfigs = {
+        {.minInt32Value = 0, .maxInt32Value = 100}
+    };
+    configs.push_back(brightConfig);
 
-    // 2. Android vraagt om een waarde (Get)
-    StatusCode getValue(const VehiclePropValue& request, VehiclePropValue* response) const override {
-        int propId = request.prop;
-        response->prop = propId;
-        response->timestamp = elapsedRealtimeNano();
+    return configs;
+}
 
-        switch (propId) {
-            case toInt(VehicleProperty::GEAR_SELECTION):
-                // Lees de opgeslagen status (geupdate door polling thread)
-                response->value.int32Values = {mCurrentGear};
-                return StatusCode::OK;
-
-            case toInt(VehicleProperty::DISPLAY_BRIGHTNESS):
-                response->value.int32Values = {mCurrentBrightness};
-                return StatusCode::OK;
-
-            default:
-                return StatusCode::INVALID_ARG;
+// 2. Batch Get Values (Nieuw in A15)
+StatusCode SnapVehicleHardware::getValues(const std::vector<GetValueRequest>& requests,
+                                          std::vector<GetValueResult>* results) const {
+    // Loop door alle aanvragen heen
+    for (const auto& req : requests) {
+        GetValueResult result;
+        result.requestId = req.requestId;
+        result.status = StatusCode::OK;
+        
+        // Roep onze interne helper aan
+        // In A15 zit de 'prop' data in req.prop
+        VehiclePropValue responseValue = req.prop; 
+        result.status = getValueInternal(req.prop, &responseValue);
+        
+        if (result.status == StatusCode::OK) {
+            result.prop = responseValue;
         }
+        results->push_back(result);
     }
+    return StatusCode::OK;
+}
 
-    // 3. Android stuurt een waarde (Set)
-    StatusCode setValue(const VehiclePropValue& request, VehiclePropValue* updatedValue) override {
-        int propId = request.prop;
+// Interne helper voor Get (Oude logica)
+StatusCode SnapVehicleHardware::getValueInternal(const VehiclePropValue& request, VehiclePropValue* response) const {
+    int32_t propId = request.prop;
+    response->timestamp = elapsedRealtimeNano();
 
-        switch (propId) {
-            case toInt(VehicleProperty::DISPLAY_BRIGHTNESS): {
-                int brightness = request.value.int32Values[0];
-                if (brightness < 0 || brightness > 100) return StatusCode::INVALID_ARG;
-                
-                // Hardware Actie: Schrijf naar PWM
-                writePwm(brightness);
-                
-                // Update interne status
-                mCurrentBrightness = brightness;
-                
-                // Stuur de update terug (voor bevestiging)
-                if (updatedValue) {
-                    updatedValue->prop = propId;
-                    updatedValue->timestamp = elapsedRealtimeNano();
-                    updatedValue->value.int32Values = {brightness};
-                }
-                return StatusCode::OK;
-            }
-            default:
-                // Gear selection is read-only, dus mag niet ge-set worden
-                return StatusCode::ACCESS_DENIED;
-        }
+    if (propId == static_cast<int32_t>(VehicleProperty::GEAR_SELECTION)) {
+        response->value.int32Values = {mCurrentGear};
+        return StatusCode::OK;
+    } else if (propId == static_cast<int32_t>(VehicleProperty::DISPLAY_BRIGHTNESS)) {
+        response->value.int32Values = {mCurrentBrightness};
+        return StatusCode::OK;
     }
-
-    // Boilerplate (vereist door interface, leeg laten voor dunne implementatie)
-    StatusCode dump(int fd, const std::vector<std::string>& args) override { return StatusCode::OK; }
-    StatusCode checkHealth() override { return StatusCode::OK; }
-    void registerOnPropertyChangeEvent(std::unique_ptr<const PropertyChangeCallback> callback) override {
-        // Sla de callback op om events naar Android te sturen (bv. Gear change)
-        mOnPropChange = std::move(callback);
-    }
-    StatusCode subscribe(const SubscribeOptions& options) override { return StatusCode::OK; }
-    StatusCode unsubscribe(int32_t propId) override { return StatusCode::OK; }
-
-private:
-    // Interne variabelen
-    int32_t mCurrentGear = toInt(VehicleGear::GEAR_PARK);
-    int32_t mCurrentBrightness = 50;
     
-    std::thread mPollThread;
-    std::atomic<bool> mShuttingDown{false};
-    std::unique_ptr<const PropertyChangeCallback> mOnPropChange;
+    return StatusCode::INVALID_ARG;
+}
 
-    // --- Hardware Helpers ---
+// 3. Batch Set Values (Nieuw in A15)
+StatusCode SnapVehicleHardware::setValues(const std::vector<SetValueRequest>& requests,
+                                          std::vector<SetValueResult>* results) {
+    for (const auto& req : requests) {
+        SetValueResult result;
+        result.requestId = req.requestId;
+        result.status = StatusCode::OK;
 
-    void initPwm() {
-        // Zet PWM period (bv. 50000ns = 20kHz) en enable
-        writeSysFs(PATH_PWM_PERIOD, "50000"); 
-        writeSysFs(PATH_PWM_ENABLE, "1");
+        VehiclePropValue updatedValue = req.value;
+        result.status = setValueInternal(req.value, &updatedValue);
+        
+        results->push_back(result);
+    }
+    return StatusCode::OK;
+}
+
+// Interne helper voor Set (Oude logica)
+StatusCode SnapVehicleHardware::setValueInternal(const VehiclePropValue& request, VehiclePropValue* updatedValue) {
+    int32_t propId = request.prop;
+
+    if (propId == static_cast<int32_t>(VehicleProperty::DISPLAY_BRIGHTNESS)) {
+        if (request.value.int32Values.empty()) return StatusCode::INVALID_ARG;
+        
+        int brightness = request.value.int32Values[0];
+        if (brightness < 0 || brightness > 100) return StatusCode::INVALID_ARG;
+
+        writePwm(brightness);
+        mCurrentBrightness = brightness;
+
+        if (updatedValue) {
+            *updatedValue = request;
+            updatedValue->timestamp = elapsedRealtimeNano();
+        }
+        return StatusCode::OK;
     }
 
-    void writePwm(int percentage) {
-        // Converteer 0-100% naar duty cycle (0 - 50000)
-        int duty = (percentage * 50000) / 100;
-        writeSysFs(PATH_PWM_BRIGHTNESS, std::to_string(duty));
-    }
+    return StatusCode::ACCESS_DENIED;
+}
 
-    void pollInputs() {
-        int lastGpioState = -1;
+// 4. Dump
+DumpResult SnapVehicleHardware::dump(const std::vector<std::string>& /*options*/) {
+    // Voor nu lege dump
+    return {};
+}
 
-        while (!mShuttingDown) {
-            // Lees GPIO (Simpele file read, in productie gebruik je epoll)
-            std::ifstream gpioFile(PATH_GPIO_REVERSE);
-            int currentState;
-            if (gpioFile >> currentState) {
-                
-                if (currentState != lastGpioState) {
-                    // Status is veranderd!
-                    mCurrentGear = (currentState == 1) ? 
-                                   toInt(VehicleGear::GEAR_REVERSE) : 
-                                   toInt(VehicleGear::GEAR_DRIVE);
+// 5. Health
+StatusCode SnapVehicleHardware::checkHealth() {
+    return StatusCode::OK;
+}
 
-                    // Informeer Android DIRECT (Event driven)
-                    if (mOnPropChange) {
-                        std::vector<VehiclePropValue> events;
-                        VehiclePropValue v;
-                        v.prop = toInt(VehicleProperty::GEAR_SELECTION);
-                        v.timestamp = elapsedRealtimeNano();
-                        v.value.int32Values = {mCurrentGear};
-                        events.push_back(v);
-                        (*mOnPropChange)(events);
-                    }
-                    lastGpioState = currentState;
+// 6. Callbacks
+void SnapVehicleHardware::registerOnPropertyChangeEvent(std::unique_ptr<const PropertyChangeCallback> callback) {
+    mOnPropChange = std::move(callback);
+}
+
+void SnapVehicleHardware::registerOnPropertySetErrorEvent(std::unique_ptr<const PropertySetErrorCallback> callback) {
+    mOnSetError = std::move(callback);
+}
+
+// 7. Subscriptions (Stubs)
+StatusCode SnapVehicleHardware::subscribe(const SubscribeOptions& /*options*/) { return StatusCode::OK; }
+StatusCode SnapVehicleHardware::unsubscribe(int32_t /*propId*/) { return StatusCode::OK; }
+StatusCode SnapVehicleHardware::updateSampleRate(int32_t /*propId*/, float /*sampleRate*/) { return StatusCode::OK; }
+
+// --- Hardware Logica ---
+
+void SnapVehicleHardware::initPwm() {
+    writeSysFs(PATH_PWM_PERIOD, "50000");
+    writeSysFs(PATH_PWM_ENABLE, "1");
+}
+
+void SnapVehicleHardware::writePwm(int percentage) {
+    int duty = (percentage * 50000) / 100;
+    writeSysFs(PATH_PWM_BRIGHTNESS, std::to_string(duty));
+}
+
+void SnapVehicleHardware::pollInputs() {
+    int lastGpioState = -1;
+    while (!mShuttingDown) {
+        std::ifstream gpioFile(PATH_GPIO_REVERSE);
+        int currentState;
+        if (gpioFile >> currentState) {
+            if (currentState != lastGpioState) {
+                mCurrentGear = (currentState == 1) ?
+                               static_cast<int32_t>(VehicleGear::GEAR_REVERSE) :
+                               static_cast<int32_t>(VehicleGear::GEAR_DRIVE);
+
+                if (mOnPropChange) {
+                    std::vector<VehiclePropValue> events;
+                    VehiclePropValue v;
+                    v.prop = static_cast<int32_t>(VehicleProperty::GEAR_SELECTION);
+                    v.timestamp = elapsedRealtimeNano();
+                    v.value.int32Values = {mCurrentGear};
+                    events.push_back(v);
+                    (*mOnPropChange)(events);
                 }
+                lastGpioState = currentState;
             }
-            // Slaap even om CPU te sparen (100ms)
-            std::this_thread::sleep_for(std::chrono::milliseconds(100));
         }
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
+}
 
-    void writeSysFs(const std::string& path, const std::string& val) {
-        std::ofstream file(path);
-        if (file.is_open()) {
-            file << val;
-        } else {
-            LOG(ERROR) << "Kan niet schrijven naar: " << path;
-        }
-    }
-};
+void SnapVehicleHardware::writeSysFs(const std::string& path, const std::string& val) {
+    std::ofstream file(path);
+    if (file.is_open()) file << val;
+    else LOG(ERROR) << "Kan niet schrijven naar: " << path;
+}
+
+}  // namespace vehicle
+}  // namespace automotive
+}  // namespace hardware
+}  // namespace android
