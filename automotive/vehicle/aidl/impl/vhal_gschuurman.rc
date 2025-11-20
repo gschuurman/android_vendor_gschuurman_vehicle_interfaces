@@ -1,0 +1,11 @@
+service vendor.vehicle-gschuurman /vendor/bin/hw/android.hardware.automotive.vehicle-V1-ndk-service-gschuurman
+    class hal
+    user vehicle_network
+    group system inet
+    capabilities NET_ADMIN
+    
+    # Zorg dat de service herstart als hij crasht
+    restart
+    
+    # Interface definitie voor VINTF (Belangrijk voor Android 15!)
+    interface aidl android.hardware.automotive.vehicle.IVehicle/default

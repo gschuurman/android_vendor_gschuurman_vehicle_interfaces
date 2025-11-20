@@ -1,0 +1,45 @@
+package {
+    default_applicable_licenses: ["Android-Apache-2.0"],
+}
+
+cc_binary {
+    name: "android.hardware.automotive.vehicle-V1-ndk-service-gschuurman",
+    relative_install_path: "hw",
+    init_rc: ["vhal_gschuurman.rc"],
+    vendor: true,
+    
+    // We gebruiken C++ voor de performance op de VIM3
+    srcs: [
+        "GSchuurmanVehicleHardware.cpp",
+        "main.cpp",
+    ],
+
+    cflags: [
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "-DLOG_TAG=\"GSchuurmanVHAL\"",
+    ],
+
+    // Libraries die we nodig hebben
+    shared_libs: [
+        "libbase",
+        "libbinder_ndk",
+        "liblog",
+        "libutils",
+        "libgrpc++", 
+        "libjsoncpp",
+    ],
+
+    // Dit zijn de standaard implementaties van Google die we hergebruiken
+    static_libs: [
+        "VehicleHalUtils",
+        "libstartop_profiler",
+        "android.hardware.automotive.vehicle@default-vehicle-hal-lib",
+    ],
+
+    // De interface definities (AIDL)
+    defaults: [
+        "VehicleHalDefaults",
+    ],
+}
