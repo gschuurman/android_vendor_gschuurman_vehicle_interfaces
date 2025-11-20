@@ -9,11 +9,18 @@
 #include <aidl/android/hardware/automotive/vehicle/VehiclePropertyAccess.h>
 #include <aidl/android/hardware/automotive/vehicle/VehiclePropertyChangeMode.h>
 
-// Pas deze paden aan naar jouw werkelijke VIM3 paden!
-#define PATH_GPIO_REVERSE   "/sys/class/gpio/gpio496/value"
-#define PATH_PWM_BRIGHTNESS "/sys/class/pwm/pwmchip0/pwm0/duty_cycle"
-#define PATH_PWM_PERIOD     "/sys/class/pwm/pwmchip0/pwm0/period"
-#define PATH_PWM_ENABLE     "/sys/class/pwm/pwmchip0/pwm0/enable"
+#ifdef EMULATOR
+    #define PATH_GPIO_REVERSE   "/data/vendor/mock_hardware/gpio/reverse_value"
+    #define PATH_PWM_BRIGHTNESS "/data/vendor/mock_hardware/pwm/duty_cycle"
+    #define PATH_PWM_PERIOD     "/data/vendor/mock_hardware/pwm/period"
+    #define PATH_PWM_ENABLE     "/data/vendor/mock_hardware/pwm/enable"
+#else
+    // TODO Set correct paths for the acctual hardware
+    #define PATH_GPIO_REVERSE   "/sys/class/gpio/gpio496/value"
+    #define PATH_PWM_BRIGHTNESS "/sys/class/pwm/pwmchip0/pwm0/duty_cycle"
+    #define PATH_PWM_PERIOD     "/sys/class/pwm/pwmchip0/pwm0/period"
+    #define PATH_PWM_ENABLE     "/sys/class/pwm/pwmchip0/pwm0/enable"
+#endif
 
 namespace android {
 namespace hardware {

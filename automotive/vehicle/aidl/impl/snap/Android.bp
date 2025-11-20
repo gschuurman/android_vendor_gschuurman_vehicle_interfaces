@@ -47,4 +47,9 @@ cc_binary {
     cflags: [
         "-DLOG_TAG=\"SnapVehicleHal\"",
     ],
+    arch: {
+        x86_64: {
+            cflags: ["-DEMULATOR"],
+        },
+    },
 }
