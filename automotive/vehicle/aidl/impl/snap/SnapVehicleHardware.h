@@ -64,9 +64,13 @@ private:
     std::thread mPollThread;
     std::atomic<bool> mShuttingDown;
     
+    std::string mPathPwmDuty;
+    std::string mPathPwmEnable;
+    std::string mPathPwmPeriod;
+    std::string mPathGpioReverse;
+
     // Callbacks
     std::unique_ptr<const PropertyChangeCallback> mOnPropChange;
-    // HIER ZAT DE FOUT: Deze variabele ontbrak in de vorige versie
     std::unique_ptr<const PropertySetErrorCallback> mOnSetError;
 
     void initPwm();
