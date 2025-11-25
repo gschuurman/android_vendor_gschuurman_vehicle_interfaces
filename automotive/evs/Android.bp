@@ -1,0 +1,14 @@
+package {
+    default_applicable_licenses: ["Android-Apache-2.0"],
+}
+
+prebuilt_etc {
+    name: "snapp_evs_configuration",
+    src: "evs_configuration.xml",
+    sub_dir: "automotive/evs",
+    filename: "evs_configuration.xml",
+    vendor: true,
+    
+
+    overrides: ["evs_configuration_xml"],
+}
