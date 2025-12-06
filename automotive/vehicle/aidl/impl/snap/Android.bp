@@ -3,11 +3,11 @@ package {
 }
 
 cc_binary {
-    name: "android.hardware.automotive.vehicle@snap-service",
+    name: "android.hardware.automotive.vehicle@schuurman-service", // Naamswijziging
     vendor: true,
     relative_install_path: "hw",
-    init_rc: ["android.hardware.automotive.vehicle@snap-service.rc"],
-    vintf_fragments: ["android.hardware.automotive.vehicle@snap-service.xml"],
+    init_rc: ["android.hardware.automotive.vehicle@schuurman-service.rc"],
+    vintf_fragments: ["android.hardware.automotive.vehicle@schuurman-service.xml"],
 
     defaults: [
         "VehicleHalDefaults",
@@ -15,7 +15,7 @@ cc_binary {
 
     srcs: [
         "Main.cpp",
-        "SnapVehicleHardware.cpp",
+        "SchuurmanVehicleHardware.cpp",
     ],
 
     local_include_dirs: ["."],
@@ -26,6 +26,7 @@ cc_binary {
         "liblog",
         "libutils",
         "android.hardware.automotive.vehicle-V4-ndk",
+        "libgpiod", // Zorg dat deze erin blijft voor de GPIO fix
     ],
 
     static_libs: [
@@ -38,6 +39,6 @@ cc_binary {
     ],
     
     cflags: [
-        "-DLOG_TAG=\"SnapVehicleHal\"",
+        "-DLOG_TAG=\"SchuurmanVehicleHal\"", // Nieuwe Log Tag
     ]
 }

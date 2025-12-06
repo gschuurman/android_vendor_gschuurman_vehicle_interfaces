@@ -1,16 +1,14 @@
-#ifndef ANDROID_HARDWARE_AUTOMOTIVE_VEHICLE_SNAP_IMPL_H
-#define ANDROID_HARDWARE_AUTOMOTIVE_VEHICLE_SNAP_IMPL_H
+#ifndef ANDROID_HARDWARE_AUTOMOTIVE_VEHICLE_SCHUURMAN_IMPL_H
+#define ANDROID_HARDWARE_AUTOMOTIVE_VEHICLE_SCHUURMAN_IMPL_H
 
 #include <vector>
 #include <thread>
 #include <string>
 #include <atomic>
 #include <memory>
+#include <gpiod.h> // Libgpiod
 
-// C++ Helper Interface
 #include <IVehicleHardware.h>
-
-// AIDL Interfaces
 #include <aidl/android/hardware/automotive/vehicle/IVehicle.h>
 #include <aidl/android/hardware/automotive/vehicle/VehicleProperty.h>
 
@@ -23,13 +21,9 @@ namespace android
             namespace vehicle
             {
 
-                // --- Namespace Aliassen ---
-
-                // C++ Types
                 using ::android::hardware::automotive::vehicle::DumpResult;
                 using ::android::hardware::automotive::vehicle::IVehicleHardware;
 
-                // AIDL Types
                 using ::aidl::android::hardware::automotive::vehicle::GetValueRequest;
                 using ::aidl::android::hardware::automotive::vehicle::GetValueResult;
                 using ::aidl::android::hardware::automotive::vehicle::SetValueRequest;
@@ -40,11 +34,11 @@ namespace android
                 using ::aidl::android::hardware::automotive::vehicle::VehicleProperty;
                 using ::aidl::android::hardware::automotive::vehicle::VehiclePropValue;
 
-                class SnapVehicleHardware : public IVehicleHardware
+                class SchuurmanVehicleHardware : public IVehicleHardware
                 {
                 public:
-                    SnapVehicleHardware();
-                    ~SnapVehicleHardware();
+                    SchuurmanVehicleHardware();
+                    ~SchuurmanVehicleHardware();
 
                     std::vector<VehiclePropConfig> getAllPropertyConfigs() const override;
 
@@ -73,13 +67,18 @@ namespace android
                     std::string mPathPwmDuty;
                     std::string mPathPwmEnable;
                     std::string mPathPwmPeriod;
-                    std::string mPathGpioReverse;
 
-                    // Callbacks
+                    // GPIO Libgpiod
+                    std::string mGpioChipPath;
+                    int mGpioLineOffset;
+                    struct gpiod_chip *mGpioChip;
+                    struct gpiod_line *mGpioLine;
+
                     std::unique_ptr<const PropertyChangeCallback> mOnPropChange;
                     std::unique_ptr<const PropertySetErrorCallback> mOnSetError;
 
                     void initPwm();
+                    void initGpio();
                     void writePwm(int percentage);
                     void pollInputs();
                     void writeSysFs(const std::string &path, const std::string &val);

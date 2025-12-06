@@ -1,0 +1,36 @@
+service vendor.vehicle-schuurman /vendor/bin/hw/android.hardware.automotive.vehicle@schuurman-service
+    class early_hal
+    user vehicle_network
+    group system inet
+    interface aidl android.hardware.automotive.vehicle.IVehicle/default
+
+# Dit gedeelte draait tijdens het booten van Android, nog voordat je service start
+on early-boot
+    # -----------------------------------------------------------
+    # 1. PWM Setup (Permanent maken)
+    # -----------------------------------------------------------
+    # Dit commando simuleert "echo 0 > export" om de map 'pwm0' aan te maken.
+    # "|| true" voorkomt foutmeldingen als hij al bestaat.
+    exec /system/bin/sh -c "echo 0 > /sys/class/pwm/pwmchip0/export || true"
+
+    # Nu de map 'pwm0' bestaat, geven we de user 'vehicle_network' schrijfrechten.
+    
+    # Duty Cycle (Helderheid)
+    chown vehicle_network system /sys/class/pwm/pwmchip0/pwm0/duty_cycle
+    chmod 0660 /sys/class/pwm/pwmchip0/pwm0/duty_cycle
+
+    # Enable (Aan/Uit)
+    chown vehicle_network system /sys/class/pwm/pwmchip0/pwm0/enable
+    chmod 0660 /sys/class/pwm/pwmchip0/pwm0/enable
+
+    # Period (Frequentie)
+    chown vehicle_network system /sys/class/pwm/pwmchip0/pwm0/period
+    chmod 0660 /sys/class/pwm/pwmchip0/pwm0/period
+
+    # -----------------------------------------------------------
+    # 2. GPIO Setup (Voor libgpiod)
+    # -----------------------------------------------------------
+    # Geef toegang tot de GPIO chip character device.
+    # LET OP: Check met 'gpioinfo' of 'ls /dev/gpiochip*' of 0 de juiste chip is.
+    chown vehicle_network system /dev/gpiochip0
+    chmod 0660 /dev/gpiochip0

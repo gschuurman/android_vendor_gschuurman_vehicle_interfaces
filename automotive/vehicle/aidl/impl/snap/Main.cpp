@@ -1,21 +1,19 @@
-#include "SnapVehicleHardware.h"
+#include "SchuurmanVehicleHardware.h" // Aangepaste include
 #include <android-base/logging.h>
 #include <android/binder_manager.h>
 #include <android/binder_process.h>
 #include <DefaultVehicleHal.h>
 
-// Belangrijk: De DefaultVehicleHal interface verwacht de hardware in de automotive namespace
 using ::android::hardware::automotive::vehicle::DefaultVehicleHal;
-using ::android::hardware::automotive::vehicle::SnapVehicleHardware;
-// IVehicle is een AIDL interface
+using ::android::hardware::automotive::vehicle::SchuurmanVehicleHardware; // Aangepaste namespace/class
 using ::aidl::android::hardware::automotive::vehicle::IVehicle;
 
 int main(int /* argc */, char * /* argv */[])
 {
     android::base::InitLogging(nullptr, android::base::LogdLogger());
-    LOG(INFO) << "Starting Snap Automotive VHAL Service...";
+    LOG(INFO) << "Starting Schuurman IT Automotive VHAL Service...";
 
-    auto hardware = std::make_unique<SnapVehicleHardware>();
+    auto hardware = std::make_unique<SchuurmanVehicleHardware>(); // Aangepaste class
     auto vhal = ::ndk::SharedRefBase::make<DefaultVehicleHal>(std::move(hardware));
 
     const std::string instanceName = std::string(IVehicle::descriptor) + "/default";

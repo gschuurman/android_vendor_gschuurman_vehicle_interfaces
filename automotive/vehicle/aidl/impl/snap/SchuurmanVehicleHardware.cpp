@@ -1,10 +1,11 @@
-#include "SnapVehicleHardware.h"
+#include "SchuurmanVehicleHardware.h"
 
 #include <android-base/logging.h>
 #include <android-base/properties.h>
 #include <chrono>
 #include <fstream>
-#include <thread> // Toegevoegd voor std::this_thread::sleep_for
+#include <thread>
+#include <gpiod.h>
 
 #include <aidl/android/hardware/automotive/vehicle/VehicleGear.h>
 #include <aidl/android/hardware/automotive/vehicle/VehiclePropertyAccess.h>
@@ -19,7 +20,6 @@ namespace android
             namespace vehicle
             {
 
-                // --- NAMESPACE ALIASSEN ---
                 using ::aidl::android::hardware::automotive::vehicle::VehicleGear;
                 using ::aidl::android::hardware::automotive::vehicle::VehiclePropertyAccess;
                 using ::aidl::android::hardware::automotive::vehicle::VehiclePropertyChangeMode;
@@ -30,39 +30,54 @@ namespace android
                     return std::chrono::duration_cast<std::chrono::nanoseconds>(now.time_since_epoch()).count();
                 }
 
-                SnapVehicleHardware::SnapVehicleHardware()
+                SchuurmanVehicleHardware::SchuurmanVehicleHardware()
                     : mCurrentGear(static_cast<int32_t>(VehicleGear::GEAR_PARK)),
                       mCurrentBrightness(50),
-                      mShuttingDown(false)
+                      mShuttingDown(false),
+                      mGpioChip(nullptr),
+                      mGpioLine(nullptr)
                 {
-
+                    // PWM Properties (eventueel ook hernoemen naar ro.vendor.schuurman... in je system.prop)
                     mPathPwmDuty = android::base::GetProperty("ro.vendor.vehicle.path.pwm.duty",
                                                               "/sys/class/pwm/pwmchip0/pwm0/duty_cycle");
                     mPathPwmEnable = android::base::GetProperty("ro.vendor.vehicle.path.pwm.enable",
                                                                 "/sys/class/pwm/pwmchip0/pwm0/enable");
                     mPathPwmPeriod = android::base::GetProperty("ro.vendor.vehicle.path.pwm.period",
                                                                 "/sys/class/pwm/pwmchip0/pwm0/period");
-                    mPathGpioReverse = android::base::GetProperty("ro.vendor.vehicle.path.gpio.reverse",
-                                                                  "/sys/class/gpio/gpio496/value");
 
-                    LOG(INFO) << "SnapVehicleHardware Configured:"
+                    // GPIO Properties
+                    mGpioChipPath = android::base::GetProperty("ro.vendor.vehicle.gpio.chip", "/dev/gpiochip0");
+                    mGpioLineOffset = android::base::GetIntProperty("ro.vendor.vehicle.gpio.offset", 0);
+
+                    LOG(INFO) << "SchuurmanVehicleHardware Configured:"
                               << "\n PWM Path: " << mPathPwmDuty
-                              << "\n GPIO Path: " << mPathGpioReverse;
+                              << "\n GPIO Chip: " << mGpioChipPath
+                              << "\n GPIO Line Offset: " << mGpioLineOffset;
 
                     initPwm();
-                    mPollThread = std::thread(&SnapVehicleHardware::pollInputs, this);
+                    initGpio();
+                    mPollThread = std::thread(&SchuurmanVehicleHardware::pollInputs, this);
                 }
 
-                SnapVehicleHardware::~SnapVehicleHardware()
+                SchuurmanVehicleHardware::~SchuurmanVehicleHardware()
                 {
                     mShuttingDown = true;
                     if (mPollThread.joinable())
                     {
                         mPollThread.join();
                     }
+                    
+                    if (mGpioLine) {
+                        gpiod_line_release(mGpioLine);
+                        mGpioLine = nullptr;
+                    }
+                    if (mGpioChip) {
+                        gpiod_chip_close(mGpioChip);
+                        mGpioChip = nullptr;
+                    }
                 }
 
-                std::vector<VehiclePropConfig> SnapVehicleHardware::getAllPropertyConfigs() const
+                std::vector<VehiclePropConfig> SchuurmanVehicleHardware::getAllPropertyConfigs() const
                 {
                     std::vector<VehiclePropConfig> configs;
 
@@ -84,7 +99,7 @@ namespace android
                     return configs;
                 }
 
-                StatusCode SnapVehicleHardware::getValues(std::shared_ptr<const GetValuesCallback> callback,
+                StatusCode SchuurmanVehicleHardware::getValues(std::shared_ptr<const GetValuesCallback> callback,
                                                           const std::vector<GetValueRequest> &requests) const
                 {
                     std::vector<GetValueResult> results;
@@ -104,7 +119,7 @@ namespace android
                     return StatusCode::OK;
                 }
 
-                StatusCode SnapVehicleHardware::getValueInternal(const VehiclePropValue &request, VehiclePropValue *response) const
+                StatusCode SchuurmanVehicleHardware::getValueInternal(const VehiclePropValue &request, VehiclePropValue *response) const
                 {
                     int32_t propId = request.prop;
                     response->timestamp = elapsedRealtimeNano();
@@ -122,7 +137,7 @@ namespace android
                     return StatusCode::INVALID_ARG;
                 }
 
-                StatusCode SnapVehicleHardware::setValues(std::shared_ptr<const SetValuesCallback> callback,
+                StatusCode SchuurmanVehicleHardware::setValues(std::shared_ptr<const SetValuesCallback> callback,
                                                           const std::vector<SetValueRequest> &requests)
                 {
                     std::vector<SetValueResult> results;
@@ -138,7 +153,7 @@ namespace android
                     return StatusCode::OK;
                 }
 
-                StatusCode SnapVehicleHardware::setValueInternal(const VehiclePropValue &request, VehiclePropValue *updatedValue)
+                StatusCode SchuurmanVehicleHardware::setValueInternal(const VehiclePropValue &request, VehiclePropValue *updatedValue)
                 {
                     int32_t propId = request.prop;
 
@@ -163,54 +178,78 @@ namespace android
                     return StatusCode::ACCESS_DENIED;
                 }
 
-                DumpResult SnapVehicleHardware::dump(const std::vector<std::string> & /*options*/)
+                DumpResult SchuurmanVehicleHardware::dump(const std::vector<std::string> & /*options*/)
                 {
                     return {};
                 }
 
-                StatusCode SnapVehicleHardware::checkHealth()
+                StatusCode SchuurmanVehicleHardware::checkHealth()
                 {
                     return StatusCode::OK;
                 }
 
-                void SnapVehicleHardware::registerOnPropertyChangeEvent(std::unique_ptr<const PropertyChangeCallback> callback)
+                void SchuurmanVehicleHardware::registerOnPropertyChangeEvent(std::unique_ptr<const PropertyChangeCallback> callback)
                 {
                     mOnPropChange = std::move(callback);
                 }
 
-                void SnapVehicleHardware::registerOnPropertySetErrorEvent(std::unique_ptr<const PropertySetErrorCallback> callback)
+                void SchuurmanVehicleHardware::registerOnPropertySetErrorEvent(std::unique_ptr<const PropertySetErrorCallback> callback)
                 {
                     mOnSetError = std::move(callback);
                 }
 
                 // Stubs
-                StatusCode SnapVehicleHardware::subscribe(SubscribeOptions /*options*/) { return StatusCode::OK; }
-                StatusCode SnapVehicleHardware::unsubscribe(int32_t /*propId*/, int32_t /*areaId*/) { return StatusCode::OK; }
-                StatusCode SnapVehicleHardware::updateSampleRate(int32_t /*propId*/, int32_t /*areaId*/, float /*sampleRate*/) { return StatusCode::OK; }
+                StatusCode SchuurmanVehicleHardware::subscribe(SubscribeOptions /*options*/) { return StatusCode::OK; }
+                StatusCode SchuurmanVehicleHardware::unsubscribe(int32_t /*propId*/, int32_t /*areaId*/) { return StatusCode::OK; }
+                StatusCode SchuurmanVehicleHardware::updateSampleRate(int32_t /*propId*/, int32_t /*areaId*/, float /*sampleRate*/) { return StatusCode::OK; }
 
                 // Hardware Logica
-                void SnapVehicleHardware::initPwm()
+                void SchuurmanVehicleHardware::initPwm()
                 {
                     writeSysFs(mPathPwmPeriod, "50000");
                     writeSysFs(mPathPwmEnable, "1");
                 }
+                
+                void SchuurmanVehicleHardware::initGpio()
+                {
+                    mGpioChip = gpiod_chip_open(mGpioChipPath.c_str());
+                    if (!mGpioChip) {
+                        LOG(ERROR) << "Failed to open GPIO chip: " << mGpioChipPath;
+                        return;
+                    }
 
-                void SnapVehicleHardware::writePwm(int percentage)
+                    mGpioLine = gpiod_chip_get_line(mGpioChip, mGpioLineOffset);
+                    if (!mGpioLine) {
+                        LOG(ERROR) << "Failed to get GPIO line: " << mGpioLineOffset;
+                        gpiod_chip_close(mGpioChip);
+                        mGpioChip = nullptr;
+                        return;
+                    }
+
+                    // Request als input met de nieuwe naam als consument
+                    int ret = gpiod_line_request_input(mGpioLine, "SchuurmanVehicleHardware");
+                    if (ret < 0) {
+                        LOG(ERROR) << "Failed to request GPIO line as input";
+                        gpiod_line_release(mGpioLine);
+                        mGpioLine = nullptr;
+                    }
+                }
+
+                void SchuurmanVehicleHardware::writePwm(int percentage)
                 {
                     int duty = (percentage * 50000) / 100;
                     writeSysFs(mPathPwmDuty, std::to_string(duty));
                 }
 
-                void SnapVehicleHardware::pollInputs()
+                void SchuurmanVehicleHardware::pollInputs()
                 {
                     int lastGpioState = -1;
                     while (!mShuttingDown)
                     {
-                        std::ifstream gpioFile(mPathGpioReverse);
-                        int currentState;
-                        if (gpioFile >> currentState)
-                        {
-                            if (currentState != lastGpioState)
+                        if (mGpioLine) {
+                            int currentState = gpiod_line_get_value(mGpioLine);
+                            
+                            if (currentState >= 0 && currentState != lastGpioState)
                             {
                                 mCurrentGear = (currentState == 1) ? static_cast<int32_t>(VehicleGear::GEAR_REVERSE) : static_cast<int32_t>(VehicleGear::GEAR_DRIVE);
 
@@ -226,12 +265,19 @@ namespace android
                                 }
                                 lastGpioState = currentState;
                             }
+                        } else {
+                            // Retry mechanisme als init mislukte
+                            static int retry = 0;
+                            if (++retry > 50) { 
+                                initGpio(); 
+                                retry = 0; 
+                            }
                         }
                         std::this_thread::sleep_for(std::chrono::milliseconds(100));
                     }
                 }
 
-                void SnapVehicleHardware::writeSysFs(const std::string &path, const std::string &val)
+                void SchuurmanVehicleHardware::writeSysFs(const std::string &path, const std::string &val)
                 {
                     std::ofstream file(path);
                     if (file.is_open())
