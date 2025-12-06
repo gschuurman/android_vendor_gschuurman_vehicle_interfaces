@@ -5,7 +5,8 @@
 #include <chrono>
 #include <fstream>
 #include <thread>
-#include <stdio.h> // Voor popen
+#include <stdio.h>  // Voor popen
+#include <stdlib.h>
 
 #include <aidl/android/hardware/automotive/vehicle/VehicleGear.h>
 #include <aidl/android/hardware/automotive/vehicle/VehiclePropertyAccess.h>
@@ -42,7 +43,7 @@ namespace android
                     mPathPwmPeriod = android::base::GetProperty("ro.vendor.vehicle.path.pwm.period", "/sys/class/pwm/pwmchip0/pwm0/period");
 
                     // GPIO Config voor 'gpioget'
-                    // Default: gpiochip0 en lijn 0. Pas aan in je build.prop!
+                    // Default: gpiochip0 en lijn 0.
                     mGpioChipName = android::base::GetProperty("ro.vendor.vehicle.gpio.chip", "gpiochip0");
                     mGpioLineOffset = android::base::GetIntProperty("ro.vendor.vehicle.gpio.offset", 0);
 
@@ -61,8 +62,6 @@ namespace android
                     if (mPollThread.joinable())
                         mPollThread.join();
                 }
-
-                // ... (Getters en Setters voor properties blijven exact hetzelfde, hier ingekort voor leesbaarheid) ...
 
                 std::vector<VehiclePropConfig> SchuurmanVehicleHardware::getAllPropertyConfigs() const
                 {
@@ -175,7 +174,7 @@ namespace android
                     writeSysFs(mPathPwmDuty, std::to_string(duty));
                 }
 
-                // Helper: Voer shell commando uit en lees eerste karakter
+                // Helper: Voer shell commando uit en lees output
                 int SchuurmanVehicleHardware::runCommand(const std::string &cmd)
                 {
                     FILE *pipe = popen(cmd.c_str(), "r");
@@ -191,25 +190,30 @@ namespace android
                     }
                     pclose(pipe);
 
-                    // Probeer te parsen naar int (0 of 1)
-                    try
+                    if (result.empty())
                     {
-                        if (!result.empty())
-                        {
-                            return std::stoi(result);
-                        }
+                        return -1;
                     }
-                    catch (...)
+
+                    // Veiligere conversie zonder exceptions (vervangt try/catch stoi)
+                    char *end;
+                    long val = strtol(result.c_str(), &end, 10);
+
+                    // Als end == result.c_str() is er niets geconverteerd
+                    if (end == result.c_str())
                     {
+                        return -1;
                     }
-                    return -1;
+
+                    return static_cast<int>(val);
                 }
 
                 void SchuurmanVehicleHardware::pollInputs()
                 {
                     int lastGpioState = -1;
                     // Commando samenstellen: "gpioget gpiochip0 12"
-                    std::string cmd = "gpioget " + mGpioChipName + " " + std::to_string(mGpioLineOffset);
+                    // Let op: controleer of 'gpioget' in je $PATH zit op het device, anders '/system/bin/gpioget' gebruiken
+                    std::string cmd = "/system/bin/gpioget " + mGpioChipName + " " + std::to_string(mGpioLineOffset);
 
                     // Voeg eventueel flag toe als hij active-low moet zijn:
                     // cmd += " --active-low";
