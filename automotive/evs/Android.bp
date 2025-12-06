@@ -1,5 +1,5 @@
 prebuilt_etc {
-    name: "snapp_evs_configuration",
+    name: "schuurman_evs_configuration",
     src: "evs_configuration.xml",
     sub_dir: "automotive/evs",
     filename: "evs_configuration_override.xml",
