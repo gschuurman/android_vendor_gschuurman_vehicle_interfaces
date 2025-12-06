@@ -5,7 +5,7 @@
 #include <chrono>
 #include <fstream>
 #include <thread>
-#include <gpiod.h>
+#include <stdio.h> // Voor popen
 
 #include <aidl/android/hardware/automotive/vehicle/VehicleGear.h>
 #include <aidl/android/hardware/automotive/vehicle/VehiclePropertyAccess.h>
@@ -33,29 +33,25 @@ namespace android
                 SchuurmanVehicleHardware::SchuurmanVehicleHardware()
                     : mCurrentGear(static_cast<int32_t>(VehicleGear::GEAR_PARK)),
                       mCurrentBrightness(50),
-                      mShuttingDown(false),
-                      mGpioChip(nullptr),
-                      mGpioLine(nullptr)
+                      mShuttingDown(false)
                 {
-                    // PWM Properties (eventueel ook hernoemen naar ro.vendor.schuurman... in je system.prop)
-                    mPathPwmDuty = android::base::GetProperty("ro.vendor.vehicle.path.pwm.duty",
-                                                              "/sys/class/pwm/pwmchip0/pwm0/duty_cycle");
-                    mPathPwmEnable = android::base::GetProperty("ro.vendor.vehicle.path.pwm.enable",
-                                                                "/sys/class/pwm/pwmchip0/pwm0/enable");
-                    mPathPwmPeriod = android::base::GetProperty("ro.vendor.vehicle.path.pwm.period",
-                                                                "/sys/class/pwm/pwmchip0/pwm0/period");
 
-                    // GPIO Properties
-                    mGpioChipPath = android::base::GetProperty("ro.vendor.vehicle.gpio.chip", "/dev/gpiochip0");
+                    // PWM Config (Sysfs)
+                    mPathPwmDuty = android::base::GetProperty("ro.vendor.vehicle.path.pwm.duty", "/sys/class/pwm/pwmchip0/pwm0/duty_cycle");
+                    mPathPwmEnable = android::base::GetProperty("ro.vendor.vehicle.path.pwm.enable", "/sys/class/pwm/pwmchip0/pwm0/enable");
+                    mPathPwmPeriod = android::base::GetProperty("ro.vendor.vehicle.path.pwm.period", "/sys/class/pwm/pwmchip0/pwm0/period");
+
+                    // GPIO Config voor 'gpioget'
+                    // Default: gpiochip0 en lijn 0. Pas aan in je build.prop!
+                    mGpioChipName = android::base::GetProperty("ro.vendor.vehicle.gpio.chip", "gpiochip0");
                     mGpioLineOffset = android::base::GetIntProperty("ro.vendor.vehicle.gpio.offset", 0);
 
                     LOG(INFO) << "SchuurmanVehicleHardware Configured:"
                               << "\n PWM Path: " << mPathPwmDuty
-                              << "\n GPIO Chip: " << mGpioChipPath
-                              << "\n GPIO Line Offset: " << mGpioLineOffset;
+                              << "\n GPIO Command Target: " << mGpioChipName << " line " << mGpioLineOffset;
 
                     initPwm();
-                    initGpio();
+                    // Geen initGpio meer nodig, gpioget regelt dat per call
                     mPollThread = std::thread(&SchuurmanVehicleHardware::pollInputs, this);
                 }
 
@@ -63,32 +59,21 @@ namespace android
                 {
                     mShuttingDown = true;
                     if (mPollThread.joinable())
-                    {
                         mPollThread.join();
-                    }
-                    
-                    if (mGpioLine) {
-                        gpiod_line_release(mGpioLine);
-                        mGpioLine = nullptr;
-                    }
-                    if (mGpioChip) {
-                        gpiod_chip_close(mGpioChip);
-                        mGpioChip = nullptr;
-                    }
                 }
+
+                // ... (Getters en Setters voor properties blijven exact hetzelfde, hier ingekort voor leesbaarheid) ...
 
                 std::vector<VehiclePropConfig> SchuurmanVehicleHardware::getAllPropertyConfigs() const
                 {
                     std::vector<VehiclePropConfig> configs;
 
-                    // GEAR_SELECTION
                     VehiclePropConfig gearConfig;
                     gearConfig.prop = static_cast<int32_t>(VehicleProperty::GEAR_SELECTION);
                     gearConfig.access = VehiclePropertyAccess::READ;
                     gearConfig.changeMode = VehiclePropertyChangeMode::ON_CHANGE;
                     configs.push_back(gearConfig);
 
-                    // DISPLAY_BRIGHTNESS
                     VehiclePropConfig brightConfig;
                     brightConfig.prop = static_cast<int32_t>(VehicleProperty::DISPLAY_BRIGHTNESS);
                     brightConfig.access = VehiclePropertyAccess::READ_WRITE;
@@ -99,8 +84,7 @@ namespace android
                     return configs;
                 }
 
-                StatusCode SchuurmanVehicleHardware::getValues(std::shared_ptr<const GetValuesCallback> callback,
-                                                          const std::vector<GetValueRequest> &requests) const
+                StatusCode SchuurmanVehicleHardware::getValues(std::shared_ptr<const GetValuesCallback> callback, const std::vector<GetValueRequest> &requests) const
                 {
                     std::vector<GetValueResult> results;
                     for (const auto &req : requests)
@@ -110,9 +94,7 @@ namespace android
                         VehiclePropValue responseValue = req.prop;
                         result.status = getValueInternal(req.prop, &responseValue);
                         if (result.status == StatusCode::OK)
-                        {
                             result.prop = responseValue;
-                        }
                         results.push_back(result);
                     }
                     (*callback)(std::move(results));
@@ -123,7 +105,6 @@ namespace android
                 {
                     int32_t propId = request.prop;
                     response->timestamp = elapsedRealtimeNano();
-
                     if (propId == static_cast<int32_t>(VehicleProperty::GEAR_SELECTION))
                     {
                         response->value.int32Values = {mCurrentGear};
@@ -137,8 +118,7 @@ namespace android
                     return StatusCode::INVALID_ARG;
                 }
 
-                StatusCode SchuurmanVehicleHardware::setValues(std::shared_ptr<const SetValuesCallback> callback,
-                                                          const std::vector<SetValueRequest> &requests)
+                StatusCode SchuurmanVehicleHardware::setValues(std::shared_ptr<const SetValuesCallback> callback, const std::vector<SetValueRequest> &requests)
                 {
                     std::vector<SetValueResult> results;
                     for (const auto &req : requests)
@@ -156,7 +136,6 @@ namespace android
                 StatusCode SchuurmanVehicleHardware::setValueInternal(const VehiclePropValue &request, VehiclePropValue *updatedValue)
                 {
                     int32_t propId = request.prop;
-
                     if (propId == static_cast<int32_t>(VehicleProperty::DISPLAY_BRIGHTNESS))
                     {
                         if (request.value.int32Values.empty())
@@ -164,10 +143,8 @@ namespace android
                         int brightness = request.value.int32Values[0];
                         if (brightness < 0 || brightness > 100)
                             return StatusCode::INVALID_ARG;
-
                         writePwm(brightness);
                         mCurrentBrightness = brightness;
-
                         if (updatedValue)
                         {
                             *updatedValue = request;
@@ -178,61 +155,18 @@ namespace android
                     return StatusCode::ACCESS_DENIED;
                 }
 
-                DumpResult SchuurmanVehicleHardware::dump(const std::vector<std::string> & /*options*/)
-                {
-                    return {};
-                }
+                DumpResult SchuurmanVehicleHardware::dump(const std::vector<std::string> &) { return {}; }
+                StatusCode SchuurmanVehicleHardware::checkHealth() { return StatusCode::OK; }
+                void SchuurmanVehicleHardware::registerOnPropertyChangeEvent(std::unique_ptr<const PropertyChangeCallback> callback) { mOnPropChange = std::move(callback); }
+                void SchuurmanVehicleHardware::registerOnPropertySetErrorEvent(std::unique_ptr<const PropertySetErrorCallback> callback) { mOnSetError = std::move(callback); }
+                StatusCode SchuurmanVehicleHardware::subscribe(SubscribeOptions) { return StatusCode::OK; }
+                StatusCode SchuurmanVehicleHardware::unsubscribe(int32_t, int32_t) { return StatusCode::OK; }
+                StatusCode SchuurmanVehicleHardware::updateSampleRate(int32_t, int32_t, float) { return StatusCode::OK; }
 
-                StatusCode SchuurmanVehicleHardware::checkHealth()
-                {
-                    return StatusCode::OK;
-                }
-
-                void SchuurmanVehicleHardware::registerOnPropertyChangeEvent(std::unique_ptr<const PropertyChangeCallback> callback)
-                {
-                    mOnPropChange = std::move(callback);
-                }
-
-                void SchuurmanVehicleHardware::registerOnPropertySetErrorEvent(std::unique_ptr<const PropertySetErrorCallback> callback)
-                {
-                    mOnSetError = std::move(callback);
-                }
-
-                // Stubs
-                StatusCode SchuurmanVehicleHardware::subscribe(SubscribeOptions /*options*/) { return StatusCode::OK; }
-                StatusCode SchuurmanVehicleHardware::unsubscribe(int32_t /*propId*/, int32_t /*areaId*/) { return StatusCode::OK; }
-                StatusCode SchuurmanVehicleHardware::updateSampleRate(int32_t /*propId*/, int32_t /*areaId*/, float /*sampleRate*/) { return StatusCode::OK; }
-
-                // Hardware Logica
                 void SchuurmanVehicleHardware::initPwm()
                 {
                     writeSysFs(mPathPwmPeriod, "50000");
                     writeSysFs(mPathPwmEnable, "1");
-                }
-                
-                void SchuurmanVehicleHardware::initGpio()
-                {
-                    mGpioChip = gpiod_chip_open(mGpioChipPath.c_str());
-                    if (!mGpioChip) {
-                        LOG(ERROR) << "Failed to open GPIO chip: " << mGpioChipPath;
-                        return;
-                    }
-
-                    mGpioLine = gpiod_chip_get_line(mGpioChip, mGpioLineOffset);
-                    if (!mGpioLine) {
-                        LOG(ERROR) << "Failed to get GPIO line: " << mGpioLineOffset;
-                        gpiod_chip_close(mGpioChip);
-                        mGpioChip = nullptr;
-                        return;
-                    }
-
-                    // Request als input met de nieuwe naam als consument
-                    int ret = gpiod_line_request_input(mGpioLine, "SchuurmanVehicleHardware");
-                    if (ret < 0) {
-                        LOG(ERROR) << "Failed to request GPIO line as input";
-                        gpiod_line_release(mGpioLine);
-                        mGpioLine = nullptr;
-                    }
                 }
 
                 void SchuurmanVehicleHardware::writePwm(int percentage)
@@ -241,39 +175,70 @@ namespace android
                     writeSysFs(mPathPwmDuty, std::to_string(duty));
                 }
 
+                // Helper: Voer shell commando uit en lees eerste karakter
+                int SchuurmanVehicleHardware::runCommand(const std::string &cmd)
+                {
+                    FILE *pipe = popen(cmd.c_str(), "r");
+                    if (!pipe)
+                    {
+                        return -1;
+                    }
+                    char buffer[128];
+                    std::string result = "";
+                    if (fgets(buffer, 128, pipe) != NULL)
+                    {
+                        result = buffer;
+                    }
+                    pclose(pipe);
+
+                    // Probeer te parsen naar int (0 of 1)
+                    try
+                    {
+                        if (!result.empty())
+                        {
+                            return std::stoi(result);
+                        }
+                    }
+                    catch (...)
+                    {
+                    }
+                    return -1;
+                }
+
                 void SchuurmanVehicleHardware::pollInputs()
                 {
                     int lastGpioState = -1;
+                    // Commando samenstellen: "gpioget gpiochip0 12"
+                    std::string cmd = "gpioget " + mGpioChipName + " " + std::to_string(mGpioLineOffset);
+
+                    // Voeg eventueel flag toe als hij active-low moet zijn:
+                    // cmd += " --active-low";
+
                     while (!mShuttingDown)
                     {
-                        if (mGpioLine) {
-                            int currentState = gpiod_line_get_value(mGpioLine);
-                            
-                            if (currentState >= 0 && currentState != lastGpioState)
-                            {
-                                mCurrentGear = (currentState == 1) ? static_cast<int32_t>(VehicleGear::GEAR_REVERSE) : static_cast<int32_t>(VehicleGear::GEAR_DRIVE);
+                        int currentState = runCommand(cmd);
 
-                                if (mOnPropChange)
-                                {
-                                    std::vector<VehiclePropValue> events;
-                                    VehiclePropValue v;
-                                    v.prop = static_cast<int32_t>(VehicleProperty::GEAR_SELECTION);
-                                    v.timestamp = elapsedRealtimeNano();
-                                    v.value.int32Values = {mCurrentGear};
-                                    events.push_back(v);
-                                    (*mOnPropChange)(events);
-                                }
-                                lastGpioState = currentState;
+                        if (currentState >= 0 && currentState != lastGpioState)
+                        {
+                            // Pas dit aan afhankelijk van je hardware (1 = achteruit of 0 = achteruit)
+                            mCurrentGear = (currentState == 1) ? static_cast<int32_t>(VehicleGear::GEAR_REVERSE) : static_cast<int32_t>(VehicleGear::GEAR_DRIVE);
+
+                            if (mOnPropChange)
+                            {
+                                std::vector<VehiclePropValue> events;
+                                VehiclePropValue v;
+                                v.prop = static_cast<int32_t>(VehicleProperty::GEAR_SELECTION);
+                                v.timestamp = elapsedRealtimeNano();
+                                v.value.int32Values = {mCurrentGear};
+                                events.push_back(v);
+                                (*mOnPropChange)(events);
                             }
-                        } else {
-                            // Retry mechanisme als init mislukte
-                            static int retry = 0;
-                            if (++retry > 50) { 
-                                initGpio(); 
-                                retry = 0; 
-                            }
+                            lastGpioState = currentState;
+                            LOG(INFO) << "Gear changed to: " << (currentState == 1 ? "REVERSE" : "DRIVE") << " (via " << cmd << ")";
                         }
-                        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
+                        // Polling interval iets ruimer nemen omdat popen zwaarder is dan file read
+                        std::this_thread::sleep_for(std::chrono::milliseconds(200));
                     }
                 }
 
@@ -281,16 +246,12 @@ namespace android
                 {
                     std::ofstream file(path);
                     if (file.is_open())
-                    {
                         file << val;
-                    }
                     else
-                    {
                         LOG(WARNING) << "Failed to write to path: " << path;
-                    }
                 }
 
-            }
-        }
-    }
-}
+            } // vehicle
+        } // automotive
+    } // hardware
+} // android

@@ -6,7 +6,8 @@
 #include <string>
 #include <atomic>
 #include <memory>
-#include <gpiod.h> // Libgpiod
+
+// Geen <gpiod.h> meer nodig
 
 #include <IVehicleHardware.h>
 #include <aidl/android/hardware/automotive/vehicle/IVehicle.h>
@@ -21,9 +22,6 @@ namespace android
             namespace vehicle
             {
 
-                using ::android::hardware::automotive::vehicle::DumpResult;
-                using ::android::hardware::automotive::vehicle::IVehicleHardware;
-
                 using ::aidl::android::hardware::automotive::vehicle::GetValueRequest;
                 using ::aidl::android::hardware::automotive::vehicle::GetValueResult;
                 using ::aidl::android::hardware::automotive::vehicle::SetValueRequest;
@@ -33,6 +31,8 @@ namespace android
                 using ::aidl::android::hardware::automotive::vehicle::VehiclePropConfig;
                 using ::aidl::android::hardware::automotive::vehicle::VehicleProperty;
                 using ::aidl::android::hardware::automotive::vehicle::VehiclePropValue;
+                using ::android::hardware::automotive::vehicle::DumpResult;
+                using ::android::hardware::automotive::vehicle::IVehicleHardware;
 
                 class SchuurmanVehicleHardware : public IVehicleHardware
                 {
@@ -41,18 +41,12 @@ namespace android
                     ~SchuurmanVehicleHardware();
 
                     std::vector<VehiclePropConfig> getAllPropertyConfigs() const override;
-
-                    StatusCode getValues(std::shared_ptr<const GetValuesCallback> callback,
-                                         const std::vector<GetValueRequest> &requests) const override;
-
-                    StatusCode setValues(std::shared_ptr<const SetValuesCallback> callback,
-                                         const std::vector<SetValueRequest> &requests) override;
-
+                    StatusCode getValues(std::shared_ptr<const GetValuesCallback> callback, const std::vector<GetValueRequest> &requests) const override;
+                    StatusCode setValues(std::shared_ptr<const SetValuesCallback> callback, const std::vector<SetValueRequest> &requests) override;
                     DumpResult dump(const std::vector<std::string> &options) override;
                     StatusCode checkHealth() override;
                     void registerOnPropertyChangeEvent(std::unique_ptr<const PropertyChangeCallback> callback) override;
                     void registerOnPropertySetErrorEvent(std::unique_ptr<const PropertySetErrorCallback> callback) override;
-
                     StatusCode subscribe(SubscribeOptions options) override;
                     StatusCode unsubscribe(int32_t propId, int32_t areaId) override;
                     StatusCode updateSampleRate(int32_t propId, int32_t areaId, float sampleRate) override;
@@ -64,32 +58,33 @@ namespace android
                     std::thread mPollThread;
                     std::atomic<bool> mShuttingDown;
 
+                    // PWM
                     std::string mPathPwmDuty;
                     std::string mPathPwmEnable;
                     std::string mPathPwmPeriod;
 
-                    // GPIO Libgpiod
-                    std::string mGpioChipPath;
-                    int mGpioLineOffset;
-                    struct gpiod_chip *mGpioChip;
-                    struct gpiod_line *mGpioLine;
+                    // GPIO Command instellingen
+                    std::string mGpioChipName; // bijv "gpiochip0"
+                    int mGpioLineOffset;       // bijv 12
 
                     std::unique_ptr<const PropertyChangeCallback> mOnPropChange;
                     std::unique_ptr<const PropertySetErrorCallback> mOnSetError;
 
                     void initPwm();
-                    void initGpio();
                     void writePwm(int percentage);
                     void pollInputs();
                     void writeSysFs(const std::string &path, const std::string &val);
+
+                    // Nieuwe helper om commando uit te voeren
+                    int runCommand(const std::string &cmd);
 
                     StatusCode getValueInternal(const VehiclePropValue &request, VehiclePropValue *response) const;
                     StatusCode setValueInternal(const VehiclePropValue &request, VehiclePropValue *updatedValue);
                 };
 
-            }
-        }
-    }
-}
+            } // vehicle
+        } // automotive
+    } // hardware
+} // android
 
 #endif

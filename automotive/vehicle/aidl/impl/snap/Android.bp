@@ -26,7 +26,6 @@ cc_binary {
         "liblog",
         "libutils",
         "android.hardware.automotive.vehicle-V4-ndk",
-        "libgpiod", // Zorg dat deze erin blijft voor de GPIO fix
     ],
 
     static_libs: [
