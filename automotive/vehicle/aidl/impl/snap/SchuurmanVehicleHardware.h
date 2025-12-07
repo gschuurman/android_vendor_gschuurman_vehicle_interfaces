@@ -7,84 +7,83 @@
 #include <atomic>
 #include <memory>
 
-// Geen <gpiod.h> meer nodig
-
 #include <IVehicleHardware.h>
 #include <aidl/android/hardware/automotive/vehicle/IVehicle.h>
 #include <aidl/android/hardware/automotive/vehicle/VehicleProperty.h>
 
-namespace android
-{
-    namespace hardware
-    {
-        namespace automotive
-        {
-            namespace vehicle
-            {
+namespace android {
+namespace hardware {
+namespace automotive {
+namespace vehicle {
 
-                using ::aidl::android::hardware::automotive::vehicle::GetValueRequest;
-                using ::aidl::android::hardware::automotive::vehicle::GetValueResult;
-                using ::aidl::android::hardware::automotive::vehicle::SetValueRequest;
-                using ::aidl::android::hardware::automotive::vehicle::SetValueResult;
-                using ::aidl::android::hardware::automotive::vehicle::StatusCode;
-                using ::aidl::android::hardware::automotive::vehicle::SubscribeOptions;
-                using ::aidl::android::hardware::automotive::vehicle::VehiclePropConfig;
-                using ::aidl::android::hardware::automotive::vehicle::VehicleProperty;
-                using ::aidl::android::hardware::automotive::vehicle::VehiclePropValue;
-                using ::android::hardware::automotive::vehicle::DumpResult;
-                using ::android::hardware::automotive::vehicle::IVehicleHardware;
+using ::android::hardware::automotive::vehicle::DumpResult;
+using ::android::hardware::automotive::vehicle::IVehicleHardware;
+using ::aidl::android::hardware::automotive::vehicle::GetValueRequest;
+using ::aidl::android::hardware::automotive::vehicle::GetValueResult;
+using ::aidl::android::hardware::automotive::vehicle::SetValueRequest;
+using ::aidl::android::hardware::automotive::vehicle::SetValueResult;
+using ::aidl::android::hardware::automotive::vehicle::StatusCode;
+using ::aidl::android::hardware::automotive::vehicle::SubscribeOptions;
+using ::aidl::android::hardware::automotive::vehicle::VehiclePropConfig;
+using ::aidl::android::hardware::automotive::vehicle::VehicleProperty;
+using ::aidl::android::hardware::automotive::vehicle::VehiclePropValue;
 
-                class SchuurmanVehicleHardware : public IVehicleHardware
-                {
-                public:
-                    SchuurmanVehicleHardware();
-                    ~SchuurmanVehicleHardware();
+class SchuurmanVehicleHardware : public IVehicleHardware {
+public:
+    SchuurmanVehicleHardware();
+    ~SchuurmanVehicleHardware();
 
-                    std::vector<VehiclePropConfig> getAllPropertyConfigs() const override;
-                    StatusCode getValues(std::shared_ptr<const GetValuesCallback> callback, const std::vector<GetValueRequest> &requests) const override;
-                    StatusCode setValues(std::shared_ptr<const SetValuesCallback> callback, const std::vector<SetValueRequest> &requests) override;
-                    DumpResult dump(const std::vector<std::string> &options) override;
-                    StatusCode checkHealth() override;
-                    void registerOnPropertyChangeEvent(std::unique_ptr<const PropertyChangeCallback> callback) override;
-                    void registerOnPropertySetErrorEvent(std::unique_ptr<const PropertySetErrorCallback> callback) override;
-                    StatusCode subscribe(SubscribeOptions options) override;
-                    StatusCode unsubscribe(int32_t propId, int32_t areaId) override;
-                    StatusCode updateSampleRate(int32_t propId, int32_t areaId, float sampleRate) override;
+    std::vector<VehiclePropConfig> getAllPropertyConfigs() const override;
+    StatusCode getValues(std::shared_ptr<const GetValuesCallback> callback, const std::vector<GetValueRequest> &requests) const override;
+    StatusCode setValues(std::shared_ptr<const SetValuesCallback> callback, const std::vector<SetValueRequest> &requests) override;
+    DumpResult dump(const std::vector<std::string> &options) override;
+    StatusCode checkHealth() override;
+    void registerOnPropertyChangeEvent(std::unique_ptr<const PropertyChangeCallback> callback) override;
+    void registerOnPropertySetErrorEvent(std::unique_ptr<const PropertySetErrorCallback> callback) override;
+    StatusCode subscribe(SubscribeOptions options) override;
+    StatusCode unsubscribe(int32_t propId, int32_t areaId) override;
+    StatusCode updateSampleRate(int32_t propId, int32_t areaId, float sampleRate) override;
 
-                private:
-                    int32_t mCurrentGear;
-                    int32_t mCurrentBrightness;
+private:
+    int32_t mCurrentGear;
+    int32_t mCurrentBrightness;
+    
+    // Dynamische PWM periode
+    int mPwmPeriodNs;
 
-                    std::thread mPollThread;
-                    std::atomic<bool> mShuttingDown;
+    std::thread mPollThread;
+    std::atomic<bool> mShuttingDown;
 
-                    // PWM
-                    std::string mPathPwmDuty;
-                    std::string mPathPwmEnable;
-                    std::string mPathPwmPeriod;
+    std::string mPathPwmDuty;
+    std::string mPathPwmEnable;
+    std::string mPathPwmPeriod;
 
-                    // GPIO Command instellingen
-                    std::string mGpioChipName; // bijv "gpiochip0"
-                    int mGpioLineOffset;       // bijv 12
+    // GPIO
+    std::string mGpioChipName;
+    int mGpioLineOffset;
 
-                    std::unique_ptr<const PropertyChangeCallback> mOnPropChange;
-                    std::unique_ptr<const PropertySetErrorCallback> mOnSetError;
+    std::unique_ptr<const PropertyChangeCallback> mOnPropChange;
+    std::unique_ptr<const PropertySetErrorCallback> mOnSetError;
 
-                    void initPwm();
-                    void writePwm(int percentage);
-                    void pollInputs();
-                    void writeSysFs(const std::string &path, const std::string &val);
+    // --- FIX HIERONDER ---
+    // Update de declaratie zodat hij matcht met je .cpp bestand
+    void initPwm(bool forceWrite);
+    
+    void writePwm(int percentage);
+    int readGpio();
+    void pollInputs();
+    
+    // Helpers voor Sysfs
+    void writeSysFs(const std::string &path, const std::string &val);
+    int readSysFsInt(const std::string &path);
 
-                    // Nieuwe helper om commando uit te voeren
-                    int runCommand(const std::string &cmd);
+    StatusCode getValueInternal(const VehiclePropValue &request, VehiclePropValue *response) const;
+    StatusCode setValueInternal(const VehiclePropValue &request, VehiclePropValue *updatedValue);
+};
 
-                    StatusCode getValueInternal(const VehiclePropValue &request, VehiclePropValue *response) const;
-                    StatusCode setValueInternal(const VehiclePropValue &request, VehiclePropValue *updatedValue);
-                };
-
-            } // vehicle
-        } // automotive
-    } // hardware
+} // vehicle
+} // automotive
+} // hardware
 } // android
 
 #endif

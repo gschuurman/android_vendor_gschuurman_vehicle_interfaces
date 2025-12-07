@@ -2,8 +2,9 @@ package {
     default_applicable_licenses: ["Android-Apache-2.0"],
 }
 
+// 1. De binary service
 cc_binary {
-    name: "android.hardware.automotive.vehicle@schuurman-service", // Naamswijziging
+    name: "android.hardware.automotive.vehicle@schuurman-service",
     vendor: true,
     relative_install_path: "hw",
     init_rc: ["android.hardware.automotive.vehicle@schuurman-service.rc"],
@@ -11,6 +12,11 @@ cc_binary {
 
     defaults: [
         "VehicleHalDefaults",
+    ],
+
+    // Dit zorgt dat het script wordt meegeinstalleerd als je deze binary bouwt
+    required: [
+        "init.vehicle.sh",
     ],
 
     srcs: [
@@ -38,6 +44,12 @@ cc_binary {
     ],
     
     cflags: [
-        "-DLOG_TAG=\"SchuurmanVehicleHal\"", // Nieuwe Log Tag
+        "-DLOG_TAG=\"SchuurmanVehicleHal\"",
     ]
+}
+
+sh_binary {
+    name: "init.vehicle.sh",
+    src: "init.vehicle.sh",
+    vendor: true,
 }
