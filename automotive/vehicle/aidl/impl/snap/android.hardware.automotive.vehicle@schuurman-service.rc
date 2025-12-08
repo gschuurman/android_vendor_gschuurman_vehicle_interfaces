@@ -3,7 +3,7 @@ service vendor.vehicle-schuurman /vendor/bin/hw/android.hardware.automotive.vehi
     user vehicle_network
     group system inet
     interface aidl android.hardware.automotive.vehicle.IVehicle/default
-    seclabel u:r:vendor_vehicle_schuurman:s0
 
 on early-boot
+    # Start script met SETUP context
     exec_background u:r:vendor_vehicle_setup:s0 -- /vendor/bin/init.vehicle.sh

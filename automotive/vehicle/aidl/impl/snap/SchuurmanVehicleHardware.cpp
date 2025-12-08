@@ -7,12 +7,17 @@
 #include <thread>
 #include <vector>
 
+#include <filesystem>
+#include <regex>
+#include <iostream>
+
 // Linux Kernel Headers
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/ioctl.h>
 #include <linux/gpio.h> 
 #include <string.h>
+#include <errno.h> // <--- TOEGEVOEGD VOOR FOUTCODES
 
 #include <aidl/android/hardware/automotive/vehicle/VehicleGear.h>
 #include <aidl/android/hardware/automotive/vehicle/VehiclePropertyAccess.h>
@@ -32,39 +37,81 @@ static int64_t elapsedRealtimeNano() {
     return std::chrono::duration_cast<std::chrono::nanoseconds>(now.time_since_epoch()).count();
 }
 
+std::string findPwmChipPath() {
+    // We zoeken naar een map in /sys/class/pwm/pwmchipX
+    // waarvan de symlink 'device/of_node' de tekst '19000' bevat.
+
+    std::string baseDir = "/sys/class/pwm/";
+    for (int i = 0; i < 10; i++) {
+        std::string chipName = "pwmchip" + std::to_string(i);
+        std::string fullPath = baseDir + chipName;
+        std::string linkPath = fullPath + "/device/of_node";
+
+        // Check of symlink bestaat
+        char buf[1024];
+        ssize_t len = readlink(linkPath.c_str(), buf, sizeof(buf)-1);
+        if (len != -1) {
+            buf[len] = '\0';
+            std::string target(buf);
+
+            // BINGO CHECK
+            if (target.find("19000") != std::string::npos) {
+                LOG(INFO) << "Auto-detected PWM Chip: " << chipName << " (Matches 19000)";
+                return fullPath; // Geeft "/sys/class/pwm/pwmchipX" terug
+            }
+        }
+    }
+    LOG(ERROR) << "Could not auto-detect PWM chip 19000! Fallback to pwmchip0.";
+    return baseDir + "pwmchip0";
+}
+
+
 SchuurmanVehicleHardware::SchuurmanVehicleHardware()
     : mCurrentGear(static_cast<int32_t>(VehicleGear::GEAR_PARK)),
       mCurrentBrightness(50),
       mShuttingDown(false) {
 
-    // 1. PWM Paden (String Properties)
-    mPathPwmDuty = android::base::GetProperty("ro.vendor.vehicle.path.pwm.duty", "/sys/class/pwm/pwmchip1/pwm1/duty_cycle");
-    mPathPwmEnable = android::base::GetProperty("ro.vendor.vehicle.path.pwm.enable", "/sys/class/pwm/pwmchip1/pwm1/enable");
-    mPathPwmPeriod = android::base::GetProperty("ro.vendor.vehicle.path.pwm.period", "/sys/class/pwm/pwmchip1/pwm1/period");
+    LOG(INFO) << ">>> DETECTING HARDWARE <<<";
+    std::string chipBase = findPwmChipPath();
 
-    // 2. PWM Configuratie (Int/Bool Properties)
-    // Lees de gewenste periode uit property. Default 30518 (32kHz) voor VIM3.
-    mPwmPeriodNs = android::base::GetIntProperty("ro.vendor.vehicle.pwm.period_ns", 30518);
+    LOG(INFO) << ">>> STARTING SchuurmanVehicleHardware INITIALIZATION <<<";
+
+    // We nemen aan dat kanaal 1 (pwm1) altijd correct is voor VIM3 pin 35
+    mPathPwmDuty = chipBase + "/pwm1/duty_cycle";
+    mPathPwmEnable = chipBase + "/pwm1/enable";
+    mPathPwmPeriod = chipBase + "/pwm1/period";
+
+    LOG(INFO) << "Resolved Paths:";
+    LOG(INFO) << "  Duty: " << mPathPwmDuty;
     
-    // Lees of we de periode moeten overschrijven (Default false/0 voor VIM3 WiFi veiligheid)
+    // Default 30518 (32kHz)
+    mPwmPeriodNs = android::base::GetIntProperty("ro.vendor.vehicle.pwm.period_ns", 30518);
     bool forceWritePeriod = android::base::GetBoolProperty("ro.vendor.vehicle.pwm.force_write_period", false);
 
-    // 3. GPIO Config
+    LOG(INFO) << "CONFIG - Duty Path:   " << mPathPwmDuty;
+    LOG(INFO) << "CONFIG - Enable Path: " << mPathPwmEnable;
+    LOG(INFO) << "CONFIG - Period Path: " << mPathPwmPeriod;
+    LOG(INFO) << "CONFIG - Target Period: " << mPwmPeriodNs << " ns";
+    LOG(INFO) << "CONFIG - Force Write: " << (forceWritePeriod ? "YES" : "NO");
+
+    // GPIO Config
     std::string chipName = android::base::GetProperty("ro.vendor.vehicle.gpio.chip", "gpiochip0");
     if (chipName.find("/dev/") == std::string::npos) {
         mGpioChipName = "/dev/" + chipName;
     } else {
         mGpioChipName = chipName;
     }
-    mGpioLineOffset = android::base::GetIntProperty("ro.vendor.vehicle.gpio.offset", 0);
+    mGpioLineOffset = android::base::GetIntProperty("ro.vendor.vehicle.gpio.offset", 16);
+    
+    LOG(INFO) << "CONFIG - GPIO Chip: " << mGpioChipName << ", Line: " << mGpioLineOffset;
 
-    LOG(INFO) << "SchuurmanVehicleHardware Configured:"
-              << "\n PWM Path: " << mPathPwmDuty
-              << "\n PWM Period Config: " << mPwmPeriodNs << " ns"
-              << "\n Force Write Period: " << (forceWritePeriod ? "YES" : "NO");
+    // 2. Initialiseer Hardware
+    initPwm(forceWritePeriod);
 
-    initPwm(forceWritePeriod); // Geef de setting mee
+    // 3. Start Poll Thread
     mPollThread = std::thread(&SchuurmanVehicleHardware::pollInputs, this);
+    
+    LOG(INFO) << ">>> SchuurmanVehicleHardware INITIALIZATION DONE <<<";
 }
 
 SchuurmanVehicleHardware::~SchuurmanVehicleHardware() {
@@ -133,10 +180,20 @@ StatusCode SchuurmanVehicleHardware::setValues(std::shared_ptr<const SetValuesCa
 
 StatusCode SchuurmanVehicleHardware::setValueInternal(const VehiclePropValue &request, VehiclePropValue *updatedValue) {
     int32_t propId = request.prop;
+    
     if (propId == static_cast<int32_t>(VehicleProperty::DISPLAY_BRIGHTNESS)) {
-        if (request.value.int32Values.empty()) return StatusCode::INVALID_ARG;
+        if (request.value.int32Values.empty()) {
+            LOG(ERROR) << "SET Request received but value list is empty!";
+            return StatusCode::INVALID_ARG;
+        }
+
         int brightness = request.value.int32Values[0];
-        if (brightness < 0 || brightness > 100) return StatusCode::INVALID_ARG;
+        LOG(INFO) << "SET Request: Display Brightness -> " << brightness << "%";
+
+        if (brightness < 0 || brightness > 100) {
+             LOG(ERROR) << "Brightness value out of range (0-100): " << brightness;
+             return StatusCode::INVALID_ARG;
+        }
         
         writePwm(brightness);
         mCurrentBrightness = brightness;
@@ -159,32 +216,40 @@ StatusCode SchuurmanVehicleHardware::unsubscribe(int32_t, int32_t) { return Stat
 StatusCode SchuurmanVehicleHardware::updateSampleRate(int32_t, int32_t, float) { return StatusCode::OK; }
 
 void SchuurmanVehicleHardware::initPwm(bool forceWrite) {
-    // Probeer eerst de huidige waarde uit sysfs te lezen ter controle
-    int currentSysPeriod = readSysFsInt(mPathPwmPeriod);
-    if (currentSysPeriod > 0) {
-        LOG(INFO) << "System reports current PWM period: " << currentSysPeriod;
-    }
+    LOG(INFO) << "--- initPwm() START ---";
 
+    // 1. Probeer huidige periode te lezen
+    int currentSysPeriod = readSysFsInt(mPathPwmPeriod);
+    LOG(INFO) << "Current Kernel PWM Period: " << currentSysPeriod;
+
+    // 2. Periode instellen (indien nodig)
     if (forceWrite) {
-        // Alleen schrijven als de property dit toestaat!
-        LOG(INFO) << "Forcing PWM period to " << mPwmPeriodNs;
+        LOG(INFO) << "Force Write Period is TRUE. Writing " << mPwmPeriodNs << " to " << mPathPwmPeriod;
         writeSysFs(mPathPwmPeriod, std::to_string(mPwmPeriodNs));
     } else {
-        LOG(INFO) << "Skipping PWM period write (safety mode)";
-        mPwmPeriodNs = currentSysPeriod;
+        LOG(INFO) << "Force Write Period is FALSE. Skipping period write (WiFi safety).";
     }
+
+    // 3. PWM Enable aanzetten
+    LOG(INFO) << "Enabling PWM chip...";
     writeSysFs(mPathPwmEnable, "1");
+    
+    LOG(INFO) << "--- initPwm() END ---";
 }
 
 void SchuurmanVehicleHardware::writePwm(int percentage) {
-    // 1. Inverted logic: 100% helderheid = 0% duty (0V)
+    LOG(INFO) << "--- writePwm(" << percentage << "%) START ---";
+    writeSysFs(mPathPwmEnable, "1");
     int invertedPercentage = 100 - percentage;
-    
-    // 2. Duty cycle berekenen met de UITGELEZEN periode
     int duty = (invertedPercentage * mPwmPeriodNs) / 100;
     
-    // 3. Schrijf de waarde
+    LOG(INFO) << "Calculation: (100 - " << percentage << ") * " << mPwmPeriodNs << " / 100 = " << duty;
+    
+    // 3. Schrijf Duty
+    LOG(INFO) << "Writing Duty Cycle: " << duty;
     writeSysFs(mPathPwmDuty, std::to_string(duty));
+    
+    LOG(INFO) << "--- writePwm() END ---";
 }
 
 int SchuurmanVehicleHardware::readGpio() {
@@ -245,18 +310,39 @@ void SchuurmanVehicleHardware::pollInputs() {
 }
 
 void SchuurmanVehicleHardware::writeSysFs(const std::string &path, const std::string &val) {
-    std::ofstream file(path);
-    if (file.is_open()) file << val;
-    else LOG(WARNING) << "Failed to write to path: " << path;
+    LOG(INFO) << "SYSFS: Opening " << path << " to write '" << val << "'";
+
+    // Gebruik low-level open() voor betere foutcodes (errno)
+    int fd = open(path.c_str(), O_WRONLY | O_TRUNC);
+    
+    if (fd < 0) {
+        // NU ZIEN WE WAAROM HET FAALT (Permission Denied / No such file / etc)
+        LOG(ERROR) << "SYSFS FATAL: Failed to open " << path 
+                   << ". Error: " << strerror(errno) << " (" << errno << ")";
+        return;
+    }
+
+    int len = val.length();
+    int written = write(fd, val.c_str(), len);
+
+    if (written != len) {
+        LOG(ERROR) << "SYSFS ERROR: Failed to write content. Error: " << strerror(errno);
+    } else {
+        LOG(INFO) << "SYSFS SUCCESS: Wrote '" << val << "'";
+    }
+
+    close(fd);
 }
 
 int SchuurmanVehicleHardware::readSysFsInt(const std::string &path) {
+    LOG(INFO) << "SYSFS: Reading from " << path;
     std::ifstream file(path);
     int value = -1;
     if (file.is_open()) {
         file >> value;
+        LOG(INFO) << "SYSFS READ RESULT: " << value;
     } else {
-        LOG(WARNING) << "Failed to read from path: " << path;
+        LOG(WARNING) << "SYSFS WARN: Failed to read from path: " << path;
     }
     return value;
 }
