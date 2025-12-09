@@ -76,12 +76,12 @@ namespace android
 
                 SchuurmanVehicleHardware::SchuurmanVehicleHardware()
                     : mCurrentGear(static_cast<int32_t>(VehicleGear::GEAR_PARK)),
-                    mCurrentBrightness(50),
-                    mShuttingDown(false),
-                    mSensorThreadRunning(false),
-                    mLightSensorPath("/data/vendor/sensors/bh1750_lux"),
-                    mSensorRawMax(100000),
-                    mAutoBrightnessEnabled(false)
+                      mCurrentBrightness(50),
+                      mShuttingDown(false),
+                      mSensorThreadRunning(false),
+                      mLightSensorPath("/data/vendor/sensors/bh1750_lux"),
+                      mSensorRawMax(100000),
+                      mAutoBrightnessEnabled(false)
                 {
 
                     LOG(INFO) << ">>> INIT START <<<";
@@ -121,42 +121,43 @@ namespace android
                 // --- SETUP FUNCTIE (Draait 1x bij boot) ---
                 void SchuurmanVehicleHardware::initPwm()
                 {
-                    LOG(INFO) << "Initializing PWM Hardware (safe mode, do not write period) ...";
+                    LOG(INFO) << ">>> Initializing PWM Hardware <<<";
 
-                    // Ensure pwm1 exists (try export if necessary)
+                    // 1. Zorg dat de export er is én dat we permissies hebben
                     std::string chipBase = findPwmChipPath();
                     ensurePwmExported(chipBase);
 
-                    // Read kernel period (do NOT overwrite it)
+                    // 2. Lees huidige kernel settings
                     int kernelPeriod = readSysFsInt(mPathPwmPeriod);
-                    if (kernelPeriod <= 0)
-                    {
-                        LOG(ERROR) << "Could not read kernel PWM period from " << mPathPwmPeriod << ". Retrying...";
-                        // Retry a few times
-                        kernelPeriod = readSysFsInt(mPathPwmPeriod);
-                    }
 
                     if (kernelPeriod > 0)
                     {
                         mPwmPeriodNs = kernelPeriod;
-                        LOG(INFO) << "Kernel reports PWM period: " << mPwmPeriodNs << " ns. We will not change it.";
+                        LOG(INFO) << "Kernel reports existing PWM period: " << mPwmPeriodNs << " ns.";
                     }
                     else
                     {
-                        // Last resort: use a safe default but log that it's a guess
-                        mPwmPeriodNs = 30518; // fallback but we document it's a fallback
-                        LOG(ERROR) << "Failed to read PWM period. Using fallback: " << mPwmPeriodNs << " ns (unsafe).";
+                        // FIX: Als de kernel 0 of niks aangeeft, MOETEN we een waarde schrijven.
+                        // Een PWM met period 0 kan niet worden ge-enabled.
+                        mPwmPeriodNs = 30518; // ~32kHz (standaard backlight frequentie)
+                        LOG(WARNING) << "No valid PWM period found. Writing fallback: " << mPwmPeriodNs << " ns.";
+
+                        // Schrijf de fallback naar sysfs!
+                        writeSysFs(mPathPwmPeriod, std::to_string(mPwmPeriodNs));
                     }
 
-                    // Make sure PWM is disabled initially
+                    // 3. Reset state
+                    // Eerst disablen om glitches te voorkomen
                     writeSysFs(mPathPwmEnable, "0");
 
-                    // Initialize duty to 0 (safe)
+                    // Duty cycle op 0 zetten (veilig)
                     writeSysFs(mPathPwmDuty, "0");
 
-                    // Do NOT write period.
-                    // Finally enable if needed (we can leave it disabled until first writePwm if preferred)
+                    // 4. Enable
+                    // Dit zou nu moeten werken omdat de file schrijfbaar is (fix 1) en de period > 0 is (fix 2)
                     writeSysFs(mPathPwmEnable, "1");
+
+                    LOG(INFO) << "PWM Initialized and Enabled.";
                 }
 
                 // --- WRITE FUNCTIE (Draait bij elke slider move) ---
@@ -271,24 +272,37 @@ namespace android
 
                 void SchuurmanVehicleHardware::ensurePwmExported(const std::string &chipBase)
                 {
-                    std::string pwm1Path = chipBase + "/pwm1";
-                    if (fileExists(pwm1Path))
-                        return;
+                    // We gaan controleren op de 'enable' file, want daar moeten we straks in schrijven.
+                    std::string pwmEnablePath = chipBase + "/pwm1/enable";
                     std::string exportPath = chipBase + "/export";
-                    if (!fileExists(exportPath))
+
+                    // 1. Check of hij al bestaat EN schrijfbaar is
+                    if (access(pwmEnablePath.c_str(), W_OK) == 0)
                     {
-                        LOG(ERROR) << "PWM export not available at " << exportPath;
-                        return;
+                        return; // Alles is al klaar
                     }
-                    // Write '1' to export and wait a bit for the sysfs node to appear
-                    writeSysFs(exportPath, "1");
-                    for (int i = 0; i < 10; ++i)
+
+                    // 2. Als de map /pwm1 nog helemaal niet bestaat, moeten we exporteren
+                    std::string pwmDir = chipBase + "/pwm1";
+                    if (!std::filesystem::exists(pwmDir))
                     {
-                        if (fileExists(pwm1Path))
+                        LOG(INFO) << "Exporting PWM1 on " << chipBase;
+                        writeSysFs(exportPath, "1");
+                    }
+
+                    // 3. Wachtlus: Wacht tot het bestand bestaat EN schrijfbaar is.
+                    // Dit lost het probleem op dat je te snel probeert te schrijven na export.
+                    for (int i = 0; i < 20; ++i) // Max 1 seconde wachten (20 * 50ms)
+                    {
+                        if (access(pwmEnablePath.c_str(), W_OK) == 0)
+                        {
+                            LOG(INFO) << "PWM1 sysfs node is writable.";
                             return;
-                        std::this_thread::sleep_for(std::chrono::milliseconds(30));
+                        }
+                        std::this_thread::sleep_for(std::chrono::milliseconds(50));
                     }
-                    LOG(ERROR) << "pwm1 did not appear under " << chipBase << " after export";
+
+                    LOG(ERROR) << "PWM1 export time-out! File not writable or not created: " << pwmEnablePath;
                 }
 
                 static int readIntFileNoExcept(const std::string &path)
