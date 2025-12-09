@@ -10,6 +10,7 @@
 #include <regex>
 #include <iostream>
 #include <atomic>
+#include <cmath>
 
 #include <linux/gpio.h>
 
@@ -37,6 +38,9 @@ namespace android
                 using ::aidl::android::hardware::automotive::vehicle::VehiclePropertyAccess;
                 using ::aidl::android::hardware::automotive::vehicle::VehiclePropertyChangeMode;
 
+                // Vendor property id: adjust if you use a centralized property map
+                static const int32_t VENDOR_AUTO_BRIGHTNESS = 0x12000001;
+
                 static int64_t elapsedRealtimeNano()
                 {
                     auto now = std::chrono::steady_clock::now();
@@ -57,6 +61,7 @@ namespace android
                         ssize_t len = readlink(linkPath.c_str(), buf, sizeof(buf) - 1);
                         if (len != -1)
                         {
+                            // FIX: Hier stond een vreemd teken, moet null terminator zijn
                             buf[len] = '\0';
                             if (std::string(buf).find("19000") != std::string::npos)
                             {
@@ -71,8 +76,12 @@ namespace android
 
                 SchuurmanVehicleHardware::SchuurmanVehicleHardware()
                     : mCurrentGear(static_cast<int32_t>(VehicleGear::GEAR_PARK)),
-                      mCurrentBrightness(50),
-                      mShuttingDown(false)
+                    mCurrentBrightness(50),
+                    mShuttingDown(false),
+                    mSensorThreadRunning(false),
+                    mLightSensorPath("/data/vendor/sensors/bh1750_lux"),
+                    mSensorRawMax(100000),
+                    mAutoBrightnessEnabled(false)
                 {
 
                     LOG(INFO) << ">>> INIT START <<<";
@@ -90,6 +99,10 @@ namespace android
                     mGpioChipName = "/dev/" + android::base::GetProperty("ro.vendor.vehicle.gpio.chip", "gpiochip0");
                     mGpioLineOffset = android::base::GetIntProperty("ro.vendor.vehicle.gpio.offset", 16);
 
+                    // Start sensor thread (reads from daemon-provided file)
+                    mSensorThreadRunning.store(true);
+                    mSensorThread = std::thread(&SchuurmanVehicleHardware::sensorLoop, this);
+
                     // 4. Thread starten
                     mPollThread = std::thread(&SchuurmanVehicleHardware::pollInputs, this);
                 }
@@ -99,6 +112,10 @@ namespace android
                     mShuttingDown = true;
                     if (mPollThread.joinable())
                         mPollThread.join();
+
+                    mSensorThreadRunning.store(false);
+                    if (mSensorThread.joinable())
+                        mSensorThread.join();
                 }
 
                 // --- SETUP FUNCTIE (Draait 1x bij boot) ---
@@ -141,6 +158,7 @@ namespace android
                     // Finally enable if needed (we can leave it disabled until first writePwm if preferred)
                     writeSysFs(mPathPwmEnable, "1");
                 }
+
                 // --- WRITE FUNCTIE (Draait bij elke slider move) ---
                 void SchuurmanVehicleHardware::writePwm(int percentage)
                 {
@@ -172,7 +190,8 @@ namespace android
                     // debounce: only write if duty actually changed
                     static std::atomic<long long> s_lastDuty(-1);
                     long long last = s_lastDuty.load(std::memory_order_relaxed);
-                    if (last == dutyCalc) {
+                    if (last == dutyCalc)
+                    {
                         return;
                     }
                     s_lastDuty.store(dutyCalc, std::memory_order_relaxed);
@@ -212,9 +231,8 @@ namespace android
                             std::string s;
                             if (std::getline(file, s))
                             {
-                                // trim spaces/newline
-                                auto start = s.find_first_not_of(" \t\r\n");
-                                auto end = s.find_last_not_of(" \t\r\n");
+                                auto start = s.find_first_not_of(" \t\n\r");
+                                auto end = s.find_last_not_of(" \t\n\r");
                                 if (start == std::string::npos)
                                     return std::string();
                                 return s.substr(start, end - start + 1);
@@ -273,7 +291,74 @@ namespace android
                     LOG(ERROR) << "pwm1 did not appear under " << chipBase << " after export";
                 }
 
-                // --- STANDAARD VHAL BOILERPLATE (Niets veranderd) ---
+                static int readIntFileNoExcept(const std::string &path)
+                {
+                    std::ifstream f(path);
+                    if (!f)
+                        return -1;
+                    long v = -1;
+                    if (!(f >> v))
+                        return -1;
+                    return static_cast<int>(v);
+                }
+
+                void SchuurmanVehicleHardware::sensorLoop()
+                {
+                    double ema = -1.0;
+                    const double alpha = 0.25; // smoothing
+                    const int pollMs = 250;    // sensor poll interval
+
+                    while (mSensorThreadRunning.load())
+                    {
+                        int raw = readIntFileNoExcept(mLightSensorPath);
+                        if (raw >= 0)
+                        {
+                            if (ema < 0)
+                                ema = (double)raw;
+                            else
+                                ema = alpha * (double)raw + (1.0 - alpha) * ema;
+
+                            double maxLux = (double)mSensorRawMax;
+                            if (maxLux < 1.0)
+                                maxLux = 1.0;
+                            double percent = (log(1.0 + ema) / log(1.0 + maxLux)) * 100.0;
+                            if (percent < 0.0)
+                                percent = 0.0;
+                            if (percent > 100.0)
+                                percent = 100.0;
+
+                            int intPercent = static_cast<int>(percent + 0.5);
+
+                            if (mAutoBrightnessEnabled.load())
+                            {
+                                int last = mAutoTargetBrightness.load();
+                                if (last < 0 || abs(intPercent - last) >= 2)
+                                {
+                                    mAutoTargetBrightness.store(intPercent);
+
+                                    // apply to HW
+                                    writePwm(intPercent);
+
+                                    // update state & notify
+                                    mCurrentBrightness = intPercent;
+                                    if (mOnPropChange)
+                                    {
+                                        std::vector<VehiclePropValue> events;
+                                        VehiclePropValue v;
+                                        v.prop = static_cast<int32_t>(VehicleProperty::DISPLAY_BRIGHTNESS);
+                                        v.timestamp = elapsedRealtimeNano();
+                                        v.value.int32Values = {mCurrentBrightness};
+                                        events.push_back(v);
+                                        (*mOnPropChange)(events);
+                                    }
+                                }
+                            }
+                        }
+                        std::this_thread::sleep_for(std::chrono::milliseconds(pollMs));
+                    }
+                }
+
+                // --- STANDAARD VHAL BOILERPLATE (Aangepast voor auto-brightness property) ---
 
                 std::vector<VehiclePropConfig> SchuurmanVehicleHardware::getAllPropertyConfigs() const
                 {
@@ -290,6 +375,14 @@ namespace android
                     brightConfig.changeMode = VehiclePropertyChangeMode::ON_CHANGE;
                     brightConfig.areaConfigs = {{.minInt32Value = 0, .maxInt32Value = 100}};
                     configs.push_back(brightConfig);
+
+                    VehiclePropConfig autoConfig;
+                    autoConfig.prop = VENDOR_AUTO_BRIGHTNESS;
+                    autoConfig.access = VehiclePropertyAccess::READ_WRITE;
+                    autoConfig.changeMode = VehiclePropertyChangeMode::ON_CHANGE;
+                    autoConfig.areaConfigs = {{.minInt32Value = 0, .maxInt32Value = 1}};
+                    configs.push_back(autoConfig);
+
                     return configs;
                 }
 
@@ -324,6 +417,11 @@ namespace android
                         response->value.int32Values = {mCurrentBrightness};
                         return StatusCode::OK;
                     }
+                    else if (propId == VENDOR_AUTO_BRIGHTNESS)
+                    {
+                        response->value.int32Values = {mAutoBrightnessEnabled.load() ? 1 : 0};
+                        return StatusCode::OK;
+                    }
                     return StatusCode::INVALID_ARG;
                 }
 
@@ -350,9 +448,16 @@ namespace android
                         if (!request.value.int32Values.empty())
                         {
                             int brightness = request.value.int32Values[0];
-                            // Update PWM
-                            writePwm(brightness);
-                            mCurrentBrightness = brightness;
+                            // If auto mode enabled, ignore direct UI set to avoid fighting sensor
+                            if (mAutoBrightnessEnabled.load())
+                            {
+                                LOG(INFO) << "Ignoring manual brightness set because auto-brightness is enabled";
+                            }
+                            else
+                            {
+                                writePwm(brightness);
+                                mCurrentBrightness = brightness;
+                            }
                         }
                         if (updatedValue)
                         {
@@ -361,10 +466,44 @@ namespace android
                         }
                         return StatusCode::OK;
                     }
+                    else if (propId == VENDOR_AUTO_BRIGHTNESS)
+                    {
+                        if (!request.value.int32Values.empty())
+                        {
+                            int val = request.value.int32Values[0];
+                            bool enabled = (val != 0);
+                            bool prev = mAutoBrightnessEnabled.exchange(enabled);
+                            if (enabled && !prev)
+                            {
+                                LOG(INFO) << "Auto brightness enabled";
+                                mAutoTargetBrightness.store(mCurrentBrightness);
+                            }
+                            else if (!enabled && prev)
+                            {
+                                LOG(INFO) << "Auto brightness disabled";
+                            }
+                            if (updatedValue)
+                            {
+                                *updatedValue = request;
+                                updatedValue->timestamp = elapsedRealtimeNano();
+                            }
+                            if (mOnPropChange)
+                            {
+                                std::vector<VehiclePropValue> events;
+                                VehiclePropValue v;
+                                v.prop = VENDOR_AUTO_BRIGHTNESS;
+                                v.timestamp = elapsedRealtimeNano();
+                                v.value.int32Values = {enabled ? 1 : 0};
+                                events.push_back(v);
+                                (*mOnPropChange)(events);
+                            }
+                        }
+                        return StatusCode::OK;
+                    }
                     return StatusCode::ACCESS_DENIED;
                 }
 
-                // GPIO boilerplate
+                // GPIO boilerplate unchanged
                 int SchuurmanVehicleHardware::readGpio()
                 {
                     int fd = open(mGpioChipName.c_str(), O_RDWR);

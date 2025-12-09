@@ -56,9 +56,21 @@ namespace android
                     // De opgeslagen periode (uitgelezen uit kernel)
                     int mPwmPeriodNs;
 
+                    // Threads & State
                     std::thread mPollThread;
                     std::atomic<bool> mShuttingDown;
 
+                    // Sensor Threading
+                    std::thread mSensorThread;
+                    std::atomic<bool> mSensorThreadRunning;
+                    std::string mLightSensorPath;
+                    int mSensorRawMax;
+                    
+                    // Auto Brightness Logic
+                    std::atomic<bool> mAutoBrightnessEnabled;
+                    std::atomic<int> mAutoTargetBrightness;
+
+                    // PWM Paden
                     std::string mPathPwmDuty;
                     std::string mPathPwmEnable;
                     std::string mPathPwmPeriod;
@@ -70,17 +82,16 @@ namespace android
                     std::unique_ptr<const PropertyChangeCallback> mOnPropChange;
                     std::unique_ptr<const PropertySetErrorCallback> mOnSetError;
 
-                    // --- FIX: Geen argumenten meer nodig ---
                     void initPwm();
-
                     void writePwm(int percentage);
                     int readGpio();
                     void pollInputs();
+                    
+                    // Nieuwe functie toegevoegd voor sensor logic
+                    void sensorLoop();
 
                     // Helpers
-                    // DEZE REGEL IS TOEGEVOEGD OM DE ERROR TE FIXEN:
                     void ensurePwmExported(const std::string &chipBase);
-
                     void writeSysFs(const std::string &path, const std::string &val);
                     int readSysFsInt(const std::string &path);
 

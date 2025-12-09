@@ -2,7 +2,6 @@ package {
     default_applicable_licenses: ["Android-Apache-2.0"],
 }
 
-// 1. De binary service
 cc_binary {
     name: "android.hardware.automotive.vehicle@schuurman-service",
     vendor: true,
@@ -14,7 +13,6 @@ cc_binary {
         "VehicleHalDefaults",
     ],
 
-    // Dit zorgt dat het script wordt meegeinstalleerd als je deze binary bouwt
     required: [
         "init.vehicle.sh",
     ],
@@ -46,6 +44,24 @@ cc_binary {
     cflags: [
         "-DLOG_TAG=\"SchuurmanVehicleHal\"",
     ]
+}
+
+cc_binary {
+    name: "bh1750d",
+    vendor: true,
+    srcs: [
+        "bh1750d.cpp",
+        "bh1750_i2c.cpp",
+        "bh1750_main.cpp",
+    ],
+    shared_libs: [
+        "liblog",
+        "libbase",
+        "libandroid",
+        "libutils",
+    ],
+    cflags: ["-Wall", "-Wextra", "-fno-exceptions"],
+    init_rc: ["init.bh1750d.rc"],
 }
 
 sh_binary {
