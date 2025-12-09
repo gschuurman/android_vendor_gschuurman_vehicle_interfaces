@@ -9,6 +9,7 @@
 #include <filesystem>
 #include <regex>
 #include <iostream>
+#include <atomic>
 
 #include <linux/gpio.h>
 
@@ -154,30 +155,33 @@ namespace android
 
                     // ALWAYS read the current kernel period before computing duty
                     int kernelPeriod = readSysFsInt(mPathPwmPeriod);
-                    if (kernelPeriod > 0)
+                    if (kernelPeriod <= 0)
                     {
-                        mPwmPeriodNs = kernelPeriod;
+                        LOG(WARNING) << "writePwm: invalid kernel period read; skipping duty write to avoid flicker";
+                        return; // do not attempt to write with invalid period (prevents flicker)
                     }
-                    else
-                    {
-                        LOG(ERROR) << "Failed to read PWM period on writePwm(); keeping previous period " << mPwmPeriodNs;
-                    }
+
+                    mPwmPeriodNs = kernelPeriod;
 
                     long long dutyCalc = ((long long)inverted * (long long)mPwmPeriodNs) / 100;
                     if (dutyCalc < 0)
                         dutyCalc = 0;
                     if (dutyCalc > mPwmPeriodNs)
                         dutyCalc = mPwmPeriodNs;
+
+                    // debounce: only write if duty actually changed
+                    static std::atomic<long long> s_lastDuty(-1);
+                    long long last = s_lastDuty.load(std::memory_order_relaxed);
+                    if (last == dutyCalc) {
+                        return;
+                    }
+                    s_lastDuty.store(dutyCalc, std::memory_order_relaxed);
+
                     std::string dutyStr = std::to_string(static_cast<long long>(dutyCalc));
 
-                    // Disable -> write duty -> enable
-                    writeSysFs(mPathPwmEnable, "0");
-                    std::this_thread::sleep_for(std::chrono::milliseconds(5));
-
+                    // IMPORTANT: Do NOT toggle enable here. Writing duty while enabled avoids visible flicker.
+                    // Simply write the new duty value.
                     writeSysFs(mPathPwmDuty, dutyStr);
-                    std::this_thread::sleep_for(std::chrono::milliseconds(2));
-
-                    writeSysFs(mPathPwmEnable, "1");
                 }
 
                 void SchuurmanVehicleHardware::writeSysFs(const std::string &path, const std::string &val)
