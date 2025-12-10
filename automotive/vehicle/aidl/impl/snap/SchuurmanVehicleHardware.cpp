@@ -25,6 +25,8 @@
 #include <aidl/android/hardware/automotive/vehicle/VehiclePropertyAccess.h>
 #include <aidl/android/hardware/automotive/vehicle/VehiclePropertyChangeMode.h>
 
+static constexpr int32_t PWM_PERIOD_NS = 30518;
+
 namespace android
 {
     namespace hardware
@@ -128,36 +130,28 @@ namespace android
                     ensurePwmExported(chipBase);
 
                     // 2. Lees huidige kernel settings
-                    int kernelPeriod = readSysFsInt(mPathPwmPeriod);
-
-                    if (kernelPeriod > 0)
-                    {
-                        mPwmPeriodNs = kernelPeriod;
-                        LOG(INFO) << "Kernel reports existing PWM period: " << mPwmPeriodNs << " ns.";
-                    }
-                    else
-                    {
-                        // FIX: Als de kernel 0 of niks aangeeft, MOETEN we een waarde schrijven.
-                        // Een PWM met period 0 kan niet worden ge-enabled.
-                        mPwmPeriodNs = 30518; // ~32kHz (standaard backlight frequentie)
-                        LOG(WARNING) << "No valid PWM period found. Writing fallback: " << mPwmPeriodNs << " ns.";
-
-                        // Schrijf de fallback naar sysfs!
-                        writeSysFs(mPathPwmPeriod, std::to_string(mPwmPeriodNs));
-                    }
+                    writeSysFs(mPathPwmPeriod, std::to_string(PWM_PERIOD_NS));
 
                     // 3. Reset state
                     // Eerst disablen om glitches te voorkomen
                     writeSysFs(mPathPwmEnable, "0");
 
+                    long long bootDuty = PWM_PERIOD_NS / 2;
+
                     // Duty cycle op 0 zetten (veilig)
-                    writeSysFs(mPathPwmDuty, "0");
+                    writeSysFs(mPathPwmDuty, std::to_string(bootDuty));
 
                     // 4. Enable
                     // Dit zou nu moeten werken omdat de file schrijfbaar is (fix 1) en de period > 0 is (fix 2)
                     writeSysFs(mPathPwmEnable, "1");
 
-                    LOG(INFO) << "PWM Initialized and Enabled.";
+                    int enabled = readSysFsInt(mPathPwmEnable);
+                    if (enabled != 1) {
+                        LOG(ERROR) << "PWM Failed to enable";
+                    }
+                    else {
+                        LOG(INFO) << "PWM Initialized and Enabled.";
+                    }
                 }
 
                 // --- WRITE FUNCTIE (Draait bij elke slider move) ---
@@ -174,19 +168,17 @@ namespace android
 
                     // ALWAYS read the current kernel period before computing duty
                     int kernelPeriod = readSysFsInt(mPathPwmPeriod);
-                    if (kernelPeriod <= 0)
+                    if (kernelPeriod != PWM_PERIOD_NS)
                     {
-                        LOG(WARNING) << "writePwm: invalid kernel period read; skipping duty write to avoid flicker";
-                        return; // do not attempt to write with invalid period (prevents flicker)
+                        LOG(WARNING) << "writePwm: unexpected kernel period, skipping duty update to avoid flicker";
+                        return;
                     }
 
-                    mPwmPeriodNs = kernelPeriod;
-
-                    long long dutyCalc = ((long long)inverted * (long long)mPwmPeriodNs) / 100;
+                    long long dutyCalc = ((long long)inverted * (long long)PWM_PERIOD_NS) / 100;
                     if (dutyCalc < 0)
                         dutyCalc = 0;
-                    if (dutyCalc > mPwmPeriodNs)
-                        dutyCalc = mPwmPeriodNs;
+                    if (dutyCalc > PWM_PERIOD_NS)
+                        dutyCalc = PWM_PERIOD_NS;
 
                     // debounce: only write if duty actually changed
                     static std::atomic<long long> s_lastDuty(-1);
