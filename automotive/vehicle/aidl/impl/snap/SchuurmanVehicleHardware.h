@@ -53,9 +53,6 @@ namespace android
                     int32_t mCurrentGear;
                     int32_t mCurrentBrightness;
 
-                    // De opgeslagen periode (uitgelezen uit kernel)
-                    int mPwmPeriodNs;
-
                     // Threads & State
                     std::thread mPollThread;
                     std::atomic<bool> mShuttingDown;
@@ -71,6 +68,7 @@ namespace android
                     std::atomic<int> mAutoTargetBrightness;
 
                     // PWM Paden
+                    std::string mPwmChipBase;
                     std::string mPathPwmDuty;
                     std::string mPathPwmEnable;
                     std::string mPathPwmPeriod;
