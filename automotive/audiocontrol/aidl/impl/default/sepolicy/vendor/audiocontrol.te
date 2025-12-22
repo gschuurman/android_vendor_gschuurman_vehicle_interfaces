@@ -1,0 +1,7 @@
+type audiocontrol_hal, domain;
+type audiocontrol_hal_exec, exec_type, vendor_file_type, file_type;
+
+init_daemon_domain(audiocontrol_hal)
+
+binder_use(audiocontrol_hal)
+binder_call(audiocontrol_hal, hal_audio_default)
