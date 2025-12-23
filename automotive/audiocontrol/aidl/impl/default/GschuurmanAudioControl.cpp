@@ -1,57 +1,86 @@
 #include "GschuurmanAudioControl.h"
 
 #include <android-base/logging.h>
-#include <android/binder_manager.h>
+#include <media/AudioSystem.h>
+#include <utils/String8.h>
+
 #include <algorithm>
 
-using aidl::android::hardware::audio::core::IModule;
-using aidl::android::media::audio::common::Float;
-using aidl::android::media::audio::common::VendorParameter;
+using ::android::AudioSystem;
+using ::android::String8;
+using ::android::status_t;
 
-GschuurmanAudioControl::GschuurmanAudioControl() {
-    const char* candidates[] = {
-        "android.hardware.audio.core.IModule/primary",
-        "android.hardware.audio.core.IModule/default",
-    };
+namespace aidl::android::hardware::automotive::audiocontrol::impl {
 
-    for (const char* name : candidates) {
-        if (AServiceManager_isDeclared(name)) {
-            ndk::SpAIBinder binder(AServiceManager_waitForService(name));
-            mPrimary = IModule::fromBinder(binder);
-            if (mPrimary) {
-                LOG(INFO) << "Connected to Audio HAL module: " << name;
-                break;
-            }
-        }
-    }
+void GschuurmanAudioControl::sendParameter(const char* key, float value) {
+    // [FIX] AudioSystem expects "key=value" format.
+    String8 params;
+    params.appendFormat("%s=%f", key, value); // Removed .3 precision to ensure raw float is passed if needed, or keep %.3f
 
-    if (!mPrimary) {
-        LOG(ERROR) << "Failed to connect to Audio HAL module";
+    // [FIX] Call setParameters. 
+    // Note: This blocks until AudioFlinger processes it.
+    status_t st = AudioSystem::setParameters(0, params); // 0 = ioHandle (default)
+    
+    if (st != ::android::OK) {
+        LOG(ERROR) << "AudioSystem::setParameters failed: " << params.c_str() << " status=" << st;
+    } else {
+        LOG(INFO) << "AudioSystem::setParameters success: " << params.c_str();
     }
 }
 
-void GschuurmanAudioControl::sendToAudioHal(
-        const std::string& key, float value) {
-    if (!mPrimary) return;
-
-    VendorParameter param;
-    param.id = key;
-    param.ext.set<Float>(Float{value});
-
-    std::vector<VendorParameter> params{param};
-    mPrimary->setVendorParameters(params, false);
+::ndk::ScopedAStatus GschuurmanAudioControl::setBalanceTowardRight(float value) {
+    LOG(INFO) << "setBalanceTowardRight: " << value;
+    float clamped = std::clamp(value, -1.0f, 1.0f);
+    sendParameter("car.balance", clamped);
+    return ::ndk::ScopedAStatus::ok();
 }
 
-ndk::ScopedAStatus
-GschuurmanAudioControl::setBalanceTowardRight(float value) {
-    value = std::clamp(value, -1.0f, 1.0f);
-    sendToAudioHal("car.balance", value);
-    return ndk::ScopedAStatus::ok();
+::ndk::ScopedAStatus GschuurmanAudioControl::setFadeTowardFront(float value) {
+    LOG(INFO) << "setFadeTowardFront: " << value;
+    float clamped = std::clamp(value, -1.0f, 1.0f);
+    sendParameter("car.fader", clamped);
+    return ::ndk::ScopedAStatus::ok();
 }
 
-ndk::ScopedAStatus
-GschuurmanAudioControl::setFadeTowardFront(float value) {
-    value = std::clamp(value, -1.0f, 1.0f);
-    sendToAudioHal("car.fader", value);
-    return ndk::ScopedAStatus::ok();
+// ... Keep the rest of the file (callbacks) as is ...
+// Just ensure you include the necessary headers for the types used in callbacks.
+
+::ndk::ScopedAStatus GschuurmanAudioControl::onAudioFocusChange(
+        const std::string&, int32_t, AudioFocusChange) {
+    return ::ndk::ScopedAStatus::ok();
 }
+
+::ndk::ScopedAStatus GschuurmanAudioControl::onDevicesToDuckChange(
+        const std::vector<DuckingInfo>&) {
+    return ::ndk::ScopedAStatus::ok();
+}
+
+::ndk::ScopedAStatus GschuurmanAudioControl::onDevicesToMuteChange(
+        const std::vector<MutingInfo>&) {
+    return ::ndk::ScopedAStatus::ok();
+}
+
+::ndk::ScopedAStatus GschuurmanAudioControl::registerFocusListener(
+        const std::shared_ptr<IFocusListener>&) {
+    return ::ndk::ScopedAStatus::ok();
+}
+
+::ndk::ScopedAStatus GschuurmanAudioControl::onAudioFocusChangeWithMetaData(
+        const ::aidl::android::hardware::audio::common::PlaybackTrackMetadata&,
+        int32_t,
+        AudioFocusChange) {
+    return ::ndk::ScopedAStatus::ok();
+}
+
+::ndk::ScopedAStatus GschuurmanAudioControl::setAudioDeviceGainsChanged(
+        const std::vector<Reasons>&,
+        const std::vector<AudioGainConfigInfo>&) {
+    return ::ndk::ScopedAStatus::ok();
+}
+
+::ndk::ScopedAStatus GschuurmanAudioControl::registerGainCallback(
+        const std::shared_ptr<IAudioGainCallback>&) {
+    return ::ndk::ScopedAStatus::ok();
+}
+
+}  // namespace aidl::android::hardware::automotive::audiocontrol::impl

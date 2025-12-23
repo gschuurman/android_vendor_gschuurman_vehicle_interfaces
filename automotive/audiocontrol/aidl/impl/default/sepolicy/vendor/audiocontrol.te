@@ -1,7 +1,15 @@
-type audiocontrol_hal, domain;
-type audiocontrol_hal_exec, exec_type, vendor_file_type, file_type;
+# Define a new domain for our service, marking it as 'coredomain' because it lives in system_ext
+type audiocontrol_service, domain, coredomain;
+type audiocontrol_service_exec, system_file_type, exec_type, file_type;
 
-init_daemon_domain(audiocontrol_hal)
+# Allow init to launch it and transition to this domain
+init_daemon_domain(audiocontrol_service)
 
-binder_use(audiocontrol_hal)
-binder_call(audiocontrol_hal, hal_audio_default)
+# Allow it to register the AudioControl HAL interface with ServiceManager
+# Note: 'hal_audiocontrol_service' is the pre-defined label for the IAudioControl interface
+add_service(audiocontrol_service, hal_audiocontrol_service)
+
+# Allow it to talk to Binder and AudioFlinger (since you use AudioSystem)
+binder_use(audiocontrol_service)
+allow audiocontrol_service audioserver_service:service_manager find;
+allow audiocontrol_service audioserver:binder call;

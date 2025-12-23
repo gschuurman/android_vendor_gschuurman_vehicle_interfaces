@@ -1,5 +1,5 @@
-service vendor.audiocontrol-hal /vendor/bin/hw/android.hardware.automotive.audiocontrol-service
+service vendor.audiocontrol-hal /system_ext/bin/hw/android.hardware.automotive.audiocontrol-service
     class hal
     user system
-    group system
+    group system audio
     oneshot

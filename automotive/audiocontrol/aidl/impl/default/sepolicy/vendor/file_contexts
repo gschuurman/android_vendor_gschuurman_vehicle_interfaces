@@ -1,2 +1,2 @@
-/vendor/bin/hw/android.hardware.automotive.audiocontrol-service
-    u:object_r:audiocontrol_hal_exec:s0
+# Map the binary path to the execution label
+/system_ext/bin/hw/android\.hardware\.automotive\.audiocontrol-service   u:object_r:audiocontrol_service_exec:s0

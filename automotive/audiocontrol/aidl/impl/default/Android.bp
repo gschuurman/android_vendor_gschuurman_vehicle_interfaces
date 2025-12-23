@@ -1,6 +1,8 @@
 cc_binary {
     name: "android.hardware.automotive.audiocontrol-service",
-    vendor: true,
+    // [FIX] Must be system_ext to access AudioSystem (libaudioclient)
+    // Vendor modules cannot link against hidden system APIs.
+    system_ext_specific: true,
     relative_install_path: "hw",
 
     srcs: [
@@ -12,10 +14,22 @@ cc_binary {
         "libbase",
         "liblog",
         "libbinder_ndk",
-        "android.hardware.automotive.audiocontrol-V1-ndk",
-        "android.hardware.audio.core-V1-ndk",
+        "libbinder", // [FIX] Required for IPC with AudioFlinger
+        "libutils",  // [FIX] Required for String8
+        "libcutils", 
+        "libaudioclient", // The library containing AudioSystem
+        
+        // Ensure this matches your AOSP version (V1, V2, or V3)
+        "android.hardware.automotive.audiocontrol-V2-ndk",
     ],
 
     init_rc: ["android.hardware.automotive.audiocontrol-service.rc"],
     vintf_fragments: ["android.hardware.automotive.audiocontrol-service.xml"],
+
+    cflags: [
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "-Wno-unused-parameter", // [Optional] Suppress unused param errors for empty callbacks
+    ],
 }

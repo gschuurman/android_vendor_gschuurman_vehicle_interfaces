@@ -1,5 +1,4 @@
-<manifest version="1.0" type="device">
-    <hal format="aidl">
+<manifest version="1.0" type="framework"> <hal format="aidl">
         <name>android.hardware.automotive.audiocontrol</name>
         <interface>
             <name>IAudioControl</name>
