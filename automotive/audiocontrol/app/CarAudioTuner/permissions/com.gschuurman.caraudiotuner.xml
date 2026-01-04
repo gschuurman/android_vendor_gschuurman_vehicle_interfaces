@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<permissions>
+    <privapp-permissions package="com.gschuurman.caraudiotuner">
+        <permission name="android.car.permission.CAR_CONTROL_AUDIO_VOLUME"/>
+        <permission name="android.car.permission.CAR_CONTROL_AUDIO_SETTINGS"/>
+    </privapp-permissions>
+</permissions>

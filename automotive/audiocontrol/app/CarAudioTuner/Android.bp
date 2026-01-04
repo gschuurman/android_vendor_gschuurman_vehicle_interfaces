@@ -1,0 +1,33 @@
+package {
+    default_applicable_licenses: ["Android-Apache-2.0"],
+}
+
+android_app {
+    name: "CarAudioTuner",
+    srcs: ["src/**/*.java"],
+    resource_dirs: ["res"],
+    
+    // Required to talk to CarService APIs
+    platform_apis: true,
+    certificate: "platform",
+    privileged: true,
+
+    static_libs: [
+        "androidx.appcompat_appcompat",
+        "androidx.preference_preference",
+    ],
+
+    libs: [
+        "android.car-system-stubs",
+    ],
+
+    // Install the permission allowlist xml
+    required: ["allowed_privapp_com.gschuurman.caraudiotuner"],
+}
+
+prebuilt_etc {
+    name: "allowed_privapp_com.gschuurman.caraudiotuner",
+    sub_dir: "permissions",
+    src: "permissions/com.gschuurman.caraudiotuner.xml",
+    filename_from_src: true,
+}

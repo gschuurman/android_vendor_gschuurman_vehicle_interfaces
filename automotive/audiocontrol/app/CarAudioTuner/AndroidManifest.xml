@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.gschuurman.caraudiotuner">
+
+    <uses-permission android:name="android.car.permission.CAR_CONTROL_AUDIO_VOLUME"/>
+    <uses-permission android:name="android.car.permission.CAR_CONTROL_AUDIO_SETTINGS"/>
+
+    <application
+        android:label="Audio Tuner"
+        android:theme="@android:style/Theme.DeviceDefault">
+
+        <activity
+            android:name=".BalanceFaderActivity"
+            android:label="Balance &amp; Fader"
+            android:exported="true"
+            android:launchMode="singleTop">
+
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+
+            <intent-filter>
+                <action android:name="com.android.settings.action.EXTRA_SETTINGS" />
+                <category android:name="com.android.settings.category.ia.sound" />
+            </intent-filter>
+
+            <meta-data
+                android:name="com.android.settings.summary"
+                android:value="Adjust speaker distribution" />
+            <meta-data android:name="com.android.settings.icon_tintable" android:value="true"/>
+        </activity>
+    </application>
+</manifest>
