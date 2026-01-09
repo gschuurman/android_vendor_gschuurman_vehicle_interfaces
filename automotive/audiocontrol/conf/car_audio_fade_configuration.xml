@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<carAudioFadeConfiguration version="2">
+    <fadeConfigs>
+        <fadeConfig name="default_fade" isDefault="true">
+            <audioAttributes>
+                <usage value="AUDIO_USAGE_MEDIA"/>
+            </audioAttributes>
+            <fadeState name="fade_unavailable"/>
+        </fadeConfig>
+    </fadeConfigs>
+</carAudioFadeConfiguration>

@@ -1,0 +1,7 @@
+runtime_resource_overlay {
+    name: "GschuurmanAudioTunerOverlay",
+    resource_dirs: ["res"],
+    target_package_name: "com.android.car.settings",
+    sdk_version: "current",
+    product_specific: true,
+}

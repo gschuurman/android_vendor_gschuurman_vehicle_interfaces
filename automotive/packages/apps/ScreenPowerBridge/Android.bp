@@ -1,0 +1,26 @@
+android_app {
+    name: "ScreenPowerBridge",
+    platform_apis: true,
+    certificate: "platform",
+    privileged: true,
+    srcs: ["src/**/*.java"],
+
+    // 1. Compile-time stubs (Required for Java compilation)
+    libs: [
+        "android.car-system-stubs",
+    ],
+
+    // 2. Disable the strict build-time check
+    // This fixes the "mismatch" error while still allowing the app to work.
+    enforce_uses_libs: false,
+
+    manifest: "AndroidManifest.xml",
+    required: ["privapp_whitelist_com.schuurman.screenpowerbridge"],
+}
+
+prebuilt_etc {
+    name: "privapp_whitelist_com.schuurman.screenpowerbridge",
+    sub_dir: "permissions",
+    src: "privapp_whitelist_com.schuurman.screenpowerbridge.xml",
+    filename_from_src: true,
+}

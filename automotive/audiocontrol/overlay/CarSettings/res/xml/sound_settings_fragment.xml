@@ -1,0 +1,50 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:settings="http://schemas.android.com/apk/res-auto"
+    android:title="@string/sound_settings_title"
+    android:key="@string/pk_sound_settings_screen">
+
+    <com.android.car.settings.sound.VolumeSeekBarPreference
+        android:key="@string/pk_audio_volume_group_music"
+        android:title="@string/audio_volume_group_music"
+        android:icon="@drawable/ic_music_note"
+        settings:controller="com.android.car.settings.sound.VolumeSettingsPreferenceController"/>
+
+    <com.android.car.settings.sound.VolumeSeekBarPreference
+        android:key="@string/pk_audio_volume_group_navigation"
+        android:title="@string/audio_volume_group_navigation"
+        android:icon="@drawable/ic_navigation"
+        settings:controller="com.android.car.settings.sound.VolumeSettingsPreferenceController"/>
+
+    <com.android.car.settings.sound.VolumeSeekBarPreference
+        android:key="@string/pk_audio_volume_group_voice_command"
+        android:title="@string/audio_volume_group_voice_command"
+        android:icon="@drawable/ic_voice_activation"
+        settings:controller="com.android.car.settings.sound.VolumeSettingsPreferenceController"/>
+
+    <com.android.car.settings.sound.VolumeSeekBarPreference
+        android:key="@string/pk_audio_volume_group_call_ring"
+        android:title="@string/audio_volume_group_call_ring"
+        android:icon="@drawable/ic_phone"
+        settings:controller="com.android.car.settings.sound.VolumeSettingsPreferenceController"/>
+
+    <com.android.car.settings.sound.VolumeSeekBarPreference
+        android:key="@string/pk_audio_volume_group_system"
+        android:title="@string/audio_volume_group_system"
+        android:icon="@drawable/ic_settings_sound"
+        settings:controller="com.android.car.settings.sound.VolumeSettingsPreferenceController"/>
+
+    <PreferenceCategory
+        android:title="Advanced Audio"
+        android:key="oem_audio_category">
+
+        <Preference
+            android:title="Balance &amp; Fader"
+            android:summary="Adjust speaker distribution">
+            <intent
+                android:action="android.intent.action.MAIN"
+                android:targetPackage="com.gschuurman.caraudiotuner"
+                android:targetClass="com.gschuurman.caraudiotuner.BalanceFaderActivity"/>
+        </Preference>
+    </PreferenceCategory>
+
+</PreferenceScreen>
