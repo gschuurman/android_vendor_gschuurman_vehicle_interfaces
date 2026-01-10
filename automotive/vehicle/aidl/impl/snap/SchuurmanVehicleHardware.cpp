@@ -1,27 +1,13 @@
-/*
- * Copyright (C) 2021 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 #include "SchuurmanVehicleHardware.h"
 
 #include <aidl/android/hardware/automotive/vehicle/VehicleGear.h>
 #include <aidl/android/hardware/automotive/vehicle/VehicleProperty.h>
 #include <aidl/android/hardware/automotive/vehicle/VehiclePropertyAccess.h>
 #include <aidl/android/hardware/automotive/vehicle/VehiclePropertyChangeMode.h>
+
 #include <android-base/logging.h>
 #include <android-base/properties.h>
+
 #include <errno.h>
 #include <fcntl.h>
 #include <linux/gpio.h>
@@ -29,13 +15,10 @@
 #include <sys/ioctl.h>
 #include <unistd.h>
 
-#include <atomic>
 #include <chrono>
 #include <cmath>
 #include <filesystem>
 #include <fstream>
-#include <iostream>
-#include <regex>
 #include <thread>
 #include <vector>
 
@@ -51,14 +34,14 @@ using ::aidl::android::hardware::automotive::vehicle::VehiclePropertyChangeMode;
 
 // Vendor Properties
 static const int32_t VENDOR_AUTO_BRIGHTNESS = 0x12000001;
-// New dedicated property for Screen Power (GPIO 53)
-static const int32_t VENDOR_SCREEN_POWER = 0x21400555;
+static const int32_t VENDOR_SCREEN_POWER   = 0x21400555;
 
 // Constants
 static constexpr int32_t PWM_PERIOD_NS = 30518;
+static constexpr int32_t GLOBAL_AREA_ID = 0;
 
 // Helper: Find PWM Chip 19000 (VIM3 specific)
-std::string findPwmChipPath() {
+static std::string findPwmChipPath() {
     std::string baseDir = "/sys/class/pwm/";
     for (int i = 0; i < 10; i++) {
         std::string chipName = "pwmchip" + std::to_string(i);
@@ -127,7 +110,6 @@ SchuurmanVehicleHardware::SchuurmanVehicleHardware()
     mPathPwmDuty = mPwmChipBase + "/pwm1/duty_cycle";
     mPathPwmEnable = mPwmChipBase + "/pwm1/enable";
     mPathPwmPeriod = mPwmChipBase + "/pwm1/period";
-
     initPwm();
 
     // 2. GPIO Setup
@@ -136,17 +118,75 @@ SchuurmanVehicleHardware::SchuurmanVehicleHardware()
     // 3. Threads
     mSensorThreadRunning.store(true);
     mSensorThread = std::thread(&SchuurmanVehicleHardware::sensorLoop, this);
+
     mPollThread = std::thread(&SchuurmanVehicleHardware::pollInputs, this);
 }
 
 SchuurmanVehicleHardware::~SchuurmanVehicleHardware() {
-    mShuttingDown = true;
+    mShuttingDown.store(true);
     if (mPollThread.joinable()) mPollThread.join();
 
     mSensorThreadRunning.store(false);
     if (mSensorThread.joinable()) mSensorThread.join();
 
     if (mBacklightEnableFd >= 0) close(mBacklightEnableFd);
+}
+
+void SchuurmanVehicleHardware::emitPropChange(const VehiclePropValue& v) {
+    std::lock_guard<std::mutex> lk(mCallbackMutex);
+    if (!mOnPropChange) return;
+    std::vector<VehiclePropValue> events;
+    events.push_back(v);
+    (*mOnPropChange)(events);
+}
+
+void SchuurmanVehicleHardware::emitInitialStatesLocked() {
+    // mCallbackMutex must be held by caller
+    if (!mOnPropChange) return;
+
+    std::vector<VehiclePropValue> events;
+
+    // Gear
+    {
+        VehiclePropValue v;
+        v.prop = static_cast<int32_t>(VehicleProperty::GEAR_SELECTION);
+        v.areaId = GLOBAL_AREA_ID;
+        v.timestamp = elapsedRealtimeNano();
+        v.value.int32Values = {mCurrentGear.load()};
+        events.push_back(v);
+    }
+
+    // Brightness
+    {
+        VehiclePropValue v;
+        v.prop = static_cast<int32_t>(VehicleProperty::DISPLAY_BRIGHTNESS);
+        v.areaId = GLOBAL_AREA_ID;
+        v.timestamp = elapsedRealtimeNano();
+        v.value.int32Values = {mCurrentBrightness.load()};
+        events.push_back(v);
+    }
+
+    // Auto brightness
+    {
+        VehiclePropValue v;
+        v.prop = VENDOR_AUTO_BRIGHTNESS;
+        v.areaId = GLOBAL_AREA_ID;
+        v.timestamp = elapsedRealtimeNano();
+        v.value.int32Values = {mAutoBrightnessEnabled.load() ? 1 : 0};
+        events.push_back(v);
+    }
+
+    // Screen power
+    {
+        VehiclePropValue v;
+        v.prop = VENDOR_SCREEN_POWER;
+        v.areaId = GLOBAL_AREA_ID;
+        v.timestamp = elapsedRealtimeNano();
+        v.value.int32Values = {mScreenOn.load() ? 1 : 0};
+        events.push_back(v);
+    }
+
+    (*mOnPropChange)(events);
 }
 
 void SchuurmanVehicleHardware::initGpios() {
@@ -163,7 +203,8 @@ void SchuurmanVehicleHardware::initGpios() {
 
     LOG(INFO) << "GPIO Config: Chip=" << mGpioChipName
               << " BL_Enable=" << mBacklightEnableGpioOffset
-              << " BrightnessRef=" << mBrightnessGpioOffset << " Gear=" << mGearGpioOffset;
+              << " BrightnessRef=" << mBrightnessGpioOffset
+              << " Gear=" << mGearGpioOffset;
 
     int chipFd = open(mGpioChipName.c_str(), O_RDWR);
     if (chipFd < 0) {
@@ -181,8 +222,8 @@ void SchuurmanVehicleHardware::initGpios() {
 
     int ret = ioctl(chipFd, GPIO_GET_LINEHANDLE_IOCTL, &req);
     if (ret < 0) {
-        LOG(ERROR) << "Failed to request Backlight GPIO line " << mBacklightEnableGpioOffset << ": "
-                   << strerror(errno);
+        LOG(ERROR) << "Failed to request Backlight GPIO line " << mBacklightEnableGpioOffset
+                   << ": " << strerror(errno);
     } else {
         mBacklightEnableFd = req.fd;
         mScreenOn.store(true);
@@ -227,7 +268,11 @@ int SchuurmanVehicleHardware::readGearGpio() {
 
     struct gpiohandle_data data;
     memset(&data, 0, sizeof(data));
-    ioctl(req.fd, GPIOHANDLE_GET_LINE_VALUES_IOCTL, &data);
+    if (ioctl(req.fd, GPIOHANDLE_GET_LINE_VALUES_IOCTL, &data) < 0) {
+        close(req.fd);
+        close(fd);
+        return -1;
+    }
 
     close(req.fd);
     close(fd);
@@ -258,8 +303,7 @@ void SchuurmanVehicleHardware::writePwm(int percentage) {
     if (percentage > 100) percentage = 100;
 
     int inverted = 100 - percentage;
-    long long dutyCalc = ((long long)inverted * (long long)PWM_PERIOD_NS) / 100;
-
+    long long dutyCalc = (static_cast<long long>(inverted) * static_cast<long long>(PWM_PERIOD_NS)) / 100;
     writeSysFs(mPathPwmDuty, std::to_string(dutyCalc));
 }
 
@@ -280,7 +324,9 @@ void SchuurmanVehicleHardware::writeSysFs(const std::string& path, const std::st
         LOG(ERROR) << "Failed to open " << path << ": " << strerror(errno);
         return;
     }
-    write(fd, val.c_str(), val.size());
+    if (write(fd, val.c_str(), val.size()) < 0) {
+        LOG(ERROR) << "Failed to write " << path << ": " << strerror(errno);
+    }
     fsync(fd);
     close(fd);
 }
@@ -298,13 +344,14 @@ StatusCode SchuurmanVehicleHardware::setValueInternal(const VehiclePropValue& re
             int brightness = request.value.int32Values[0];
             if (!mAutoBrightnessEnabled.load()) {
                 writePwm(brightness);
-                mCurrentBrightness = brightness;
+                mCurrentBrightness.store(brightness);
             } else {
                 LOG(INFO) << "Manual brightness set ignored (Auto Enabled)";
             }
         }
         if (updatedValue) {
             *updatedValue = request;
+            updatedValue->areaId = GLOBAL_AREA_ID;
             updatedValue->timestamp = elapsedRealtimeNano();
         }
         return StatusCode::OK;
@@ -313,18 +360,15 @@ StatusCode SchuurmanVehicleHardware::setValueInternal(const VehiclePropValue& re
             bool on = (request.value.int32Values[0] == 1);
             setBacklightEnable(on);
             mScreenOn.store(on);
-            LOG(INFO) << "VHAL: Screen Power set to " << on;
 
-            if (mOnPropChange) {
-                std::vector<VehiclePropValue> events;
-                VehiclePropValue v = request;
-                v.timestamp = elapsedRealtimeNano();
-                events.push_back(v);
-                (*mOnPropChange)(events);
-            }
+            VehiclePropValue v = request;
+            v.areaId = GLOBAL_AREA_ID;
+            v.timestamp = elapsedRealtimeNano();
+            emitPropChange(v);
         }
         if (updatedValue) {
             *updatedValue = request;
+            updatedValue->areaId = GLOBAL_AREA_ID;
             updatedValue->timestamp = elapsedRealtimeNano();
         }
         return StatusCode::OK;
@@ -332,9 +376,15 @@ StatusCode SchuurmanVehicleHardware::setValueInternal(const VehiclePropValue& re
         if (!request.value.int32Values.empty()) {
             bool enable = request.value.int32Values[0] == 1;
             mAutoBrightnessEnabled.store(enable);
+
+            VehiclePropValue v = request;
+            v.areaId = GLOBAL_AREA_ID;
+            v.timestamp = elapsedRealtimeNano();
+            emitPropChange(v);
         }
         if (updatedValue) {
             *updatedValue = request;
+            updatedValue->areaId = GLOBAL_AREA_ID;
             updatedValue->timestamp = elapsedRealtimeNano();
         }
         return StatusCode::OK;
@@ -345,13 +395,16 @@ StatusCode SchuurmanVehicleHardware::setValueInternal(const VehiclePropValue& re
 
 StatusCode SchuurmanVehicleHardware::getValueInternal(const VehiclePropValue& request,
                                                       VehiclePropValue* response) const {
+    response->prop = request.prop;
+    response->areaId = (request.areaId != 0 ? request.areaId : GLOBAL_AREA_ID);
     response->timestamp = elapsedRealtimeNano();
+
     if (request.prop == static_cast<int32_t>(VehicleProperty::DISPLAY_BRIGHTNESS)) {
-        response->value.int32Values = {mCurrentBrightness};
+        response->value.int32Values = {mCurrentBrightness.load()};
         return StatusCode::OK;
     }
     if (request.prop == static_cast<int32_t>(VehicleProperty::GEAR_SELECTION)) {
-        response->value.int32Values = {mCurrentGear};
+        response->value.int32Values = {mCurrentGear.load()};
         return StatusCode::OK;
     }
     if (request.prop == VENDOR_AUTO_BRIGHTNESS) {
@@ -368,53 +421,87 @@ StatusCode SchuurmanVehicleHardware::getValueInternal(const VehiclePropValue& re
 std::vector<VehiclePropConfig> SchuurmanVehicleHardware::getAllPropertyConfigs() const {
     std::vector<VehiclePropConfig> configs;
 
-    VehiclePropConfig gearConfig;
-    gearConfig.prop = static_cast<int32_t>(VehicleProperty::GEAR_SELECTION);
-    gearConfig.access = VehiclePropertyAccess::READ;
-    gearConfig.changeMode = VehiclePropertyChangeMode::ON_CHANGE;
-    configs.push_back(gearConfig);
+    // GEAR_SELECTION (global, on-change)
+    {
+        VehiclePropConfig gearConfig;
+        gearConfig.prop = static_cast<int32_t>(VehicleProperty::GEAR_SELECTION);
+        gearConfig.access = VehiclePropertyAccess::READ;
+        gearConfig.changeMode = VehiclePropertyChangeMode::ON_CHANGE;
+        gearConfig.areaConfigs = {{
+            .minInt32Value = static_cast<int32_t>(VehicleGear::GEAR_PARK),
+            .maxInt32Value = static_cast<int32_t>(VehicleGear::GEAR_REVERSE),
+        }};
+        configs.push_back(gearConfig);
+    }
 
-    VehiclePropConfig brightConfig;
-    brightConfig.prop = static_cast<int32_t>(VehicleProperty::DISPLAY_BRIGHTNESS);
-    brightConfig.access = VehiclePropertyAccess::READ_WRITE;
-    brightConfig.changeMode = VehiclePropertyChangeMode::ON_CHANGE;
-    brightConfig.areaConfigs = {{.minInt32Value = 0, .maxInt32Value = 100}};
-    configs.push_back(brightConfig);
+    // DISPLAY_BRIGHTNESS (0..100, on-change)
+    {
+        VehiclePropConfig brightConfig;
+        brightConfig.prop = static_cast<int32_t>(VehicleProperty::DISPLAY_BRIGHTNESS);
+        brightConfig.access = VehiclePropertyAccess::READ_WRITE;
+        brightConfig.changeMode = VehiclePropertyChangeMode::ON_CHANGE;
+        brightConfig.areaConfigs = {{.minInt32Value = 0, .maxInt32Value = 100}};
+        configs.push_back(brightConfig);
+    }
 
-    VehiclePropConfig autoConfig;
-    autoConfig.prop = VENDOR_AUTO_BRIGHTNESS;
-    autoConfig.access = VehiclePropertyAccess::READ_WRITE;
-    autoConfig.changeMode = VehiclePropertyChangeMode::ON_CHANGE;
-    autoConfig.areaConfigs = {{.minInt32Value = 0, .maxInt32Value = 1}};
-    configs.push_back(autoConfig);
+    // Vendor auto brightness (0/1)
+    {
+        VehiclePropConfig autoConfig;
+        autoConfig.prop = VENDOR_AUTO_BRIGHTNESS;
+        autoConfig.access = VehiclePropertyAccess::READ_WRITE;
+        autoConfig.changeMode = VehiclePropertyChangeMode::ON_CHANGE;
+        autoConfig.areaConfigs = {{.minInt32Value = 0, .maxInt32Value = 1}};
+        configs.push_back(autoConfig);
+    }
 
-    VehiclePropConfig screenPowerConfig;
-    screenPowerConfig.prop = VENDOR_SCREEN_POWER;
-    screenPowerConfig.access = VehiclePropertyAccess::READ_WRITE;
-    screenPowerConfig.changeMode = VehiclePropertyChangeMode::ON_CHANGE;
-    screenPowerConfig.areaConfigs = {{.minInt32Value = 0, .maxInt32Value = 1}};
-    configs.push_back(screenPowerConfig);
+    // Vendor screen power (0/1)
+    {
+        VehiclePropConfig screenPowerConfig;
+        screenPowerConfig.prop = VENDOR_SCREEN_POWER;
+        screenPowerConfig.access = VehiclePropertyAccess::READ_WRITE;
+        screenPowerConfig.changeMode = VehiclePropertyChangeMode::ON_CHANGE;
+        screenPowerConfig.areaConfigs = {{.minInt32Value = 0, .maxInt32Value = 1}};
+        configs.push_back(screenPowerConfig);
+    }
 
     return configs;
 }
 
 void SchuurmanVehicleHardware::pollInputs() {
-    int lastGearState = -1;
-    while (!mShuttingDown) {
+    int lastGearState = -2;
+
+    // Seed initial from GPIO if enabled
+    if (mGearGpioOffset >= 0) {
+        int gearState = readGearGpio();
+        if (gearState >= 0) {
+            mCurrentGear.store((gearState == 1)
+                ? static_cast<int32_t>(VehicleGear::GEAR_REVERSE)
+                : static_cast<int32_t>(VehicleGear::GEAR_DRIVE));
+            lastGearState = gearState;
+
+            VehiclePropValue v;
+            v.prop = static_cast<int32_t>(VehicleProperty::GEAR_SELECTION);
+            v.areaId = GLOBAL_AREA_ID;
+            v.timestamp = elapsedRealtimeNano();
+            v.value.int32Values = {mCurrentGear.load()};
+            emitPropChange(v);
+        }
+    }
+
+    while (!mShuttingDown.load()) {
         int gearState = readGearGpio();
         if (gearState >= 0 && gearState != lastGearState) {
-            mCurrentGear = (gearState == 1) ? static_cast<int32_t>(VehicleGear::GEAR_REVERSE)
-                                            : static_cast<int32_t>(VehicleGear::GEAR_DRIVE);
+            mCurrentGear.store((gearState == 1)
+                ? static_cast<int32_t>(VehicleGear::GEAR_REVERSE)
+                : static_cast<int32_t>(VehicleGear::GEAR_DRIVE));
 
-            if (mOnPropChange) {
-                std::vector<VehiclePropValue> events;
-                VehiclePropValue v;
-                v.prop = static_cast<int32_t>(VehicleProperty::GEAR_SELECTION);
-                v.timestamp = elapsedRealtimeNano();
-                v.value.int32Values = {mCurrentGear};
-                events.push_back(v);
-                (*mOnPropChange)(events);
-            }
+            VehiclePropValue v;
+            v.prop = static_cast<int32_t>(VehicleProperty::GEAR_SELECTION);
+            v.areaId = GLOBAL_AREA_ID;
+            v.timestamp = elapsedRealtimeNano();
+            v.value.int32Values = {mCurrentGear.load()};
+            emitPropChange(v);
+
             lastGearState = gearState;
         }
         std::this_thread::sleep_for(std::chrono::milliseconds(200));
@@ -429,13 +516,12 @@ void SchuurmanVehicleHardware::sensorLoop() {
     while (mSensorThreadRunning.load()) {
         int raw = readIntFileNoExcept(mLightSensorPath);
         if (raw >= 0) {
-            if (ema < 0)
-                ema = (double)raw;
-            else
-                ema = alpha * (double)raw + (1.0 - alpha) * ema;
+            if (ema < 0) ema = static_cast<double>(raw);
+            else ema = alpha * static_cast<double>(raw) + (1.0 - alpha) * ema;
 
-            double maxLux = (double)mSensorRawMax;
+            double maxLux = static_cast<double>(mSensorRawMax);
             if (maxLux < 1.0) maxLux = 1.0;
+
             double percent = (log(1.0 + ema) / log(1.0 + maxLux)) * 100.0;
             if (percent < 0.0) percent = 0.0;
             if (percent > 100.0) percent = 100.0;
@@ -444,20 +530,18 @@ void SchuurmanVehicleHardware::sensorLoop() {
 
             if (mAutoBrightnessEnabled.load()) {
                 int last = mAutoTargetBrightness.load();
-                if (last < 0 || abs(intPercent - last) >= 2) {
+                if (last < 0 || std::abs(intPercent - last) >= 2) {
                     mAutoTargetBrightness.store(intPercent);
                     if (mScreenOn.load()) {
                         writePwm(intPercent);
-                        mCurrentBrightness = intPercent;
-                        if (mOnPropChange) {
-                            std::vector<VehiclePropValue> events;
-                            VehiclePropValue v;
-                            v.prop = static_cast<int32_t>(VehicleProperty::DISPLAY_BRIGHTNESS);
-                            v.timestamp = elapsedRealtimeNano();
-                            v.value.int32Values = {mCurrentBrightness};
-                            events.push_back(v);
-                            (*mOnPropChange)(events);
-                        }
+                        mCurrentBrightness.store(intPercent);
+
+                        VehiclePropValue v;
+                        v.prop = static_cast<int32_t>(VehicleProperty::DISPLAY_BRIGHTNESS);
+                        v.areaId = GLOBAL_AREA_ID;
+                        v.timestamp = elapsedRealtimeNano();
+                        v.value.int32Values = {mCurrentBrightness.load()};
+                        emitPropChange(v);
                     }
                 }
             }
@@ -470,63 +554,73 @@ void SchuurmanVehicleHardware::sensorLoop() {
 StatusCode SchuurmanVehicleHardware::checkHealth() {
     return StatusCode::OK;
 }
+
 void SchuurmanVehicleHardware::registerOnPropertyChangeEvent(
         std::unique_ptr<const PropertyChangeCallback> callback) {
+    std::lock_guard<std::mutex> lk(mCallbackMutex);
     mOnPropChange = std::move(callback);
+    emitInitialStatesLocked();  // OK: requires mutex, which we hold
 }
+
 void SchuurmanVehicleHardware::registerOnPropertySetErrorEvent(
         std::unique_ptr<const PropertySetErrorCallback> callback) {
+    std::lock_guard<std::mutex> lk(mCallbackMutex);
     mOnSetError = std::move(callback);
 }
+
 StatusCode SchuurmanVehicleHardware::subscribe(SubscribeOptions) {
+    // We generate events internally via pollInputs/sensorLoop; OK to no-op.
     return StatusCode::OK;
 }
+
 StatusCode SchuurmanVehicleHardware::unsubscribe(int32_t, int32_t) {
     return StatusCode::OK;
 }
+
 StatusCode SchuurmanVehicleHardware::updateSampleRate(int32_t, int32_t, float) {
     return StatusCode::OK;
 }
+
 DumpResult SchuurmanVehicleHardware::dump(const std::vector<std::string>&) {
     return {};
 }
 
-// Corrected getValues logic:
-// Use a temporary variable 'val' to capture the output of getValueInternal.
-// Then move 'val' into 'res.prop' (which is std::optional<VehiclePropValue>).
 StatusCode SchuurmanVehicleHardware::getValues(
         std::shared_ptr<const GetValuesCallback> callback,
         const std::vector<GetValueRequest>& requests) const {
     std::vector<GetValueResult> results;
+    results.reserve(requests.size());
+
     for (const auto& req : requests) {
         GetValueResult res;
         res.requestId = req.requestId;
-        
-        // Initialize the temp holder with request ID/AreaID info
-        VehiclePropValue val = req.prop;
-        
-        // Pass pointer to temp variable
+
+        VehiclePropValue val = req.prop;  // includes prop/areaId from request
         res.status = getValueInternal(req.prop, &val);
-        
+
         if (res.status == StatusCode::OK) {
-            // Assign valid result to the optional field in response
             res.prop = std::move(val);
         }
-        results.push_back(res);
+        results.push_back(std::move(res));
     }
+
     (*callback)(std::move(results));
     return StatusCode::OK;
 }
 
-StatusCode SchuurmanVehicleHardware::setValues(std::shared_ptr<const SetValuesCallback> callback,
-                                               const std::vector<SetValueRequest>& requests) {
+StatusCode SchuurmanVehicleHardware::setValues(
+        std::shared_ptr<const SetValuesCallback> callback,
+        const std::vector<SetValueRequest>& requests) {
     std::vector<SetValueResult> results;
+    results.reserve(requests.size());
+
     for (const auto& req : requests) {
         SetValueResult res;
         res.requestId = req.requestId;
         res.status = setValueInternal(req.value, nullptr);
-        results.push_back(res);
+        results.push_back(std::move(res));
     }
+
     (*callback)(std::move(results));
     return StatusCode::OK;
 }
