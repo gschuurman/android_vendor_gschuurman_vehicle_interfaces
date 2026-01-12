@@ -193,17 +193,13 @@ void SchuurmanVehicleHardware::initGpios() {
     mGpioChipName =
             "/dev/" + android::base::GetProperty("ro.vendor.vehicle.gpio.chip", "gpiochip0");
 
-    mBrightnessGpioOffset =
-            android::base::GetIntProperty("ro.vendor.vehicle.brightness.gpio.offset", 51);
-
     mBacklightEnableGpioOffset =
             android::base::GetIntProperty("ro.vendor.vehicle.backlight.enable.gpio.offset", 53);
 
-    mGearGpioOffset = android::base::GetIntProperty("ro.vendor.vehicle.gear.gpio.offset", -1);
+    mGearGpioOffset = android::base::GetIntProperty("ro.vendor.vehicle.gear.gpio.offset", 51);
 
     LOG(INFO) << "GPIO Config: Chip=" << mGpioChipName
               << " BL_Enable=" << mBacklightEnableGpioOffset
-              << " BrightnessRef=" << mBrightnessGpioOffset
               << " Gear=" << mGearGpioOffset;
 
     int chipFd = open(mGpioChipName.c_str(), O_RDWR);
