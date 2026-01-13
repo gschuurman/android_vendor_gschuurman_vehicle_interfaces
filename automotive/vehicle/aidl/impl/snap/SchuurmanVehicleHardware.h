@@ -85,6 +85,7 @@ class SchuurmanVehicleHardware : public IVehicleHardware {
 
     // GPIO Handles
     int mBacklightEnableFd;
+    int mGearFd; // [ADDED] Persistent handle for gear input
 
     // PWM Paths
     std::string mPwmChipBase;

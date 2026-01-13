@@ -97,6 +97,7 @@ SchuurmanVehicleHardware::SchuurmanVehicleHardware()
       mCurrentBrightness(50),
       mScreenOn(true),
       mBacklightEnableFd(-1),
+      mGearFd(-1),
       mShuttingDown(false),
       mSensorThreadRunning(false),
       mLightSensorPath("/data/vendor/sensors/bh1750_lux"),
@@ -130,6 +131,7 @@ SchuurmanVehicleHardware::~SchuurmanVehicleHardware() {
     if (mSensorThread.joinable()) mSensorThread.join();
 
     if (mBacklightEnableFd >= 0) close(mBacklightEnableFd);
+    if (mGearFd >= 0) close(mGearFd);
 }
 
 void SchuurmanVehicleHardware::emitPropChange(const VehiclePropValue& v) {
@@ -208,22 +210,42 @@ void SchuurmanVehicleHardware::initGpios() {
         return;
     }
 
-    struct gpiohandle_request req;
-    memset(&req, 0, sizeof(req));
-    req.lineoffsets[0] = mBacklightEnableGpioOffset;
-    req.lines = 1;
-    req.flags = GPIOHANDLE_REQUEST_OUTPUT;
-    req.default_values[0] = 1;  // Default ON
-    strncpy(req.consumer_label, "vhal_backlight", sizeof(req.consumer_label) - 1);
+    // 1. Setup Backlight GPIO (Output)
+    struct gpiohandle_request reqBl;
+    memset(&reqBl, 0, sizeof(reqBl));
+    reqBl.lineoffsets[0] = mBacklightEnableGpioOffset;
+    reqBl.lines = 1;
+    reqBl.flags = GPIOHANDLE_REQUEST_OUTPUT;
+    reqBl.default_values[0] = 1;  // Default ON
+    strncpy(reqBl.consumer_label, "vhal_backlight", sizeof(reqBl.consumer_label) - 1);
 
-    int ret = ioctl(chipFd, GPIO_GET_LINEHANDLE_IOCTL, &req);
+    int ret = ioctl(chipFd, GPIO_GET_LINEHANDLE_IOCTL, &reqBl);
     if (ret < 0) {
         LOG(ERROR) << "Failed to request Backlight GPIO line " << mBacklightEnableGpioOffset
                    << ": " << strerror(errno);
     } else {
-        mBacklightEnableFd = req.fd;
+        mBacklightEnableFd = reqBl.fd;
         mScreenOn.store(true);
         LOG(INFO) << "Backlight Enable GPIO " << mBacklightEnableGpioOffset << " initialized.";
+    }
+
+    // 2. Setup Gear GPIO (Input)
+    if (mGearGpioOffset >= 0) {
+        struct gpiohandle_request reqGear;
+        memset(&reqGear, 0, sizeof(reqGear));
+        reqGear.lineoffsets[0] = mGearGpioOffset;
+        reqGear.lines = 1;
+        reqGear.flags = GPIOHANDLE_REQUEST_INPUT;
+        strncpy(reqGear.consumer_label, "vhal_gear", sizeof(reqGear.consumer_label) - 1);
+
+        ret = ioctl(chipFd, GPIO_GET_LINEHANDLE_IOCTL, &reqGear);
+        if (ret < 0) {
+            LOG(ERROR) << "Failed to request Gear GPIO line " << mGearGpioOffset
+                       << ": " << strerror(errno);
+        } else {
+            mGearFd = reqGear.fd;
+            LOG(INFO) << "Gear GPIO " << mGearGpioOffset << " initialized.";
+        }
     }
 
     close(chipFd);
@@ -245,33 +267,17 @@ void SchuurmanVehicleHardware::setBacklightEnable(bool on) {
 }
 
 int SchuurmanVehicleHardware::readGearGpio() {
-    if (mGearGpioOffset < 0) return -1;
-
-    int fd = open(mGpioChipName.c_str(), O_RDWR);
-    if (fd < 0) return -1;
-
-    struct gpiohandle_request req;
-    memset(&req, 0, sizeof(req));
-    req.lineoffsets[0] = mGearGpioOffset;
-    req.lines = 1;
-    req.flags = GPIOHANDLE_REQUEST_INPUT;
-
-    int ret = ioctl(fd, GPIO_GET_LINEHANDLE_IOCTL, &req);
-    if (ret < 0) {
-        close(fd);
-        return -1;
-    }
+    if (mGearFd < 0) return -1;
 
     struct gpiohandle_data data;
     memset(&data, 0, sizeof(data));
-    if (ioctl(req.fd, GPIOHANDLE_GET_LINE_VALUES_IOCTL, &data) < 0) {
-        close(req.fd);
-        close(fd);
+    
+    // Read directly from the persistent file descriptor
+    if (ioctl(mGearFd, GPIOHANDLE_GET_LINE_VALUES_IOCTL, &data) < 0) {
+        // Only log verbose or on change in pollInputs to avoid spam, or log here if critical error
         return -1;
     }
 
-    close(req.fd);
-    close(fd);
     return data.values[0];
 }
 
@@ -467,7 +473,7 @@ void SchuurmanVehicleHardware::pollInputs() {
     int lastGearState = -2;
 
     // Seed initial from GPIO if enabled
-    if (mGearGpioOffset >= 0) {
+    if (mGearFd >= 0) {
         int gearState = readGearGpio();
         if (gearState >= 0) {
             mCurrentGear.store((gearState == 1)
@@ -481,24 +487,38 @@ void SchuurmanVehicleHardware::pollInputs() {
             v.timestamp = elapsedRealtimeNano();
             v.value.int32Values = {mCurrentGear.load()};
             emitPropChange(v);
+            
+            LOG(INFO) << "Initial Gear State: " << (gearState == 1 ? "REVERSE" : "DRIVE");
+        } else {
+            LOG(ERROR) << "Failed to read initial Gear state from GPIO";
         }
+    } else {
+        LOG(ERROR) << "Gear GPIO not initialized, polling disabled for gear.";
     }
 
     while (!mShuttingDown.load()) {
-        int gearState = readGearGpio();
-        if (gearState >= 0 && gearState != lastGearState) {
-            mCurrentGear.store((gearState == 1)
-                ? static_cast<int32_t>(VehicleGear::GEAR_REVERSE)
-                : static_cast<int32_t>(VehicleGear::GEAR_DRIVE));
+        if (mGearFd >= 0) {
+            int gearState = readGearGpio();
+            
+            if (gearState < 0) {
+                // If this spams logcat too much, you might want to throttle this log
+                LOG(ERROR) << "Error reading Gear GPIO during poll.";
+            } else if (gearState != lastGearState) {
+                LOG(INFO) << "Gear GPIO Changed: " << lastGearState << " -> " << gearState;
+                
+                mCurrentGear.store((gearState == 1)
+                    ? static_cast<int32_t>(VehicleGear::GEAR_REVERSE)
+                    : static_cast<int32_t>(VehicleGear::GEAR_DRIVE));
 
-            VehiclePropValue v;
-            v.prop = static_cast<int32_t>(VehicleProperty::GEAR_SELECTION);
-            v.areaId = GLOBAL_AREA_ID;
-            v.timestamp = elapsedRealtimeNano();
-            v.value.int32Values = {mCurrentGear.load()};
-            emitPropChange(v);
+                VehiclePropValue v;
+                v.prop = static_cast<int32_t>(VehicleProperty::GEAR_SELECTION);
+                v.areaId = GLOBAL_AREA_ID;
+                v.timestamp = elapsedRealtimeNano();
+                v.value.int32Values = {mCurrentGear.load()};
+                emitPropChange(v);
 
-            lastGearState = gearState;
+                lastGearState = gearState;
+            }
         }
         std::this_thread::sleep_for(std::chrono::milliseconds(200));
     }
