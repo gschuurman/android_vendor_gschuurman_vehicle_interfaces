@@ -73,10 +73,7 @@ static std::string readSysFsString(const std::string& path, int retries = 3, int
         if (file) {
             std::string s;
             if (std::getline(file, s)) {
-                auto start = s.find_first_not_of(" \t\n\r");
-                auto end = s.find_last_not_of(" \t\n\r");
-                if (start == std::string::npos) return std::string();
-                return s.substr(start, end - start + 1);
+                return s;
             }
         }
         std::this_thread::sleep_for(std::chrono::milliseconds(delayMs));
@@ -97,7 +94,7 @@ SchuurmanVehicleHardware::SchuurmanVehicleHardware()
       mCurrentBrightness(50),
       mScreenOn(true),
       mBacklightEnableFd(-1),
-      mGearFd(-1),
+      mGearFd(-1), // Initialized to -1
       mShuttingDown(false),
       mSensorThreadRunning(false),
       mLightSensorPath("/data/vendor/sensors/bh1750_lux"),
@@ -131,7 +128,7 @@ SchuurmanVehicleHardware::~SchuurmanVehicleHardware() {
     if (mSensorThread.joinable()) mSensorThread.join();
 
     if (mBacklightEnableFd >= 0) close(mBacklightEnableFd);
-    if (mGearFd >= 0) close(mGearFd);
+    if (mGearFd >= 0) close(mGearFd); // Close gear handle
 }
 
 void SchuurmanVehicleHardware::emitPropChange(const VehiclePropValue& v) {
@@ -206,11 +203,12 @@ void SchuurmanVehicleHardware::initGpios() {
 
     int chipFd = open(mGpioChipName.c_str(), O_RDWR);
     if (chipFd < 0) {
-        LOG(ERROR) << "Could not open GPIO chip " << mGpioChipName << ": " << strerror(errno);
+        LOG(ERROR) << "FATAL: Could not open GPIO chip " << mGpioChipName << ": " << strerror(errno) 
+                   << ". Check init.vehicle.sh permissions!";
         return;
     }
 
-    // 1. Setup Backlight GPIO (Output)
+    // 1. Setup Backlight (Output)
     struct gpiohandle_request reqBl;
     memset(&reqBl, 0, sizeof(reqBl));
     reqBl.lineoffsets[0] = mBacklightEnableGpioOffset;
@@ -229,7 +227,7 @@ void SchuurmanVehicleHardware::initGpios() {
         LOG(INFO) << "Backlight Enable GPIO " << mBacklightEnableGpioOffset << " initialized.";
     }
 
-    // 2. Setup Gear GPIO (Input)
+    // 2. Setup Gear (Input)
     if (mGearGpioOffset >= 0) {
         struct gpiohandle_request reqGear;
         memset(&reqGear, 0, sizeof(reqGear));
@@ -244,7 +242,7 @@ void SchuurmanVehicleHardware::initGpios() {
                        << ": " << strerror(errno);
         } else {
             mGearFd = reqGear.fd;
-            LOG(INFO) << "Gear GPIO " << mGearGpioOffset << " initialized.";
+            LOG(INFO) << "Gear GPIO " << mGearGpioOffset << " initialized. Handle: " << mGearFd;
         }
     }
 
@@ -267,14 +265,15 @@ void SchuurmanVehicleHardware::setBacklightEnable(bool on) {
 }
 
 int SchuurmanVehicleHardware::readGearGpio() {
+    // If the FD was never opened successfully, return -1 immediately
     if (mGearFd < 0) return -1;
 
     struct gpiohandle_data data;
     memset(&data, 0, sizeof(data));
-    
-    // Read directly from the persistent file descriptor
+
+    // Use the persistent file descriptor
     if (ioctl(mGearFd, GPIOHANDLE_GET_LINE_VALUES_IOCTL, &data) < 0) {
-        // Only log verbose or on change in pollInputs to avoid spam, or log here if critical error
+        LOG(ERROR) << "ioctl failed on Gear GPIO handle: " << strerror(errno);
         return -1;
     }
 
@@ -487,10 +486,10 @@ void SchuurmanVehicleHardware::pollInputs() {
             v.timestamp = elapsedRealtimeNano();
             v.value.int32Values = {mCurrentGear.load()};
             emitPropChange(v);
-            
+
             LOG(INFO) << "Initial Gear State: " << (gearState == 1 ? "REVERSE" : "DRIVE");
         } else {
-            LOG(ERROR) << "Failed to read initial Gear state from GPIO";
+            LOG(ERROR) << "Failed to read initial Gear state.";
         }
     } else {
         LOG(ERROR) << "Gear GPIO not initialized, polling disabled for gear.";
@@ -501,7 +500,7 @@ void SchuurmanVehicleHardware::pollInputs() {
             int gearState = readGearGpio();
             
             if (gearState < 0) {
-                // If this spams logcat too much, you might want to throttle this log
+                // IMPORTANT: This logs failures that were previously silent
                 LOG(ERROR) << "Error reading Gear GPIO during poll.";
             } else if (gearState != lastGearState) {
                 LOG(INFO) << "Gear GPIO Changed: " << lastGearState << " -> " << gearState;
@@ -585,7 +584,6 @@ void SchuurmanVehicleHardware::registerOnPropertySetErrorEvent(
 }
 
 StatusCode SchuurmanVehicleHardware::subscribe(SubscribeOptions) {
-    // We generate events internally via pollInputs/sensorLoop; OK to no-op.
     return StatusCode::OK;
 }
 

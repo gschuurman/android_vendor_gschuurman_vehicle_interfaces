@@ -2,10 +2,8 @@
 #define ANDROID_HARDWARE_AUTOMOTIVE_VEHICLE_SCHUURMANVEHICLEHARDWARE_H
 
 #include <IVehicleHardware.h>
-
 #include <aidl/android/hardware/automotive/vehicle/BnVehicle.h>
 #include <android-base/thread_annotations.h>
-
 #include <atomic>
 #include <memory>
 #include <mutex>
@@ -85,7 +83,7 @@ class SchuurmanVehicleHardware : public IVehicleHardware {
 
     // GPIO Handles
     int mBacklightEnableFd;
-    int mGearFd; // [ADDED] Persistent handle for gear input
+    int mGearFd; // <--- ADDED THIS
 
     // PWM Paths
     std::string mPwmChipBase;
