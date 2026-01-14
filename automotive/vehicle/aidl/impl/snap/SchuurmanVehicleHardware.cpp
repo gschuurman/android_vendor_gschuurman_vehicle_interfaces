@@ -189,46 +189,47 @@ void SchuurmanVehicleHardware::emitInitialStatesLocked() {
 }
 
 void SchuurmanVehicleHardware::initGpios() {
-    mGpioChipName =
-            "/dev/" + android::base::GetProperty("ro.vendor.vehicle.gpio.chip", "gpiochip0");
+    // ---------------------------------------------------------
+    // FIX: Ensure config is loaded if constructor missed it
+    // ---------------------------------------------------------
+    if (mGpioChipName.empty()) {
+        mGpioChipName = "/dev/" + android::base::GetProperty("ro.vendor.vehicle.gpio.chip", "gpiochip0");
+        mBacklightEnableGpioOffset = android::base::GetIntProperty("ro.vendor.vehicle.backlight.enable.gpio.offset", 53);
+        mGearGpioOffset = android::base::GetIntProperty("ro.vendor.vehicle.gear.gpio.offset", 51);
+        
+        LOG(INFO) << "GPIO Config Loaded: Chip=" << mGpioChipName 
+                  << " BL=" << mBacklightEnableGpioOffset 
+                  << " Gear=" << mGearGpioOffset;
+    }
 
-    mBacklightEnableGpioOffset =
-            android::base::GetIntProperty("ro.vendor.vehicle.backlight.enable.gpio.offset", 53);
-
-    mGearGpioOffset = android::base::GetIntProperty("ro.vendor.vehicle.gear.gpio.offset", 51);
-
-    LOG(INFO) << "GPIO Config: Chip=" << mGpioChipName
-              << " BL_Enable=" << mBacklightEnableGpioOffset
-              << " Gear=" << mGearGpioOffset;
-
+    // Try to open the Chip
     int chipFd = open(mGpioChipName.c_str(), O_RDWR);
     if (chipFd < 0) {
-        LOG(ERROR) << "FATAL: Could not open GPIO chip " << mGpioChipName << ": " << strerror(errno) 
-                   << ". Check init.vehicle.sh permissions!";
-        return;
+        // This log will now show the actual path (e.g. /dev/gpiochip0) instead of empty
+        LOG(ERROR) << "initGpios: Failed to open " << mGpioChipName << ": " << strerror(errno);
+        return; // We will retry in pollInputs
     }
 
-    // 1. Setup Backlight (Output)
-    struct gpiohandle_request reqBl;
-    memset(&reqBl, 0, sizeof(reqBl));
-    reqBl.lineoffsets[0] = mBacklightEnableGpioOffset;
-    reqBl.lines = 1;
-    reqBl.flags = GPIOHANDLE_REQUEST_OUTPUT;
-    reqBl.default_values[0] = 1;  // Default ON
-    strncpy(reqBl.consumer_label, "vhal_backlight", sizeof(reqBl.consumer_label) - 1);
+    // 1. Backlight
+    if (mBacklightEnableFd < 0) {
+        struct gpiohandle_request reqBl;
+        memset(&reqBl, 0, sizeof(reqBl));
+        reqBl.lineoffsets[0] = mBacklightEnableGpioOffset;
+        reqBl.lines = 1;
+        reqBl.flags = GPIOHANDLE_REQUEST_OUTPUT;
+        reqBl.default_values[0] = 1; 
+        strncpy(reqBl.consumer_label, "vhal_backlight", sizeof(reqBl.consumer_label) - 1);
 
-    int ret = ioctl(chipFd, GPIO_GET_LINEHANDLE_IOCTL, &reqBl);
-    if (ret < 0) {
-        LOG(ERROR) << "Failed to request Backlight GPIO line " << mBacklightEnableGpioOffset
-                   << ": " << strerror(errno);
-    } else {
-        mBacklightEnableFd = reqBl.fd;
-        mScreenOn.store(true);
-        LOG(INFO) << "Backlight Enable GPIO " << mBacklightEnableGpioOffset << " initialized.";
+        if (ioctl(chipFd, GPIO_GET_LINEHANDLE_IOCTL, &reqBl) >= 0) {
+            mBacklightEnableFd = reqBl.fd;
+            LOG(INFO) << "Backlight GPIO initialized.";
+        } else {
+            LOG(ERROR) << "Failed to lock Backlight GPIO line " << mBacklightEnableGpioOffset;
+        }
     }
 
-    // 2. Setup Gear (Input)
-    if (mGearGpioOffset >= 0) {
+    // 2. Gear
+    if (mGearFd < 0) {
         struct gpiohandle_request reqGear;
         memset(&reqGear, 0, sizeof(reqGear));
         reqGear.lineoffsets[0] = mGearGpioOffset;
@@ -236,16 +237,14 @@ void SchuurmanVehicleHardware::initGpios() {
         reqGear.flags = GPIOHANDLE_REQUEST_INPUT;
         strncpy(reqGear.consumer_label, "vhal_gear", sizeof(reqGear.consumer_label) - 1);
 
-        ret = ioctl(chipFd, GPIO_GET_LINEHANDLE_IOCTL, &reqGear);
-        if (ret < 0) {
-            LOG(ERROR) << "Failed to request Gear GPIO line " << mGearGpioOffset
-                       << ": " << strerror(errno);
-        } else {
+        if (ioctl(chipFd, GPIO_GET_LINEHANDLE_IOCTL, &reqGear) >= 0) {
             mGearFd = reqGear.fd;
-            LOG(INFO) << "Gear GPIO " << mGearGpioOffset << " initialized. Handle: " << mGearFd;
+            LOG(INFO) << "Gear GPIO initialized.";
+        } else {
+             LOG(ERROR) << "Failed to lock Gear GPIO line " << mGearGpioOffset;
         }
     }
-
+    
     close(chipFd);
 }
 
@@ -471,40 +470,27 @@ std::vector<VehiclePropConfig> SchuurmanVehicleHardware::getAllPropertyConfigs()
 void SchuurmanVehicleHardware::pollInputs() {
     int lastGearState = -2;
 
-    // Seed initial from GPIO if enabled
-    if (mGearFd >= 0) {
-        int gearState = readGearGpio();
-        if (gearState >= 0) {
-            mCurrentGear.store((gearState == 1)
-                ? static_cast<int32_t>(VehicleGear::GEAR_REVERSE)
-                : static_cast<int32_t>(VehicleGear::GEAR_DRIVE));
-            lastGearState = gearState;
-
-            VehiclePropValue v;
-            v.prop = static_cast<int32_t>(VehicleProperty::GEAR_SELECTION);
-            v.areaId = GLOBAL_AREA_ID;
-            v.timestamp = elapsedRealtimeNano();
-            v.value.int32Values = {mCurrentGear.load()};
-            emitPropChange(v);
-
-            LOG(INFO) << "Initial Gear State: " << (gearState == 1 ? "REVERSE" : "DRIVE");
-        } else {
-            LOG(ERROR) << "Failed to read initial Gear state.";
-        }
-    } else {
-        LOG(ERROR) << "Gear GPIO not initialized, polling disabled for gear.";
-    }
-
     while (!mShuttingDown.load()) {
+        
+        // RETRY LOGIC: If GPIOs failed to open at boot (race condition), try again now
+        if (mGearFd < 0 || mBacklightEnableFd < 0) {
+            static int retryCounter = 0;
+            if (retryCounter++ % 10 == 0) { // Try every ~2 seconds (10 * 200ms)
+                LOG(INFO) << "Retrying GPIO initialization...";
+                initGpios();
+            }
+        }
+
         if (mGearFd >= 0) {
             int gearState = readGearGpio();
             
             if (gearState < 0) {
-                // IMPORTANT: This logs failures that were previously silent
-                LOG(ERROR) << "Error reading Gear GPIO during poll.";
+                // Read failed? Maybe file descriptor went bad. Close and reset to force retry.
+                LOG(ERROR) << "Failed to read Gear GPIO. Resetting FD.";
+                close(mGearFd);
+                mGearFd = -1;
             } else if (gearState != lastGearState) {
                 LOG(INFO) << "Gear GPIO Changed: " << lastGearState << " -> " << gearState;
-                
                 mCurrentGear.store((gearState == 1)
                     ? static_cast<int32_t>(VehicleGear::GEAR_REVERSE)
                     : static_cast<int32_t>(VehicleGear::GEAR_DRIVE));
