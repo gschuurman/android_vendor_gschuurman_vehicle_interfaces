@@ -1,0 +1,29 @@
+cc_binary {
+    name: "rearview_service",
+    srcs: [
+        "src/Main.cpp",
+        "src/CameraSystem.cpp",
+        "src/GearListener.cpp",
+        "src/RecorderSystem.cpp",
+        "src/DisplaySystem.cpp",
+    ],
+    local_include_dirs: ["include"],
+    shared_libs: [
+        "liblog",
+        "libutils",
+        "libcutils",
+        "libcamera2ndk",
+        "libmediandk",
+        "libbinder_ndk",
+        "libnativewindow",
+        "libandroid",
+        "libvhalclient", 
+        "android.hardware.automotive.vehicle-V4-ndk",
+    ],
+    cflags: [
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "-std=c++20",
+    ],
+}
