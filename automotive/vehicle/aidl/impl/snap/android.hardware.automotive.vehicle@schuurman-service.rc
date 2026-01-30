@@ -1,9 +1,0 @@
-service vendor.vehicle-schuurman /vendor/bin/hw/android.hardware.automotive.vehicle@schuurman-service
-    class early_hal
-    user vehicle_network
-    group system inet
-    interface aidl android.hardware.automotive.vehicle.IVehicle/default
-
-on early-boot
-    # Start script met SETUP context
-    exec_background u:r:vendor_vehicle_setup:s0 -- /vendor/bin/init.vehicle.sh

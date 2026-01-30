@@ -1,8 +1,0 @@
-service bh1750d /vendor/bin/bh1750d
-    class main
-    user system
-    group system
-    seclabel u:r:bh1750d:s0
-    
-on post-fs-data
-    mkdir /data/vendor/sensors 0770 system system

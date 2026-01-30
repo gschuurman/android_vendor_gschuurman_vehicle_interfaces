@@ -1,0 +1,10 @@
+service vendor.gnss-usb /vendor/bin/hw/android.hardware.gnss-service.usb
+    class hal
+    user system
+    group system gps inet net_raw wakelock
+
+    # This is the critical mapping used by ctl.interface_start
+    interface aidl android.hardware.gnss.IGnss/default
+
+    # Framework is trying to start it as a LAZY AIDL service
+    lazy
