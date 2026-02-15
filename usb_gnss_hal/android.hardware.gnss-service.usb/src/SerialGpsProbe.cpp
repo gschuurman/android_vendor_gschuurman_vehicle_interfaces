@@ -142,7 +142,11 @@ std::vector<std::string> SerialGpsProbe::ListCandidatePorts() {
 
     dirent* ent;
     while ((ent = readdir(dir)) != nullptr) {
-        if (strncmp(ent->d_name, "ttyUSB", 6) == 0 || strncmp(ent->d_name, "ttyACM", 6) == 0) {
+        if (
+            strncmp(ent->d_name, "ttyUSB", 6) == 0 ||
+            strncmp(ent->d_name, "ttyACM", 6) == 0 ||
+            strncmp(ent->d_name, "ttyAML", 6) == 0
+        ) {
             out.emplace_back(std::string("/dev/") + ent->d_name);
         }
     }
