@@ -1,1 +1,4 @@
 /vendor/bin/hw/android\.hardware\.gnss-service\.usb  u:object_r:hal_gnss_usb_exec:s0
+
+# Change 'tty_device' to 'gnss_device'
+/dev/ttyAML.* u:object_r:gnss_device:s0

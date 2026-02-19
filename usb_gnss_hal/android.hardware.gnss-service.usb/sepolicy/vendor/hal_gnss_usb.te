@@ -1,0 +1,19 @@
+# 1. Define the HAL domain and executable type.
+type hal_gnss_usb, domain;
+type hal_gnss_usb_exec, exec_type, vendor_file_type, file_type;
+
+# 2. Use the macro to mark this as a GNSS HAL server.
+hal_server_domain(hal_gnss_usb, hal_gnss)
+
+# 3. Allow init to start the service.
+init_daemon_domain(hal_gnss_usb)
+
+# 4. Allow talking to the (vendor) service manager.
+vndbinder_use(hal_gnss_usb)
+
+# 5. Allow read/write access to the GPS device node.
+# (We assume 'gnss_device' is already defined elsewhere since the build complained)
+allow hal_gnss_usb gnss_device:chr_file rw_file_perms;
+
+# 6. Allow access to /dev nodes (needed if the HAL scans for ports).
+allow hal_gnss_usb device:dir { open read search getattr };
