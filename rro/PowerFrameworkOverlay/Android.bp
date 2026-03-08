@@ -1,0 +1,6 @@
+runtime_resource_overlay {
+    name: "Vim3PowerFrameworkOverlay",
+    product_specific: true,
+    theme: "Vim3PowerFrameworkOverlay",
+    certificate: "platform",
+}
