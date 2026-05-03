@@ -60,6 +60,8 @@ class SchuurmanVehicleHardware : public IVehicleHardware {
 
     void pollInputs();
     void sensorLoop();
+    void displayStateLoop();
+    std::string findDisplayDpmsPath();
 
     void writePwm(int percentage);
     void setBacklightEnable(bool on);
@@ -107,6 +109,10 @@ class SchuurmanVehicleHardware : public IVehicleHardware {
     std::thread mSensorThread;
     std::string mLightSensorPath;
     int mSensorRawMax;
+
+    std::atomic<bool> mDisplayThreadRunning;
+    std::thread mDisplayThread;
+    std::string mDisplayDpmsPath;
 
     std::atomic<bool> mAutoBrightnessEnabled;
     std::atomic<int> mAutoTargetBrightness;

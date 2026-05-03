@@ -120,6 +120,7 @@ SchuurmanVehicleHardware::SchuurmanVehicleHardware()
       mSensorRawMax(100000),
       mAutoBrightnessEnabled(false),
       mAutoTargetBrightness(-1),
+      mDisplayThreadRunning(false),
       mLastApPowerStateReq(static_cast<int32_t>(VehicleApPowerStateReq::ON)),
       mLastApPowerStateReqParam(0),
       mLastApPowerStateReport(static_cast<int32_t>(VehicleApPowerStateReport::ON)),
@@ -138,6 +139,14 @@ SchuurmanVehicleHardware::SchuurmanVehicleHardware()
     mSensorThread = std::thread(&SchuurmanVehicleHardware::sensorLoop, this);
     mPollThread = std::thread(&SchuurmanVehicleHardware::pollInputs, this);
 
+    mDisplayDpmsPath = findDisplayDpmsPath();
+    if (!mDisplayDpmsPath.empty()) {
+        mDisplayThreadRunning.store(true);
+        mDisplayThread = std::thread(&SchuurmanVehicleHardware::displayStateLoop, this);
+    } else {
+        LOG(WARNING) << "Display DPMS path not found - backlight won't track display sleep";
+    }
+
     LOG(INFO) << "Initial gear forced to PARK";
     LOG(INFO) << "Ignition forced ON; parking brake ON";
 }
@@ -148,6 +157,9 @@ SchuurmanVehicleHardware::~SchuurmanVehicleHardware() {
 
     mSensorThreadRunning.store(false);
     if (mSensorThread.joinable()) mSensorThread.join();
+
+    mDisplayThreadRunning.store(false);
+    if (mDisplayThread.joinable()) mDisplayThread.join();
 
     if (mBacklightEnableFd >= 0) close(mBacklightEnableFd);
     if (mGearFd >= 0) close(mGearFd);
@@ -863,6 +875,48 @@ void SchuurmanVehicleHardware::sensorLoop() {
         }
 
         std::this_thread::sleep_for(std::chrono::milliseconds(pollMs));
+    }
+}
+
+std::string SchuurmanVehicleHardware::findDisplayDpmsPath() {
+    std::string prop = android::base::GetProperty(
+            "ro.vendor.vehicle.display.dpms_path", "");
+    if (!prop.empty() && access(prop.c_str(), R_OK) == 0) {
+        LOG(INFO) << "Using configured DPMS path: " << prop;
+        return prop;
+    }
+
+    const std::string drmBase = "/sys/class/drm/";
+    std::error_code ec;
+    for (const auto& entry : std::filesystem::directory_iterator(drmBase, ec)) {
+        const std::string name = entry.path().filename().string();
+        if (name.find("HDMI") != std::string::npos ||
+            name.find("hdmi") != std::string::npos) {
+            const std::string dpmsPath = entry.path().string() + "/dpms";
+            if (access(dpmsPath.c_str(), R_OK) == 0) {
+                LOG(INFO) << "Auto-detected DPMS path: " << dpmsPath;
+                return dpmsPath;
+            }
+        }
+    }
+    if (ec) LOG(WARNING) << "Error scanning " << drmBase << ": " << ec.message();
+    return "";
+}
+
+void SchuurmanVehicleHardware::displayStateLoop() {
+    std::string lastState = "On";  // display assumed on at boot
+
+    while (mDisplayThreadRunning.load()) {
+        std::string state = readSysFsString(mDisplayDpmsPath, /*retries=*/1, /*delayMs=*/0);
+
+        if (!state.empty() && state != lastState) {
+            const bool isOn = (state == "On");
+            LOG(INFO) << "DPMS: '" << lastState << "' -> '" << state << "'";
+            lastState = state;
+            applyScreenPower(isOn, isOn);
+        }
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
     }
 }
 
