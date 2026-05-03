@@ -4,9 +4,11 @@
 #include <IVehicleHardware.h>
 #include <aidl/android/hardware/automotive/vehicle/BnVehicle.h>
 #include <android-base/thread_annotations.h>
+
 #include <atomic>
 #include <memory>
 #include <mutex>
+#include <string>
 #include <thread>
 #include <vector>
 
@@ -15,7 +17,6 @@ namespace hardware {
 namespace automotive {
 namespace vehicle {
 
-// Only use AIDL types here. Implementation types come from IVehicleHardware.
 using ::aidl::android::hardware::automotive::vehicle::GetValueRequest;
 using ::aidl::android::hardware::automotive::vehicle::GetValueResult;
 using ::aidl::android::hardware::automotive::vehicle::SetValueRequest;
@@ -37,8 +38,10 @@ class SchuurmanVehicleHardware : public IVehicleHardware {
                          const std::vector<SetValueRequest>& requests) override;
     StatusCode checkHealth() override;
 
-    void registerOnPropertyChangeEvent(std::unique_ptr<const PropertyChangeCallback> callback) override;
-    void registerOnPropertySetErrorEvent(std::unique_ptr<const PropertySetErrorCallback> callback) override;
+    void registerOnPropertyChangeEvent(
+            std::unique_ptr<const PropertyChangeCallback> callback) override;
+    void registerOnPropertySetErrorEvent(
+            std::unique_ptr<const PropertySetErrorCallback> callback) override;
 
     StatusCode subscribe(SubscribeOptions options) override;
     StatusCode unsubscribe(int32_t propId, int32_t areaId) override;
@@ -50,51 +53,53 @@ class SchuurmanVehicleHardware : public IVehicleHardware {
     void initGpios();
 
   private:
-    StatusCode getValueInternal(const VehiclePropValue& request, VehiclePropValue* response) const;
-    StatusCode setValueInternal(const VehiclePropValue& request, VehiclePropValue* updatedValue);
+    StatusCode getValueInternal(const VehiclePropValue& request,
+                                VehiclePropValue* response) const;
+    StatusCode setValueInternal(const VehiclePropValue& request,
+                                VehiclePropValue* updatedValue);
 
     void pollInputs();
     void sensorLoop();
 
-    // Hardware Control Helpers
     void writePwm(int percentage);
     void setBacklightEnable(bool on);
     int readGearGpio();
 
-    // Sysfs Helpers
     void writeSysFs(const std::string& path, const std::string& val);
     int readSysFsInt(const std::string& path);
     void ensurePwmExported(const std::string& base);
 
-    // Safe callback emission
     void emitPropChange(const VehiclePropValue& v);
     void emitInitialStatesLocked() REQUIRES(mCallbackMutex);
 
-    // State Variables (thread-safe)
+    void publishCurrentBrightness();
+    void publishVendorScreenPower();
+    void publishApPowerStateReq(int32_t reqState, int32_t param = 0);
+
+    void applyScreenPower(bool on, bool restoreBrightness);
+    void handleApPowerStateReport(const VehiclePropValue& request);
+
     std::atomic<int32_t> mCurrentGear;
     std::atomic<int32_t> mCurrentBrightness;
+    std::atomic<int32_t> mLastNonZeroBrightness;
     std::atomic<bool> mScreenOn;
-    
+
     std::atomic<int32_t> mIgnitionState;
     std::atomic<int32_t> mParkingBrakeOn;
-    
-    // GPIO Configuration
-    std::string mGpioChipName;
+
+    std::string mBacklightGpioChipName;
+    std::string mGearGpioChipName;
     int mGearGpioOffset;
-    int mBrightnessGpioOffset;
     int mBacklightEnableGpioOffset;
 
-    // GPIO Handles
     int mBacklightEnableFd;
-    int mGearFd; // <--- ADDED THIS
+    int mGearFd;
 
-    // PWM Paths
     std::string mPwmChipBase;
     std::string mPathPwmDuty;
     std::string mPathPwmEnable;
     std::string mPathPwmPeriod;
 
-    // Threading
     std::atomic<bool> mShuttingDown;
     std::thread mPollThread;
 
@@ -106,7 +111,12 @@ class SchuurmanVehicleHardware : public IVehicleHardware {
     std::atomic<bool> mAutoBrightnessEnabled;
     std::atomic<int> mAutoTargetBrightness;
 
-    // Callbacks (protected)
+    // Track AAOS power properties explicitly.
+    std::atomic<int32_t> mLastApPowerStateReq;
+    std::atomic<int32_t> mLastApPowerStateReqParam;
+    std::atomic<int32_t> mLastApPowerStateReport;
+    std::atomic<int32_t> mLastApPowerStateReportParam;
+
     mutable std::mutex mCallbackMutex;
     std::unique_ptr<const PropertyChangeCallback> mOnPropChange GUARDED_BY(mCallbackMutex);
     std::unique_ptr<const PropertySetErrorCallback> mOnSetError GUARDED_BY(mCallbackMutex);

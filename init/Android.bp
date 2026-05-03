@@ -1,0 +1,6 @@
+prebuilt_etc {
+    name: "init.wifi_fix.rc",
+    src: "init.wifi_fix.rc",
+    sub_dir: "init",
+    soc_specific: true,
+}

@@ -1,15 +1,15 @@
 #include "SchuurmanVehicleHardware.h"
 
+#include <aidl/android/hardware/automotive/vehicle/FuelType.h>
+#include <aidl/android/hardware/automotive/vehicle/VehicleApPowerStateReport.h>
+#include <aidl/android/hardware/automotive/vehicle/VehicleApPowerStateReq.h>
 #include <aidl/android/hardware/automotive/vehicle/VehicleArea.h>
 #include <aidl/android/hardware/automotive/vehicle/VehicleGear.h>
 #include <aidl/android/hardware/automotive/vehicle/VehicleIgnitionState.h>
 #include <aidl/android/hardware/automotive/vehicle/VehicleProperty.h>
 #include <aidl/android/hardware/automotive/vehicle/VehiclePropertyAccess.h>
 #include <aidl/android/hardware/automotive/vehicle/VehiclePropertyChangeMode.h>
-#include <aidl/android/hardware/automotive/vehicle/VehiclePropertyType.h>
 #include <aidl/android/hardware/automotive/vehicle/VehicleSeatOccupancyState.h>
-#include <aidl/android/hardware/automotive/vehicle/VehicleUnit.h>
-#include <aidl/android/hardware/automotive/vehicle/FuelType.h>
 
 #include <android-base/logging.h>
 #include <android-base/properties.h>
@@ -25,6 +25,7 @@
 #include <cmath>
 #include <filesystem>
 #include <fstream>
+#include <string>
 #include <thread>
 #include <vector>
 
@@ -33,54 +34,54 @@ namespace hardware {
 namespace automotive {
 namespace vehicle {
 
+using ::aidl::android::hardware::automotive::vehicle::FuelType;
+using ::aidl::android::hardware::automotive::vehicle::VehicleApPowerStateReport;
+using ::aidl::android::hardware::automotive::vehicle::VehicleApPowerStateReq;
 using ::aidl::android::hardware::automotive::vehicle::VehicleArea;
 using ::aidl::android::hardware::automotive::vehicle::VehicleGear;
 using ::aidl::android::hardware::automotive::vehicle::VehicleIgnitionState;
 using ::aidl::android::hardware::automotive::vehicle::VehicleProperty;
 using ::aidl::android::hardware::automotive::vehicle::VehiclePropertyAccess;
 using ::aidl::android::hardware::automotive::vehicle::VehiclePropertyChangeMode;
-using ::aidl::android::hardware::automotive::vehicle::VehiclePropertyType;
 using ::aidl::android::hardware::automotive::vehicle::VehicleSeatOccupancyState;
-using ::aidl::android::hardware::automotive::vehicle::FuelType;
 
-// Vendor Properties
 static const int32_t VENDOR_AUTO_BRIGHTNESS = 0x12000001;
-static const int32_t VENDOR_SCREEN_POWER   = 0x21400555;
+static const int32_t VENDOR_SCREEN_POWER = 0x21400555;
 
-// Constants
-static constexpr int32_t PWM_PERIOD_NS   = 30518;
-static constexpr int32_t GLOBAL_AREA_ID  = 0;
-// 1 = Driver Seat (ROW_1_LEFT)
-static constexpr int32_t DRIVER_SEAT_ID  = 1; 
+static constexpr int32_t PWM_PERIOD_NS = 30518;
+static constexpr int32_t GLOBAL_AREA_ID = 0;
+static constexpr int32_t DRIVER_SEAT_ID = 1;
 
-// Helper: Find PWM Chip 19000 (VIM3 specific)
 static std::string findPwmChipPath() {
-    std::string baseDir = "/sys/class/pwm/";
+    const std::string baseDir = "/sys/class/pwm/";
     for (int i = 0; i < 10; i++) {
-        std::string chipName = "pwmchip" + std::to_string(i);
-        std::string fullPath = baseDir + chipName;
-        std::string linkPath = fullPath + "/device/of_node";
+        const std::string chipName = "pwmchip" + std::to_string(i);
+        const std::string fullPath = baseDir + chipName;
+        const std::string linkPath = fullPath + "/device/of_node";
 
         char buf[1024];
         ssize_t len = readlink(linkPath.c_str(), buf, sizeof(buf) - 1);
         if (len != -1) {
             buf[len] = '\0';
             if (std::string(buf).find("19000") != std::string::npos) {
-                LOG(INFO) << "Found PWM Chip: " << chipName << " (Address 19000)";
+                LOG(INFO) << "Found PWM chip " << chipName << " for address 19000";
                 return fullPath;
             }
         }
     }
-    LOG(ERROR) << "PWM Chip 19000 not found! Fallback to pwmchip0";
+    LOG(WARNING) << "PWM chip for address 19000 not found, falling back to pwmchip0";
     return baseDir + "pwmchip0";
 }
 
 static int64_t elapsedRealtimeNano() {
     auto now = std::chrono::steady_clock::now();
-    return std::chrono::duration_cast<std::chrono::nanoseconds>(now.time_since_epoch()).count();
+    return std::chrono::duration_cast<std::chrono::nanoseconds>(
+                   now.time_since_epoch())
+            .count();
 }
 
-static std::string readSysFsString(const std::string& path, int retries = 3, int delayMs = 50) {
+static std::string readSysFsString(const std::string& path, int retries = 3,
+                                   int delayMs = 50) {
     for (int i = 0; i < retries; ++i) {
         std::ifstream file(path);
         if (file) {
@@ -105,47 +106,38 @@ static int readIntFileNoExcept(const std::string& path) {
 SchuurmanVehicleHardware::SchuurmanVehicleHardware()
     : mCurrentGear(static_cast<int32_t>(VehicleGear::GEAR_PARK)),
       mCurrentBrightness(50),
+      mLastNonZeroBrightness(50),
       mScreenOn(true),
-
-      // MUST MATCH HEADER ORDER ↓
       mIgnitionState(static_cast<int32_t>(VehicleIgnitionState::ON)),
       mParkingBrakeOn(1),
-
-      // GPIO handles come after GPIO config fields
+      mGearGpioOffset(51),
+      mBacklightEnableGpioOffset(53),
       mBacklightEnableFd(-1),
       mGearFd(-1),
-
-      // Threading
       mShuttingDown(false),
       mSensorThreadRunning(false),
-
-      // Sensor
       mLightSensorPath("/data/vendor/sensors/bh1750_lux"),
       mSensorRawMax(100000),
-
-      // Auto-brightness
       mAutoBrightnessEnabled(false),
-      mAutoTargetBrightness(-1) {
+      mAutoTargetBrightness(-1),
+      mLastApPowerStateReq(static_cast<int32_t>(VehicleApPowerStateReq::ON)),
+      mLastApPowerStateReqParam(0),
+      mLastApPowerStateReport(static_cast<int32_t>(VehicleApPowerStateReport::ON)),
+      mLastApPowerStateReportParam(0) {
+    LOG(INFO) << "Initializing SchuurmanVehicleHardware";
 
-    LOG(INFO) << ">>> INIT START SchuurmanVehicleHardware <<<";
-
-    // 1. PWM Setup
-    mPwmChipBase   = findPwmChipPath();
-    mPathPwmDuty   = mPwmChipBase + "/pwm1/duty_cycle";
+    mPwmChipBase = findPwmChipPath();
+    mPathPwmDuty = mPwmChipBase + "/pwm1/duty_cycle";
     mPathPwmEnable = mPwmChipBase + "/pwm1/enable";
     mPathPwmPeriod = mPwmChipBase + "/pwm1/period";
-    initPwm();
 
-    // 2. GPIO Setup
+    initPwm();
     initGpios();
 
-    // 3. Threads
     mSensorThreadRunning.store(true);
     mSensorThread = std::thread(&SchuurmanVehicleHardware::sensorLoop, this);
-    mPollThread   = std::thread(&SchuurmanVehicleHardware::pollInputs, this);
+    mPollThread = std::thread(&SchuurmanVehicleHardware::pollInputs, this);
 
-    // Force initial gear to PARK
-    mCurrentGear.store(static_cast<int32_t>(VehicleGear::GEAR_PARK));
     LOG(INFO) << "Initial gear forced to PARK";
     LOG(INFO) << "Ignition forced ON; parking brake ON";
 }
@@ -170,12 +162,10 @@ void SchuurmanVehicleHardware::emitPropChange(const VehiclePropValue& v) {
 }
 
 void SchuurmanVehicleHardware::emitInitialStatesLocked() {
-    // mCallbackMutex must be held by caller
     if (!mOnPropChange) return;
 
     std::vector<VehiclePropValue> events;
 
-    // Helper lambda for simple int events
     auto addIntEvent = [&](int32_t propId, int32_t areaId, int32_t value) {
         VehiclePropValue v;
         v.prop = propId;
@@ -185,10 +175,9 @@ void SchuurmanVehicleHardware::emitInitialStatesLocked() {
         events.push_back(v);
     };
 
-    // GEAR_SELECTION
-    addIntEvent(static_cast<int32_t>(VehicleProperty::GEAR_SELECTION), GLOBAL_AREA_ID, mCurrentGear.load());
+    addIntEvent(static_cast<int32_t>(VehicleProperty::GEAR_SELECTION),
+                GLOBAL_AREA_ID, mCurrentGear.load());
 
-    // PERF_VEHICLE_SPEED (always stationary)
     {
         VehiclePropValue v;
         v.prop = static_cast<int32_t>(VehicleProperty::PERF_VEHICLE_SPEED);
@@ -198,87 +187,111 @@ void SchuurmanVehicleHardware::emitInitialStatesLocked() {
         events.push_back(v);
     }
 
-    // IGNITION_STATE
-    addIntEvent(static_cast<int32_t>(VehicleProperty::IGNITION_STATE), GLOBAL_AREA_ID, mIgnitionState.load());
-
-    // PARKING_BRAKE_ON
-    addIntEvent(static_cast<int32_t>(VehicleProperty::PARKING_BRAKE_ON), GLOBAL_AREA_ID, mParkingBrakeOn.load());
-
-    // DISPLAY_BRIGHTNESS
-    addIntEvent(static_cast<int32_t>(VehicleProperty::DISPLAY_BRIGHTNESS), GLOBAL_AREA_ID, mCurrentBrightness.load());
-
-    // Vendor: Auto Brightness
-    addIntEvent(VENDOR_AUTO_BRIGHTNESS, GLOBAL_AREA_ID, mAutoBrightnessEnabled.load() ? 1 : 0);
-
-    // Vendor: Screen Power
-    addIntEvent(VENDOR_SCREEN_POWER, GLOBAL_AREA_ID, mScreenOn.load() ? 1 : 0);
-
-    // --- NEW STATIC PROPERTIES FOR ANDROID 16 STABILITY ---
-    // These must be emitted if they are subscribed to, but typically 
-    // GetValues is called for static properties. 
-    // However, emiting Seat Occupancy helps initialization.
-
-    // SEAT_OCCUPANCY (Driver always occupied)
-    addIntEvent(static_cast<int32_t>(VehicleProperty::SEAT_OCCUPANCY), DRIVER_SEAT_ID, 
+    addIntEvent(static_cast<int32_t>(VehicleProperty::IGNITION_STATE),
+                GLOBAL_AREA_ID, mIgnitionState.load());
+    addIntEvent(static_cast<int32_t>(VehicleProperty::PARKING_BRAKE_ON),
+                GLOBAL_AREA_ID, mParkingBrakeOn.load());
+    addIntEvent(static_cast<int32_t>(VehicleProperty::DISPLAY_BRIGHTNESS),
+                GLOBAL_AREA_ID, mCurrentBrightness.load());
+    addIntEvent(VENDOR_AUTO_BRIGHTNESS, GLOBAL_AREA_ID,
+                mAutoBrightnessEnabled.load() ? 1 : 0);
+    addIntEvent(VENDOR_SCREEN_POWER, GLOBAL_AREA_ID,
+                mScreenOn.load() ? 1 : 0);
+    addIntEvent(static_cast<int32_t>(VehicleProperty::SEAT_OCCUPANCY),
+                DRIVER_SEAT_ID,
                 static_cast<int32_t>(VehicleSeatOccupancyState::OCCUPIED));
+
+    // Since there is no external VMCU in your setup, expose a sane default AP request.
+    {
+        VehiclePropValue v;
+        v.prop = static_cast<int32_t>(VehicleProperty::AP_POWER_STATE_REQ);
+        v.areaId = GLOBAL_AREA_ID;
+        v.timestamp = elapsedRealtimeNano();
+        v.value.int32Values = {
+                mLastApPowerStateReq.load(),
+                mLastApPowerStateReqParam.load()};
+        events.push_back(v);
+    }
 
     (*mOnPropChange)(events);
 }
 
 void SchuurmanVehicleHardware::initGpios() {
-    if (mGpioChipName.empty()) {
-        mGpioChipName = "/dev/" + android::base::GetProperty("ro.vendor.vehicle.gpio.chip", "gpiochip0");
-        mBacklightEnableGpioOffset =
-                android::base::GetIntProperty("ro.vendor.vehicle.backlight.enable.gpio.offset", 53);
-        mGearGpioOffset = android::base::GetIntProperty("ro.vendor.vehicle.gear.gpio.offset", 51);
-
-        LOG(INFO) << "GPIO Config Loaded: Chip=" << mGpioChipName
-                  << " BL=" << mBacklightEnableGpioOffset
-                  << " Gear=" << mGearGpioOffset;
+    if (mBacklightGpioChipName.empty()) {
+        mBacklightGpioChipName = "/dev/" +
+                android::base::GetProperty(
+                        "ro.vendor.vehicle.backlight.enable.gpio.chip",
+                        "gpiochip0");
     }
 
-    int chipFd = open(mGpioChipName.c_str(), O_RDWR);
-    if (chipFd < 0) {
-        LOG(ERROR) << "initGpios: Failed to open " << mGpioChipName << ": " << strerror(errno);
-        return;
+    if (mGearGpioChipName.empty()) {
+        mGearGpioChipName = "/dev/" +
+                android::base::GetProperty(
+                        "ro.vendor.vehicle.gear.gpio.chip",
+                        "gpiochip0");
     }
 
-    // 1. Backlight
+    mBacklightEnableGpioOffset = android::base::GetIntProperty(
+            "ro.vendor.vehicle.backlight.enable.gpio.offset", 53);
+    mGearGpioOffset = android::base::GetIntProperty(
+            "ro.vendor.vehicle.gear.gpio.offset", 51);
+
+    LOG(INFO) << "Backlight GPIO config: chip=" << mBacklightGpioChipName
+              << " offset=" << mBacklightEnableGpioOffset;
+    LOG(INFO) << "Gear GPIO config: chip=" << mGearGpioChipName
+              << " offset=" << mGearGpioOffset;
+
     if (mBacklightEnableFd < 0) {
-        struct gpiohandle_request reqBl;
-        memset(&reqBl, 0, sizeof(reqBl));
-        reqBl.lineoffsets[0] = mBacklightEnableGpioOffset;
-        reqBl.lines = 1;
-        reqBl.flags = GPIOHANDLE_REQUEST_OUTPUT;
-        reqBl.default_values[0] = 1;
-        strncpy(reqBl.consumer_label, "vhal_backlight", sizeof(reqBl.consumer_label) - 1);
-
-        if (ioctl(chipFd, GPIO_GET_LINEHANDLE_IOCTL, &reqBl) >= 0) {
-            mBacklightEnableFd = reqBl.fd;
-            LOG(INFO) << "Backlight GPIO initialized.";
+        int chipFd = open(mBacklightGpioChipName.c_str(), O_RDWR);
+        if (chipFd < 0) {
+            LOG(ERROR) << "Failed to open backlight GPIO chip "
+                       << mBacklightGpioChipName << ": " << strerror(errno);
         } else {
-            LOG(ERROR) << "Failed to lock Backlight GPIO line " << mBacklightEnableGpioOffset;
+            struct gpiohandle_request reqBl;
+            memset(&reqBl, 0, sizeof(reqBl));
+            reqBl.lineoffsets[0] = mBacklightEnableGpioOffset;
+            reqBl.lines = 1;
+            reqBl.flags = GPIOHANDLE_REQUEST_OUTPUT;
+            reqBl.default_values[0] = 1;
+            strncpy(reqBl.consumer_label, "vhal_backlight",
+                    sizeof(reqBl.consumer_label) - 1);
+
+            if (ioctl(chipFd, GPIO_GET_LINEHANDLE_IOCTL, &reqBl) >= 0) {
+                mBacklightEnableFd = reqBl.fd;
+                LOG(INFO) << "Backlight GPIO initialized";
+            } else {
+                LOG(ERROR) << "Failed to request backlight GPIO line "
+                           << mBacklightEnableGpioOffset << ": "
+                           << strerror(errno);
+            }
+            close(chipFd);
         }
     }
 
-    // 2. Gear
     if (mGearFd < 0) {
-        struct gpiohandle_request reqGear;
-        memset(&reqGear, 0, sizeof(reqGear));
-        reqGear.lineoffsets[0] = mGearGpioOffset;
-        reqGear.lines = 1;
-        reqGear.flags = GPIOHANDLE_REQUEST_INPUT;
-        strncpy(reqGear.consumer_label, "vhal_gear", sizeof(reqGear.consumer_label) - 1);
-
-        if (ioctl(chipFd, GPIO_GET_LINEHANDLE_IOCTL, &reqGear) >= 0) {
-            mGearFd = reqGear.fd;
-            LOG(INFO) << "Gear GPIO initialized.";
+        int chipFd = open(mGearGpioChipName.c_str(), O_RDWR);
+        if (chipFd < 0) {
+            LOG(ERROR) << "Failed to open gear GPIO chip "
+                       << mGearGpioChipName << ": " << strerror(errno);
         } else {
-            LOG(ERROR) << "Failed to lock Gear GPIO line " << mGearGpioOffset;
+            struct gpiohandle_request reqGear;
+            memset(&reqGear, 0, sizeof(reqGear));
+            reqGear.lineoffsets[0] = mGearGpioOffset;
+            reqGear.lines = 1;
+            reqGear.flags = GPIOHANDLE_REQUEST_INPUT;
+            strncpy(reqGear.consumer_label, "vhal_gear",
+                    sizeof(reqGear.consumer_label) - 1);
+
+            if (ioctl(chipFd, GPIO_GET_LINEHANDLE_IOCTL, &reqGear) >= 0) {
+                mGearFd = reqGear.fd;
+                LOG(INFO) << "Gear GPIO initialized";
+            } else {
+                LOG(ERROR) << "Failed to request gear GPIO line "
+                           << mGearGpioOffset << ": " << strerror(errno);
+            }
+            close(chipFd);
         }
     }
-
-    close(chipFd);
 }
 
 void SchuurmanVehicleHardware::setBacklightEnable(bool on) {
@@ -289,9 +302,9 @@ void SchuurmanVehicleHardware::setBacklightEnable(bool on) {
     data.values[0] = on ? 1 : 0;
 
     if (ioctl(mBacklightEnableFd, GPIOHANDLE_SET_LINE_VALUES_IOCTL, &data) < 0) {
-        LOG(ERROR) << "Failed to set Backlight GPIO: " << strerror(errno);
+        LOG(ERROR) << "Failed to set backlight GPIO: " << strerror(errno);
     } else {
-        LOG(INFO) << "Set Backlight GPIO " << mBacklightEnableGpioOffset << " to " << (on ? "ON" : "OFF");
+        LOG(INFO) << "Backlight GPIO set to " << (on ? "ON" : "OFF");
     }
 }
 
@@ -302,30 +315,24 @@ int SchuurmanVehicleHardware::readGearGpio() {
     memset(&data, 0, sizeof(data));
 
     if (ioctl(mGearFd, GPIOHANDLE_GET_LINE_VALUES_IOCTL, &data) < 0) {
-        LOG(ERROR) << "ioctl failed on Gear GPIO handle: " << strerror(errno);
+        LOG(ERROR) << "Failed reading gear GPIO: " << strerror(errno);
         return -1;
     }
-
     return data.values[0];
 }
 
 void SchuurmanVehicleHardware::initPwm() {
-    LOG(INFO) << ">>> Initializing PWM Hardware <<<";
+    LOG(INFO) << "Initializing PWM";
     ensurePwmExported(mPwmChipBase);
 
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
-
     writeSysFs(mPathPwmEnable, "0");
     std::this_thread::sleep_for(std::chrono::milliseconds(20));
-
     writeSysFs(mPathPwmPeriod, std::to_string(PWM_PERIOD_NS));
     std::this_thread::sleep_for(std::chrono::milliseconds(20));
-
     writeSysFs(mPathPwmDuty, std::to_string(PWM_PERIOD_NS / 2));
     std::this_thread::sleep_for(std::chrono::milliseconds(20));
-
     writeSysFs(mPathPwmEnable, "1");
-    LOG(INFO) << "PWM Initialized.";
 }
 
 void SchuurmanVehicleHardware::writePwm(int percentage) {
@@ -333,13 +340,16 @@ void SchuurmanVehicleHardware::writePwm(int percentage) {
     if (percentage > 100) percentage = 100;
 
     int inverted = 100 - percentage;
-    long long dutyCalc = (static_cast<long long>(inverted) * static_cast<long long>(PWM_PERIOD_NS)) / 100;
+    long long dutyCalc =
+            (static_cast<long long>(inverted) *
+             static_cast<long long>(PWM_PERIOD_NS)) /
+            100;
     writeSysFs(mPathPwmDuty, std::to_string(dutyCalc));
 }
 
 void SchuurmanVehicleHardware::ensurePwmExported(const std::string& base) {
-    std::string pwmEnablePath = base + "/pwm1/enable";
-    std::string exportPath = base + "/export";
+    const std::string pwmEnablePath = base + "/pwm1/enable";
+    const std::string exportPath = base + "/export";
 
     if (access(pwmEnablePath.c_str(), W_OK) == 0) return;
 
@@ -348,7 +358,8 @@ void SchuurmanVehicleHardware::ensurePwmExported(const std::string& base) {
     }
 }
 
-void SchuurmanVehicleHardware::writeSysFs(const std::string& path, const std::string& val) {
+void SchuurmanVehicleHardware::writeSysFs(const std::string& path,
+                                          const std::string& val) {
     int fd = open(path.c_str(), O_WRONLY | O_TRUNC);
     if (fd < 0) {
         LOG(ERROR) << "Failed to open " << path << ": " << strerror(errno);
@@ -367,41 +378,156 @@ int SchuurmanVehicleHardware::readSysFsInt(const std::string& path) {
     return std::stoi(s);
 }
 
-StatusCode SchuurmanVehicleHardware::setValueInternal(const VehiclePropValue& request,
-                                                      VehiclePropValue* updatedValue) {
+void SchuurmanVehicleHardware::publishCurrentBrightness() {
+    VehiclePropValue v;
+    v.prop = static_cast<int32_t>(VehicleProperty::DISPLAY_BRIGHTNESS);
+    v.areaId = GLOBAL_AREA_ID;
+    v.timestamp = elapsedRealtimeNano();
+    v.value.int32Values = {mCurrentBrightness.load()};
+    emitPropChange(v);
+}
+
+void SchuurmanVehicleHardware::publishVendorScreenPower() {
+    VehiclePropValue v;
+    v.prop = VENDOR_SCREEN_POWER;
+    v.areaId = GLOBAL_AREA_ID;
+    v.timestamp = elapsedRealtimeNano();
+    v.value.int32Values = {mScreenOn.load() ? 1 : 0};
+    emitPropChange(v);
+}
+
+void SchuurmanVehicleHardware::publishApPowerStateReq(int32_t reqState,
+                                                      int32_t param) {
+    mLastApPowerStateReq.store(reqState);
+    mLastApPowerStateReqParam.store(param);
+
+    VehiclePropValue v;
+    v.prop = static_cast<int32_t>(VehicleProperty::AP_POWER_STATE_REQ);
+    v.areaId = GLOBAL_AREA_ID;
+    v.timestamp = elapsedRealtimeNano();
+    v.value.int32Values = {reqState, param};
+    emitPropChange(v);
+}
+
+void SchuurmanVehicleHardware::applyScreenPower(bool on, bool restoreBrightness) {
+    if (on) {
+        int restore = mLastNonZeroBrightness.load();
+        if (restore <= 0) restore = 50;
+
+        setBacklightEnable(true);
+
+        if (restoreBrightness) {
+            writePwm(restore);
+            mCurrentBrightness.store(restore);
+        }
+
+        // Ensure PWM is non-zero even if current brightness was 0.
+        if (mCurrentBrightness.load() <= 0) {
+            mCurrentBrightness.store(restore);
+            writePwm(restore);
+        }
+
+        mScreenOn.store(true);
+    } else {
+        int current = mCurrentBrightness.load();
+        if (current > 0) {
+            mLastNonZeroBrightness.store(current);
+        }
+
+        writePwm(0);
+        setBacklightEnable(false);
+        mCurrentBrightness.store(0);
+        mScreenOn.store(false);
+    }
+
+    publishCurrentBrightness();
+    publishVendorScreenPower();
+}
+
+void SchuurmanVehicleHardware::handleApPowerStateReport(
+        const VehiclePropValue& request) {
+    if (request.value.int32Values.empty()) {
+        LOG(WARNING) << "AP_POWER_STATE_REPORT received without payload";
+        return;
+    }
+
+    const int32_t state = request.value.int32Values[0];
+    const int32_t param =
+            request.value.int32Values.size() > 1 ? request.value.int32Values[1] : 0;
+
+    mLastApPowerStateReport.store(state);
+    mLastApPowerStateReportParam.store(param);
+
+    LOG(INFO) << "AP_POWER_STATE_REPORT state=" << state << " param=" << param;
+
+    switch (static_cast<VehicleApPowerStateReport>(state)) {
+        case VehicleApPowerStateReport::ON:
+        case VehicleApPowerStateReport::DEEP_SLEEP_EXIT:
+        case VehicleApPowerStateReport::HIBERNATION_EXIT:
+        case VehicleApPowerStateReport::SHUTDOWN_CANCELLED:
+        case VehicleApPowerStateReport::WAIT_FOR_VHAL:
+            applyScreenPower(true, true);
+            break;
+
+        case VehicleApPowerStateReport::DEEP_SLEEP_ENTRY:
+        case VehicleApPowerStateReport::HIBERNATION_ENTRY:
+        case VehicleApPowerStateReport::SHUTDOWN_PREPARE:
+        case VehicleApPowerStateReport::SHUTDOWN_START:
+            applyScreenPower(false, false);
+            break;
+
+        case VehicleApPowerStateReport::SHUTDOWN_POSTPONE:
+            // Keep state as-is while Android finishes its cleanup work.
+            break;
+
+        default:
+            LOG(INFO) << "Ignoring unhandled AP power report state=" << state;
+            break;
+    }
+}
+
+StatusCode SchuurmanVehicleHardware::setValueInternal(
+        const VehiclePropValue& request, VehiclePropValue* updatedValue) {
     if (request.prop == static_cast<int32_t>(VehicleProperty::DISPLAY_BRIGHTNESS)) {
         if (!request.value.int32Values.empty()) {
             int brightness = request.value.int32Values[0];
+            if (brightness < 0) brightness = 0;
+            if (brightness > 100) brightness = 100;
+
             if (!mAutoBrightnessEnabled.load()) {
-                writePwm(brightness);
+                if (brightness > 0) {
+                    mLastNonZeroBrightness.store(brightness);
+                }
                 mCurrentBrightness.store(brightness);
+
+                if (mScreenOn.load()) {
+                    writePwm(brightness);
+                }
+
+                publishCurrentBrightness();
             } else {
-                LOG(INFO) << "Manual brightness set ignored (Auto Enabled)";
+                LOG(INFO) << "Ignoring manual brightness update because auto brightness is enabled";
             }
         }
     } else if (request.prop == VENDOR_SCREEN_POWER) {
         if (!request.value.int32Values.empty()) {
-            bool on = (request.value.int32Values[0] == 1);
-            setBacklightEnable(on);
-            mScreenOn.store(on);
-            
-            VehiclePropValue v = request;
-            v.areaId = GLOBAL_AREA_ID;
-            v.timestamp = elapsedRealtimeNano();
-            emitPropChange(v);
+            const bool on = (request.value.int32Values[0] == 1);
+            applyScreenPower(on, true);
         }
     } else if (request.prop == VENDOR_AUTO_BRIGHTNESS) {
         if (!request.value.int32Values.empty()) {
-            bool enable = request.value.int32Values[0] == 1;
+            const bool enable = request.value.int32Values[0] == 1;
             mAutoBrightnessEnabled.store(enable);
-            
+
             VehiclePropValue v = request;
             v.areaId = GLOBAL_AREA_ID;
             v.timestamp = elapsedRealtimeNano();
             emitPropChange(v);
         }
+    } else if (request.prop ==
+               static_cast<int32_t>(VehicleProperty::AP_POWER_STATE_REPORT)) {
+        handleApPowerStateReport(request);
     } else {
-        // Other properties not writable in this implementation
         return StatusCode::INVALID_ARG;
     }
 
@@ -413,13 +539,12 @@ StatusCode SchuurmanVehicleHardware::setValueInternal(const VehiclePropValue& re
     return StatusCode::OK;
 }
 
-StatusCode SchuurmanVehicleHardware::getValueInternal(const VehiclePropValue& request,
-                                                      VehiclePropValue* response) const {
+StatusCode SchuurmanVehicleHardware::getValueInternal(
+        const VehiclePropValue& request, VehiclePropValue* response) const {
     response->prop = request.prop;
     response->areaId = (request.areaId != 0 ? request.areaId : GLOBAL_AREA_ID);
     response->timestamp = elapsedRealtimeNano();
 
-    // -- IDENTITY PROPERTIES (Fixes GMS Crash) --
     switch (static_cast<VehicleProperty>(request.prop)) {
         case VehicleProperty::INFO_MAKE:
             response->value.stringValue = "Schuurman";
@@ -431,22 +556,19 @@ StatusCode SchuurmanVehicleHardware::getValueInternal(const VehiclePropValue& re
             response->value.int32Values = {2026};
             return StatusCode::OK;
         case VehicleProperty::INFO_FUEL_CAPACITY:
-            response->value.floatValues = {50000.0f}; // 50kWh (roughly) or 50L
+            response->value.floatValues = {50000.0f};
             return StatusCode::OK;
         case VehicleProperty::INFO_FUEL_TYPE:
-            response->value.int32Values = {static_cast<int32_t>(FuelType::FUEL_TYPE_ELECTRIC)};
+            response->value.int32Values = {
+                    static_cast<int32_t>(FuelType::FUEL_TYPE_ELECTRIC)};
             return StatusCode::OK;
-            
-        // -- SEAT PROPERTIES (Fixes CarService/Bluetooth Crash) --
         case VehicleProperty::INFO_DRIVER_SEAT:
-            response->value.int32Values = {DRIVER_SEAT_ID}; 
+            response->value.int32Values = {DRIVER_SEAT_ID};
             return StatusCode::OK;
         case VehicleProperty::SEAT_OCCUPANCY:
-            // Force occupied to prevent system from thinking driver is absent
-            response->value.int32Values = {static_cast<int32_t>(VehicleSeatOccupancyState::OCCUPIED)};
+            response->value.int32Values = {
+                    static_cast<int32_t>(VehicleSeatOccupancyState::OCCUPIED)};
             return StatusCode::OK;
-
-        // -- DYNAMIC PROPERTIES --
         case VehicleProperty::DISPLAY_BRIGHTNESS:
             response->value.int32Values = {mCurrentBrightness.load()};
             return StatusCode::OK;
@@ -462,11 +584,20 @@ StatusCode SchuurmanVehicleHardware::getValueInternal(const VehiclePropValue& re
         case VehicleProperty::PARKING_BRAKE_ON:
             response->value.int32Values = {mParkingBrakeOn.load()};
             return StatusCode::OK;
-            
+        case VehicleProperty::AP_POWER_STATE_REQ:
+            response->value.int32Values = {
+                    mLastApPowerStateReq.load(),
+                    mLastApPowerStateReqParam.load()};
+            return StatusCode::OK;
+        case VehicleProperty::AP_POWER_STATE_REPORT:
+            response->value.int32Values = {
+                    mLastApPowerStateReport.load(),
+                    mLastApPowerStateReportParam.load()};
+            return StatusCode::OK;
         default:
-            // Check Vendor Properties
             if (request.prop == VENDOR_AUTO_BRIGHTNESS) {
-                response->value.int32Values = {mAutoBrightnessEnabled.load() ? 1 : 0};
+                response->value.int32Values = {
+                        mAutoBrightnessEnabled.load() ? 1 : 0};
                 return StatusCode::OK;
             }
             if (request.prop == VENDOR_SCREEN_POWER) {
@@ -480,53 +611,50 @@ StatusCode SchuurmanVehicleHardware::getValueInternal(const VehiclePropValue& re
 std::vector<VehiclePropConfig> SchuurmanVehicleHardware::getAllPropertyConfigs() const {
     std::vector<VehiclePropConfig> configs;
 
-    // Helper for simple read-only global configs
-    auto addGlobalRO = [&](int32_t propId, int32_t changeMode = static_cast<int32_t>(VehiclePropertyChangeMode::STATIC)) {
+    auto addGlobalRO = [&](int32_t propId,
+                           int32_t changeMode =
+                                   static_cast<int32_t>(VehiclePropertyChangeMode::STATIC)) {
         VehiclePropConfig c;
         c.prop = propId;
         c.access = VehiclePropertyAccess::READ;
         c.changeMode = static_cast<VehiclePropertyChangeMode>(changeMode);
-        c.areaConfigs = {{ .areaId = GLOBAL_AREA_ID }};
+        c.areaConfigs = {{.areaId = GLOBAL_AREA_ID}};
         configs.push_back(c);
     };
 
-    // --- IDENTITY (MANDATORY FOR GMS) ---
     addGlobalRO(static_cast<int32_t>(VehicleProperty::INFO_MAKE));
     addGlobalRO(static_cast<int32_t>(VehicleProperty::INFO_MODEL));
     addGlobalRO(static_cast<int32_t>(VehicleProperty::INFO_MODEL_YEAR));
     addGlobalRO(static_cast<int32_t>(VehicleProperty::INFO_FUEL_CAPACITY));
     addGlobalRO(static_cast<int32_t>(VehicleProperty::INFO_FUEL_TYPE));
-
-    // --- SEATS (MANDATORY FOR BLUETOOTH/USER) ---
     addGlobalRO(static_cast<int32_t>(VehicleProperty::INFO_DRIVER_SEAT));
-    
-    // SEAT_OCCUPANCY (Dynamic)
+
     {
         VehiclePropConfig c;
         c.prop = static_cast<int32_t>(VehicleProperty::SEAT_OCCUPANCY);
         c.access = VehiclePropertyAccess::READ;
         c.changeMode = VehiclePropertyChangeMode::ON_CHANGE;
-        // Define specifically for Driver Seat
-        c.areaConfigs = {{ .areaId = DRIVER_SEAT_ID, .minInt32Value = 0, .maxInt32Value = 3 }};
+        c.areaConfigs = {{
+                .areaId = DRIVER_SEAT_ID,
+                .minInt32Value = 0,
+                .maxInt32Value = 3,
+        }};
         configs.push_back(c);
     }
 
-    // --- STANDARD DRIVING PROPERTIES ---
-    // GEAR_SELECTION
     {
         VehiclePropConfig c;
         c.prop = static_cast<int32_t>(VehicleProperty::GEAR_SELECTION);
         c.access = VehiclePropertyAccess::READ;
         c.changeMode = VehiclePropertyChangeMode::ON_CHANGE;
         c.areaConfigs = {{
-            .areaId = GLOBAL_AREA_ID,
-            .minInt32Value = static_cast<int32_t>(VehicleGear::GEAR_PARK),
-            .maxInt32Value = static_cast<int32_t>(VehicleGear::GEAR_REVERSE),
+                .areaId = GLOBAL_AREA_ID,
+                .minInt32Value = static_cast<int32_t>(VehicleGear::GEAR_PARK),
+                .maxInt32Value = static_cast<int32_t>(VehicleGear::GEAR_REVERSE),
         }};
         configs.push_back(c);
     }
 
-    // PERF_VEHICLE_SPEED
     {
         VehiclePropConfig c;
         c.prop = static_cast<int32_t>(VehicleProperty::PERF_VEHICLE_SPEED);
@@ -534,58 +662,97 @@ std::vector<VehiclePropConfig> SchuurmanVehicleHardware::getAllPropertyConfigs()
         c.changeMode = VehiclePropertyChangeMode::CONTINUOUS;
         c.minSampleRate = 1.0f;
         c.maxSampleRate = 100.0f;
-        c.areaConfigs = {{ .areaId = GLOBAL_AREA_ID, .minFloatValue = 0.0f, .maxFloatValue = 100.0f }};
+        c.areaConfigs = {{
+                .areaId = GLOBAL_AREA_ID,
+                .minFloatValue = 0.0f,
+                .maxFloatValue = 100.0f,
+        }};
         configs.push_back(c);
     }
 
-    // IGNITION_STATE
     {
         VehiclePropConfig c;
         c.prop = static_cast<int32_t>(VehicleProperty::IGNITION_STATE);
         c.access = VehiclePropertyAccess::READ;
         c.changeMode = VehiclePropertyChangeMode::ON_CHANGE;
-        c.areaConfigs = {{ .areaId = GLOBAL_AREA_ID, .minInt32Value = 0, .maxInt32Value = 7 }};
+        c.areaConfigs = {{
+                .areaId = GLOBAL_AREA_ID,
+                .minInt32Value = 0,
+                .maxInt32Value = 7,
+        }};
         configs.push_back(c);
     }
 
-    // PARKING_BRAKE_ON
     {
         VehiclePropConfig c;
         c.prop = static_cast<int32_t>(VehicleProperty::PARKING_BRAKE_ON);
         c.access = VehiclePropertyAccess::READ;
         c.changeMode = VehiclePropertyChangeMode::ON_CHANGE;
-        c.areaConfigs = {{ .areaId = GLOBAL_AREA_ID, .minInt32Value = 0, .maxInt32Value = 1 }};
+        c.areaConfigs = {{
+                .areaId = GLOBAL_AREA_ID,
+                .minInt32Value = 0,
+                .maxInt32Value = 1,
+        }};
         configs.push_back(c);
     }
 
-    // DISPLAY_BRIGHTNESS
     {
         VehiclePropConfig c;
         c.prop = static_cast<int32_t>(VehicleProperty::DISPLAY_BRIGHTNESS);
         c.access = VehiclePropertyAccess::READ_WRITE;
         c.changeMode = VehiclePropertyChangeMode::ON_CHANGE;
-        c.areaConfigs = {{ .areaId = GLOBAL_AREA_ID, .minInt32Value = 0, .maxInt32Value = 100 }};
+        c.areaConfigs = {{
+                .areaId = GLOBAL_AREA_ID,
+                .minInt32Value = 0,
+                .maxInt32Value = 100,
+        }};
         configs.push_back(c);
     }
 
-    // --- VENDOR PROPERTIES ---
-    // Auto Brightness
     {
         VehiclePropConfig c;
         c.prop = VENDOR_AUTO_BRIGHTNESS;
         c.access = VehiclePropertyAccess::READ_WRITE;
         c.changeMode = VehiclePropertyChangeMode::ON_CHANGE;
-        c.areaConfigs = {{ .areaId = GLOBAL_AREA_ID, .minInt32Value = 0, .maxInt32Value = 1 }};
+        c.areaConfigs = {{
+                .areaId = GLOBAL_AREA_ID,
+                .minInt32Value = 0,
+                .maxInt32Value = 1,
+        }};
         configs.push_back(c);
     }
 
-    // Screen Power
     {
         VehiclePropConfig c;
         c.prop = VENDOR_SCREEN_POWER;
         c.access = VehiclePropertyAccess::READ_WRITE;
         c.changeMode = VehiclePropertyChangeMode::ON_CHANGE;
-        c.areaConfigs = {{ .areaId = GLOBAL_AREA_ID, .minInt32Value = 0, .maxInt32Value = 1 }};
+        c.areaConfigs = {{
+                .areaId = GLOBAL_AREA_ID,
+                .minInt32Value = 0,
+                .maxInt32Value = 1,
+        }};
+        configs.push_back(c);
+    }
+
+    // Correct AAOS direction:
+    // AP_POWER_STATE_REQ is VHAL -> Android
+    {
+        VehiclePropConfig c;
+        c.prop = static_cast<int32_t>(VehicleProperty::AP_POWER_STATE_REQ);
+        c.access = VehiclePropertyAccess::READ;
+        c.changeMode = VehiclePropertyChangeMode::ON_CHANGE;
+        c.areaConfigs = {{.areaId = GLOBAL_AREA_ID}};
+        configs.push_back(c);
+    }
+
+    // AP_POWER_STATE_REPORT is Android -> VHAL
+    {
+        VehiclePropConfig c;
+        c.prop = static_cast<int32_t>(VehicleProperty::AP_POWER_STATE_REPORT);
+        c.access = VehiclePropertyAccess::READ_WRITE;
+        c.changeMode = VehiclePropertyChangeMode::ON_CHANGE;
+        c.areaConfigs = {{.areaId = GLOBAL_AREA_ID}};
         configs.push_back(c);
     }
 
@@ -596,11 +763,10 @@ void SchuurmanVehicleHardware::pollInputs() {
     int lastGearState = -2;
 
     while (!mShuttingDown.load()) {
-        // Retry GPIO init on race
         if (mGearFd < 0 || mBacklightEnableFd < 0) {
             static int retryCounter = 0;
             if (retryCounter++ % 10 == 0) {
-                LOG(INFO) << "Retrying GPIO initialization...";
+                LOG(INFO) << "Retrying GPIO initialization";
                 initGpios();
             }
         }
@@ -609,13 +775,13 @@ void SchuurmanVehicleHardware::pollInputs() {
             int gearState = readGearGpio();
 
             if (gearState < 0) {
-                LOG(ERROR) << "Failed to read Gear GPIO. Resetting FD.";
+                LOG(ERROR) << "Failed to read gear GPIO, resetting FD";
                 close(mGearFd);
                 mGearFd = -1;
             } else if (gearState != lastGearState) {
-                LOG(INFO) << "Gear GPIO Changed: " << lastGearState << " -> " << gearState;
+                LOG(INFO) << "Gear GPIO changed: " << lastGearState
+                          << " -> " << gearState;
 
-                // gearState==1 -> REVERSE, else PARK
                 int32_t newGear = (gearState == 1)
                         ? static_cast<int32_t>(VehicleGear::GEAR_REVERSE)
                         : static_cast<int32_t>(VehicleGear::GEAR_PARK);
@@ -627,15 +793,14 @@ void SchuurmanVehicleHardware::pollInputs() {
                     v.prop = static_cast<int32_t>(VehicleProperty::GEAR_SELECTION);
                     v.areaId = GLOBAL_AREA_ID;
                     v.timestamp = elapsedRealtimeNano();
-                    v.value.int32Values = { newGear };
+                    v.value.int32Values = {newGear};
                     emitPropChange(v);
 
-                    LOG(INFO) << "Published gear state: " << newGear;
+                    LOG(INFO) << "Published gear state " << newGear;
                 }
                 lastGearState = gearState;
             }
         } else {
-            // Safety Fallback
             static bool forcedOnce = false;
             if (!forcedOnce) {
                 forcedOnce = true;
@@ -645,10 +810,10 @@ void SchuurmanVehicleHardware::pollInputs() {
                 v.prop = static_cast<int32_t>(VehicleProperty::GEAR_SELECTION);
                 v.areaId = GLOBAL_AREA_ID;
                 v.timestamp = elapsedRealtimeNano();
-                v.value.int32Values = { mCurrentGear.load() };
+                v.value.int32Values = {mCurrentGear.load()};
                 emitPropChange(v);
 
-                LOG(WARNING) << "GPIO unavailable; forcing gear=PARK";
+                LOG(WARNING) << "GPIO unavailable, forcing gear=PARK";
             }
         }
 
@@ -664,13 +829,17 @@ void SchuurmanVehicleHardware::sensorLoop() {
     while (mSensorThreadRunning.load()) {
         int raw = readIntFileNoExcept(mLightSensorPath);
         if (raw >= 0) {
-            if (ema < 0) ema = static_cast<double>(raw);
-            else ema = alpha * static_cast<double>(raw) + (1.0 - alpha) * ema;
+            if (ema < 0) {
+                ema = static_cast<double>(raw);
+            } else {
+                ema = alpha * static_cast<double>(raw) + (1.0 - alpha) * ema;
+            }
 
             double maxLux = static_cast<double>(mSensorRawMax);
             if (maxLux < 1.0) maxLux = 1.0;
 
-            double percent = (log(1.0 + ema) / log(1.0 + maxLux)) * 100.0;
+            double percent =
+                    (log(1.0 + ema) / log(1.0 + maxLux)) * 100.0;
             if (percent < 0.0) percent = 0.0;
             if (percent > 100.0) percent = 100.0;
 
@@ -680,45 +849,62 @@ void SchuurmanVehicleHardware::sensorLoop() {
                 int last = mAutoTargetBrightness.load();
                 if (last < 0 || std::abs(intPercent - last) >= 2) {
                     mAutoTargetBrightness.store(intPercent);
+
                     if (mScreenOn.load()) {
+                        if (intPercent > 0) {
+                            mLastNonZeroBrightness.store(intPercent);
+                        }
                         writePwm(intPercent);
                         mCurrentBrightness.store(intPercent);
-
-                        VehiclePropValue v;
-                        v.prop = static_cast<int32_t>(VehicleProperty::DISPLAY_BRIGHTNESS);
-                        v.areaId = GLOBAL_AREA_ID;
-                        v.timestamp = elapsedRealtimeNano();
-                        v.value.int32Values = {mCurrentBrightness.load()};
-                        emitPropChange(v);
+                        publishCurrentBrightness();
                     }
                 }
             }
         }
+
         std::this_thread::sleep_for(std::chrono::milliseconds(pollMs));
     }
 }
 
-// Boilerplate
-StatusCode SchuurmanVehicleHardware::checkHealth() { return StatusCode::OK; }
-void SchuurmanVehicleHardware::registerOnPropertyChangeEvent(std::unique_ptr<const PropertyChangeCallback> callback) {
+StatusCode SchuurmanVehicleHardware::checkHealth() {
+    return StatusCode::OK;
+}
+
+void SchuurmanVehicleHardware::registerOnPropertyChangeEvent(
+        std::unique_ptr<const PropertyChangeCallback> callback) {
     std::lock_guard<std::mutex> lk(mCallbackMutex);
     mOnPropChange = std::move(callback);
     emitInitialStatesLocked();
 }
-void SchuurmanVehicleHardware::registerOnPropertySetErrorEvent(std::unique_ptr<const PropertySetErrorCallback> callback) {
+
+void SchuurmanVehicleHardware::registerOnPropertySetErrorEvent(
+        std::unique_ptr<const PropertySetErrorCallback> callback) {
     std::lock_guard<std::mutex> lk(mCallbackMutex);
     mOnSetError = std::move(callback);
 }
-StatusCode SchuurmanVehicleHardware::subscribe(SubscribeOptions) { return StatusCode::OK; }
-StatusCode SchuurmanVehicleHardware::unsubscribe(int32_t, int32_t) { return StatusCode::OK; }
-StatusCode SchuurmanVehicleHardware::updateSampleRate(int32_t, int32_t, float) { return StatusCode::OK; }
-DumpResult SchuurmanVehicleHardware::dump(const std::vector<std::string>&) { return {}; }
+
+StatusCode SchuurmanVehicleHardware::subscribe(SubscribeOptions) {
+    return StatusCode::OK;
+}
+
+StatusCode SchuurmanVehicleHardware::unsubscribe(int32_t, int32_t) {
+    return StatusCode::OK;
+}
+
+StatusCode SchuurmanVehicleHardware::updateSampleRate(int32_t, int32_t, float) {
+    return StatusCode::OK;
+}
+
+DumpResult SchuurmanVehicleHardware::dump(const std::vector<std::string>&) {
+    return {};
+}
 
 StatusCode SchuurmanVehicleHardware::getValues(
         std::shared_ptr<const GetValuesCallback> callback,
         const std::vector<GetValueRequest>& requests) const {
     std::vector<GetValueResult> results;
     results.reserve(requests.size());
+
     for (const auto& req : requests) {
         GetValueResult res;
         res.requestId = req.requestId;
@@ -729,6 +915,7 @@ StatusCode SchuurmanVehicleHardware::getValues(
         }
         results.push_back(std::move(res));
     }
+
     (*callback)(std::move(results));
     return StatusCode::OK;
 }
@@ -738,12 +925,14 @@ StatusCode SchuurmanVehicleHardware::setValues(
         const std::vector<SetValueRequest>& requests) {
     std::vector<SetValueResult> results;
     results.reserve(requests.size());
+
     for (const auto& req : requests) {
         SetValueResult res;
         res.requestId = req.requestId;
         res.status = setValueInternal(req.value, nullptr);
         results.push_back(std::move(res));
     }
+
     (*callback)(std::move(results));
     return StatusCode::OK;
 }
