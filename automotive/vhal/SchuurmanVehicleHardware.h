@@ -110,12 +110,12 @@ class SchuurmanVehicleHardware : public IVehicleHardware {
     std::string mLightSensorPath;
     int mSensorRawMax;
 
+    std::atomic<bool> mAutoBrightnessEnabled;
+    std::atomic<int> mAutoTargetBrightness;
+
     std::atomic<bool> mDisplayThreadRunning;
     std::thread mDisplayThread;
     std::string mDisplayDpmsPath;
-
-    std::atomic<bool> mAutoBrightnessEnabled;
-    std::atomic<int> mAutoTargetBrightness;
 
     // Track AAOS power properties explicitly.
     std::atomic<int32_t> mLastApPowerStateReq;
