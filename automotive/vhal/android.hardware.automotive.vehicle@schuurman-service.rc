@@ -1,7 +1,7 @@
 service vendor.vehicle-schuurman /vendor/bin/hw/android.hardware.automotive.vehicle@schuurman-service
     class early_hal
     user vehicle_network
-    group system inet
+    group system inet input
     interface aidl android.hardware.automotive.vehicle.IVehicle/default
 
 on early-boot

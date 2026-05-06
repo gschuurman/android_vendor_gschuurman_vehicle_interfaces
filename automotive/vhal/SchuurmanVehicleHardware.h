@@ -63,6 +63,10 @@ class SchuurmanVehicleHardware : public IVehicleHardware {
     void displayStateLoop();
     std::string findDisplayDpmsPath();
 
+    void touchWakeLoop();
+    static int findInputDeviceByVidPid(uint16_t vendor, uint16_t product);
+    static int findInputDeviceWithKey(uint16_t keyCode);
+
     void writePwm(int percentage);
     void setBacklightEnable(bool on);
     int readGearGpio();
@@ -117,11 +121,17 @@ class SchuurmanVehicleHardware : public IVehicleHardware {
     std::thread mDisplayThread;
     std::string mDisplayDpmsPath;
 
+    std::atomic<bool> mTouchWakeThreadRunning;
+    std::thread mTouchWakeThread;
+
     // Track AAOS power properties explicitly.
     std::atomic<int32_t> mLastApPowerStateReq;
     std::atomic<int32_t> mLastApPowerStateReqParam;
     std::atomic<int32_t> mLastApPowerStateReport;
     std::atomic<int32_t> mLastApPowerStateReportParam;
+
+    std::string mCurrentPolicyGroup;
+    std::string mCurrentPolicyReq;
 
     mutable std::mutex mCallbackMutex;
     std::unique_ptr<const PropertyChangeCallback> mOnPropChange GUARDED_BY(mCallbackMutex);

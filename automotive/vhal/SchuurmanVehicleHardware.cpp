@@ -17,6 +17,8 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <linux/gpio.h>
+#include <linux/input.h>
+#include <poll.h>
 #include <string.h>
 #include <sys/ioctl.h>
 #include <unistd.h>
@@ -47,6 +49,10 @@ using ::aidl::android::hardware::automotive::vehicle::VehicleSeatOccupancyState;
 
 static const int32_t VENDOR_AUTO_BRIGHTNESS = 0x12000001;
 static const int32_t VENDOR_SCREEN_POWER = 0x21400555;
+
+// SYSTEM | GLOBAL | STRING — VHAL → CarPowerPolicyService
+static const int32_t POWER_POLICY_REQ       = 0x11100F21;
+static const int32_t POWER_POLICY_GROUP_REQ = 0x11100F22;
 
 static constexpr int32_t PWM_PERIOD_NS = 30518;
 static constexpr int32_t GLOBAL_AREA_ID = 0;
@@ -121,10 +127,13 @@ SchuurmanVehicleHardware::SchuurmanVehicleHardware()
       mAutoBrightnessEnabled(false),
       mAutoTargetBrightness(-1),
       mDisplayThreadRunning(false),
+      mTouchWakeThreadRunning(false),
       mLastApPowerStateReq(static_cast<int32_t>(VehicleApPowerStateReq::ON)),
       mLastApPowerStateReqParam(0),
       mLastApPowerStateReport(static_cast<int32_t>(VehicleApPowerStateReport::ON)),
-      mLastApPowerStateReportParam(0) {
+      mLastApPowerStateReportParam(0),
+      mCurrentPolicyGroup("default_group"),
+      mCurrentPolicyReq("") {
     LOG(INFO) << "Initializing SchuurmanVehicleHardware";
 
     mPwmChipBase = findPwmChipPath();
@@ -147,6 +156,9 @@ SchuurmanVehicleHardware::SchuurmanVehicleHardware()
         LOG(WARNING) << "Display DPMS path not found - backlight won't track display sleep";
     }
 
+    mTouchWakeThreadRunning.store(true);
+    mTouchWakeThread = std::thread(&SchuurmanVehicleHardware::touchWakeLoop, this);
+
     LOG(INFO) << "Initial gear forced to PARK";
     LOG(INFO) << "Ignition forced ON; parking brake ON";
 }
@@ -160,6 +172,9 @@ SchuurmanVehicleHardware::~SchuurmanVehicleHardware() {
 
     mDisplayThreadRunning.store(false);
     if (mDisplayThread.joinable()) mDisplayThread.join();
+
+    mTouchWakeThreadRunning.store(false);
+    if (mTouchWakeThread.joinable()) mTouchWakeThread.join();
 
     if (mBacklightEnableFd >= 0) close(mBacklightEnableFd);
     if (mGearFd >= 0) close(mGearFd);
@@ -212,6 +227,16 @@ void SchuurmanVehicleHardware::emitInitialStatesLocked() {
     addIntEvent(static_cast<int32_t>(VehicleProperty::SEAT_OCCUPANCY),
                 DRIVER_SEAT_ID,
                 static_cast<int32_t>(VehicleSeatOccupancyState::OCCUPIED));
+
+    // Tell CarPowerPolicyService which policy group to use (defined in power_policy.xml).
+    {
+        VehiclePropValue v;
+        v.prop = POWER_POLICY_GROUP_REQ;
+        v.areaId = GLOBAL_AREA_ID;
+        v.timestamp = elapsedRealtimeNano();
+        v.value.stringValue = mCurrentPolicyGroup;
+        events.push_back(v);
+    }
 
     // Since there is no external VMCU in your setup, expose a sane default AP request.
     {
@@ -479,6 +504,9 @@ void SchuurmanVehicleHardware::handleApPowerStateReport(
         case VehicleApPowerStateReport::SHUTDOWN_CANCELLED:
         case VehicleApPowerStateReport::WAIT_FOR_VHAL:
             applyScreenPower(true, true);
+            // Android is ready and waiting — tell it to go to ON so the
+            // policyGroup transitions from WaitForVHAL → On.
+            publishApPowerStateReq(static_cast<int32_t>(VehicleApPowerStateReq::ON));
             break;
 
         case VehicleApPowerStateReport::DEEP_SLEEP_ENTRY:
@@ -616,6 +644,14 @@ StatusCode SchuurmanVehicleHardware::getValueInternal(
                 response->value.int32Values = {mScreenOn.load() ? 1 : 0};
                 return StatusCode::OK;
             }
+            if (request.prop == POWER_POLICY_GROUP_REQ) {
+                response->value.stringValue = mCurrentPolicyGroup;
+                return StatusCode::OK;
+            }
+            if (request.prop == POWER_POLICY_REQ) {
+                response->value.stringValue = mCurrentPolicyReq;
+                return StatusCode::OK;
+            }
             return StatusCode::INVALID_ARG;
     }
 }
@@ -744,6 +780,25 @@ std::vector<VehiclePropConfig> SchuurmanVehicleHardware::getAllPropertyConfigs()
                 .minInt32Value = 0,
                 .maxInt32Value = 1,
         }};
+        configs.push_back(c);
+    }
+
+    // POWER_POLICY_GROUP_REQ and POWER_POLICY_REQ are VHAL → CarPowerPolicyService.
+    {
+        VehiclePropConfig c;
+        c.prop = POWER_POLICY_GROUP_REQ;
+        c.access = VehiclePropertyAccess::READ;
+        c.changeMode = VehiclePropertyChangeMode::ON_CHANGE;
+        c.areaConfigs = {{.areaId = GLOBAL_AREA_ID}};
+        configs.push_back(c);
+    }
+
+    {
+        VehiclePropConfig c;
+        c.prop = POWER_POLICY_REQ;
+        c.access = VehiclePropertyAccess::READ;
+        c.changeMode = VehiclePropertyChangeMode::ON_CHANGE;
+        c.areaConfigs = {{.areaId = GLOBAL_AREA_ID}};
         configs.push_back(c);
     }
 
@@ -989,6 +1044,114 @@ StatusCode SchuurmanVehicleHardware::setValues(
 
     (*callback)(std::move(results));
     return StatusCode::OK;
+}
+
+// Scan /dev/input/event* for a device matching the given USB vendor/product ID.
+// Returns an open O_RDONLY fd, or -1 if not found.
+int SchuurmanVehicleHardware::findInputDeviceByVidPid(uint16_t vendor, uint16_t product) {
+    for (int i = 0; i < 32; i++) {
+        std::string path = "/dev/input/event" + std::to_string(i);
+        int fd = open(path.c_str(), O_RDONLY | O_NONBLOCK | O_CLOEXEC);
+        if (fd < 0) continue;
+        struct input_id id = {};
+        if (ioctl(fd, EVIOCGID, &id) == 0 &&
+            id.vendor == vendor && id.product == product) {
+            return fd;
+        }
+        close(fd);
+    }
+    return -1;
+}
+
+// Scan /dev/input/event* for a device that reports the given EV_KEY keyCode.
+// Returns an open O_RDWR fd (needed to write events), or -1 if not found.
+int SchuurmanVehicleHardware::findInputDeviceWithKey(uint16_t keyCode) {
+    // 32 bytes covers key codes 0-255; KEY_WAKEUP = 143 fits comfortably.
+    constexpr size_t kBufBytes = 32;
+    for (int i = 0; i < 32; i++) {
+        std::string path = "/dev/input/event" + std::to_string(i);
+        int fd = open(path.c_str(), O_RDWR | O_NONBLOCK | O_CLOEXEC);
+        if (fd < 0) continue;
+        uint8_t bits[kBufBytes] = {};
+        if (ioctl(fd, EVIOCGBIT(EV_KEY, kBufBytes), bits) >= 0 &&
+            (bits[keyCode / 8] & (1u << (keyCode % 8)))) {
+            return fd;
+        }
+        close(fd);
+    }
+    return -1;
+}
+
+// Monitor the WaveShare touch device. When a finger-down event arrives while
+// the display is off, inject KEY_WAKEUP into the CEC device to wake Android.
+void SchuurmanVehicleHardware::touchWakeLoop() {
+    constexpr uint16_t kVendor  = 0x0eef;
+    constexpr uint16_t kProduct = 0x0005;
+    constexpr uint16_t kKeyWakeup = KEY_WAKEUP;  // 143
+
+    int touchFd = -1;
+    int wakeFd  = -1;
+
+    while (mTouchWakeThreadRunning.load()) {
+        // (Re-)open devices if needed.
+        if (touchFd < 0) {
+            touchFd = findInputDeviceByVidPid(kVendor, kProduct);
+            if (touchFd < 0) {
+                std::this_thread::sleep_for(std::chrono::seconds(2));
+                continue;
+            }
+            // Switch to blocking mode for poll().
+            int flags = fcntl(touchFd, F_GETFL, 0);
+            fcntl(touchFd, F_SETFL, flags & ~O_NONBLOCK);
+            LOG(INFO) << "touchWakeLoop: opened touch device";
+        }
+        if (wakeFd < 0) {
+            wakeFd = findInputDeviceWithKey(kKeyWakeup);
+            if (wakeFd < 0) {
+                LOG(WARNING) << "touchWakeLoop: no KEY_WAKEUP device found, retrying";
+                std::this_thread::sleep_for(std::chrono::seconds(2));
+                continue;
+            }
+            LOG(INFO) << "touchWakeLoop: opened wakeup injection device";
+        }
+
+        struct pollfd pfd = {touchFd, POLLIN, 0};
+        int ret = poll(&pfd, 1, 500);  // 500 ms timeout so we can check mTouchWakeThreadRunning
+        if (ret <= 0) continue;
+        if (!(pfd.revents & POLLIN)) continue;
+
+        struct input_event ev = {};
+        ssize_t n = read(touchFd, &ev, sizeof(ev));
+        if (n != sizeof(ev)) {
+            if (n == 0 || (n < 0 && errno != EAGAIN)) {
+                LOG(WARNING) << "touchWakeLoop: touch device read error, reopening";
+                close(touchFd);
+                touchFd = -1;
+            }
+            continue;
+        }
+
+        // BTN_TOUCH DOWN while screen is off → inject KEY_WAKEUP.
+        if (ev.type == EV_KEY && ev.code == BTN_TOUCH && ev.value == 1 &&
+            !mScreenOn.load()) {
+            LOG(INFO) << "touchWakeLoop: touch while screen off, injecting KEY_WAKEUP";
+
+            auto writeEvent = [&](uint16_t type, uint16_t code, int32_t value) {
+                struct input_event out = {};
+                out.type  = type;
+                out.code  = code;
+                out.value = value;
+                write(wakeFd, &out, sizeof(out));
+            };
+            writeEvent(EV_KEY, kKeyWakeup, 1);
+            writeEvent(EV_SYN, SYN_REPORT, 0);
+            writeEvent(EV_KEY, kKeyWakeup, 0);
+            writeEvent(EV_SYN, SYN_REPORT, 0);
+        }
+    }
+
+    if (touchFd >= 0) close(touchFd);
+    if (wakeFd  >= 0) close(wakeFd);
 }
 
 }  // namespace vehicle
