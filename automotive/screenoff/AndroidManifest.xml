@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.schuurman.vim3.screenoff">
+
+    <uses-permission android:name="android.permission.DEVICE_POWER" />
+
+    <application
+        android:label="Screen Off"
+        android:persistent="false"
+        android:allowBackup="false"
+        android:hasCode="true">
+
+        <activity
+            android:name=".ScreenOffActivity"
+            android:exported="true"
+            android:theme="@android:style/Theme.NoDisplay"
+            android:excludeFromRecents="true"
+            android:noHistory="true">
+            <intent-filter>
+                <action android:name="com.schuurman.vim3.action.SCREEN_OFF" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>

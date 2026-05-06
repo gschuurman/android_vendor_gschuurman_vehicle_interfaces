@@ -1,0 +1,19 @@
+android_app {
+    name: "ScreenOffService",
+    srcs: ["src/**/*.java"],
+    manifest: "AndroidManifest.xml",
+    platform_apis: true,
+    privileged: true,
+    certificate: "platform",
+    required: [
+        "privapp-permissions-screenoff",
+    ],
+}
+
+prebuilt_etc {
+    name: "privapp-permissions-screenoff",
+    src: "privapp-permissions-screenoff.xml",
+    sub_dir: "permissions",
+    product_specific: true,
+    filename_from_src: true,
+}
