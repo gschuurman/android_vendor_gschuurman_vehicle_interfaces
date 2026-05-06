@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Display configuration for the VIM3 1024x600 HDMI panel.
+    Status bar: 48px  Navigation bar: 60px  Usable height: 492px
+-->
+<displayConfiguration>
+    <projectionDisplayId>0</projectionDisplayId>
+</displayConfiguration>

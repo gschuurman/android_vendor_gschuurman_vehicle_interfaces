@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Match the device's system bar configuration -->
+    <bool name="rro_show_status_bar">false</bool>
+    <bool name="rro_show_navigation_bar">false</bool>
+    <bool name="rro_account_for_status_bar_insets">true</bool>
+    <bool name="rro_account_for_navigation_bar_insets">true</bool>
+
+    <!-- Projection capabilities -->
+    <bool name="rro_wired_projection_support">true</bool>
+    <bool name="rro_wireless_projection_support">true</bool>
+    <bool name="rro_projection_rotary_support">true</bool>
+
+    <!-- UI chrome -->
+    <bool name="rro_hide_battery">false</bool>
+    <bool name="rro_hide_clock">true</bool>
+    <bool name="rro_hide_phone">false</bool>
+
+    <!-- Misc -->
+    <bool name="rro_projection_overlay_handling">false</bool>
+    <bool name="rro_register_key_event_call_for_background">false</bool>
+    <integer name="rro_decoder_additional_depth">0</integer>
+    <integer name="rro_projection_ui_mode">0</integer>
+    <string name="rro_exit_icon_display_name" translatable="false"></string>
+</resources>

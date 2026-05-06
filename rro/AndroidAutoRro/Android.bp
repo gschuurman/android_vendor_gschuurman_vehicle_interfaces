@@ -1,0 +1,6 @@
+runtime_resource_overlay {
+    name: "AndroidAutoProjectionRro",
+    manifest: "AndroidManifest.xml",
+    resource_dirs: ["res"],
+    vendor: true,
+}
