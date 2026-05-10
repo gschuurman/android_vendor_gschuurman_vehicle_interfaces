@@ -22,4 +22,8 @@
     <integer name="rro_decoder_additional_depth">0</integer>
     <integer name="rro_projection_ui_mode">0</integer>
     <string name="rro_exit_icon_display_name" translatable="false"></string>
+
+    <!-- Notification: show a persistent notification while projecting -->
+    <bool name="rro_show_projecting_notification">false</bool>
+    <bool name="rro_enable_projecting_notification_for_background_projection">false</bool>
 </resources>
