@@ -1,0 +1,9 @@
+android_app {
+    name: "VolumeControl",
+    srcs: ["src/**/*.java"],
+    manifest: "AndroidManifest.xml",
+    sdk_version: "current",
+    product_specific: true,
+    certificate: "platform",
+    privileged: true,
+}

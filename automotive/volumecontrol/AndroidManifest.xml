@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.schuurman.vim3.volumecontrol">
+
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS"/>
+
+    <application
+        android:label="Volume Control"
+        android:allowBackup="false"
+        android:hasCode="true">
+
+        <receiver
+            android:name=".VolumeControlReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.schuurman.vim3.volumecontrol.VOLUME_UP"/>
+                <action android:name="com.schuurman.vim3.volumecontrol.VOLUME_DOWN"/>
+                <action android:name="com.schuurman.vim3.volumecontrol.VOLUME_MUTE"/>
+            </intent-filter>
+        </receiver>
+    </application>
+</manifest>
