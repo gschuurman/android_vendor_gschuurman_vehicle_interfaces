@@ -7,9 +7,3 @@ android_app {
     privileged: true,
 }
 
-prebuilt_etc {
-    name: "allowed_privapp_com.schuurman.vim3.volumecontrol",
-    sub_dir: "permissions",
-    src: "permissions/com.schuurman.vim3.volumecontrol.xml",
-    filename_from_src: true,
-}
