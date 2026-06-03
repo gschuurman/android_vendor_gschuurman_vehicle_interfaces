@@ -1,4 +1,0 @@
-# Force Wi-Fi on when boot completes to counter VIM3 HAL initialization delays
-on property:sys.boot_completed=1
-    exec_background - root root -- /system/bin/cmd wifi set-wifi-enabled disabled
-    exec_background - root root -- /system/bin/cmd wifi set-wifi-enabled enabled

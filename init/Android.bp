@@ -1,6 +1,3 @@
-prebuilt_etc {
-    name: "init.wifi_fix.rc",
-    src: "init.wifi_fix.rc",
-    sub_dir: "init",
-    soc_specific: true,
-}
+// wifi_fix.rc removed — exec_background in init context violates SELinux neverallows
+// (neverallow init to execute_no_trans, find services, or be a binder target).
+// WiFi is enabled by the standard WiFi HAL/service startup sequence.
