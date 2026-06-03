@@ -2,8 +2,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.schuurman.vim3.volumecontrol">
 
-    <uses-permission android:name="android.car.permission.CAR_CONTROL_AUDIO_VOLUME"/>
-
     <application
         android:label="Volume Control"
         android:allowBackup="false"
