@@ -477,7 +477,12 @@ void SchuurmanVehicleHardware::applyScreenPower(bool on, bool restoreBrightness)
         mScreenOn.store(false);
     }
 
-    publishCurrentBrightness();
+    // Only publish brightness to Android when turning on. Publishing brightness=0
+    // on screen-off causes Android to cache 0; it then sends DISPLAY_BRIGHTNESS=0
+    // back after wake-up, which overwrites the restored PWM value.
+    if (on) {
+        publishCurrentBrightness();
+    }
     publishVendorScreenPower();
 }
 

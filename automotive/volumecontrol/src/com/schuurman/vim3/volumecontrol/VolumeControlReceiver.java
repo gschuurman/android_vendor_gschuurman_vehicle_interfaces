@@ -1,14 +1,12 @@
 package com.schuurman.vim3.volumecontrol;
 
+import android.car.Car;
+import android.car.media.CarAudioManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.media.AudioManager;
+import android.media.AudioAttributes;
 
-/**
- * Handles volume up / down / mute broadcasts sent by CarSystemBarButton.
- * Uses FLAG=0 so no volume panel appears — safe for driving.
- */
 public class VolumeControlReceiver extends BroadcastReceiver {
 
     static final String ACTION_VOLUME_UP   = "com.schuurman.vim3.volumecontrol.VOLUME_UP";
@@ -17,23 +15,37 @@ public class VolumeControlReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        AudioManager am = context.getSystemService(AudioManager.class);
-        if (am == null || intent.getAction() == null) return;
+        if (intent.getAction() == null) return;
 
-        int direction;
-        switch (intent.getAction()) {
-            case ACTION_VOLUME_UP:
-                direction = AudioManager.ADJUST_RAISE;
-                break;
-            case ACTION_VOLUME_DOWN:
-                direction = AudioManager.ADJUST_LOWER;
-                break;
-            case ACTION_VOLUME_MUTE:
-                direction = AudioManager.ADJUST_TOGGLE_MUTE;
-                break;
-            default:
-                return;
+        Car car = Car.createCar(context);
+        if (car == null) return;
+        try {
+            CarAudioManager cam = (CarAudioManager) car.getCarManager(Car.AUDIO_SERVICE);
+            if (cam == null) return;
+
+            int groupId = cam.getVolumeGroupIdForUsage(AudioAttributes.USAGE_MEDIA);
+
+            switch (intent.getAction()) {
+                case ACTION_VOLUME_UP: {
+                    int current = cam.getGroupVolume(groupId);
+                    int max = cam.getGroupMaxVolume(groupId);
+                    cam.setGroupVolume(groupId, Math.min(current + 1, max), 0);
+                    break;
+                }
+                case ACTION_VOLUME_DOWN: {
+                    int current = cam.getGroupVolume(groupId);
+                    int min = cam.getGroupMinVolume(groupId);
+                    cam.setGroupVolume(groupId, Math.max(current - 1, min), 0);
+                    break;
+                }
+                case ACTION_VOLUME_MUTE: {
+                    boolean muted = cam.isVolumeGroupMuted(CarAudioManager.PRIMARY_AUDIO_ZONE, groupId);
+                    cam.setVolumeGroupMute(CarAudioManager.PRIMARY_AUDIO_ZONE, groupId, !muted, 0);
+                    break;
+                }
+            }
+        } finally {
+            car.disconnect();
         }
-        am.adjustStreamVolume(AudioManager.STREAM_MUSIC, direction, 0 /* no UI */);
     }
 }

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<permissions>
+    <privapp-permissions package="com.schuurman.vim3.volumecontrol">
+        <permission name="android.car.permission.CAR_CONTROL_AUDIO_VOLUME"/>
+    </privapp-permissions>
+</permissions>
