@@ -5,5 +5,19 @@ android_app {
     platform_apis: true,
     certificate: "platform",
     privileged: true,
+
+    // Needed for CarAudioManager (car volume group) APIs.
+    libs: [
+        "android.car-system-stubs",
+    ],
+
+    // Install the privapp permission allowlist for CAR_CONTROL_AUDIO_VOLUME.
+    required: ["allowed_privapp_com.schuurman.vim3.volumecontrol"],
 }
 
+prebuilt_etc {
+    name: "allowed_privapp_com.schuurman.vim3.volumecontrol",
+    src: "permissions/com.schuurman.vim3.volumecontrol.xml",
+    sub_dir: "permissions",
+    filename_from_src: true,
+}
