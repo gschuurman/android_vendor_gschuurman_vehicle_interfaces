@@ -1,0 +1,15 @@
+// Open Headunit (github.com/andreknieriem/open-headunit), github flavor,
+// built from source and imported as a prebuilt system app so it gets
+// FLAG_SYSTEM. Per UsbProfileGroupSettingsManager#getDefaultActivityLocked,
+// a system app that's the sole match for a USB_DEVICE_ATTACHED intent
+// auto-launches with no resolver dialog and no persisted preference
+// needed -- that's what actually fixes the "not listed / doesn't
+// remember" USB picker problem, not a runtime override.
+android_app_import {
+    name: "OpenHeadunit",
+    apk: "OpenHeadunit.apk",
+    presigned: false,
+    dex_preopt: {
+        enabled: false,
+    },
+}
