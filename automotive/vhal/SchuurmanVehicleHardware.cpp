@@ -39,8 +39,10 @@ namespace automotive {
 namespace vehicle {
 
 using ::aidl::android::hardware::automotive::vehicle::FuelType;
+using ::aidl::android::hardware::automotive::vehicle::VehicleApPowerStateConfigFlag;
 using ::aidl::android::hardware::automotive::vehicle::VehicleApPowerStateReport;
 using ::aidl::android::hardware::automotive::vehicle::VehicleApPowerStateReq;
+using ::aidl::android::hardware::automotive::vehicle::VehicleApPowerStateShutdownParam;
 using ::aidl::android::hardware::automotive::vehicle::VehicleArea;
 using ::aidl::android::hardware::automotive::vehicle::VehicleGear;
 using ::aidl::android::hardware::automotive::vehicle::VehicleIgnitionState;
