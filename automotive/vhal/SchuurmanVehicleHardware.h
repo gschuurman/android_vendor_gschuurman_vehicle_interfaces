@@ -64,6 +64,7 @@ class SchuurmanVehicleHardware : public IVehicleHardware {
     std::string findDisplayDpmsPath();
 
     void touchWakeLoop();
+    void accKeyLoop();
     static int findInputDeviceByVidPid(uint16_t vendor, uint16_t product);
     static int findInputDeviceWithKey(uint16_t keyCode);
 
@@ -81,6 +82,7 @@ class SchuurmanVehicleHardware : public IVehicleHardware {
     void publishCurrentBrightness();
     void publishVendorScreenPower();
     void publishApPowerStateReq(int32_t reqState, int32_t param = 0);
+    void publishIgnitionState(int32_t state);
 
     void applyScreenPower(bool on, bool restoreBrightness);
     void handleApPowerStateReport(const VehiclePropValue& request);
@@ -123,6 +125,16 @@ class SchuurmanVehicleHardware : public IVehicleHardware {
 
     std::atomic<bool> mTouchWakeThreadRunning;
     std::thread mTouchWakeThread;
+
+    // KEY_POWER on this board is driven exclusively by an external MCU that
+    // relays the car's ACC/ignition line as a real evdev press — a short
+    // press means ACC just went low, a long press (handled by the standard
+    // Android long-press-power flow) means a forced shutdown. We watch the
+    // same key here purely to suppress touch-to-wake for ACC-off screen-offs
+    // (see touchWakeLoop) without affecting user-initiated screen-off paths.
+    std::atomic<bool> mAccKeyThreadRunning;
+    std::thread mAccKeyThread;
+    std::atomic<bool> mTapToWakeSuppressed;
 
     // Track AAOS power properties explicitly.
     std::atomic<int32_t> mLastApPowerStateReq;

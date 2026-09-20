@@ -1,8 +1,10 @@
 #include "SchuurmanVehicleHardware.h"
 
 #include <aidl/android/hardware/automotive/vehicle/FuelType.h>
+#include <aidl/android/hardware/automotive/vehicle/VehicleApPowerStateConfigFlag.h>
 #include <aidl/android/hardware/automotive/vehicle/VehicleApPowerStateReport.h>
 #include <aidl/android/hardware/automotive/vehicle/VehicleApPowerStateReq.h>
+#include <aidl/android/hardware/automotive/vehicle/VehicleApPowerStateShutdownParam.h>
 #include <aidl/android/hardware/automotive/vehicle/VehicleArea.h>
 #include <aidl/android/hardware/automotive/vehicle/VehicleGear.h>
 #include <aidl/android/hardware/automotive/vehicle/VehicleIgnitionState.h>
@@ -128,6 +130,8 @@ SchuurmanVehicleHardware::SchuurmanVehicleHardware()
       mAutoTargetBrightness(-1),
       mDisplayThreadRunning(false),
       mTouchWakeThreadRunning(false),
+      mAccKeyThreadRunning(false),
+      mTapToWakeSuppressed(false),
       mLastApPowerStateReq(static_cast<int32_t>(VehicleApPowerStateReq::ON)),
       mLastApPowerStateReqParam(0),
       mLastApPowerStateReport(static_cast<int32_t>(VehicleApPowerStateReport::ON)),
@@ -159,6 +163,9 @@ SchuurmanVehicleHardware::SchuurmanVehicleHardware()
     mTouchWakeThreadRunning.store(true);
     mTouchWakeThread = std::thread(&SchuurmanVehicleHardware::touchWakeLoop, this);
 
+    mAccKeyThreadRunning.store(true);
+    mAccKeyThread = std::thread(&SchuurmanVehicleHardware::accKeyLoop, this);
+
     LOG(INFO) << "Initial gear forced to PARK";
     LOG(INFO) << "Ignition forced ON; parking brake ON";
 }
@@ -175,6 +182,9 @@ SchuurmanVehicleHardware::~SchuurmanVehicleHardware() {
 
     mTouchWakeThreadRunning.store(false);
     if (mTouchWakeThread.joinable()) mTouchWakeThread.join();
+
+    mAccKeyThreadRunning.store(false);
+    if (mAccKeyThread.joinable()) mAccKeyThread.join();
 
     if (mBacklightEnableFd >= 0) close(mBacklightEnableFd);
     if (mGearFd >= 0) close(mGearFd);
@@ -446,6 +456,17 @@ void SchuurmanVehicleHardware::publishApPowerStateReq(int32_t reqState,
     emitPropChange(v);
 }
 
+void SchuurmanVehicleHardware::publishIgnitionState(int32_t state) {
+    mIgnitionState.store(state);
+
+    VehiclePropValue v;
+    v.prop = static_cast<int32_t>(VehicleProperty::IGNITION_STATE);
+    v.areaId = GLOBAL_AREA_ID;
+    v.timestamp = elapsedRealtimeNano();
+    v.value.int32Values = {state};
+    emitPropChange(v);
+}
+
 void SchuurmanVehicleHardware::applyScreenPower(bool on, bool restoreBrightness) {
     if (on) {
         int restore = mLastNonZeroBrightness.load();
@@ -465,6 +486,9 @@ void SchuurmanVehicleHardware::applyScreenPower(bool on, bool restoreBrightness)
         }
 
         mScreenOn.store(true);
+        // Any legitimate screen-on (ACC back on, manual wake, etc.) re-arms
+        // touch-to-wake for the next screen-off.
+        mTapToWakeSuppressed.store(false);
     } else {
         int current = mCurrentBrightness.load();
         if (current > 0) {
@@ -815,6 +839,13 @@ std::vector<VehiclePropConfig> SchuurmanVehicleHardware::getAllPropertyConfigs()
         c.access = VehiclePropertyAccess::READ;
         c.changeMode = VehiclePropertyChangeMode::ON_CHANGE;
         c.areaConfigs = {{.areaId = GLOBAL_AREA_ID}};
+        // ENABLE_DEEP_SLEEP_FLAG: the power button (KEY_POWER, driven by the
+        // Pico relaying ACC) is a real interrupt-capable wakeup-source GPIO
+        // (see meson-khadas-vim3.dtsi), so requesting SHUTDOWN_PREPARE with
+        // CAN_SLEEP on ACC-off is a real, resumable suspend-to-RAM, not a
+        // capability we don't actually have.
+        c.configArray = {
+                static_cast<int32_t>(VehicleApPowerStateConfigFlag::ENABLE_DEEP_SLEEP_FLAG)};
         configs.push_back(c);
     }
 
@@ -1136,9 +1167,10 @@ void SchuurmanVehicleHardware::touchWakeLoop() {
             continue;
         }
 
-        // BTN_TOUCH DOWN while screen is off → inject KEY_WAKEUP.
+        // BTN_TOUCH DOWN while screen is off → inject KEY_WAKEUP, unless the
+        // screen went off because of an ACC-off short press (see accKeyLoop).
         if (ev.type == EV_KEY && ev.code == BTN_TOUCH && ev.value == 1 &&
-            !mScreenOn.load()) {
+            !mScreenOn.load() && !mTapToWakeSuppressed.load()) {
             LOG(INFO) << "touchWakeLoop: touch while screen off, injecting KEY_WAKEUP";
 
             auto writeEvent = [&](uint16_t type, uint16_t code, int32_t value) {
@@ -1157,6 +1189,126 @@ void SchuurmanVehicleHardware::touchWakeLoop() {
 
     if (touchFd >= 0) close(touchFd);
     if (wakeFd  >= 0) close(wakeFd);
+}
+
+// Inject a press+release of the given key code into an already-open
+// injectable evdev fd (same technique touchWakeLoop uses for KEY_WAKEUP).
+static void injectKeyPress(int fd, uint16_t keyCode) {
+    auto writeEvent = [&](uint16_t type, uint16_t code, int32_t value) {
+        struct input_event out = {};
+        out.type  = type;
+        out.code  = code;
+        out.value = value;
+        write(fd, &out, sizeof(out));
+    };
+    writeEvent(EV_KEY, keyCode, 1);
+    writeEvent(EV_SYN, SYN_REPORT, 0);
+    writeEvent(EV_KEY, keyCode, 0);
+    writeEvent(EV_SYN, SYN_REPORT, 0);
+}
+
+// Watch KEY_POWER directly. On this board that key is never pressed by a
+// human — it's driven by an external MCU that relays the car's ACC line: a
+// short press means ACC just went low, a long press (handled entirely by
+// the standard Android long-press-power → shutdown flow, independent of
+// this loop) means force a real shutdown. A short press while the screen is
+// on means ACC just went low: injects KEY_PAUSECD (→ Android
+// KEYCODE_MEDIA_PAUSE per Generic.kl) and suppresses touch-to-wake so the
+// screen doesn't pop back on from a stray touch while parked. A short press
+// while the screen is off means ACC just came back: injects KEY_PLAYCD (→
+// KEYCODE_MEDIA_PLAY) to resume. Both go through the same CEC-backed
+// injectable device touchWakeLoop already uses for KEY_WAKEUP.
+void SchuurmanVehicleHardware::accKeyLoop() {
+    constexpr uint16_t kKeyPower = KEY_POWER;
+    constexpr uint16_t kKeyPause = KEY_PAUSECD;  // 201 -> KEYCODE_MEDIA_PAUSE
+    constexpr uint16_t kKeyPlay  = KEY_PLAYCD;   // 200 -> KEYCODE_MEDIA_PLAY
+    constexpr auto kShortPressMax = std::chrono::milliseconds(1500);
+
+    int fd = -1;
+    int injectFd = -1;
+    bool keyDown = false;
+    bool screenWasOnAtPress = false;
+    std::chrono::steady_clock::time_point downTime;
+
+    while (mAccKeyThreadRunning.load()) {
+        if (fd < 0) {
+            fd = findInputDeviceWithKey(kKeyPower);
+            if (fd < 0) {
+                std::this_thread::sleep_for(std::chrono::seconds(2));
+                continue;
+            }
+            int flags = fcntl(fd, F_GETFL, 0);
+            fcntl(fd, F_SETFL, flags & ~O_NONBLOCK);
+            LOG(INFO) << "accKeyLoop: opened KEY_POWER device";
+        }
+        if (injectFd < 0) {
+            injectFd = findInputDeviceWithKey(kKeyPause);
+            if (injectFd < 0) {
+                LOG(WARNING) << "accKeyLoop: no KEY_PAUSECD-capable device found, "
+                                 "media won't be paused/resumed on ACC changes";
+            } else {
+                LOG(INFO) << "accKeyLoop: opened media-pause/play injection device";
+            }
+        }
+
+        struct pollfd pfd = {fd, POLLIN, 0};
+        int ret = poll(&pfd, 1, 500);  // 500 ms so we can check mAccKeyThreadRunning
+        if (ret <= 0) continue;
+        if (!(pfd.revents & POLLIN)) continue;
+
+        struct input_event ev = {};
+        ssize_t n = read(fd, &ev, sizeof(ev));
+        if (n != sizeof(ev)) {
+            if (n == 0 || (n < 0 && errno != EAGAIN)) {
+                LOG(WARNING) << "accKeyLoop: KEY_POWER device read error, reopening";
+                close(fd);
+                fd = -1;
+            }
+            continue;
+        }
+
+        if (ev.type != EV_KEY || ev.code != kKeyPower) continue;
+
+        if (ev.value == 1) {  // DOWN
+            keyDown = true;
+            screenWasOnAtPress = mScreenOn.load();
+            downTime = std::chrono::steady_clock::now();
+        } else if (ev.value == 0 && keyDown) {  // UP
+            keyDown = false;
+            auto heldFor = std::chrono::steady_clock::now() - downTime;
+            if (heldFor < kShortPressMax) {
+                if (screenWasOnAtPress) {
+                    LOG(INFO) << "accKeyLoop: short press (ACC off) - pausing media, "
+                                 "suppressing touch-to-wake, requesting suspend";
+                    mTapToWakeSuppressed.store(true);
+                    if (injectFd >= 0) {
+                        injectKeyPress(injectFd, kKeyPause);
+                    }
+                    publishIgnitionState(static_cast<int32_t>(VehicleIgnitionState::OFF));
+                    // CarPowerManagementService drives the actual screen-off
+                    // (via the existing SHUTDOWN_PREPARE/SHUTDOWN_START and
+                    // DEEP_SLEEP_ENTRY cases in handleApPowerStateReport) and,
+                    // once GPIOAO_7's wakeup-source IRQ resumes the kernel,
+                    // the DEEP_SLEEP_EXIT case there turns it back on.
+                    publishApPowerStateReq(
+                            static_cast<int32_t>(VehicleApPowerStateReq::SHUTDOWN_PREPARE),
+                            static_cast<int32_t>(VehicleApPowerStateShutdownParam::CAN_SLEEP));
+                } else {
+                    LOG(INFO) << "accKeyLoop: short press (ACC on) - resuming media";
+                    if (injectFd >= 0) {
+                        injectKeyPress(injectFd, kKeyPlay);
+                    }
+                    publishIgnitionState(static_cast<int32_t>(VehicleIgnitionState::ON));
+                    publishApPowerStateReq(static_cast<int32_t>(VehicleApPowerStateReq::ON));
+                }
+            } else {
+                LOG(INFO) << "accKeyLoop: long press detected - leaving to shutdown flow";
+            }
+        }
+    }
+
+    if (fd >= 0) close(fd);
+    if (injectFd >= 0) close(injectFd);
 }
 
 }  // namespace vehicle
