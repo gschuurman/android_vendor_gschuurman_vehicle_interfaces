@@ -1,0 +1,12 @@
+// Organic Maps (F-Droid build, app.organicmaps, Apache-2.0): offline OpenStreetMap
+// navigation. Google Maps needs a Play-certified device, so this is the on-device
+// navigation app. The APK is the unmodified F-Droid release with the non-arm64
+// native libs and the F-Droid signature removed (the build re-signs it).
+android_app_import {
+    name: "OrganicMaps",
+    apk: "OrganicMaps.apk",
+    default_dev_cert: true,
+    dex_preopt: {
+        enabled: false,
+    },
+}
