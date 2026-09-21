@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.schuurman.vim3.setup">
+
+    <!-- Marks the device / user as provisioned when the user finishes setup. -->
+    <uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS" />
+
+    <application
+        android:label="Setup"
+        android:persistent="false"
+        android:allowBackup="false"
+        android:directBootAware="true"
+        android:hasCode="true">
+
+        <!--
+          HOME while the device is unprovisioned. Must be direct-boot-aware: the driver user is still
+          locked when the switch to it happens, and only direct-boot-aware activities can be its home
+          screen then (otherwise the user switch never completes and the user is never unlocked).
+          Priority beats AOSP's CarProvision (1) and CarLauncher (0). Disabled again once setup is done.
+        -->
+        <activity
+            android:name=".SetupActivity"
+            android:exported="true"
+            android:directBootAware="true"
+            android:theme="@android:style/Theme.DeviceDefault.NoActionBar"
+            android:launchMode="singleTask"
+            android:excludeFromRecents="true"
+            android:stateNotNeeded="true">
+            <meta-data android:name="distractionOptimized" android:value="true" />
+            <intent-filter android:priority="10">
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.HOME" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>

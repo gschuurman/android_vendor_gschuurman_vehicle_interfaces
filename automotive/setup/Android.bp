@@ -1,0 +1,22 @@
+// First-boot setup for the VIM3 head unit: Wi-Fi, Google account, then marks the device provisioned.
+// Replaces the Google car setup wizard (not usable on this hardware) and AOSP's silent CarProvision
+// flow as the HOME activity while the device is unprovisioned.
+android_app {
+    name: "Vim3Setup",
+    srcs: ["src/**/*.java"],
+    manifest: "AndroidManifest.xml",
+    platform_apis: true,
+    privileged: true,
+    certificate: "platform",
+    required: [
+        "privapp-permissions-vim3setup",
+    ],
+}
+
+prebuilt_etc {
+    name: "privapp-permissions-vim3setup",
+    src: "privapp-permissions-vim3setup.xml",
+    sub_dir: "permissions",
+    product_specific: true,
+    filename_from_src: true,
+}
