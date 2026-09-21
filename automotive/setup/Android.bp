@@ -17,6 +17,7 @@ prebuilt_etc {
     name: "privapp-permissions-vim3setup",
     src: "privapp-permissions-vim3setup.xml",
     sub_dir: "permissions",
-    product_specific: true,
+    // Must live on the same partition as the priv-app it allowlists (Vim3Setup is in /system/priv-app);
+    // a /product copy is ignored and system_server aborts with "not in privileged permission allowlist".
     filename_from_src: true,
 }
