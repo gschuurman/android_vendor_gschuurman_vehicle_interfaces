@@ -1,11 +1,16 @@
-// Organic Maps (F-Droid build, app.organicmaps, Apache-2.0): offline OpenStreetMap
-// navigation. Google Maps needs a Play-certified device, so this is the on-device
-// navigation app. The APK is the unmodified F-Droid release with the non-arm64
-// native libs and the F-Droid signature removed (the build re-signs it).
+// Organic Maps (app.organicmaps, Apache-2.0): offline OpenStreetMap navigation. Google Maps needs a
+// Play-certified device, so this is the on-device navigation app.
+// The APK is our own fdroid release build (arm64 only) of the aaos-map-provider branch of
+// git@github.com:gschuurman/organicmaps.git: it adds the Android Automotive map card that CarLauncher
+// embeds on its home screen (automotive/MapCardActivity, CATEGORY_APP_MAPS) with a navigation banner.
+// Build: see ~/android/om-release.sh, then repacked with the JNI libs stored uncompressed + zipalign -P 16
+// (required for a "preprocessed" prebuilt) and re-signed with our own release key (~/android/keys). Kept
+// as is by the build, so newer builds of ours install as updates.
 android_app_import {
     name: "OrganicMaps",
     apk: "OrganicMaps.apk",
-    default_dev_cert: true,
+    presigned: true,
+    preprocessed: true,
     dex_preopt: {
         enabled: false,
     },
