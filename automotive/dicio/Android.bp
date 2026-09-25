@@ -1,9 +1,9 @@
-// Dicio (F-Droid build, org.stypox.dicio 4.0, GPL-3.0): open-source, on-device voice assistant.
+// Dicio (org.stypox.dicio 4.0, GPL-3.0): open-source, on-device voice assistant.
 // Google's car Assistant needs a Play-certified device, so Dicio is the ASSISTANT role holder:
 // the system bar's mic button starts its ACTION_ASSIST activity (see CarSystemUI AssistantButton).
-// The APK is the unmodified F-Droid release. It is re-signed by the build (a presigned APK must be
-// "preprocessed", which needs uncompressed JNI libs, and Dicio's are compressed), so F-Droid can't
-// update it; ROM updates do.
+// The APK is our release build of Dicio v4.0 plus preinstalled-model support (models/, installed to
+// /product/usr/share/dicio): speech recognition in English and Dutch and the wake word work offline
+// from the first boot. Source: ~/android/dicio-src, branch preinstalled-models. Signed by the build.
 android_app_import {
     name: "Dicio",
     apk: "Dicio.apk",
