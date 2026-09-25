@@ -4,6 +4,31 @@
 
     <!-- Marks the device / user as provisioned when the user finishes setup. -->
     <uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS" />
+    <!-- Preferences step: applying the dark-theme toggle. -->
+    <uses-permission android:name="android.permission.MODIFY_DAY_NIGHT_MODE" />
+    <!-- Bluetooth step: scanning for and pairing a phone. Runtime-granted like any app; not
+         privileged, so no privapp-permissions entry needed. -->
+    <uses-permission android:name="android.permission.BLUETOOTH_SCAN"
+        android:usesPermissionFlags="neverForLocation" />
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+    <!-- Wi-Fi step: scanning for and joining a network. ACCESS/CHANGE are "normal" and
+         auto-granted; NEARBY_WIFI_DEVICES is the modern (API 33+) stand-in for
+         ACCESS_FINE_LOCATION that unlocks scan results without any location access, granted the
+         same runtime-request way as the Bluetooth permissions above. NETWORK_SETTINGS is plain
+         "signature" (not "signature|privileged", so no privapp-permissions entry is needed) and
+         auto-grants to any platform-signed app; it lets a real setup wizard connect directly
+         (WifiManager.connect) instead of the app-scoped WifiNetworkSuggestion path. -->
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+    <uses-permission android:name="android.permission.NEARBY_WIFI_DEVICES"
+        android:usesPermissionFlags="neverForLocation" />
+    <uses-permission android:name="android.permission.NETWORK_SETTINGS" />
+    <!-- Language (LocalePicker.updateLocale), date & time and time zone steps. All "signature|privileged", so
+         they must be in privapp-permissions-vim3setup.xml too: system_server refuses to boot otherwise,
+         even for a platform-signed app. -->
+    <uses-permission android:name="android.permission.CHANGE_CONFIGURATION" />
+    <uses-permission android:name="android.permission.SET_TIME" />
+    <uses-permission android:name="android.permission.SET_TIME_ZONE" />
 
     <application
         android:label="Setup"

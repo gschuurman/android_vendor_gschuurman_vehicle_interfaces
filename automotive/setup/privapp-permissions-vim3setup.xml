@@ -2,5 +2,11 @@
 <permissions>
     <privapp-permissions package="com.schuurman.vim3.setup">
         <permission name="android.permission.WRITE_SECURE_SETTINGS" />
+        <!-- Preferences step: applying the dark-theme toggle. -->
+        <permission name="android.permission.MODIFY_DAY_NIGHT_MODE" />
+        <!-- Language, date & time and time zone steps. -->
+        <permission name="android.permission.CHANGE_CONFIGURATION" />
+        <permission name="android.permission.SET_TIME" />
+        <permission name="android.permission.SET_TIME_ZONE" />
     </privapp-permissions>
 </permissions>
