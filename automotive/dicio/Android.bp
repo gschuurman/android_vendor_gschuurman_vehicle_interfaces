@@ -1,0 +1,36 @@
+// Dicio (F-Droid build, org.stypox.dicio 4.0, GPL-3.0): open-source, on-device voice assistant.
+// Google's car Assistant needs a Play-certified device, so Dicio is the ASSISTANT role holder:
+// the system bar's mic button starts its ACTION_ASSIST activity (see CarSystemUI AssistantButton).
+// The APK is the unmodified F-Droid release. It is re-signed by the build (a presigned APK must be
+// "preprocessed", which needs uncompressed JNI libs, and Dicio's are compressed), so F-Droid can't
+// update it; ROM updates do.
+android_app_import {
+    name: "Dicio",
+    apk: "Dicio.apk",
+    default_dev_cert: true,
+    product_specific: true,
+    dex_preopt: {
+        enabled: false,
+    },
+    required: [
+        "DicioAssistantOverlay",
+        "default-permissions-dicio.xml",
+    ],
+}
+
+// Makes Dicio the default assistant. GasPlaystoreOverlay (static, priority 1001) blanks
+// config_defaultAssistant, so this one has to be static with a higher priority.
+runtime_resource_overlay {
+    name: "DicioAssistantOverlay",
+    manifest: "rro/AndroidManifest.xml",
+    resource_dirs: ["rro/res"],
+    product_specific: true,
+}
+
+// Microphone and notifications for the default assistant, so it works right after setup.
+prebuilt_etc {
+    name: "default-permissions-dicio.xml",
+    src: "default-permissions-dicio.xml",
+    sub_dir: "default-permissions",
+    product_specific: true,
+}
