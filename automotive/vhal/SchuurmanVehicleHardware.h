@@ -86,6 +86,9 @@ class SchuurmanVehicleHardware : public IVehicleHardware {
 
     void applyScreenPower(bool on, bool restoreBrightness);
     void handleApPowerStateReport(const VehiclePropValue& request);
+    StatusCode setDisplayUnits(const VehiclePropValue& request, const std::vector<int32_t>& supported,
+                               const char* persistProp, std::atomic<int32_t>* current,
+                               VehiclePropValue* updatedValue);
 
     std::atomic<int32_t> mCurrentGear;
     std::atomic<int32_t> mCurrentBrightness;
@@ -94,6 +97,12 @@ class SchuurmanVehicleHardware : public IVehicleHardware {
 
     std::atomic<int32_t> mIgnitionState;
     std::atomic<int32_t> mParkingBrakeOn;
+
+    // Display units (distance, temperature, fuel volume), chosen in Car Settings or the setup wizard and
+    // kept across reboots in persist.vendor.vehicle.*_units.
+    std::atomic<int32_t> mDistanceUnits;
+    std::atomic<int32_t> mTemperatureUnits;
+    std::atomic<int32_t> mFuelVolumeUnits;
 
     std::string mBacklightGpioChipName;
     std::string mGearGpioChipName;

@@ -12,10 +12,12 @@
 #include <aidl/android/hardware/automotive/vehicle/VehiclePropertyAccess.h>
 #include <aidl/android/hardware/automotive/vehicle/VehiclePropertyChangeMode.h>
 #include <aidl/android/hardware/automotive/vehicle/VehicleSeatOccupancyState.h>
+#include <aidl/android/hardware/automotive/vehicle/VehicleUnit.h>
 
 #include <android-base/logging.h>
 #include <android-base/properties.h>
 
+#include <algorithm>
 #include <errno.h>
 #include <fcntl.h>
 #include <linux/gpio.h>
@@ -45,6 +47,7 @@ using ::aidl::android::hardware::automotive::vehicle::VehicleApPowerStateReq;
 using ::aidl::android::hardware::automotive::vehicle::VehicleApPowerStateShutdownParam;
 using ::aidl::android::hardware::automotive::vehicle::VehicleArea;
 using ::aidl::android::hardware::automotive::vehicle::VehicleGear;
+using ::aidl::android::hardware::automotive::vehicle::VehicleUnit;
 using ::aidl::android::hardware::automotive::vehicle::VehicleIgnitionState;
 using ::aidl::android::hardware::automotive::vehicle::VehicleProperty;
 using ::aidl::android::hardware::automotive::vehicle::VehiclePropertyAccess;
@@ -105,6 +108,18 @@ static std::string readSysFsString(const std::string& path, int retries = 3,
     return std::string();
 }
 
+static constexpr char kDistanceUnitsProp[] = "persist.vendor.vehicle.distance_units";
+static constexpr char kTemperatureUnitsProp[] = "persist.vendor.vehicle.temperature_units";
+static constexpr char kFuelVolumeUnitsProp[] = "persist.vendor.vehicle.fuel_volume_units";
+
+static const std::vector<int32_t> kDistanceUnits = {
+        static_cast<int32_t>(VehicleUnit::KILOMETER), static_cast<int32_t>(VehicleUnit::MILE)};
+static const std::vector<int32_t> kTemperatureUnits = {
+        static_cast<int32_t>(VehicleUnit::CELSIUS), static_cast<int32_t>(VehicleUnit::FAHRENHEIT)};
+static const std::vector<int32_t> kFuelVolumeUnits = {
+        static_cast<int32_t>(VehicleUnit::LITER), static_cast<int32_t>(VehicleUnit::US_GALLON),
+        static_cast<int32_t>(VehicleUnit::IMPERIAL_GALLON)};
+
 static int readIntFileNoExcept(const std::string& path) {
     std::ifstream f(path);
     if (!f) return -1;
@@ -120,6 +135,12 @@ SchuurmanVehicleHardware::SchuurmanVehicleHardware()
       mScreenOn(true),
       mIgnitionState(static_cast<int32_t>(VehicleIgnitionState::ON)),
       mParkingBrakeOn(1),
+      mDistanceUnits(android::base::GetIntProperty(kDistanceUnitsProp,
+              static_cast<int32_t>(VehicleUnit::KILOMETER))),
+      mTemperatureUnits(android::base::GetIntProperty(kTemperatureUnitsProp,
+              static_cast<int32_t>(VehicleUnit::CELSIUS))),
+      mFuelVolumeUnits(android::base::GetIntProperty(kFuelVolumeUnitsProp,
+              static_cast<int32_t>(VehicleUnit::LITER))),
       mGearGpioOffset(51),
       mBacklightEnableGpioOffset(53),
       mBacklightEnableFd(-1),
@@ -557,6 +578,30 @@ void SchuurmanVehicleHardware::handleApPowerStateReport(
     }
 }
 
+StatusCode SchuurmanVehicleHardware::setDisplayUnits(const VehiclePropValue& request,
+                                                     const std::vector<int32_t>& supported,
+                                                     const char* persistProp,
+                                                     std::atomic<int32_t>* current,
+                                                     VehiclePropValue* updatedValue) {
+    if (request.value.int32Values.empty() ||
+        std::find(supported.begin(), supported.end(), request.value.int32Values[0]) ==
+                supported.end()) {
+        return StatusCode::INVALID_ARG;
+    }
+    const int32_t unit = request.value.int32Values[0];
+    current->store(unit);
+    android::base::SetProperty(persistProp, std::to_string(unit));
+
+    VehiclePropValue v = request;
+    v.areaId = GLOBAL_AREA_ID;
+    v.timestamp = elapsedRealtimeNano();
+    emitPropChange(v);
+    if (updatedValue) {
+        *updatedValue = v;
+    }
+    return StatusCode::OK;
+}
+
 StatusCode SchuurmanVehicleHardware::setValueInternal(
         const VehiclePropValue& request, VehiclePropValue* updatedValue) {
     if (request.prop == static_cast<int32_t>(VehicleProperty::DISPLAY_BRIGHTNESS)) {
@@ -598,6 +643,16 @@ StatusCode SchuurmanVehicleHardware::setValueInternal(
     } else if (request.prop ==
                static_cast<int32_t>(VehicleProperty::AP_POWER_STATE_REPORT)) {
         handleApPowerStateReport(request);
+    } else if (request.prop == static_cast<int32_t>(VehicleProperty::DISTANCE_DISPLAY_UNITS)) {
+        return setDisplayUnits(request, kDistanceUnits, kDistanceUnitsProp, &mDistanceUnits,
+                               updatedValue);
+    } else if (request.prop ==
+               static_cast<int32_t>(VehicleProperty::HVAC_TEMPERATURE_DISPLAY_UNITS)) {
+        return setDisplayUnits(request, kTemperatureUnits, kTemperatureUnitsProp,
+                               &mTemperatureUnits, updatedValue);
+    } else if (request.prop == static_cast<int32_t>(VehicleProperty::FUEL_VOLUME_DISPLAY_UNITS)) {
+        return setDisplayUnits(request, kFuelVolumeUnits, kFuelVolumeUnitsProp, &mFuelVolumeUnits,
+                               updatedValue);
     } else {
         return StatusCode::INVALID_ARG;
     }
@@ -631,7 +686,7 @@ StatusCode SchuurmanVehicleHardware::getValueInternal(
             return StatusCode::OK;
         case VehicleProperty::INFO_FUEL_TYPE:
             response->value.int32Values = {
-                    static_cast<int32_t>(FuelType::FUEL_TYPE_ELECTRIC)};
+                    static_cast<int32_t>(FuelType::FUEL_TYPE_UNLEADED)};
             return StatusCode::OK;
         case VehicleProperty::INFO_DRIVER_SEAT:
             response->value.int32Values = {DRIVER_SEAT_ID};
@@ -654,6 +709,15 @@ StatusCode SchuurmanVehicleHardware::getValueInternal(
             return StatusCode::OK;
         case VehicleProperty::PARKING_BRAKE_ON:
             response->value.int32Values = {mParkingBrakeOn.load()};
+            return StatusCode::OK;
+        case VehicleProperty::DISTANCE_DISPLAY_UNITS:
+            response->value.int32Values = {mDistanceUnits.load()};
+            return StatusCode::OK;
+        case VehicleProperty::HVAC_TEMPERATURE_DISPLAY_UNITS:
+            response->value.int32Values = {mTemperatureUnits.load()};
+            return StatusCode::OK;
+        case VehicleProperty::FUEL_VOLUME_DISPLAY_UNITS:
+            response->value.int32Values = {mFuelVolumeUnits.load()};
             return StatusCode::OK;
         case VehicleProperty::AP_POWER_STATE_REQ:
             response->value.int32Values = {
@@ -832,6 +896,20 @@ std::vector<VehiclePropConfig> SchuurmanVehicleHardware::getAllPropertyConfigs()
         c.areaConfigs = {{.areaId = GLOBAL_AREA_ID}};
         configs.push_back(c);
     }
+
+    // Display units: configArray lists the supported VehicleUnit values (Car Settings' units page).
+    auto addDisplayUnits = [&](VehicleProperty prop, const std::vector<int32_t>& units) {
+        VehiclePropConfig c;
+        c.prop = static_cast<int32_t>(prop);
+        c.access = VehiclePropertyAccess::READ_WRITE;
+        c.changeMode = VehiclePropertyChangeMode::ON_CHANGE;
+        c.configArray = units;
+        c.areaConfigs = {{.areaId = GLOBAL_AREA_ID}};
+        configs.push_back(c);
+    };
+    addDisplayUnits(VehicleProperty::DISTANCE_DISPLAY_UNITS, kDistanceUnits);
+    addDisplayUnits(VehicleProperty::HVAC_TEMPERATURE_DISPLAY_UNITS, kTemperatureUnits);
+    addDisplayUnits(VehicleProperty::FUEL_VOLUME_DISPLAY_UNITS, kFuelVolumeUnits);
 
     // Correct AAOS direction:
     // AP_POWER_STATE_REQ is VHAL -> Android
