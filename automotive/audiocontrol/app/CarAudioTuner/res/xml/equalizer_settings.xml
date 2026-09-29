@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Values are the audio HAL's "car.eq.*" parameters (see CarAudioParams), not SharedPreferences. -->
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <SwitchPreference
+        android:key="car.eq.enabled"
+        android:title="@string/eq_enabled_title"
+        android:summary="@string/eq_enabled_summary" />
+
+    <ListPreference
+        android:key="preset"
+        android:dependency="car.eq.enabled"
+        android:title="@string/eq_preset_title"
+        android:summary="@string/eq_preset_summary"
+        android:entries="@array/eq_preset_names"
+        android:entryValues="@array/eq_preset_indexes" />
+
+    <SeekBarPreference
+        android:key="car.eq.band0"
+        android:dependency="car.eq.enabled"
+        android:title="@string/eq_band0"
+        app:min="-12"
+        android:max="12"
+        app:showSeekBarValue="true" />
+
+    <SeekBarPreference
+        android:key="car.eq.band1"
+        android:dependency="car.eq.enabled"
+        android:title="@string/eq_band1"
+        app:min="-12"
+        android:max="12"
+        app:showSeekBarValue="true" />
+
+    <SeekBarPreference
+        android:key="car.eq.band2"
+        android:dependency="car.eq.enabled"
+        android:title="@string/eq_band2"
+        app:min="-12"
+        android:max="12"
+        app:showSeekBarValue="true" />
+
+    <SeekBarPreference
+        android:key="car.eq.band3"
+        android:dependency="car.eq.enabled"
+        android:title="@string/eq_band3"
+        app:min="-12"
+        android:max="12"
+        app:showSeekBarValue="true" />
+
+    <SeekBarPreference
+        android:key="car.eq.band4"
+        android:dependency="car.eq.enabled"
+        android:title="@string/eq_band4"
+        app:min="-12"
+        android:max="12"
+        app:showSeekBarValue="true" />
+
+    <Preference
+        android:key="reset"
+        android:dependency="car.eq.enabled"
+        android:title="@string/eq_reset_title" />
+
+</PreferenceScreen>

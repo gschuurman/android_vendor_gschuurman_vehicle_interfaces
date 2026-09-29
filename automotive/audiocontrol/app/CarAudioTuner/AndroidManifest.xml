@@ -1,25 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Car audio settings: equalizer and balance/fader, shown as entries on the CarSettings "Sound"
+     page (injected settings: system apps only). The audio HAL applies and persists the values. -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.gschuurman.caraudiotuner">
 
-    <uses-permission android:name="android.car.permission.CAR_CONTROL_AUDIO_VOLUME"/>
-    <uses-permission android:name="android.car.permission.CAR_CONTROL_AUDIO_SETTINGS"/>
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
 
     <application
-        android:label="Audio Tuner"
-        android:theme="@android:style/Theme.DeviceDefault">
+        android:label="@string/app_name"
+        android:theme="@style/Theme.CarAudioSettings">
 
         <activity
-            android:name=".BalanceFaderActivity"
-            android:label="Balance &amp; Fader"
+            android:name=".CarAudioSettingsActivity$Equalizer"
             android:exported="true"
-            android:launchMode="singleTop">
-            
+            android:label="@string/equalizer_title">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <action android:name="com.android.settings.action.EXTRA_SETTINGS" />
             </intent-filter>
+            <meta-data android:name="com.android.settings.category"
+                android:value="com.android.settings.category.ia.sound" />
+            <meta-data android:name="com.android.settings.title"
+                android:resource="@string/equalizer_title" />
+            <meta-data android:name="com.android.settings.summary"
+                android:resource="@string/equalizer_summary" />
+            <meta-data android:name="com.android.settings.icon"
+                android:resource="@drawable/ic_equalizer" />
+        </activity>
+
+        <activity
+            android:name=".CarAudioSettingsActivity$BalanceFader"
+            android:exported="true"
+            android:label="@string/balance_fader_title">
+            <intent-filter>
+                <action android:name="com.android.settings.action.EXTRA_SETTINGS" />
+            </intent-filter>
+            <meta-data android:name="com.android.settings.category"
+                android:value="com.android.settings.category.ia.sound" />
+            <meta-data android:name="com.android.settings.title"
+                android:resource="@string/balance_fader_title" />
+            <meta-data android:name="com.android.settings.summary"
+                android:resource="@string/balance_fader_summary" />
+            <meta-data android:name="com.android.settings.icon"
+                android:resource="@drawable/ic_balance_fader" />
         </activity>
     </application>
 </manifest>

@@ -2,32 +2,24 @@ package {
     default_applicable_licenses: ["Android-Apache-2.0"],
 }
 
+// Equalizer and balance/fader settings, injected into the CarSettings "Sound" page.
 android_app {
     name: "CarAudioTuner",
     srcs: ["src/**/*.java"],
     resource_dirs: ["res"],
-    
-    // Required to talk to CarService APIs
+
     platform_apis: true,
     certificate: "platform",
-    privileged: true,
 
-    static_libs: [
-        "androidx.appcompat_appcompat",
-        "androidx.preference_preference",
-    ],
-
+    // car-ui-lib calls into the car framework (UX restrictions).
     libs: [
-        "android.car-system-stubs",
+        "android.car",
     ],
 
-    // Install the permission allowlist xml
-    required: ["allowed_privapp_com.gschuurman.caraudiotuner"],
-}
-
-prebuilt_etc {
-    name: "allowed_privapp_com.gschuurman.caraudiotuner",
-    sub_dir: "permissions",
-    src: "permissions/com.gschuurman.caraudiotuner.xml",
-    filename_from_src: true,
+    // Uses the car UI library, like CarSettings.
+    static_libs: [
+        "androidx.fragment_fragment",
+        "androidx.preference_preference",
+        "car-ui-lib",
+    ],
 }

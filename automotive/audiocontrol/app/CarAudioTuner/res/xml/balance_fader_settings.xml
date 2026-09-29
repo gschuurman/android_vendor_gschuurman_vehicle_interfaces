@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Values are the audio HAL's "car.balance"/"car.fader" parameters (see CarAudioParams). -->
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <SeekBarPreference
+        android:key="car.balance"
+        android:title="@string/balance_title"
+        app:min="-10"
+        android:max="10" />
+
+    <SeekBarPreference
+        android:key="car.fader"
+        android:title="@string/fader_title"
+        app:min="-10"
+        android:max="10" />
+
+    <Preference
+        android:key="center"
+        android:title="@string/center_title" />
+
+</PreferenceScreen>
