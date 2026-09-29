@@ -1,0 +1,65 @@
+Designator,Value,Description / MPN,LCSC,Footprint (KiCad name),Fit,Note
+J1,Vehicle 5-pin 5.08mm,5.08mm pluggable terminal block 5P (pick from EasyEDA library),,"TerminalBlock_Phoenix:TerminalBlock_Phoenix_MSTBA-2,5-5-G-5,08_1x05_P5.08mm_Horizontal",yes,"1 BATT+ permanent, 2 ACC, 3 REVERSE lamp, 4 AMP REMOTE out, 5 GND"
+F1,"PTC 200mA hold, 30V",1206 PTC 0.2A hold 30V (pick in library),,Fuse:Fuse_1206_3216Metric,yes,
+D1,SS34,SS34 40V 3A Schottky,C8678,Diode_SMD:D_SMA,yes,reverse-polarity protection
+D2,SMBJ18A TVS,SMBJ18A 600W TVS (unidirectional),C49301917,Diode_SMD:D_SMB,yes,
+C1,10uF 50V,1206 10uF 50V X5R,C13585,Capacitor_SMD:C_1206_3216Metric,yes,
+C2,100nF 50V,0603 100nF 50V X7R,C14663,Capacitor_SMD:C_0603_1608Metric,yes,
+U1,TPS560430XDBVR,"TPS560430XDBVR 36V 600mA buck, 1.1MHz",C524782,Package_TO_SOT_SMD:SOT-23-6,yes,"pinout checked against TI datasheet: 1 CB, 2 GND, 3 FB, 4 EN, 5 VIN, 6 SW"
+C3,100nF 50V,0603 100nF 50V X7R,C14663,Capacitor_SMD:C_0603_1608Metric,yes,
+L1,18uH,SWPA4030S180MT 18uH (TI-recommended value for 5V out),C96895,Inductor_SMD:L_Sunlord_SWPA4030S,yes,
+R1,100k,0603 100k 1%,C25803,Resistor_SMD:R_0603_1608Metric,yes,
+R2,24k,0603 24k 1%,C23352,Resistor_SMD:R_0603_1608Metric,yes,Vout = 1.0V x (1 + 100k/24k) = 5.17V
+C4,22uF 25V,0805 22uF 25V X5R,C45783,Capacitor_SMD:C_0805_2012Metric,yes,
+D3,SS14,SS14 40V 1A Schottky,C2480,Diode_SMD:D_SMA,yes,lets Pico USB and board 5V coexist (Pico datasheet VSYS OR-ing)
+F2,"PTC 750mA hold, 30V",1812 PTC 0.75A hold 30V (pick in library),,Fuse:Fuse_1812_4532Metric,yes,also feeds amp remote output
+D4,SS34,SS34 40V 3A Schottky,C8678,Diode_SMD:D_SMA,yes,
+D5,SMBJ18A TVS,SMBJ18A 600W TVS (unidirectional),C49301917,Diode_SMD:D_SMB,yes,
+C5,100nF 50V,0603 100nF 50V X7R,C14663,Capacitor_SMD:C_0603_1608Metric,yes,
+R3,4.7kΩ 0805,0805 4.7k 1%,C17673,Resistor_SMD:R_0805_2012Metric,yes,
+D6,1N4148W,1N4148W,C81598,Diode_SMD:D_SOD-123,yes,reverse-voltage clamp across opto LED
+U2,EL817S1(C),EL817S1(C)(TU)-F,C106900,Package_DIP:SMDIP-4_W7.62mm,yes,
+R4,4.7k,0603 4.7k 1%,C23162,Resistor_SMD:R_0603_1608Metric,yes,
+C6,100nF 50V,0603 100nF 50V X7R,C14663,Capacitor_SMD:C_0603_1608Metric,yes,
+R5,4.7kΩ 0805,0805 4.7k 1%,C17673,Resistor_SMD:R_0805_2012Metric,yes,
+D7,1N4148W,1N4148W,C81598,Diode_SMD:D_SOD-123,yes,
+U3,EL817S1(C),EL817S1(C)(TU)-F,C106900,Package_DIP:SMDIP-4_W7.62mm,yes,
+R6,4.7k,0603 4.7k 1%,C23162,Resistor_SMD:R_0603_1608Metric,yes,
+C7,100nF 50V,0603 100nF 50V X7R,C14663,Capacitor_SMD:C_0603_1608Metric,yes,
+C8,100nF 50V,0603 100nF 50V X7R,C14663,Capacitor_SMD:C_0603_1608Metric,yes,
+Q2,AO3401A,AO3401A -30V -4A P-MOSFET,C15127,Package_TO_SOT_SMD:SOT-23,yes,
+R13,10k,0603 10k 1%,C25804,Resistor_SMD:R_0603_1608Metric,yes,
+D8,BZT52C12,BZT52C12-7-F 12V zener,C124196,Diode_SMD:D_SOD-123,yes,Vgs clamp
+R14,10k,0603 10k 1%,C25804,Resistor_SMD:R_0603_1608Metric,yes,
+Q3,AO3400A,AO3400A 30V 5.7A N-MOSFET,C20917,Package_TO_SOT_SMD:SOT-23,yes,
+R15,100k,0603 100k 1%,C25803,Resistor_SMD:R_0603_1608Metric,yes,
+R16,0Ω,0603 0 1%,C21189,Resistor_SMD:R_0603_1608Metric,yes,fit: Pico GP11 controls the amp
+R17,0Ω,0603 0 1%,C21189,Resistor_SMD:R_0603_1608Metric,DNP,DNP: fit instead of R16 to let Android (header pin 37) control the amp
+D9,SS34,SS34 40V 3A Schottky,C8678,Diode_SMD:D_SMA,yes,clamps inductive kick from long remote wire
+R18,4.7kΩ 0805,0805 4.7k 1%,C17673,Resistor_SMD:R_0805_2012Metric,yes,
+D10,LED green,0805 green LED (pick in library),,LED_SMD:LED_0805_2012Metric,yes,amp remote on indicator
+J3,Pico 2 pins 1-20 (1x20 F),1x20 2.54mm female header (pick in library),,Connector_PinSocket_2.54mm:PinSocket_1x20_P2.54mm_Vertical,yes,pad n = Pico pin n
+J4,Pico 2 pins 21-40 (1x20 F),1x20 2.54mm female header (pick in library),,Connector_PinSocket_2.54mm:PinSocket_1x20_P2.54mm_Vertical,yes,pad n = Pico pin 20+n; J4 pad 1 (pin 21) sits opposite J3 pad 20 (pin 20)
+R7,1k,0603 1k 1%,C21190,Resistor_SMD:R_0603_1608Metric,yes,
+R8,4.7k,0603 4.7k 1%,C23162,Resistor_SMD:R_0603_1608Metric,yes,
+JP1,SERVICE jumper,1x2 2.54mm pin header + jumper,,Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical,yes,
+R9,4.7k,0603 4.7k 1%,C23162,Resistor_SMD:R_0603_1608Metric,yes,
+R10,1M,0603 1M 1%,C22935,Resistor_SMD:R_0603_1608Metric,yes,battery sense: 14.4V -> 2.6V
+R11,220k,0603 220k 1%,C22961,Resistor_SMD:R_0603_1608Metric,yes,
+C9,100nF 50V,0603 100nF 50V X7R,C14663,Capacitor_SMD:C_0603_1608Metric,yes,
+Q1,AO3400A,AO3400A 30V 5.7A N-MOSFET,C20917,Package_TO_SOT_SMD:SOT-23,yes,open-drain press of the active-low VIM3 POWER key (GPIOAO_7)
+R12,100Ω,0603 100 1%,C22775,Resistor_SMD:R_0603_1608Metric,yes,
+R19,100k,0603 100k 1%,C25803,Resistor_SMD:R_0603_1608Metric,yes,
+J5,VIM3 POWER key lead,JST-PH 2P (pick in library),,Connector_JST:JST_PH_B2B-PH-K_1x02_P2.00mm_Vertical,yes,wire to the VIM3 power-key pad; not on the 40-pin header
+R20,1k,0603 1k 1%,C21190,Resistor_SMD:R_0603_1608Metric,yes,limits back-feed when VIM3 is off
+R21,1k,0603 1k 1%,C21190,Resistor_SMD:R_0603_1608Metric,yes,optional Pico<->Android link
+R22,1k,0603 1k 1%,C21190,Resistor_SMD:R_0603_1608Metric,yes,
+R23,100Ω,0603 100 1%,C22775,Resistor_SMD:R_0603_1608Metric,yes,
+R24,100Ω,0603 100 1%,C22775,Resistor_SMD:R_0603_1608Metric,yes,
+J6,Display backlight,JST-PH 3P (pick in library),,Connector_JST:JST_PH_B3B-PH-K_1x03_P2.00mm_Vertical,yes,
+R25,0Ω,0603 0 1%,C21189,Resistor_SMD:R_0603_1608Metric,yes,fit: BH1750 on I2C_AO (pins 25/26)
+R26,0Ω,0603 0 1%,C21189,Resistor_SMD:R_0603_1608Metric,yes,
+R27,0Ω,0603 0 1%,C21189,Resistor_SMD:R_0603_1608Metric,DNP,DNP: fit instead of R25/R26 for I2C_M3 (pins 22/23)
+R28,0Ω,0603 0 1%,C21189,Resistor_SMD:R_0603_1608Metric,DNP,
+J7,BH1750 light sensor,JST-PH 4P (pick in library),,Connector_JST:JST_PH_B4B-PH-K_1x04_P2.00mm_Vertical,yes,
+J2,VIM3 40-pin via 2x20 IDC ribbon,2x20 2.54mm shrouded box header (pick in library),,Connector_IDC:IDC-Header_2x20_P2.54mm_Vertical,yes,pin names are VIM3 numbers (Vn); pad numbers are IDC odd/even
