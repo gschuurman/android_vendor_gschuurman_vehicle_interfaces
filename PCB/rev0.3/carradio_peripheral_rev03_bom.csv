@@ -229,7 +229,7 @@ C97,100nF,0603 100nF 50V X7R,C14663,Capacitor_SMD:C_0603_1608Metric,yes,at USB_O
 U21,W25Q128JVS,Winbond W25Q128JVSIQ,C97521,Package_SO:SOIC-8_5.3x5.3mm_P1.27mm,yes,
 C98,100nF,0603 100nF 50V X7R,C14663,Capacitor_SMD:C_0603_1608Metric,yes,at flash VCC
 R81,1k,0603 1k 1%,C21190,Resistor_SMD:R_0603_1608Metric,yes,
-SW1,BOOTSEL,E-Switch TL3342F160QG (use the LCSC footprint; LCSC lists 5.2x5.2mm),C2886898,,yes,hold while resetting to enter the USB bootloader
+SW1,BOOTSEL,E-Switch TL3342F160QG,C2886898,Button_Switch_SMD:SW_SPST_TL3342,yes,hold while resetting to enter the USB bootloader
 Y3,12MHz,Abracon ABM8-272-T3 12MHz (Raspberry Pi reference part),C20625731,Crystal:Crystal_SMD_3225-4Pin_3.2x2.5mm,yes,
 R82,1k,0603 1k 1%,C21190,Resistor_SMD:R_0603_1608Metric,yes,series resistor on XOUT
 C99,15pF,Samsung CL10C150JB8NNNC 15pF C0G,C1644,Capacitor_SMD:C_0603_1608Metric,yes,
@@ -239,7 +239,7 @@ R84,27Ω,UNI-ROYAL 0603WAF270JT5E 27R,C25190,Resistor_SMD:R_0603_1608Metric,yes,
 J22,SWD,1x4 male header 2.54mm,C124378,Connector_PinHeader_2.54mm:PinHeader_1x04_P2.54mm_Vertical,yes,"Debug probe: SWCLK, GND, SWDIO, RUN"
 R85,10k,0603 10k 1%,C25804,Resistor_SMD:R_0603_1608Metric,yes,
 C101,100nF,0603 100nF 50V X7R,C14663,Capacitor_SMD:C_0603_1608Metric,yes,
-SW2,RESET,E-Switch TL3342F160QG (use the LCSC footprint; LCSC lists 5.2x5.2mm),C2886898,,yes,
+SW2,RESET,E-Switch TL3342F160QG,C2886898,Button_Switch_SMD:SW_SPST_TL3342,yes,
 R86,1k,0603 1k 1%,C21190,Resistor_SMD:R_0603_1608Metric,yes,
 D16,LED green,KT-0805G green LED,C2297,LED_SMD:LED_0805_2012Metric,yes,status LED (Pico LED was on GP25)
 R87,10k,0603 10k 1%,C25804,Resistor_SMD:R_0603_1608Metric,yes,TPS2561 FAULT1: port 1 over-current

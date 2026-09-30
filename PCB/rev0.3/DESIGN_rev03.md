@@ -122,3 +122,23 @@ checked:
   pin map.
 - Layout: keep the QSPI flash and crystal within a few millimetres of U20. Copy the Pico 2 layout for
   the core regulator (L5, C82, C83). Route the USB pair to hub 1 as a 90Ω pair.
+
+## Importing into KiCad
+
+The schematic is KiCad 7 format and opens in KiCad 7, 8 and 9. All symbols are embedded in the file, so
+it needs no extra symbol libraries. I checked it with KiCad 7's command-line tools: the file loads, and
+the netlist and PDF export cleanly. KiCad's own ERC has not been run, because KiCad 7's command line has
+no ERC. Run Inspect > Electrical Rules Checker once in the GUI. Expect some "power pin not driven"
+warnings on nets fed through a diode or fuse. Those need PWR_FLAG symbols, not wiring changes.
+
+**Footprints.** Every footprint name was checked against the KiCad libraries. Four parts need attention
+before "Update PCB from Schematic":
+
+| Part | Issue | Fix |
+|---|---|---|
+| U12 TPS55288 (LCSC C2864583) | No KiCad library footprint | Run `easyeda2kicad --full --lcsc_id=C2864583` (pip package easyeda2kicad), or take TI's footprint from the TPS55288 product page. |
+| F4 Littelfuse 01530008Z (C206907) | No KiCad library footprint | `easyeda2kicad --full --lcsc_id=C206907` |
+| J14 XUNPU FPC-05FB-40PH20 (C2856837) | The schematic uses the Hirose FH12 footprint, and the XUNPU pads may differ | `easyeda2kicad --full --lcsc_id=C2856837` and swap it in |
+| U20 RP2350B QFN-80, U21 SOIC-8 208mil | In the current KiCad library (8/9), not in KiCad 7 | Nothing, on KiCad 8 or later |
+
+The TL3342 switches use KiCad's own SW_SPST_TL3342 footprint.

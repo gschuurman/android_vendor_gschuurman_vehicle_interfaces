@@ -45059,7 +45059,7 @@
           (size 1 1))))
     (property
       "Footprint"
-      ""
+      "Button_Switch_SMD:SW_SPST_TL3342"
       (at 940 290 0)
       (effects
         (font
@@ -45083,7 +45083,7 @@
         hide))
     (property
       "MPN"
-      "E-Switch TL3342F160QG (use the LCSC footprint; LCSC lists 5.2x5.2mm)"
+      "E-Switch TL3342F160QG"
       (at 940 290 0)
       (effects
         (font
@@ -46261,7 +46261,7 @@
           (size 1 1))))
     (property
       "Footprint"
-      ""
+      "Button_Switch_SMD:SW_SPST_TL3342"
       (at 1110 100 0)
       (effects
         (font
@@ -46285,7 +46285,7 @@
         hide))
     (property
       "MPN"
-      "E-Switch TL3342F160QG (use the LCSC footprint; LCSC lists 5.2x5.2mm)"
+      "E-Switch TL3342F160QG"
       (at 1110 100 0)
       (effects
         (font
