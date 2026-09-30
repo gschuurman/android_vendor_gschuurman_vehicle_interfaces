@@ -46,6 +46,20 @@ def add_lib(libname, name):
     pin_table[lib_id] = pins_of(d)
     return lib_id
 
+def renumber_pin(lib_id, old, new):
+    """Rename a pin number in an embedded symbol so it matches the footprint's pad name."""
+    def walk(x):
+        for e in x:
+            if isinstance(e, list) and e:
+                if e[0] == 'pin':
+                    for q in e:
+                        if isinstance(q, list) and q and q[0] == 'number' and q[1] == old:
+                            q[1] = new
+                elif e[0] == 'symbol':
+                    walk(e)
+    walk(lib_symbols[lib_id])
+    pin_table[lib_id] = pins_of(lib_symbols[lib_id])
+
 def box_symbol(name, left, right, width=20.32, ref="J", value=None, fp=""):
     """Custom rectangular symbol. left/right: list of (number, name) or None (gap)."""
     lib_id = f"carradio:{name}"
@@ -424,14 +438,14 @@ place(HDMI, "J13", "HDMI in (from VIM3)", 60, 490,
       {"1": "HDMI_D2P", "3": "HDMI_D2N", "4": "HDMI_D1P", "6": "HDMI_D1N", "7": "HDMI_D0P", "9": "HDMI_D0N", "10": "HDMI_CLKP", "12": "HDMI_CLKN",
        "2": "GND", "5": "GND", "8": "GND", "11": "GND", "17": "GND", "SH": "GND",
        "13": "HDMI_CEC", "15": "HDMI_SCL", "16": "HDMI_SDA", "18": "HDMI_5V", "19": "HDMI_HPD"},
-      "Connector_HDMI:HDMI_A_Amphenol_10029449-x01xLF_Horizontal", "", "HDMI type A receptacle (pick in library)",
+      "Connector_Video:HDMI_A_Amphenol_10029449-x01xLF_Horizontal", "", "HDMI type A receptacle (pick in library)",
       note="short HDMI cable from the VIM3. Route TMDS pairs as 100 ohm differential, length-matched")
-FPC = add_lib('Connector_Generic', 'Conn_01x40')
+FPC = add_lib('Connector_Generic_MountingPin', 'Conn_01x40_MountingPin')
 fpc = {4: "+5V_SYS", 5: "+5V_SYS", 6: "+5V_SYS", 11: "HDMI_D2P", 13: "HDMI_D2N", 14: "HDMI_D1P", 16: "HDMI_D1N", 17: "HDMI_D0P", 19: "HDMI_D0N",
        20: "HDMI_CLKP", 22: "HDMI_CLKN", 23: "HDMI_CEC", 24: "HDMI_SCL", 25: "HDMI_SDA", 27: "HDMI_5V", 28: "HDMI_HPD",
        33: "TOUCH_DP", 34: "TOUCH_DN", 36: "BL_PWM", 37: "BL_EN"}
 for g in (8, 9, 10, 12, 15, 18, 21, 26, 35): fpc[g] = "GND"
-place(FPC, "J14", "Display FPC 40P 0.5mm", 200, 490, {str(i): fpc.get(i) for i in range(1, 41)},
+place(FPC, "J14", "Display FPC 40P 0.5mm", 200, 490, {**{str(i): fpc.get(i) for i in range(1, 41)}, "MP": "GND"},
       "Connector_FFC-FPC:Hirose_FH12-40S-0.5SH_1x40-1MP_P0.50mm_Horizontal", "", "40-pin 0.5mm FPC, flip-lock, DUAL-CONTACT (top + bottom), 2.0mm high (pick in library)",
       note="pinout from the Waveshare HDMI LCD Adapter schematic (Glenn, 2026-09-29): 1-3 = 12V (NC on the adapter, R1 not fitted), 4-6 = 5V, 7 = 3V3 out from the panel (unused), 8-10 GND, 29-32 audio (unused), 38-40 KEY/IO0/IO1 (unused), mounting tabs = GND")
 USBM = add_lib('Connector', 'USB_B_Micro')
@@ -506,14 +520,15 @@ place(HUB, "U13", "CH334R", 700, 290,
        "3": "SDR_DM", "4": "SDR_DP", "1": "HUB2_UP_DM", "2": "HUB2_UP_DP"},
       "Package_SO:QSOP-16_3.9x4.9mm_P0.635mm", "C4154405", "WCH CH334R 4-port USB 2.0 hub, QSOP-16",
       note="pinout checked against WCH CH334 datasheet (CH334R column). Upstream = VIM3 header pins 3/4 (VIM3 hub port 4)")
-place(add_lib('Device', 'Crystal'), "Y1", "12MHz", 660, 305, {"1": "HUB_XI", "2": "HUB_XO"}, "Crystal:Crystal_SMD_3225-4Pin_3.2x2.5mm", "",
+place(add_lib('Device', 'Crystal_GND24'), "Y1", "12MHz", 660, 305, {"1": "HUB_XI", "3": "HUB_XO", "2": "GND", "4": "GND"}, "Crystal:Crystal_SMD_3225-4Pin_3.2x2.5mm", "",
       "12MHz crystal (pick in library)", note="CH334R has built-in load capacitors")
 cap("C61", "1u", 720, 262, "+5V_SYS", "GND", note="at V5")
 cap("C62", "10u", 728, 262, "HUB_3V3", "GND")
 cap("C63", "100n", 736, 262, "HUB_3V3", "GND")
 place(PF, "F5", "PTC 0.5A", 780, 270, {"1": "+5V_SYS", "2": "SDR_VBUS"}, "Fuse:Fuse_1206_3216Metric", "", "1206 PTC 0.5A hold (pick in library)")
 USBA = add_lib('Connector', 'USB_A')
-place(USBA, "J17", "RTL-SDR (internal)", 805, 290, {"1": "SDR_VBUS", "2": "SDR_DM", "3": "SDR_DP", "4": "GND", "5": "GND"}, "Connector_USB:USB_A_Molex_67643_Horizontal", "",
+renumber_pin(USBA, "5", "SH")   # KiCad's USB-A footprints call the shield pads "SH", not "5"
+place(USBA, "J17", "RTL-SDR (internal)", 805, 290, {"1": "SDR_VBUS", "2": "SDR_DM", "3": "SDR_DP", "4": "GND", "SH": "GND"}, "Connector_USB:USB_A_Molex_67643_Horizontal", "",
       "USB-A receptacle, board mount (pick in library)", note="RTL-SDR dongle for FM/DAB+ plugs in here with its existing USB-A to USB-C cable")
 text("One link to the VIM3: no USB cables. Port 1 MCU (HID + GNSS CDC), 2 touch, 3 RTL-SDR, 4 second hub (external ports). Route D+/D- as 90 ohm pairs.", 610, 345)
 text("VIM3 header pins 3/4 are a working USB host port (confirmed by Glenn, 2026-09-29).", 610, 349)
@@ -547,13 +562,13 @@ place(HUB, "U14", "CH334R", 560, 480,
        "10": "HUB2_UP_DM", "11": "HUB2_UP_DP", "7": "EXT1_DM", "8": "EXT1_DP", "5": "EXT2_DM", "6": "EXT2_DP", "3": None, "4": None, "1": None, "2": None},
       "Package_SO:QSOP-16_3.9x4.9mm_P0.635mm", "C4154405", "WCH CH334R 4-port USB 2.0 hub, QSOP-16",
       note="cascaded on hub 1 port 4. RESET#/CDP tied high = BC1.2 CDP for faster phone charging (WCH: depends on batch)")
-place(add_lib('Device', 'Crystal'), "Y2", "12MHz", 530, 505, {"1": "HUB2_XI", "2": "HUB2_XO"}, "Crystal:Crystal_SMD_3225-4Pin_3.2x2.5mm", "", "12MHz crystal (pick in library)")
+place(add_lib('Device', 'Crystal_GND24'), "Y2", "12MHz", 530, 505, {"1": "HUB2_XI", "3": "HUB2_XO", "2": "GND", "4": "GND"}, "Crystal:Crystal_SMD_3225-4Pin_3.2x2.5mm", "", "12MHz crystal (pick in library)")
 cap("C75", "1u", 580, 455, "+5V_SYS", "GND")
 cap("C76", "10u", 588, 455, "HUB2_3V3", "GND")
 cap("C77", "100n", 596, 455, "HUB2_3V3", "GND")
-place(USBA, "J19", "External USB 1", 600, 510, {"1": "EXT1_VBUS", "2": "EXT1_DM", "3": "EXT1_DP", "4": "GND", "5": "GND"}, "Connector_USB:USB_A_Molex_67643_Horizontal", "",
+place(USBA, "J19", "External USB 1", 600, 510, {"1": "EXT1_VBUS", "2": "EXT1_DM", "3": "EXT1_DP", "4": "GND", "SH": "GND"}, "Connector_USB:USB_A_Molex_67643_Horizontal", "",
       "USB-A receptacle (pick in library), or a JST lead to a dash-mount USB socket")
-place(USBA, "J20", "External USB 2", 600, 540, {"1": "EXT2_VBUS", "2": "EXT2_DM", "3": "EXT2_DP", "4": "GND", "5": "GND"}, "Connector_USB:USB_A_Molex_67643_Horizontal", "",
+place(USBA, "J20", "External USB 2", 600, 540, {"1": "EXT2_VBUS", "2": "EXT2_DM", "3": "EXT2_DP", "4": "GND", "SH": "GND"}, "Connector_USB:USB_A_Molex_67643_Horizontal", "",
       "USB-A receptacle (pick in library), or a JST lead to a dash-mount USB socket")
 
 ESD = add_lib('Power_Protection', 'USBLC6-2SC6')

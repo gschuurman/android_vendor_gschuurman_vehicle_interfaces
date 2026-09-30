@@ -142,3 +142,10 @@ before "Update PCB from Schematic":
 | U20 RP2350B QFN-80, U21 SOIC-8 208mil | In the current KiCad library (8/9), not in KiCad 7 | Nothing, on KiCad 8 or later |
 
 The TL3342 switches use KiCad's own SW_SPST_TL3342 footprint.
+
+**Checked against KiCad 10's "Update PCB from Schematic" (2026-09-30).** The first import showed pad-name
+mismatches. They are fixed: the HDMI footprint moved to the `Connector_Video` library, the USB-A shield pin
+is now numbered `SH` to match the Molex footprint, the hub crystals Y1/Y2 use the 4-pin crystal symbol with
+pads 2 and 4 on GND, and the FPC mounting pads (MP) are on GND. Every symbol pin now matches a footprint
+pad, checked with a script against the KiCad footprint library. Only U12 and F4 remain, until their LCSC
+footprints are assigned.

@@ -139,7 +139,7 @@ C41,2.2nF C0G,0805 2.2nF 50V C0G,C28260,Capacitor_SMD:C_0805_2012Metric,yes,
 J2,VIM3 40-pin via 2x20 IDC ribbon,BOOMELE 2.54-2*20P box header (check it is shrouded),C9138,Connector_IDC:IDC-Header_2x20_P2.54mm_Vertical,yes,pin names are VIM3 numbers (Vn); pad numbers are IDC odd/even
 J8,ISO 10487 C1 (via pigtail),Molex 43045-0612,C234188,Connector_Molex:Molex_Micro-Fit_3.0_43045-0612_2x03_P3.00mm_Vertical,yes,"pad n = ISO C1 pin n: 1 rear L, 2 rear R, 3 front L, 4 front R, 5 line-out ground, 6 remote"
 R56,0Ω,0603 0 1%,C21189,Resistor_SMD:R_0603_1608Metric,yes,"ground-lift option: fit 0R, or 10R if the amp hums (alternator whine)"
-J13,HDMI in (from VIM3),Amphenol 10029449-111RLF (plating variant of -001RLF; confirm land pattern),C427307,Connector_HDMI:HDMI_A_Amphenol_10029449-x01xLF_Horizontal,yes,"short HDMI cable from the VIM3. Route TMDS pairs as 100 ohm differential, length-matched"
+J13,HDMI in (from VIM3),Amphenol 10029449-111RLF (plating variant of -001RLF; confirm land pattern),C427307,Connector_Video:HDMI_A_Amphenol_10029449-x01xLF_Horizontal,yes,"short HDMI cable from the VIM3. Route TMDS pairs as 100 ohm differential, length-matched"
 J14,Display FPC 40P 0.5mm,"XUNPU FPC-05FB-40PH20, 40P 0.5mm dual-contact flip-top 2.0mm (use the LCSC footprint, not FH12)",C2856837,Connector_FFC-FPC:Hirose_FH12-40S-0.5SH_1x40-1MP_P0.50mm_Horizontal,yes,"pinout from the Waveshare HDMI LCD Adapter schematic (Glenn, 2026-09-29): 1-3 = 12V (NC on the adapter, R1 not fitted), 4-6 = 5V, 7 = 3V3 out from the panel (unused), 8-10 GND, 29-32 audio (unused), 38-40 KEY/IO0/IO1 (unused), mounting tabs = GND"
 C46,10uF,0805 10uF 25V X5R,C15850,Capacitor_SMD:C_0805_2012Metric,yes,at FPC 5V pins
 C47,100nF,0603 100nF 50V X7R,C14663,Capacitor_SMD:C_0603_1608Metric,yes,
