@@ -30638,7 +30638,7 @@
           (size 1 1))))
     (property
       "Footprint"
-      "Connector_FFC-FPC:Hirose_FH12-40S-0.5SH_1x40-1MP_P0.50mm_Horizontal"
+      "carradio:XUNPU_FPC-05FB-40PH20"
       (at 200 490 0)
       (effects
         (font
@@ -30662,7 +30662,7 @@
         hide))
     (property
       "MPN"
-      "XUNPU FPC-05FB-40PH20, 40P 0.5mm dual-contact flip-top 2.0mm (use the LCSC footprint, not FH12)"
+      "XUNPU FPC-05FB-40PH20, 40P 0.5mm dual-contact flip-top 2.0mm (pads numbered by panel pin: pin 1 on the right, ribbon leaving the edge)"
       (at 200 490 0)
       (effects
         (font
@@ -31814,7 +31814,7 @@
           (size 1 1))))
     (property
       "Footprint"
-      ""
+      "carradio:Littelfuse_01530008Z"
       (at 615 50 0)
       (effects
         (font
@@ -31838,7 +31838,7 @@
         hide))
     (property
       "MPN"
-      "Littelfuse 01530008Z mini blade holder (use the LCSC footprint) + fuse C178942 Littelfuse 029707.5WXNV 7.5A"
+      "Littelfuse 01530008Z mini blade holder + fuse C178942 Littelfuse 029707.5WXNV 7.5A"
       (at 615 50 0)
       (effects
         (font
@@ -32720,7 +32720,7 @@
           (size 1.27 1.27))))
     (property
       "Footprint"
-      ""
+      "carradio:TPS55288RPMR_VQFN-HR-26"
       (at 735 110 0)
       (effects
         (font
@@ -32744,7 +32744,7 @@
         hide))
     (property
       "MPN"
-      "TI TPS55288RPMR 36V buck-boost, I2C (footprint: use the EasyEDA library part)"
+      "TI TPS55288RPMR"
       (at 735 110 0)
       (effects
         (font
@@ -48772,33 +48772,42 @@
           "/3b49dff3-5af1-5299-8484-b6e3bf9b1595"
           (reference "#FLG232")
           (unit 1)))))
+  (label
+    "+5V_AON"
+    (at 390 392 270)
+    (fields_autoplaced)
+    (effects
+      (font
+        (size 1.27 1.27))
+      (justify right bottom))
+    (uuid "c77ed9b6-087f-5520-b1c4-3c19a83381e6"))
   (symbol
-    (lib_id "power:GND")
-    (at 390 392 0)
+    (lib_id "power:PWR_FLAG")
+    (at 405 392 0)
     (unit 1)
     (in_bom no)
     (on_board yes)
     (dnp no)
-    (uuid "c77ed9b6-087f-5520-b1c4-3c19a83381e6")
+    (uuid "6d2a78c7-675e-52b1-a835-d0ff576f3d16")
     (property
       "Reference"
-      "#PWR233"
-      (at 390 397 0)
+      "#FLG233"
+      (at 405 397 0)
       (effects
         (font
           (size 1.27 1.27))
         hide))
     (property
       "Value"
-      "GND"
-      (at 390 395.5 0)
+      "PWR_FLAG"
+      (at 405 395.5 0)
       (effects
         (font
           (size 1 1))))
     (property
       "Footprint"
       ""
-      (at 390 392 0)
+      (at 405 392 0)
       (effects
         (font
           (size 1.27 1.27))
@@ -48806,20 +48815,359 @@
     (property
       "Datasheet"
       ""
-      (at 390 392 0)
+      (at 405 392 0)
       (effects
         (font
           (size 1.27 1.27))
         hide))
     (pin
       "1"
-      (uuid "6d2a78c7-675e-52b1-a835-d0ff576f3d16"))
+      (uuid "02da2595-ac58-5158-b7a3-5e796c4e5221"))
     (instances
       (project
         "carradio_peripheral_rev03"
         (path
           "/3b49dff3-5af1-5299-8484-b6e3bf9b1595"
-          (reference "#PWR233")
+          (reference "#FLG233")
+          (unit 1)))))
+  (label
+    "+5V_SYS"
+    (at 405 392 270)
+    (fields_autoplaced)
+    (effects
+      (font
+        (size 1.27 1.27))
+      (justify right bottom))
+    (uuid "cea4f14c-ced7-5ed0-bb36-1ee842eba0c9"))
+  (symbol
+    (lib_id "power:PWR_FLAG")
+    (at 420 392 0)
+    (unit 1)
+    (in_bom no)
+    (on_board yes)
+    (dnp no)
+    (uuid "2db67b51-5ee3-5bcb-8e29-455066d046d5")
+    (property
+      "Reference"
+      "#FLG234"
+      (at 420 397 0)
+      (effects
+        (font
+          (size 1.27 1.27))
+        hide))
+    (property
+      "Value"
+      "PWR_FLAG"
+      (at 420 395.5 0)
+      (effects
+        (font
+          (size 1 1))))
+    (property
+      "Footprint"
+      ""
+      (at 420 392 0)
+      (effects
+        (font
+          (size 1.27 1.27))
+        hide))
+    (property
+      "Datasheet"
+      ""
+      (at 420 392 0)
+      (effects
+        (font
+          (size 1.27 1.27))
+        hide))
+    (pin
+      "1"
+      (uuid "c28168e7-5e9e-5baa-a2c2-f2b391731716"))
+    (instances
+      (project
+        "carradio_peripheral_rev03"
+        (path
+          "/3b49dff3-5af1-5299-8484-b6e3bf9b1595"
+          (reference "#FLG234")
+          (unit 1)))))
+  (label
+    "+5V_USB"
+    (at 420 392 270)
+    (fields_autoplaced)
+    (effects
+      (font
+        (size 1.27 1.27))
+      (justify right bottom))
+    (uuid "49cc9a70-c5c4-5dc4-9675-d40a224487ff"))
+  (symbol
+    (lib_id "power:PWR_FLAG")
+    (at 435 392 0)
+    (unit 1)
+    (in_bom no)
+    (on_board yes)
+    (dnp no)
+    (uuid "8cf0e71a-b0df-5ae5-beef-9d5b299f1500")
+    (property
+      "Reference"
+      "#FLG235"
+      (at 435 397 0)
+      (effects
+        (font
+          (size 1.27 1.27))
+        hide))
+    (property
+      "Value"
+      "PWR_FLAG"
+      (at 435 395.5 0)
+      (effects
+        (font
+          (size 1 1))))
+    (property
+      "Footprint"
+      ""
+      (at 435 392 0)
+      (effects
+        (font
+          (size 1.27 1.27))
+        hide))
+    (property
+      "Datasheet"
+      ""
+      (at 435 392 0)
+      (effects
+        (font
+          (size 1.27 1.27))
+        hide))
+    (pin
+      "1"
+      (uuid "ad381ea3-945b-5ec5-aa82-f35698007ae5"))
+    (instances
+      (project
+        "carradio_peripheral_rev03"
+        (path
+          "/3b49dff3-5af1-5299-8484-b6e3bf9b1595"
+          (reference "#FLG235")
+          (unit 1)))))
+  (label
+    "SDR_VBUS"
+    (at 435 392 270)
+    (fields_autoplaced)
+    (effects
+      (font
+        (size 1.27 1.27))
+      (justify right bottom))
+    (uuid "420d7608-28cb-54f0-89d6-01b18e121c03"))
+  (symbol
+    (lib_id "power:PWR_FLAG")
+    (at 450 392 0)
+    (unit 1)
+    (in_bom no)
+    (on_board yes)
+    (dnp no)
+    (uuid "1884a9df-d664-52a7-b28b-259dbd0b34e2")
+    (property
+      "Reference"
+      "#FLG236"
+      (at 450 397 0)
+      (effects
+        (font
+          (size 1.27 1.27))
+        hide))
+    (property
+      "Value"
+      "PWR_FLAG"
+      (at 450 395.5 0)
+      (effects
+        (font
+          (size 1 1))))
+    (property
+      "Footprint"
+      ""
+      (at 450 392 0)
+      (effects
+        (font
+          (size 1.27 1.27))
+        hide))
+    (property
+      "Datasheet"
+      ""
+      (at 450 392 0)
+      (effects
+        (font
+          (size 1.27 1.27))
+        hide))
+    (pin
+      "1"
+      (uuid "68c54875-fcf1-5720-b2d2-3754f14636a5"))
+    (instances
+      (project
+        "carradio_peripheral_rev03"
+        (path
+          "/3b49dff3-5af1-5299-8484-b6e3bf9b1595"
+          (reference "#FLG236")
+          (unit 1)))))
+  (label
+    "VSYS_IN"
+    (at 450 392 270)
+    (fields_autoplaced)
+    (effects
+      (font
+        (size 1.27 1.27))
+      (justify right bottom))
+    (uuid "06039065-c7fd-5230-88f6-70aafda62580"))
+  (symbol
+    (lib_id "power:PWR_FLAG")
+    (at 465 392 0)
+    (unit 1)
+    (in_bom no)
+    (on_board yes)
+    (dnp no)
+    (uuid "902ca4e5-95b9-5e59-b4c9-344fbb6aefbd")
+    (property
+      "Reference"
+      "#FLG237"
+      (at 465 397 0)
+      (effects
+        (font
+          (size 1.27 1.27))
+        hide))
+    (property
+      "Value"
+      "PWR_FLAG"
+      (at 465 395.5 0)
+      (effects
+        (font
+          (size 1 1))))
+    (property
+      "Footprint"
+      ""
+      (at 465 392 0)
+      (effects
+        (font
+          (size 1.27 1.27))
+        hide))
+    (property
+      "Datasheet"
+      ""
+      (at 465 392 0)
+      (effects
+        (font
+          (size 1.27 1.27))
+        hide))
+    (pin
+      "1"
+      (uuid "d243c336-53ae-5f14-acc6-1c5aa843177e"))
+    (instances
+      (project
+        "carradio_peripheral_rev03"
+        (path
+          "/3b49dff3-5af1-5299-8484-b6e3bf9b1595"
+          (reference "#FLG237")
+          (unit 1)))))
+  (label
+    "HDMI_5V"
+    (at 465 392 270)
+    (fields_autoplaced)
+    (effects
+      (font
+        (size 1.27 1.27))
+      (justify right bottom))
+    (uuid "7a7b2a92-4117-529c-ac96-c0791b7b2c0f"))
+  (symbol
+    (lib_id "power:PWR_FLAG")
+    (at 480 392 0)
+    (unit 1)
+    (in_bom no)
+    (on_board yes)
+    (dnp no)
+    (uuid "6ada4780-0693-577e-880f-421665aa248c")
+    (property
+      "Reference"
+      "#FLG238"
+      (at 480 397 0)
+      (effects
+        (font
+          (size 1.27 1.27))
+        hide))
+    (property
+      "Value"
+      "PWR_FLAG"
+      (at 480 395.5 0)
+      (effects
+        (font
+          (size 1 1))))
+    (property
+      "Footprint"
+      ""
+      (at 480 392 0)
+      (effects
+        (font
+          (size 1.27 1.27))
+        hide))
+    (property
+      "Datasheet"
+      ""
+      (at 480 392 0)
+      (effects
+        (font
+          (size 1.27 1.27))
+        hide))
+    (pin
+      "1"
+      (uuid "14b9076f-969d-5932-8dec-826c43b47ab0"))
+    (instances
+      (project
+        "carradio_peripheral_rev03"
+        (path
+          "/3b49dff3-5af1-5299-8484-b6e3bf9b1595"
+          (reference "#FLG238")
+          (unit 1)))))
+  (symbol
+    (lib_id "power:GND")
+    (at 480 392 0)
+    (unit 1)
+    (in_bom no)
+    (on_board yes)
+    (dnp no)
+    (uuid "e688be0a-19fc-58a0-b0bc-eaaa23f037f6")
+    (property
+      "Reference"
+      "#PWR239"
+      (at 480 397 0)
+      (effects
+        (font
+          (size 1.27 1.27))
+        hide))
+    (property
+      "Value"
+      "GND"
+      (at 480 395.5 0)
+      (effects
+        (font
+          (size 1 1))))
+    (property
+      "Footprint"
+      ""
+      (at 480 392 0)
+      (effects
+        (font
+          (size 1.27 1.27))
+        hide))
+    (property
+      "Datasheet"
+      ""
+      (at 480 392 0)
+      (effects
+        (font
+          (size 1.27 1.27))
+        hide))
+    (pin
+      "1"
+      (uuid "f5dbb058-96f8-5432-aed0-ad0d745c8531"))
+    (instances
+      (project
+        "carradio_peripheral_rev03"
+        (path
+          "/3b49dff3-5af1-5299-8484-b6e3bf9b1595"
+          (reference "#PWR239")
           (unit 1)))))
   (text
     "Car radio peripheral board rev 0.3 - MG F (1996), VIM3 + RP2350B, 4ch line out, NEO-M9N. Generated; see DESIGN_rev03.md."
@@ -48828,7 +49176,7 @@
       (font
         (size 1.5 1.5))
       (justify left bottom))
-    (uuid "02da2595-ac58-5158-b7a3-5e796c4e5221"))
+    (uuid "f0f36a1e-dda0-5cc5-b950-25c3ae141206"))
   (sheet_instances
     (path
       "/"

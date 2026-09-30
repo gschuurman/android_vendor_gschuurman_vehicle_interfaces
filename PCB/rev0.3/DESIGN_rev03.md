@@ -131,21 +131,20 @@ the netlist and PDF export cleanly. KiCad's own ERC has not been run, because Ki
 no ERC. Run Inspect > Electrical Rules Checker once in the GUI. Expect some "power pin not driven"
 warnings on nets fed through a diode or fuse. Those need PWR_FLAG symbols, not wiring changes.
 
-**Footprints.** Every footprint name was checked against the KiCad libraries. Four parts need attention
-before "Update PCB from Schematic":
+**Footprints.** Every footprint is in KiCad 8+'s standard libraries or in the project library `carradio.pretty`
+(registered by the `fp-lib-table` in this folder, so no setup is needed). The project library holds the three LCSC parts
+KiCad doesn't have, taken from Glenn's easyeda2kicad export (2026-09-30):
 
-| Part | Issue | Fix |
+| Part | Footprint | Notes |
 |---|---|---|
-| U12 TPS55288 (LCSC C2864583) | No KiCad library footprint | Run `easyeda2kicad --full --lcsc_id=C2864583` (pip package easyeda2kicad), or take TI's footprint from the TPS55288 product page. |
-| F4 Littelfuse 01530008Z (C206907) | No KiCad library footprint | `easyeda2kicad --full --lcsc_id=C206907` |
-| J14 XUNPU FPC-05FB-40PH20 (C2856837) | The schematic uses the Hirose FH12 footprint, and the XUNPU pads may differ | `easyeda2kicad --full --lcsc_id=C2856837` and swap it in |
-| U20 RP2350B QFN-80, U21 SOIC-8 208mil | In the current KiCad library (8/9), not in KiCad 7 | Nothing, on KiCad 8 or later |
+| U12 TPS55288RPMR (C2864583) | `carradio:TPS55288RPMR_VQFN-HR-26` | As exported. Pin numbers match TI's datasheet (1 DR1L, 3 VIN, 9/24 PGND). |
+| F4 Littelfuse 01530008Z (C206907) | `carradio:Littelfuse_01530008Z` | Centre peg hole changed to non-plated. |
+| J14 XUNPU FPC-05FB-40PH20 (C2856837) | `carradio:XUNPU_FPC-05FB-40PH20` | **Pads renumbered**: pad n is the Waveshare panel's pin n, so panel pin 1 sits on the right seen from the top with the ribbon leaving the board edge (as on the Waveshare adapter). XUNPU's own numbering runs the other way. Tabs are `MP` (GND). Check the cable direction in the 3D viewer. |
 
-The TL3342 switches use KiCad's own SW_SPST_TL3342 footprint.
+J13 is the full-size HDMI socket (Amphenol 10029449, C427307, KiCad `Connector_Video` footprint).
 
 **Checked against KiCad 10's "Update PCB from Schematic" (2026-09-30).** The first import showed pad-name
 mismatches. They are fixed: the HDMI footprint moved to the `Connector_Video` library, the USB-A shield pin
 is now numbered `SH` to match the Molex footprint, the hub crystals Y1/Y2 use the 4-pin crystal symbol with
 pads 2 and 4 on GND, and the FPC mounting pads (MP) are on GND. Every symbol pin now matches a footprint
-pad, checked with a script against the KiCad footprint library. Only U12 and F4 remain, until their LCSC
-footprints are assigned.
+pad, checked with a script against the KiCad footprint library. 

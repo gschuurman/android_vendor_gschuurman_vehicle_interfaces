@@ -137,10 +137,10 @@ J2,VIM3 40-pin via 2x20 IDC ribbon,BOOMELE 2.54-2*20P box header (check it is sh
 J8,ISO 10487 C1 (via pigtail),Molex 43045-0612,C234188,Connector_Molex:Molex_Micro-Fit_3.0_43045-0612_2x03_P3.00mm_Vertical,yes,"pad n = ISO C1 pin n: 1 rear L, 2 rear R, 3 front L, 4 front R, 5 line-out ground, 6 remote"
 R56,0Ω,0603 0 1%,C21189,Resistor_SMD:R_0603_1608Metric,yes,"ground-lift option: fit 0R, or 10R if the amp hums (alternator whine)"
 J13,HDMI in (from VIM3),Amphenol 10029449-111RLF (plating variant of -001RLF; confirm land pattern),C427307,Connector_Video:HDMI_A_Amphenol_10029449-x01xLF_Horizontal,yes,"short HDMI cable from the VIM3. Route TMDS pairs as 100 ohm differential, length-matched"
-J14,Display FPC 40P 0.5mm,"XUNPU FPC-05FB-40PH20, 40P 0.5mm dual-contact flip-top 2.0mm (use the LCSC footprint, not FH12)",C2856837,Connector_FFC-FPC:Hirose_FH12-40S-0.5SH_1x40-1MP_P0.50mm_Horizontal,yes,"pinout from the Waveshare HDMI LCD Adapter schematic (Glenn, 2026-09-29): 1-3 = 12V (NC on the adapter, R1 not fitted), 4-6 = 5V, 7 = 3V3 out from the panel (unused), 8-10 GND, 29-32 audio (unused), 38-40 KEY/IO0/IO1 (unused), mounting tabs = GND"
+J14,Display FPC 40P 0.5mm,"XUNPU FPC-05FB-40PH20, 40P 0.5mm dual-contact flip-top 2.0mm (pads numbered by panel pin: pin 1 on the right, ribbon leaving the edge)",C2856837,carradio:XUNPU_FPC-05FB-40PH20,yes,"pinout from the Waveshare HDMI LCD Adapter schematic (Glenn, 2026-09-29): 1-3 = 12V (NC on the adapter, R1 not fitted), 4-6 = 5V, 7 = 3V3 out from the panel (unused), 8-10 GND, 29-32 audio (unused), 38-40 KEY/IO0/IO1 (unused), mounting tabs = GND"
 C46,10uF,0805 10uF 25V X5R,C15850,Capacitor_SMD:C_0805_2012Metric,yes,at FPC 5V pins
 C47,100nF,0603 100nF 50V X7R,C14663,Capacitor_SMD:C_0603_1608Metric,yes,
-F4,7.5A fuse,Littelfuse 01530008Z mini blade holder (use the LCSC footprint) + fuse C178942 Littelfuse 029707.5WXNV 7.5A,C206907,,yes,feeds the VIM3 supply from permanent +12V (ISO A4)
+F4,7.5A fuse,Littelfuse 01530008Z mini blade holder + fuse C178942 Littelfuse 029707.5WXNV 7.5A,C206907,carradio:Littelfuse_01530008Z,yes,feeds the VIM3 supply from permanent +12V (ISO A4)
 Q10,P-MOSFET -40V,NCE40P70K -40V 10 mOhm P-MOSFET TO-252 (alt Diodes DMP4015SK3-13 C513222),C130101,Package_TO_SOT_SMD:TO-252-2,yes,"reverse-polarity protection, no diode drop"
 D15,BZT52C12,BZT52C12-7-F 12V zener,C124196,Diode_SMD:D_SOD-123,yes,Vgs clamp
 R66,10k,0603 10k 1%,C25804,Resistor_SMD:R_0603_1608Metric,yes,
@@ -148,7 +148,7 @@ D14,Load-dump TVS,"Liown 5.0SMDJ22A, 5 kW SMC",C2990362,Diode_SMD:D_SMC,yes,"SM8
 C48,100uF 50V,Panasonic EEEFK1H101P 100uF 50V 8x10.2,C178548,Capacitor_SMD:CP_Elec_8x10,yes,bulk + input damping
 C49,10uF 50V,1206 10uF 50V X5R (Murata GRM31CR61H106KA12L),C77092,Capacitor_SMD:C_1206_3216Metric,yes,
 C50,10uF 50V,1206 10uF 50V X5R (Murata GRM31CR61H106KA12L),C77092,Capacitor_SMD:C_1206_3216Metric,yes,
-U12,TPS55288RPMR,"TI TPS55288RPMR 36V buck-boost, I2C (footprint: use the EasyEDA library part)",C2864583,,yes,"pinout from TI datasheet SLVSF01B Table 5-1. Powers up with output off: the MCU enables it over I2C (address 0x74, OE bit) after EN goes high. Default 5.0V"
+U12,TPS55288RPMR,TI TPS55288RPMR,C2864583,carradio:TPS55288RPMR_VQFN-HR-26,yes,"pinout from TI datasheet SLVSF01B Table 5-1. Powers up with output off: the MCU enables it over I2C (address 0x74, OE bit) after EN goes high. Default 5.0V"
 R67,0Ω,0603 0 1%,C21189,Resistor_SMD:R_0603_1608Metric,yes,"MODE = 0 ohm: internal VCC, I2C 0x74, forced PWM"
 R68,47k,0603 47k 1% (YAGEO RC0603FR-0747KL),C105579,Resistor_SMD:R_0603_1608Metric,yes,fsw = 1000/(0.05 x 47000 + 20) = 422 kHz
 R69,30k,UNI-ROYAL 0603WAF3002T5E,C22984,Resistor_SMD:R_0603_1608Metric,yes,"average inductor current limit = 330000/R = 11 A (max ~12.7 A), below L3 saturation; still covers 25 W out at 3 V in"
