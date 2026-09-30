@@ -2,7 +2,7 @@
 // Google's car Assistant needs a Play-certified device, so Dicio is the ASSISTANT role holder:
 // the system bar's mic button starts its ACTION_ASSIST activity (see CarSystemUI AssistantButton).
 // The APK is our release build of Dicio v4.0 plus preinstalled-model support (models/, installed to
-// /product/usr/share/dicio): speech recognition in English and Dutch and the wake word work offline
+// /product/usr/share/dicio): speech recognition (Whisper, or Vosk per language) and the wake word work offline
 // from the first boot. Source: ~/android/dicio-src, branch preinstalled-models. Signed by the build.
 android_app_import {
     name: "Dicio",
