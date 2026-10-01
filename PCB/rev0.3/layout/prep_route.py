@@ -7,18 +7,18 @@ def V(x, y): return pcbnew.VECTOR2I(MM(x), MM(y))
 
 CLASSES = {
     # name: (track, clearance, via_d, via_drill, dp_w, dp_gap)
-    'Default':     (0.2, 0.13, 0.6, 0.3, 0.2, 0.15),
-    'HDMI':        (0.2, 0.1, 0.6, 0.3, 0.2, 0.15),
-    'USB':         (0.25, 0.15, 0.6, 0.3, 0.25, 0.15),
+    'Default':     (0.2, 0.13, 0.45, 0.2, 0.2, 0.15),
+    'HDMI':        (0.2, 0.1, 0.45, 0.2, 0.2, 0.15),
+    'USB':         (0.25, 0.15, 0.45, 0.2, 0.25, 0.15),
     # routed thin for connectivity; the high-current paths get copper pours afterwards
-    'Power':       (0.3, 0.13, 0.6, 0.3, 0.3, 0.15),
-    'HighCurrent': (0.4, 0.13, 0.6, 0.3, 0.4, 0.15),
+    'Power':       (0.3, 0.13, 0.45, 0.2, 0.3, 0.15),
+    'HighCurrent': (0.6, 0.15, 0.6, 0.3, 0.6, 0.15),
 }
 PATTERNS = [
     ('HDMI', '/HDMI_*'),
     ('USB', '*_DP'), ('USB', '*_DM'), ('USB', '*_DN'), ('USB', '*USBDP*'), ('USB', '*USBDM*'),
-    ('HighCurrent', '/BATT_RAW'), ('HighCurrent', '/BATT_F2'), ('HighCurrent', '/VSYS_IN'), ('HighCurrent', '/+5V_SYS'),
-    ('HighCurrent', '/BB_SW*'), ('HighCurrent', '/BB_VOUT'),
+    ('HighCurrent', '/VSYS_IN'), ('HighCurrent', '/+5V_SYS'),
+    ('Power', '/BATT_RAW'), ('Power', '/BATT_F2'), ('Power', '/BB_SW*'), ('Power', '/BB_VOUT'),
     ('Power', '/+5V_USB'), ('Power', '/EXT?_VBUS'), ('Power', '/SDR_VBUS'), ('Power', '/USBP_*'), ('Power', '/+5V_AON'),
     ('Power', '/+3V3_*'), ('Power', '/+1V1_MCU'), ('Power', '/BUCK_SW'), ('Power', '/VIM3_5V'), ('Power', '/BATT_F'),
     ('Power', '/HUB*_3V3'), ('Power', '/GNSS_VCCRF'),
@@ -33,8 +33,8 @@ for i, (n, (tw, cl, vd, vh, dw, dg)) in enumerate(CLASSES.items()):
 tmpl['net_settings']['classes'] = cls
 tmpl['net_settings']['netclass_patterns'] = [{'netclass': c, 'pattern': p} for c, p in PATTERNS]
 r = tmpl['board']['design_settings']['rules']
-r.update(min_clearance=0.1, min_track_width=0.15, min_via_diameter=0.5, min_through_hole_diameter=0.3,
-         min_via_annular_width=0.13, min_copper_edge_clearance=0.3, min_hole_clearance=0.2, min_hole_to_hole=0.25)
+r.update(min_clearance=0.1, min_track_width=0.15, min_via_diameter=0.45, min_through_hole_diameter=0.2,
+         min_via_annular_width=0.1, min_copper_edge_clearance=0.3, min_hole_clearance=0.2, min_hole_to_hole=0.25)
 tmpl['meta']['filename'] = base.split('/')[-1] + '.kicad_pro'
 json.dump(tmpl, open(base + '.kicad_pro', 'w'), indent=2)
 shutil.copy(src, base + '.kicad_pcb')

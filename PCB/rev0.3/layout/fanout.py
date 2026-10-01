@@ -4,7 +4,7 @@ import pcbnew, sys, math, re
 MM = pcbnew.FromMM
 b = pcbnew.LoadBoard(sys.argv[1])
 W, H = [float(x) for x in re.findall(r'W, H = ([\d.]+), ([\d.]+)', open('/w/lay/floorplan.py').read())[0]]
-VD, VH, CL = 0.6, 0.3, 0.2
+VD, VH, CL = 0.45, 0.2, 0.2
 gnd = b.FindNet('GND')
 obst = []   # (x0,y0,x1,y1, netcode)
 for f in b.GetFootprints():
@@ -14,7 +14,15 @@ for f in b.GetFootprints():
 for t in b.GetTracks():
     bb = t.GetBoundingBox()
     obst.append((bb.GetX() / 1e6, bb.GetY() / 1e6, bb.GetRight() / 1e6, bb.GetBottom() / 1e6, t.GetNetCode()))
+zones = [z for z in b.Zones() if not z.GetIsRuleArea() and z.GetNetname() != 'GND' and z.GetLayer() == pcbnew.F_Cu]
+def in_zone(x, y, r):
+    for z in zones:
+        bb = z.GetBoundingBox()
+        if bb.GetX() / 1e6 - r - 0.3 < x < bb.GetRight() / 1e6 + r + 0.3 and bb.GetY() / 1e6 - r - 0.3 < y < bb.GetBottom() / 1e6 + r + 0.3:
+            if z.Outline().Collide(pcbnew.VECTOR2I(MM(x), MM(y)), MM(r + 0.3)): return True
+    return False
 def free(x, y, r, ignore=None):
+    if in_zone(x, y, r): return False
     if x < 0.8 or y < 0.8 or x > W - 0.8 or y > H - 0.8: return False
     for (x0, y0, x1, y1, nc) in obst:
         if nc == gnd.GetNetCode() and nc != 0: m = 0.05

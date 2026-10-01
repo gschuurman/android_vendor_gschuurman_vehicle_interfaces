@@ -1,0 +1,10 @@
+viaL /+5V_SYS 38.5 68.45
+# U14 VDD5: reroute the hub 3V3 stub so the 5V via fits beside pad 12
+evict /HUB2_3V3 86.9 46.4 88.3 48.35
+segL /HUB2_3V3 F 86.638 46.682 88.136 46.698 0.3
+segL /HUB2_3V3 In2 87.95 48.4 88.136 46.698 0.3
+viaL /+5V_SYS 87.5 47.3
+segL /+5V_SYS F 87.5 47.3 86.64 47.32
+viaL /HUB2_3V3 88.136 46.698
+viaL /HUB2_3V3 87.95 48.4
+segL /HUB2_3V3 In2 88.136 46.698 89.44 45.394 0.3

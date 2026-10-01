@@ -1,0 +1,7 @@
+# swap R69 (ILIM set resistor) next to U12 pin 17, thermistor TH1 to R69's old spot
+delnet /BB_ILIM
+move R69 41.8 66.0 0
+move TH1 42.25 57.5 90
+del /MCU_TEMP_ADC F 40.98 66.0 40.98 63.75
+segL /BB_ILIM F 37.84 66.5 40.5 66.5
+segL /BB_ILIM F 40.5 66.5 40.98 66.02
