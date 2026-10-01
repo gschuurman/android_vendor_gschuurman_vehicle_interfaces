@@ -26,7 +26,10 @@ def dp(pts, e):
     if dmax > e: return dp(pts[:im + 1], e)[:-1] + dp(pts[im:], e)
     return [pts[0], pts[-1]]
 made = []; nrm = nadd = 0
+import os
+ONLY = set(filter(None, os.environ.get('NETS', '').split(',')))
 for (net, layer, w), ss in groups.items():
+    if ONLY and ss[0].GetNetname() not in ONLY: continue
     deg = defaultdict(list)
     for s in ss: deg[K(s.GetStart())].append(s); deg[K(s.GetEnd())].append(s)
     # also count other-width/other-layer copper ends of same net as hard

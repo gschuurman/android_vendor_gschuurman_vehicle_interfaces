@@ -476,19 +476,19 @@ TPS88 = box_symbol("TPS55288RPMR",
     [(2, "DR1H"), (22, "BOOT1"), (23, "SW1"), (1, "DR1L"), None, (21, "SW2"), (25, "SW2"), (20, "BOOT2"), None, (11, "VOUT"), (26, "VOUT"), (12, "ISP"), (13, "ISN"), (19, "VCC")],
     width=22.86, ref="U")
 place(TPS88, "U12", "TPS55288RPMR", 735, 110,
-      {"3": "VSYS_IN", "4": "VIM3_PWR_EN", "5": "LUX_SCL", "6": "LUX_SDA", "15": "BB_MODE", "7": "GND", "8": "BB_FSW", "17": "BB_ILIM", "16": "BB_CDC",
-       "18": "BB_COMP", "14": None, "10": "GND", "9": "GND", "24": "GND",
+      {"3": "VSYS_IN", "4": "VIM3_PWR_EN", "5": "LUX_SCL", "6": "LUX_SDA", "15": "BB_MODE", "7": "BB_AGND", "8": "BB_FSW", "17": "BB_ILIM", "16": "BB_CDC",
+       "18": "BB_COMP", "14": None, "10": "BB_AGND", "9": "GND", "24": "GND",
        "2": "BB_DR1H", "22": "BB_BOOT1", "23": "BB_SW1", "1": "BB_DR1L", "21": "BB_SW2", "25": "BB_SW2", "20": "BB_BOOT2",
-       "11": "BB_VOUT", "26": "BB_VOUT", "12": "BB_VOUT", "13": "+5V_SYS", "19": "BB_VCC"},
+       "11": "BB_VOUT", "26": "BB_VOUT", "12": "BB_ISP", "13": "BB_ISN", "19": "BB_VCC"},
       "", "C2864583", "TI TPS55288RPMR 36V buck-boost, I2C (footprint: use the EasyEDA library part)",
       note="pinout from TI datasheet SLVSF01B Table 5-1. Powers up with output off: the MCU enables it over I2C (address 0x74, OE bit) after EN goes high. Default 5.0V")
-res("R67", "0", 700, 150, "BB_MODE", "GND", note="MODE = 0 ohm: internal VCC, I2C 0x74, forced PWM")
-res("R68", "47k", 707, 150, "BB_FSW", "GND", note="fsw = 1000/(0.05 x 47000 + 20) = 422 kHz")
-res("R69", "30k", 714, 150, "BB_ILIM", "GND", note="average inductor current limit = 330000/R = 11 A (max ~12.7 A), below L3 saturation; still covers 25 W out at 3 V in")
-res("R70", "100k", 721, 150, "BB_CDC", "GND")
+res("R67", "0", 700, 150, "BB_MODE", "BB_AGND", note="MODE = 0 ohm: internal VCC, I2C 0x74, forced PWM")
+res("R68", "47k", 707, 150, "BB_FSW", "BB_AGND", note="fsw = 1000/(0.05 x 47000 + 20) = 422 kHz")
+res("R69", "30k", 714, 150, "BB_ILIM", "BB_AGND", note="average inductor current limit = 330000/R = 11 A (max ~12.7 A), below L3 saturation; still covers 25 W out at 3 V in")
+res("R70", "100k", 721, 150, "BB_CDC", "BB_AGND")
 res("R71", "8.2k", 690, 175, "BB_COMP", "BB_COMP_RC", note="compensation calculated for fc ~2.5-4 kHz, Cout ~60uF effective; check on the bench")
-cap("C54", "4n7", 690, 190, "BB_COMP_RC", "GND")
-cap("C55", "22p", 698, 182, "BB_COMP", "GND")
+cap("C54", "4n7", 690, 190, "BB_COMP_RC", "BB_AGND")
+cap("C55", "22p", 698, 182, "BB_COMP", "BB_AGND")
 res("R72", "100k", 682, 175, "VIM3_PWR_EN", "GND", note="VIM3 supply off unless the MCU enables it")
 res("R73", "1k", 674, 175, "MCU_VIM3_PWR_EN", "VIM3_PWR_EN")
 NFET = add_lib('Transistor_FET', 'CSD18543Q3A')
@@ -509,6 +509,15 @@ place(R, "R74", "10mΩ 2512", 818, 140, {"1": "BB_VOUT", "2": "+5V_SYS"}, "Resis
       note="ISP/ISN sense: 50 mV default = 5 A output current limit, adjustable to 6.35 A over I2C")
 place(CG2, "J18", "VIM3 VIN (JST-XH 2P)", 800, 140, {"1": "+5V_SYS", "2": "GND"}, "Connector_JST:JST_XH_B2B-XH-A_1x02_P2.50mm_Vertical", "",
       "JST-XH B2B-XH-A 2-pin header (pick in library)", note="mates with Glenn's existing VIM3 VIN lead: pin 1 +, pin 2 -. VIM3 VIN accepts 5-12V (Khadas docs)")
+# Layout review 2026-10-01 (TI SLVAER0C): Kelvin sense lines and a separate analog ground, each joined by a net tie
+NT = add_lib('Device', 'NetTie_2')
+for ref, a, b, x, why in [("NT1", "BB_ISP", "BB_VOUT", 826, "ISP Kelvin tap: place on R74 pad 1"),
+                          ("NT2", "BB_ISN", "+5V_SYS", 834, "ISN Kelvin tap: place on R74 pad 2"),
+                          ("NT3", "BB_AGND", "GND", 778, "AGND joins PGND at one point: place at C53's GND pad")]:
+    place(NT, ref, "NetTie", x, 160 if ref != "NT3" else 160, {"1": a, "2": b}, "NetTie:NetTie-2_SMD_Pad0.5mm", "", "net tie (copper only, not a part)", note=why)
+    bom.pop()
+    sym = next(e for e in reversed(items) if e[0] == 'symbol' and e[1] == [S('lib_id'), NT])
+    sym[4] = [S('in_bom'), S('no')]
 text("Input 3V-36V (runs through cranking); output 5.0V up to 5A. MCU GP28 = EN, MCU I2C0 sets OE/voltage/current limit.", 610, 205)
 text("VIN is permanent +12V so the VIM3 can finish its Android shutdown after ACC drops.", 610, 209)
 

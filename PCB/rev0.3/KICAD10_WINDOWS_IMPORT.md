@@ -34,7 +34,8 @@ git clone -b claude/project-thread-78vfgl https://github.com/gschuurman/android_
    project library `carradio.pretty`, so easyeda2kicad is no longer needed.
 3. Only use **Tools > Update PCB from Schematic** (F8) on this board after a schematic change; never into
    a new empty board, or the placement is lost.
-4. Before ordering: review the TPS55288 power stage (U12, Q10-Q12, L3, R74, C48-C60) against TI's
-   layout guide, check J14 pin 1 in the 3D viewer, and tidy the silkscreen (reference text overlaps
-   pads in places). Press B to refill zones before running DRC. How the routing was made is in
+4. The TPS55288 area was reworked against TI's layout guide (see `TPS55288_LAYOUT_REVIEW.md`).
+   NT1-NT3 are net ties (copper only, not in the BOM): Kelvin sense taps at R74 and the single
+   AGND-to-GND joint at C53. Before ordering: check J14 pin 1 in the 3D viewer and tidy the
+   silkscreen (reference text overlaps pads in places, worst around U12's control parts). Press B to refill zones before running DRC. How the routing was made is in
    `layout/README.md`.

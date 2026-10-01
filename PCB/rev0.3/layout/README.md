@@ -26,3 +26,13 @@ small changes, edit the board in KiCad directly.
    M3 holes), `trim.py` (shortens remaining dangling track ends).
 
 `q.py`, `plotst.py`, `crop.sh` and `hd.sh` are inspection helpers.
+
+## TPS55288 rework (after the TI layout review)
+
+`rw.py` applies the review fixes to the routed board: new pad nets for the net ties (BB_ISP, BB_ISN,
+BB_AGND), the control parts clustered at U12, hand-placed VCC/BOOT/sense/control copper (locked), an AGND
+zone and new SW2/VOUT zone outlines. The nets it had to move out of the way were re-routed with `maze2.py`
+(VMAX=3, then VMAX=6 for RPP_G), the `hand_ops/rw_*.txt` fixes, `clean.py`, `dang.py` (removes dead
+branches DRC flags as dangling), `simplify.py` limited to the re-routed nets (`NETS=` env var) and
+`fixz.py` (VOUT zone notch for the Kelvin taps, hidden net-tie fields).
+
