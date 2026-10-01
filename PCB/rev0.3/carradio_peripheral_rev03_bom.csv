@@ -257,3 +257,7 @@ J21,Expansion 2,BOOMELE 1x10 male header 2.54mm,C57369,Connector_PinHeader_2.54m
 R94,4.7k,0603 4.7k 1%,C23162,Resistor_SMD:R_0603_1608Metric,yes,RP2350-E9: PPS floats while the GNSS supply is off
 R95,4.7k,0603 4.7k 1%,C23162,Resistor_SMD:R_0603_1608Metric,yes,RP2350-E9: UART RX floats while the GNSS supply is off
 R96,100k,0603 100k 1%,C25803,Resistor_SMD:R_0603_1608Metric,yes,backlight off while the MCU is in reset or booting
+R97,0Ω,UNI-ROYAL 0402WGF0000TCE 0402 0R,C17168,Resistor_SMD:R_0402_1005Metric,yes,DR1H gate resistor: 0 ohm by default; 2.2-4.7 ohm slows SW1 edges (check dead time on a scope first)
+R98,0Ω,UNI-ROYAL 0402WGF0000TCE 0402 0R,C17168,Resistor_SMD:R_0402_1005Metric,yes,DR1L gate resistor: 0 ohm by default; 2.2-4.7 ohm slows SW1 edges (check dead time on a scope first)
+C104,1nF,Samsung CL10B102KB8NNNC 0603 1nF 50V X7R,C1588,Capacitor_SMD:C_0603_1608Metric,yes,SW1 RC snubber; about 0.08 W in R99 at 14 V and 422 kHz
+R99,2.2Ω 0805,UNI-ROYAL 0805W8F220KT5E 0805 2.2R 125mW,C17521,Resistor_SMD:R_0805_2012Metric,yes,SW1 RC snubber resistor

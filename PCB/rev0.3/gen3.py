@@ -492,9 +492,9 @@ cap("C55", "22p", 698, 182, "BB_COMP", "BB_AGND")
 res("R72", "100k", 682, 175, "VIM3_PWR_EN", "GND", note="VIM3 supply off unless the MCU enables it")
 res("R73", "1k", 674, 175, "MCU_VIM3_PWR_EN", "VIM3_PWR_EN")
 NFET = add_lib('Transistor_FET', 'CSD18543Q3A')
-place(NFET, "Q11", "CSD18543Q3A", 772, 60, {"5": "VSYS_IN", "1": "BB_SW1", "2": "BB_SW1", "3": "BB_SW1", "4": "BB_DR1H"}, "Package_SON:VSON-8_3.3x3.3mm_P0.65mm_NexFET",
+place(NFET, "Q11", "CSD18543Q3A", 772, 60, {"5": "VSYS_IN", "1": "BB_SW1", "2": "BB_SW1", "3": "BB_SW1", "4": "BB_DR1H_G"}, "Package_SON:VSON-8_3.3x3.3mm_P0.65mm_NexFET",
       "C840100", "TI CSD18543Q3A 60V 8.5mOhm N-MOSFET", note="buck-side high-side switch")
-place(NFET, "Q12", "CSD18543Q3A", 772, 90, {"5": "BB_SW1", "1": "GND", "2": "GND", "3": "GND", "4": "BB_DR1L"}, "Package_SON:VSON-8_3.3x3.3mm_P0.65mm_NexFET",
+place(NFET, "Q12", "CSD18543Q3A", 772, 90, {"5": "BB_SW1", "1": "GND", "2": "GND", "3": "GND", "4": "BB_DR1L_G"}, "Package_SON:VSON-8_3.3x3.3mm_P0.65mm_NexFET",
       "C840100", "TI CSD18543Q3A 60V 8.5mOhm N-MOSFET", note="buck-side low-side switch")
 cap("C51", "100n", 790, 60, "BB_BOOT1", "BB_SW1")
 place(L, "L3", "4.7uH 12A+", 800, 75, {"1": "BB_SW1", "2": "BB_SW2"}, "Inductor_SMD:L_Vishay_IHLP-5050", "",
@@ -705,6 +705,20 @@ res("R95", "4.7k", 1008, 360, "MCU_GNSS_RX", "GND", note="RP2350-E9: UART RX flo
 res("R96", "100k", 1016, 360, "MCU_BL_EN", "GND", note="backlight off while the MCU is in reset or booting")
 text("RP2350-E9 check (every MCU pin): opto inputs GP2/3/6/7 4.7k down; SBC sense and service jumper 4.7k down; buttons, USB faults/PG, I2C, RUN pulled up;", 860, 412)
 text("GNSS PPS/RX 4.7k down (R94/R95); outputs have defined off-state resistors; ADC pins run with the digital input disabled; unused and expansion pins: see DESIGN_rev03.md.", 860, 416)
+
+
+# Layout review follow-up 2026-10-01: series gate resistors (fitted as 0 ohm; try 2.2-4.7 ohm on the bench only after
+# checking dead time on a scope, the TPS55288 senses the gate through DRx) and an RC snubber on SW1. Added last so the
+# generated UUIDs of every earlier part stay the same.
+R0402 = "Resistor_SMD:R_0402_1005Metric"
+place(R, "R97", "0Ω", 760, 45, {"1": "BB_DR1H", "2": "BB_DR1H_G"}, R0402, "C17168", "UNI-ROYAL 0402WGF0000TCE 0402 0R",
+      note="DR1H gate resistor: 0 ohm by default; 2.2-4.7 ohm slows SW1 edges (check dead time on a scope first)")
+place(R, "R98", "0Ω", 760, 100, {"1": "BB_DR1L", "2": "BB_DR1L_G"}, R0402, "C17168", "UNI-ROYAL 0402WGF0000TCE 0402 0R",
+      note="DR1L gate resistor: 0 ohm by default; 2.2-4.7 ohm slows SW1 edges (check dead time on a scope first)")
+place(C, "C104", "1nF", 790, 100, {"1": "BB_SW1", "2": "BB_SNUB"}, FP_C0603, "C1588", "Samsung CL10B102KB8NNNC 0603 1nF 50V X7R",
+      note="SW1 RC snubber; about 0.08 W in R99 at 14 V and 422 kHz")
+place(R, "R99", "2.2Ω 0805", 800, 100, {"1": "BB_SNUB", "2": "GND"}, FP_R0805, "C17521", "UNI-ROYAL 0805W8F220KT5E 0805 2.2R 125mW",
+      note="SW1 RC snubber resistor")
 
 # ================================================================ power flags
 def flag(net, x, y):

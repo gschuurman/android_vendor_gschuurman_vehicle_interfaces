@@ -70,3 +70,20 @@ VIM3_PWR_EN, MCU_TEMP_ADC, ACC_F and a few short pieces elsewhere.
 
 DRC after the rework: 0 unconnected, no copper or courtyard errors; only silkscreen warnings and the
 library-path notice for U12, F4 and J14.
+
+## Follow-up: gate resistors and SW1 snubber (2026-10-01)
+
+Items 4 and 7 were not fixed by moving copper, so the board now has the usual fallbacks for both:
+
+| Part | Where | Fitted value | Purpose |
+|---|---|---|---|
+| R97 (0402) | Between L3 and Q11, in DR1H at Q11's gate | 0 Ω (C17168) | Gate resistor. 2.2-4.7 Ω slows the high-side switching edge and damps the long DR1H loop |
+| R98 (0402) | Below Q12, in DR1L at Q12's gate | 0 Ω (C17168) | Same for the low-side FET |
+| C104 (0603) + R99 (0805) | Above Q11/Q12, SW1 to GND | 1 nF X7R (C1588) + 2.2 Ω 125 mW (C17521) | RC snubber that damps ringing on SW1. About 0.08 W in R99 at 14 V in and 422 kHz |
+
+The gate resistors ship as 0 Ω on purpose. The TPS55288 sets its dead time by watching the gate drive, and
+a series resistor makes the FET turn off later than the chip thinks it does. Fit 2.2 Ω only if SW1 rings or
+EMI is a problem on the bench, and check with a scope that the two FETs are never on together.
+The snubber is fitted. If it runs warm or efficiency matters more than ringing, leave C104 off.
+
+DRC after the change: 0 unconnected, no copper or courtyard errors.

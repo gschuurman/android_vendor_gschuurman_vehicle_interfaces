@@ -36,3 +36,7 @@ zone and new SW2/VOUT zone outlines. The nets it had to move out of the way were
 branches DRC flags as dangling), `simplify.py` limited to the re-routed nets (`NETS=` env var) and
 `fixz.py` (VOUT zone notch for the Kelvin taps, hidden net-tie fields).
 
+
+`gate.py` runs after that: it adds the series gate resistors R97 (DR1H, above Q11) and R98 (DR1L, below
+Q12) and the SW1 snubber C104/R99 above the FETs, moves the two gate vias out of the way and refills the
+zones. `qx.py board x0 y0 x1 y1` lists every track, via and zone touching a window.
