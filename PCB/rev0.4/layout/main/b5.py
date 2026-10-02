@@ -14,7 +14,7 @@ uuid = {r: c['uuid'] for r, c in comps('/w/pcb4/net_carradio_peripheral_rev04.ne
 # footprints to add (load before LoadBoard: SWIG quirk)
 NEWFP = {r: pcbnew.FootprintLoad(f'{FPDIR}/Connector_PinSocket_2.54mm.pretty', 'PinSocket_2x10_P2.54mm_Vertical') for r in ('J23', 'J25')}
 NEWFP['J27'] = pcbnew.FootprintLoad(f'{FPDIR}/Connector_PinSocket_2.54mm.pretty', 'PinSocket_2x08_P2.54mm_Vertical')
-for r in ('R100', 'R101'): NEWFP[r] = pcbnew.FootprintLoad(f'{FPDIR}/Resistor_SMD.pretty', 'R_0603_1608Metric')
+for r in ('R100', 'R101', 'R104'): NEWFP[r] = pcbnew.FootprintLoad(f'{FPDIR}/Resistor_SMD.pretty', 'R_0603_1608Metric')
 NEWFP['JP2'] = pcbnew.FootprintLoad(f'{FPDIR}/Jumper.pretty', 'SolderJumper-3_P1.3mm_Bridged12_RoundedPad1.0x1.5mm')
 HOLEFP = [pcbnew.FootprintLoad(f'{FPDIR}/MountingHole.pretty', 'MountingHole_3.2mm_M3_Pad_Via') for _ in range(4)] + \
          [pcbnew.FootprintLoad(f'{FPDIR}/MountingHole.pretty', 'MountingHole_2.7mm_M2.5_Pad_Via') for _ in range(3)]
@@ -33,7 +33,7 @@ for f in FPS:
 FP = {r: f for r, f in FP.items() if r in pads}
 for ref, f in NEWFP.items():
     lib, nm = comps('/w/pcb4/net_carradio_peripheral_rev04.net')[ref]['fp'].split(':')
-    f.SetFPID(pcbnew.LIB_ID(lib, nm)); f.SetReference(ref); f.SetValue({'J23': 'Audio module socket', 'J25': 'USB module socket', 'J27': 'GNSS module socket', 'JP2': 'GNSS RX source', 'R100': '1k', 'R101': '1k'}[ref])
+    f.SetFPID(pcbnew.LIB_ID(lib, nm)); f.SetReference(ref); f.SetValue({'J23': 'Audio module socket', 'J25': 'USB module socket', 'J27': 'GNSS module socket', 'JP2': 'GNSS RX source', 'R100': '1k', 'R101': '1k', 'R104': '10k'}[ref])
     b.Add(f); FP[ref] = f
 for r, f in FP.items():
     f.SetPath(pcbnew.KIID_PATH('/' + uuid[r]))

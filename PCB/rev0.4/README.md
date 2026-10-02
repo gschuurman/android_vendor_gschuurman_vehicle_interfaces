@@ -25,6 +25,8 @@ Each board has its own schematic, PCB, PDF, netlist and BOM. **Status 2026-10-02
 - The RTL-SDR socket moved from hub 1 to hub 2 on the USB module, so USB module header pins 9 and 11 are now unused.
 - J18 (VIM3 power, JST-XH) and J5 (power-on lead) now sit right below the VIM3 40-pin header at the top left.
 - Parts now sit under the modules (MCU, hub 1, GNSS LDO, J21/J10), which freed space for wider spacing.
+- Hub 1 (U13) now runs from the always-on +5V_AON instead of +5V_SYS, with a 10k pull-up (R104) on its reset pin.
+  A blank RP2350B therefore enumerates as soon as 12V is applied, so the first flash works over USB (Glenn, 2026-10-02).
 
 ## How the modules stack
 
@@ -110,6 +112,15 @@ USB path (kept for the existing HAL design):
    plus sepolicy for that device.
 
 Both paths can run at the same time; NEO-M9N outputs the same NMEA on UART and USB.
+
+## Flashing the RP2350B
+
+- Over USB: hold SW1 (BOOTSEL), tap SW2 (RESET); the chip shows up as a USB drive `RP2350` on whatever hosts hub 1.
+  A blank flash starts the bootloader by itself. The host is normally the VIM3 (`picotool` from a root adb shell), or a PC
+  on a breakout cable to J2 pins 2-5 (5V, D-, D+, GND) with the board off the VIM3 and 12V applied.
+- Over SWD: J22 (SWCLK, GND, SWDIO, RUN) with a Raspberry Pi Debug Probe or a Pico running `debugprobe`, for recovery and debugging.
+- Firmware should hold hub 1 in reset (MCU_HUB_RST low) while the VIM3 is off, to save parked current and keep the hub's
+  D+ pull-up off the unpowered VIM3.
 
 ## Hand soldering
 

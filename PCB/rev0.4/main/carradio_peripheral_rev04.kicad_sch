@@ -20274,7 +20274,7 @@
       (justify right bottom))
     (uuid "9062d9f1-7185-51ac-bf8e-45620782412b"))
   (text
-    "5. GNSS MODULE: u-blox NEO-M9N, active antenna on SMA, UART + USB to the main board. Switched 3.3V supply stays on the main board."
+    "5. GNSS MODULE: u-blox NEO-M9N, active antenna on U.FL (pigtail to SMA), UART + USB to the main board. Switched 3.3V supply stays on the main board."
     (at 215 158 0)
     (effects
       (font
@@ -32425,7 +32425,7 @@
       (justify right bottom))
     (uuid "814c0824-5aa7-5646-9a68-691cdd8966f5"))
   (label
-    "+5V_SYS"
+    "+5V_AON"
     (at 700 269.68 90)
     (fields_autoplaced)
     (effects
@@ -32842,7 +32842,7 @@
           (reference "C61")
           (unit 1)))))
   (label
-    "+5V_SYS"
+    "+5V_AON"
     (at 720 258.19 90)
     (fields_autoplaced)
     (effects
@@ -33156,7 +33156,7 @@
           (reference "#PWR166")
           (unit 1)))))
   (text
-    "One link to the VIM3: no USB cables. Port 1 MCU, 2 touch, 3 GNSS module USB, 4 second hub (external ports + RTL-SDR). Route D+/D- as 90 ohm pairs."
+    "Hub 1 runs from the always-on +5V_AON so a blank MCU enumerates (first flash over USB). One link to the VIM3: no USB cables. Port 1 MCU, 2 touch, 3 GNSS module USB, 4 second hub (external ports + RTL-SDR). Route D+/D- as 90 ohm pairs."
     (at 610 345 0)
     (effects
       (font
@@ -39779,13 +39779,101 @@
     (uuid "79e3ff0f-9707-5627-ace4-70e870516687"))
   (symbol
     (lib_id "Device:R")
-    (at 1110 360 0)
+    (at 1108 360 0)
     (unit 1)
     (in_bom yes)
     (on_board yes)
     (dnp no)
     (fields_autoplaced)
     (uuid "ac461aa7-a9e1-554a-a993-348b9e3fb8c7")
+    (property
+      "Reference"
+      "R104"
+      (at 1110.2 358.8 0)
+      (effects
+        (font
+          (size 1.27 1.27))
+        (justify left)))
+    (property
+      "Value"
+      "10k"
+      (at 1110.2 361.2 0)
+      (effects
+        (font
+          (size 1 1))
+        (justify left)))
+    (property
+      "Footprint"
+      "Resistor_SMD:R_0603_1608Metric"
+      (at 1108 360 0)
+      (effects
+        (font
+          (size 1.27 1.27))
+        hide))
+    (property
+      "Datasheet"
+      ""
+      (at 1108 360 0)
+      (effects
+        (font
+          (size 1.27 1.27))
+        hide))
+    (property
+      "LCSC"
+      "C25804"
+      (at 1108 360 0)
+      (effects
+        (font
+          (size 1.27 1.27))
+        hide))
+    (property
+      "MPN"
+      "0603 10k 1%"
+      (at 1108 360 0)
+      (effects
+        (font
+          (size 1.27 1.27))
+        hide))
+    (pin
+      "1"
+      (uuid "bb0be04a-0591-50f1-943a-4d65f7fe5406"))
+    (pin
+      "2"
+      (uuid "8c4d8b6c-cd7b-5f52-886c-073cca16fe0a"))
+    (instances
+      (project
+        "carradio_peripheral_rev04"
+        (path
+          "/3b49dff3-5af1-5299-8484-b6e3bf9b1595"
+          (reference "R104")
+          (unit 1)))))
+  (label
+    "HUB_3V3"
+    (at 1108 356.19 90)
+    (fields_autoplaced)
+    (effects
+      (font
+        (size 1.27 1.27))
+      (justify left bottom))
+    (uuid "80b6f3cb-5f48-59d9-a158-ea2562befcc3"))
+  (label
+    "HUB1_RST"
+    (at 1108 363.81 270)
+    (fields_autoplaced)
+    (effects
+      (font
+        (size 1.27 1.27))
+      (justify right bottom))
+    (uuid "24d2c1eb-5286-5611-8c58-dfe02b892573"))
+  (symbol
+    (lib_id "Device:R")
+    (at 1110 360 0)
+    (unit 1)
+    (in_bom yes)
+    (on_board yes)
+    (dnp no)
+    (fields_autoplaced)
+    (uuid "bcf421e8-e498-52f3-bda1-d2516811600c")
     (property
       "Reference"
       "R79"
@@ -39836,10 +39924,10 @@
         hide))
     (pin
       "1"
-      (uuid "bb0be04a-0591-50f1-943a-4d65f7fe5406"))
+      (uuid "0d7083a6-d97f-524e-a351-95bdcbcec784"))
     (pin
       "2"
-      (uuid "8c4d8b6c-cd7b-5f52-886c-073cca16fe0a"))
+      (uuid "56e51ce7-8005-5a02-bb0f-9291ec9d33ca"))
     (instances
       (project
         "carradio_peripheral_rev04"
@@ -39855,7 +39943,7 @@
       (font
         (size 1.27 1.27))
       (justify left bottom))
-    (uuid "80b6f3cb-5f48-59d9-a158-ea2562befcc3"))
+    (uuid "d0630306-ccfd-51c2-9d60-87fab665a4fc"))
   (label
     "GNSS_SAFEBOOT"
     (at 1110 363.81 270)
@@ -39864,7 +39952,7 @@
       (font
         (size 1.27 1.27))
       (justify right bottom))
-    (uuid "24d2c1eb-5286-5611-8c58-dfe02b892573"))
+    (uuid "45909ef0-e3ed-5a13-98e4-faf41931c91d"))
   (symbol
     (lib_id "Device:R")
     (at 870 360 0)
@@ -39873,7 +39961,7 @@
     (on_board yes)
     (dnp no)
     (fields_autoplaced)
-    (uuid "bcf421e8-e498-52f3-bda1-d2516811600c")
+    (uuid "f0d36d2b-5ab2-5e43-8768-a0c7090b3603")
     (property
       "Reference"
       "R91"
@@ -39924,10 +40012,10 @@
         hide))
     (pin
       "1"
-      (uuid "0d7083a6-d97f-524e-a351-95bdcbcec784"))
+      (uuid "41f07ffd-2dea-50a7-85f6-5614607ad553"))
     (pin
       "2"
-      (uuid "56e51ce7-8005-5a02-bb0f-9291ec9d33ca"))
+      (uuid "e303edb2-5f3d-5e16-acc8-32cfdccdf370"))
     (instances
       (project
         "carradio_peripheral_rev04"
@@ -39943,7 +40031,7 @@
       (font
         (size 1.27 1.27))
       (justify left bottom))
-    (uuid "d0630306-ccfd-51c2-9d60-87fab665a4fc"))
+    (uuid "e96cb8c1-eafb-568e-a110-52522b7c2550"))
   (label
     "MCU_5VSYS_ADC"
     (at 870 363.81 270)
@@ -39952,7 +40040,7 @@
       (font
         (size 1.27 1.27))
       (justify right bottom))
-    (uuid "45909ef0-e3ed-5a13-98e4-faf41931c91d"))
+    (uuid "351071a5-22c5-5402-8410-4776b29f3eb2"))
   (symbol
     (lib_id "Device:R")
     (at 878 360 0)
@@ -39961,7 +40049,7 @@
     (on_board yes)
     (dnp no)
     (fields_autoplaced)
-    (uuid "f0d36d2b-5ab2-5e43-8768-a0c7090b3603")
+    (uuid "58720903-f805-5c64-9c31-b0b2939f8873")
     (property
       "Reference"
       "R92"
@@ -40012,10 +40100,10 @@
         hide))
     (pin
       "1"
-      (uuid "41f07ffd-2dea-50a7-85f6-5614607ad553"))
+      (uuid "5f7f3db8-1346-5406-a415-e39b358a5064"))
     (pin
       "2"
-      (uuid "e303edb2-5f3d-5e16-acc8-32cfdccdf370"))
+      (uuid "9f8d54a7-f3ed-5ab1-b981-bc19954303c9"))
     (instances
       (project
         "carradio_peripheral_rev04"
@@ -40031,7 +40119,7 @@
       (font
         (size 1.27 1.27))
       (justify left bottom))
-    (uuid "e96cb8c1-eafb-568e-a110-52522b7c2550"))
+    (uuid "1006e57d-c2cf-56e6-b8a6-5fbf2ecb5ce4"))
   (symbol
     (lib_id "power:GND")
     (at 878 363.81 0)
@@ -40039,7 +40127,7 @@
     (in_bom no)
     (on_board yes)
     (dnp no)
-    (uuid "351071a5-22c5-5402-8410-4776b29f3eb2")
+    (uuid "ff911bf7-52a7-5153-8ac2-4b84938d69ca")
     (property
       "Reference"
       "#PWR241"
@@ -40073,7 +40161,7 @@
         hide))
     (pin
       "1"
-      (uuid "5f7f3db8-1346-5406-a415-e39b358a5064"))
+      (uuid "237f4de9-d563-58e6-93d5-a72e14aeb1a2"))
     (instances
       (project
         "carradio_peripheral_rev04"
@@ -40089,7 +40177,7 @@
     (on_board yes)
     (dnp no)
     (fields_autoplaced)
-    (uuid "1006e57d-c2cf-56e6-b8a6-5fbf2ecb5ce4")
+    (uuid "5cf9e09e-f4a2-53f3-87d3-6f56fb9a3e6e")
     (property
       "Reference"
       "C102"
@@ -40140,10 +40228,10 @@
         hide))
     (pin
       "1"
-      (uuid "9f8d54a7-f3ed-5ab1-b981-bc19954303c9"))
+      (uuid "36c86b27-e777-5092-a1cb-9a3169b6051c"))
     (pin
       "2"
-      (uuid "58720903-f805-5c64-9c31-b0b2939f8873"))
+      (uuid "d123d779-6114-574b-81bb-6a37aaa0ff5a"))
     (instances
       (project
         "carradio_peripheral_rev04"
@@ -40159,7 +40247,7 @@
       (font
         (size 1.27 1.27))
       (justify left bottom))
-    (uuid "ff911bf7-52a7-5153-8ac2-4b84938d69ca"))
+    (uuid "27980c0d-968e-588d-a8b1-ccb6035da17c"))
   (symbol
     (lib_id "power:GND")
     (at 886 363.81 0)
@@ -40167,7 +40255,7 @@
     (in_bom no)
     (on_board yes)
     (dnp no)
-    (uuid "237f4de9-d563-58e6-93d5-a72e14aeb1a2")
+    (uuid "40250c59-8a56-5586-9620-6e7f932f515c")
     (property
       "Reference"
       "#PWR242"
@@ -40201,7 +40289,7 @@
         hide))
     (pin
       "1"
-      (uuid "36c86b27-e777-5092-a1cb-9a3169b6051c"))
+      (uuid "35285d45-30de-5d3f-9b95-4004889c600d"))
     (instances
       (project
         "carradio_peripheral_rev04"
@@ -40217,7 +40305,7 @@
     (on_board yes)
     (dnp no)
     (fields_autoplaced)
-    (uuid "27980c0d-968e-588d-a8b1-ccb6035da17c")
+    (uuid "1c5eebd0-057b-53ff-9f4e-370d2d3543c9")
     (property
       "Reference"
       "R93"
@@ -40268,10 +40356,10 @@
         hide))
     (pin
       "1"
-      (uuid "d123d779-6114-574b-81bb-6a37aaa0ff5a"))
+      (uuid "eed40803-b4a8-5564-b6f8-155bc27f6020"))
     (pin
       "2"
-      (uuid "5cf9e09e-f4a2-53f3-87d3-6f56fb9a3e6e"))
+      (uuid "bd7f267f-2609-579c-8ba0-7a3719cc43dd"))
     (instances
       (project
         "carradio_peripheral_rev04"
@@ -40287,7 +40375,7 @@
       (font
         (size 1.27 1.27))
       (justify left bottom))
-    (uuid "40250c59-8a56-5586-9620-6e7f932f515c"))
+    (uuid "17e38f41-d041-5e40-b4a1-bb00f5d4a841"))
   (label
     "MCU_TEMP_ADC"
     (at 900 363.81 270)
@@ -40296,7 +40384,7 @@
       (font
         (size 1.27 1.27))
       (justify right bottom))
-    (uuid "35285d45-30de-5d3f-9b95-4004889c600d"))
+    (uuid "8a2d6eb9-7581-5936-8e1b-eeb8b5ba8319"))
   (symbol
     (lib_id "Device:Thermistor_NTC")
     (at 908 375 0)
@@ -40305,7 +40393,7 @@
     (on_board yes)
     (dnp no)
     (fields_autoplaced)
-    (uuid "1c5eebd0-057b-53ff-9f4e-370d2d3543c9")
+    (uuid "4785b58f-f70b-5b88-ac34-e6043fe5bbb1")
     (property
       "Reference"
       "TH1"
@@ -40354,10 +40442,10 @@
         hide))
     (pin
       "1"
-      (uuid "eed40803-b4a8-5564-b6f8-155bc27f6020"))
+      (uuid "a22228d4-a1ed-5813-a768-2b9fb6622826"))
     (pin
       "2"
-      (uuid "bd7f267f-2609-579c-8ba0-7a3719cc43dd"))
+      (uuid "2a2c8bbc-d486-5167-a8e7-f7ae6d75bca1"))
     (instances
       (project
         "carradio_peripheral_rev04"
@@ -40373,7 +40461,7 @@
       (font
         (size 1.27 1.27))
       (justify left bottom))
-    (uuid "17e38f41-d041-5e40-b4a1-bb00f5d4a841"))
+    (uuid "c06ebd21-b31d-5490-a4f8-3f0eb139faa2"))
   (symbol
     (lib_id "power:GND")
     (at 908 378.81 0)
@@ -40381,7 +40469,7 @@
     (in_bom no)
     (on_board yes)
     (dnp no)
-    (uuid "8a2d6eb9-7581-5936-8e1b-eeb8b5ba8319")
+    (uuid "7465a27f-c2c6-503c-aa5a-f6c2b6a22ceb")
     (property
       "Reference"
       "#PWR243"
@@ -40415,7 +40503,7 @@
         hide))
     (pin
       "1"
-      (uuid "a22228d4-a1ed-5813-a768-2b9fb6622826"))
+      (uuid "f1421973-5b0d-5860-bffd-2331a64dcdfd"))
     (instances
       (project
         "carradio_peripheral_rev04"
@@ -40431,7 +40519,7 @@
     (on_board yes)
     (dnp no)
     (fields_autoplaced)
-    (uuid "c06ebd21-b31d-5490-a4f8-3f0eb139faa2")
+    (uuid "8c696314-404d-5f17-8e99-bfda3553843d")
     (property
       "Reference"
       "C103"
@@ -40482,10 +40570,10 @@
         hide))
     (pin
       "1"
-      (uuid "2a2c8bbc-d486-5167-a8e7-f7ae6d75bca1"))
+      (uuid "7f9876e3-38d4-5ece-90f0-bd7aad158304"))
     (pin
       "2"
-      (uuid "4785b58f-f70b-5b88-ac34-e6043fe5bbb1"))
+      (uuid "5ca7db6f-dbe2-5ac6-b8f5-908b47d33062"))
     (instances
       (project
         "carradio_peripheral_rev04"
@@ -40501,7 +40589,7 @@
       (font
         (size 1.27 1.27))
       (justify left bottom))
-    (uuid "7465a27f-c2c6-503c-aa5a-f6c2b6a22ceb"))
+    (uuid "c461190c-a3ab-5d57-a1b6-3fdd7ea02a73"))
   (symbol
     (lib_id "power:GND")
     (at 916 363.81 0)
@@ -40509,7 +40597,7 @@
     (in_bom no)
     (on_board yes)
     (dnp no)
-    (uuid "f1421973-5b0d-5860-bffd-2331a64dcdfd")
+    (uuid "76084895-c250-546f-9d77-0e2935ec75e1")
     (property
       "Reference"
       "#PWR244"
@@ -40543,7 +40631,7 @@
         hide))
     (pin
       "1"
-      (uuid "7f9876e3-38d4-5ece-90f0-bd7aad158304"))
+      (uuid "9d774978-ebe3-582e-9c7c-9c69d1ae00b8"))
     (instances
       (project
         "carradio_peripheral_rev04"
@@ -40559,7 +40647,7 @@
     (on_board yes)
     (dnp no)
     (fields_autoplaced)
-    (uuid "3ea24791-d189-5dbb-9585-6a6244d23a3e")
+    (uuid "6e64c4ea-bb43-5eba-9cff-bac3e5a2a8b8")
     (property
       "Reference"
       "J21"
@@ -40608,34 +40696,34 @@
         hide))
     (pin
       "1"
-      (uuid "5ca7db6f-dbe2-5ac6-b8f5-908b47d33062"))
-    (pin
-      "10"
-      (uuid "8c696314-404d-5f17-8e99-bfda3553843d"))
-    (pin
-      "2"
-      (uuid "c461190c-a3ab-5d57-a1b6-3fdd7ea02a73"))
-    (pin
-      "3"
-      (uuid "76084895-c250-546f-9d77-0e2935ec75e1"))
-    (pin
-      "4"
-      (uuid "9d774978-ebe3-582e-9c7c-9c69d1ae00b8"))
-    (pin
-      "5"
       (uuid "9a9608ff-3a0b-5b8e-8a44-b49ca2ca3b4a"))
     (pin
-      "6"
+      "10"
       (uuid "f5126295-c151-5a71-b7f8-a0c4bc966755"))
     (pin
-      "7"
+      "2"
       (uuid "0e7be171-b079-5b3c-a3b0-dd01e5beb864"))
     (pin
-      "8"
+      "3"
       (uuid "de307b8b-4c28-54c8-b598-87a021f73287"))
     (pin
-      "9"
+      "4"
       (uuid "2a34fea0-5b4c-5af9-ac83-3430c031a9a9"))
+    (pin
+      "5"
+      (uuid "3ea24791-d189-5dbb-9585-6a6244d23a3e"))
+    (pin
+      "6"
+      (uuid "5b7cd829-293c-5c57-bc26-6cab0eb1bf21"))
+    (pin
+      "7"
+      (uuid "3d152a92-043e-5038-92fa-2a24aceb7ef1"))
+    (pin
+      "8"
+      (uuid "87c29b4a-c4b6-5c89-907b-d79b353c5075"))
+    (pin
+      "9"
+      (uuid "3e04739d-6af1-5f58-854c-550accb4bb0f"))
     (instances
       (project
         "carradio_peripheral_rev04"
@@ -40651,7 +40739,7 @@
       (font
         (size 1.27 1.27))
       (justify right bottom))
-    (uuid "5b7cd829-293c-5c57-bc26-6cab0eb1bf21"))
+    (uuid "bdfffc9c-6bf6-5009-ae33-4b65d4b32e35"))
   (symbol
     (lib_id "power:GND")
     (at 1134.92 212.7 270)
@@ -40659,7 +40747,7 @@
     (in_bom no)
     (on_board yes)
     (dnp no)
-    (uuid "3d152a92-043e-5038-92fa-2a24aceb7ef1")
+    (uuid "af57f0d9-0bfb-527e-a7c0-4fe0586d0dd2")
     (property
       "Reference"
       "#PWR245"
@@ -40693,7 +40781,7 @@
         hide))
     (pin
       "1"
-      (uuid "87c29b4a-c4b6-5c89-907b-d79b353c5075"))
+      (uuid "9b7e76c5-283f-5b3f-84cf-1732200ef770"))
     (instances
       (project
         "carradio_peripheral_rev04"
@@ -40709,7 +40797,7 @@
       (font
         (size 1.27 1.27))
       (justify right bottom))
-    (uuid "3e04739d-6af1-5f58-854c-550accb4bb0f"))
+    (uuid "4869aef1-e80e-5a14-a26c-4f304717ed57"))
   (label
     "EXP_GP33"
     (at 1134.92 194.92 180)
@@ -40718,7 +40806,7 @@
       (font
         (size 1.27 1.27))
       (justify right bottom))
-    (uuid "6e64c4ea-bb43-5eba-9cff-bac3e5a2a8b8"))
+    (uuid "30f6cbbf-cf68-59cf-9642-a792a6fe7bed"))
   (label
     "EXP_GP34"
     (at 1134.92 197.46 180)
@@ -40727,7 +40815,7 @@
       (font
         (size 1.27 1.27))
       (justify right bottom))
-    (uuid "bdfffc9c-6bf6-5009-ae33-4b65d4b32e35"))
+    (uuid "9e86c88e-71cb-544b-962e-09c2d2f6445f"))
   (label
     "EXP_GP35"
     (at 1134.92 200 180)
@@ -40736,7 +40824,7 @@
       (font
         (size 1.27 1.27))
       (justify right bottom))
-    (uuid "af57f0d9-0bfb-527e-a7c0-4fe0586d0dd2"))
+    (uuid "a6bc601c-5cf4-52e2-becb-5b2292fede32"))
   (label
     "EXP_GP36"
     (at 1134.92 202.54 180)
@@ -40745,7 +40833,7 @@
       (font
         (size 1.27 1.27))
       (justify right bottom))
-    (uuid "9b7e76c5-283f-5b3f-84cf-1732200ef770"))
+    (uuid "a8c14c0b-9f37-5e0a-a3ea-c8e85148e757"))
   (label
     "EXP_GP37"
     (at 1134.92 205.08 180)
@@ -40754,7 +40842,7 @@
       (font
         (size 1.27 1.27))
       (justify right bottom))
-    (uuid "4869aef1-e80e-5a14-a26c-4f304717ed57"))
+    (uuid "c930e08c-0be9-58ec-be96-d4375043e448"))
   (label
     "EXP_GP38"
     (at 1134.92 207.62 180)
@@ -40763,7 +40851,7 @@
       (font
         (size 1.27 1.27))
       (justify right bottom))
-    (uuid "30f6cbbf-cf68-59cf-9642-a792a6fe7bed"))
+    (uuid "8af9e56c-b2b2-5e16-8c65-d214444ef38f"))
   (label
     "EXP_GP39"
     (at 1134.92 210.16 180)
@@ -40772,7 +40860,7 @@
       (font
         (size 1.27 1.27))
       (justify right bottom))
-    (uuid "9e86c88e-71cb-544b-962e-09c2d2f6445f"))
+    (uuid "220c1a83-e72d-53c3-9549-d63a7a9c2b27"))
   (text
     "GPIO0-29 as rev 0.2 except: GPIO40 battery ADC (was GP26), GPIO23/24 USB port faults, GPIO25 LED, GPIO26 USB supply PG,"
     (at 860 400 0)
@@ -40780,7 +40868,7 @@
       (font
         (size 1.27 1.27))
       (justify left bottom))
-    (uuid "a6bc601c-5cf4-52e2-becb-5b2292fede32"))
+    (uuid "90cae169-9b9e-5311-aef1-5fd60a45a2fe"))
   (text
     "GPIO29 GNSS safeboot, GPIO30/31 on J10, GPIO32-39 on J21, GPIO41 5V rail ADC, GPIO42 board temperature, GPIO43 hub 1 reset."
     (at 860 404 0)
@@ -40788,7 +40876,7 @@
       (font
         (size 1.27 1.27))
       (justify left bottom))
-    (uuid "a8c14c0b-9f37-5e0a-a3ea-c8e85148e757"))
+    (uuid "10877315-0496-5212-9191-8c10e3fbee24"))
   (symbol
     (lib_id "Device:R")
     (at 1000 360 0)
@@ -40797,7 +40885,7 @@
     (on_board yes)
     (dnp no)
     (fields_autoplaced)
-    (uuid "220c1a83-e72d-53c3-9549-d63a7a9c2b27")
+    (uuid "a8ae6190-8a18-57de-ba47-cfe87669067e")
     (property
       "Reference"
       "R94"
@@ -40848,10 +40936,10 @@
         hide))
     (pin
       "1"
-      (uuid "c930e08c-0be9-58ec-be96-d4375043e448"))
+      (uuid "05add790-f75d-5078-9d88-299b978f433a"))
     (pin
       "2"
-      (uuid "8af9e56c-b2b2-5e16-8c65-d214444ef38f"))
+      (uuid "9444e524-6965-5814-9dbf-75c25666da42"))
     (instances
       (project
         "carradio_peripheral_rev04"
@@ -40867,7 +40955,7 @@
       (font
         (size 1.27 1.27))
       (justify left bottom))
-    (uuid "90cae169-9b9e-5311-aef1-5fd60a45a2fe"))
+    (uuid "3dd60f50-ea34-53e7-9228-354102b20a06"))
   (symbol
     (lib_id "power:GND")
     (at 1000 363.81 0)
@@ -40875,7 +40963,7 @@
     (in_bom no)
     (on_board yes)
     (dnp no)
-    (uuid "10877315-0496-5212-9191-8c10e3fbee24")
+    (uuid "4a91dae5-285f-57fa-a7da-65f86d4cee05")
     (property
       "Reference"
       "#PWR246"
@@ -40909,7 +40997,7 @@
         hide))
     (pin
       "1"
-      (uuid "05add790-f75d-5078-9d88-299b978f433a"))
+      (uuid "9bcd99e9-e022-568e-83be-718a0d368649"))
     (instances
       (project
         "carradio_peripheral_rev04"
@@ -40925,7 +41013,7 @@
     (on_board yes)
     (dnp no)
     (fields_autoplaced)
-    (uuid "3dd60f50-ea34-53e7-9228-354102b20a06")
+    (uuid "c989be30-bfac-5ba4-9cb3-bd63ba67563d")
     (property
       "Reference"
       "R95"
@@ -40976,10 +41064,10 @@
         hide))
     (pin
       "1"
-      (uuid "9444e524-6965-5814-9dbf-75c25666da42"))
+      (uuid "ed765a45-c028-5845-9f1b-d06020fd5c55"))
     (pin
       "2"
-      (uuid "a8ae6190-8a18-57de-ba47-cfe87669067e"))
+      (uuid "6391bb70-86ec-532b-88b3-4ea5f29e9e29"))
     (instances
       (project
         "carradio_peripheral_rev04"
@@ -40995,7 +41083,7 @@
       (font
         (size 1.27 1.27))
       (justify left bottom))
-    (uuid "4a91dae5-285f-57fa-a7da-65f86d4cee05"))
+    (uuid "e6275766-a99b-5053-acae-09dba3f578a1"))
   (symbol
     (lib_id "power:GND")
     (at 1008 363.81 0)
@@ -41003,7 +41091,7 @@
     (in_bom no)
     (on_board yes)
     (dnp no)
-    (uuid "9bcd99e9-e022-568e-83be-718a0d368649")
+    (uuid "23748b3a-3615-5ab1-b252-d29b222d4a72")
     (property
       "Reference"
       "#PWR247"
@@ -41037,7 +41125,7 @@
         hide))
     (pin
       "1"
-      (uuid "ed765a45-c028-5845-9f1b-d06020fd5c55"))
+      (uuid "7515b70c-f8b6-55fa-8e24-6b55254806a8"))
     (instances
       (project
         "carradio_peripheral_rev04"
@@ -41053,7 +41141,7 @@
     (on_board yes)
     (dnp no)
     (fields_autoplaced)
-    (uuid "e6275766-a99b-5053-acae-09dba3f578a1")
+    (uuid "85b6dc3a-72b3-53df-b3df-2580032c55c6")
     (property
       "Reference"
       "R96"
@@ -41104,10 +41192,10 @@
         hide))
     (pin
       "1"
-      (uuid "6391bb70-86ec-532b-88b3-4ea5f29e9e29"))
+      (uuid "068429c7-0a6a-5f3f-b767-afce69b4ce70"))
     (pin
       "2"
-      (uuid "c989be30-bfac-5ba4-9cb3-bd63ba67563d"))
+      (uuid "dac8b3a9-eca8-53e9-b32b-49dbf1e4fc94"))
     (instances
       (project
         "carradio_peripheral_rev04"
@@ -41123,7 +41211,7 @@
       (font
         (size 1.27 1.27))
       (justify left bottom))
-    (uuid "23748b3a-3615-5ab1-b252-d29b222d4a72"))
+    (uuid "2c8457f9-491e-5436-a76b-133bbe98eba8"))
   (symbol
     (lib_id "power:GND")
     (at 1016 363.81 0)
@@ -41131,7 +41219,7 @@
     (in_bom no)
     (on_board yes)
     (dnp no)
-    (uuid "7515b70c-f8b6-55fa-8e24-6b55254806a8")
+    (uuid "49a5a7eb-ae7c-5080-ac0c-75c964d47bf8")
     (property
       "Reference"
       "#PWR248"
@@ -41165,7 +41253,7 @@
         hide))
     (pin
       "1"
-      (uuid "068429c7-0a6a-5f3f-b767-afce69b4ce70"))
+      (uuid "f1bbc630-3fad-51c7-baef-501d82850b20"))
     (instances
       (project
         "carradio_peripheral_rev04"
@@ -41180,7 +41268,7 @@
       (font
         (size 1.27 1.27))
       (justify left bottom))
-    (uuid "dac8b3a9-eca8-53e9-b32b-49dbf1e4fc94"))
+    (uuid "9c1d58ce-3635-5819-8b22-58d25b136459"))
   (text
     "GNSS PPS/RX 4.7k down (R94/R95); outputs have defined off-state resistors; ADC pins run with the digital input disabled; unused and expansion pins: see DESIGN_rev03.md."
     (at 860 416 0)
@@ -41188,7 +41276,7 @@
       (font
         (size 1.27 1.27))
       (justify left bottom))
-    (uuid "85b6dc3a-72b3-53df-b3df-2580032c55c6"))
+    (uuid "9deef658-8f7a-50b5-aa89-a128d6b68eb0"))
   (symbol
     (lib_id "Device:R")
     (at 760 45 0)
@@ -41197,7 +41285,7 @@
     (on_board yes)
     (dnp no)
     (fields_autoplaced)
-    (uuid "f1bbc630-3fad-51c7-baef-501d82850b20")
+    (uuid "e277da41-d7df-5cec-8d2f-25e25b2ebc59")
     (property
       "Reference"
       "R97"
@@ -41248,10 +41336,10 @@
         hide))
     (pin
       "1"
-      (uuid "2c8457f9-491e-5436-a76b-133bbe98eba8"))
+      (uuid "571552b6-ad0d-5dcb-874c-8d828f4f4708"))
     (pin
       "2"
-      (uuid "49a5a7eb-ae7c-5080-ac0c-75c964d47bf8"))
+      (uuid "fdf3cba5-4ffc-544e-b216-624819e4d9bb"))
     (instances
       (project
         "carradio_peripheral_rev04"
@@ -41267,7 +41355,7 @@
       (font
         (size 1.27 1.27))
       (justify left bottom))
-    (uuid "9c1d58ce-3635-5819-8b22-58d25b136459"))
+    (uuid "83d005ee-8aa5-5dfc-b713-50f7eef43340"))
   (label
     "BB_DR1H_G"
     (at 760 48.81 270)
@@ -41276,7 +41364,7 @@
       (font
         (size 1.27 1.27))
       (justify right bottom))
-    (uuid "9deef658-8f7a-50b5-aa89-a128d6b68eb0"))
+    (uuid "04c8069c-9a6e-5a91-8597-08bb048dc72f"))
   (symbol
     (lib_id "Device:R")
     (at 760 100 0)
@@ -41285,7 +41373,7 @@
     (on_board yes)
     (dnp no)
     (fields_autoplaced)
-    (uuid "e277da41-d7df-5cec-8d2f-25e25b2ebc59")
+    (uuid "793836a3-b7a8-59c4-af5b-339a0a667da2")
     (property
       "Reference"
       "R98"
@@ -41336,10 +41424,10 @@
         hide))
     (pin
       "1"
-      (uuid "571552b6-ad0d-5dcb-874c-8d828f4f4708"))
+      (uuid "d3cb83fa-7269-5bb3-a5c8-1b07e8f99014"))
     (pin
       "2"
-      (uuid "fdf3cba5-4ffc-544e-b216-624819e4d9bb"))
+      (uuid "afe5e7ff-4686-52a8-a1ea-bb6d8e890e6a"))
     (instances
       (project
         "carradio_peripheral_rev04"
@@ -41355,7 +41443,7 @@
       (font
         (size 1.27 1.27))
       (justify left bottom))
-    (uuid "83d005ee-8aa5-5dfc-b713-50f7eef43340"))
+    (uuid "4667b157-0cf9-509f-9ece-377a30eb4fd4"))
   (label
     "BB_DR1L_G"
     (at 760 103.81 270)
@@ -41364,7 +41452,7 @@
       (font
         (size 1.27 1.27))
       (justify right bottom))
-    (uuid "04c8069c-9a6e-5a91-8597-08bb048dc72f"))
+    (uuid "c79ce059-4c6d-500c-acaa-497fcf46e4ab"))
   (symbol
     (lib_id "Device:C")
     (at 790 100 0)
@@ -41373,7 +41461,7 @@
     (on_board yes)
     (dnp no)
     (fields_autoplaced)
-    (uuid "793836a3-b7a8-59c4-af5b-339a0a667da2")
+    (uuid "6fc6ef4b-bf06-570f-9480-d9f2d1ab6d8c")
     (property
       "Reference"
       "C104"
@@ -41424,10 +41512,10 @@
         hide))
     (pin
       "1"
-      (uuid "d3cb83fa-7269-5bb3-a5c8-1b07e8f99014"))
+      (uuid "48aa7fd8-754f-531e-96ea-b4bbbed08b41"))
     (pin
       "2"
-      (uuid "afe5e7ff-4686-52a8-a1ea-bb6d8e890e6a"))
+      (uuid "541d49a4-43f3-5afc-a910-d3d097b827eb"))
     (instances
       (project
         "carradio_peripheral_rev04"
@@ -41443,7 +41531,7 @@
       (font
         (size 1.27 1.27))
       (justify left bottom))
-    (uuid "4667b157-0cf9-509f-9ece-377a30eb4fd4"))
+    (uuid "8b602e05-1fee-52ae-a3e9-aad66ffa10a9"))
   (label
     "BB_SNUB"
     (at 790 103.81 270)
@@ -41452,7 +41540,7 @@
       (font
         (size 1.27 1.27))
       (justify right bottom))
-    (uuid "c79ce059-4c6d-500c-acaa-497fcf46e4ab"))
+    (uuid "19e221ae-3ca6-517c-9f8e-e44f4210e11c"))
   (symbol
     (lib_id "Device:R")
     (at 800 100 0)
@@ -41461,7 +41549,7 @@
     (on_board yes)
     (dnp no)
     (fields_autoplaced)
-    (uuid "6fc6ef4b-bf06-570f-9480-d9f2d1ab6d8c")
+    (uuid "f0713c91-92d2-556a-89b7-43a3dec6bf3a")
     (property
       "Reference"
       "R99"
@@ -41512,10 +41600,10 @@
         hide))
     (pin
       "1"
-      (uuid "48aa7fd8-754f-531e-96ea-b4bbbed08b41"))
+      (uuid "29926355-7fdc-57bc-a17e-179e7ca99868"))
     (pin
       "2"
-      (uuid "541d49a4-43f3-5afc-a910-d3d097b827eb"))
+      (uuid "79db0594-e580-5eda-8599-6a258ba19a9b"))
     (instances
       (project
         "carradio_peripheral_rev04"
@@ -41531,7 +41619,7 @@
       (font
         (size 1.27 1.27))
       (justify left bottom))
-    (uuid "8b602e05-1fee-52ae-a3e9-aad66ffa10a9"))
+    (uuid "dcace077-3228-592c-8ad0-b3df0b093500"))
   (symbol
     (lib_id "power:GND")
     (at 800 103.81 0)
@@ -41539,7 +41627,7 @@
     (in_bom no)
     (on_board yes)
     (dnp no)
-    (uuid "19e221ae-3ca6-517c-9f8e-e44f4210e11c")
+    (uuid "9b574d15-a3e9-5905-811a-a33379b8a5df")
     (property
       "Reference"
       "#PWR249"
@@ -41573,7 +41661,7 @@
         hide))
     (pin
       "1"
-      (uuid "29926355-7fdc-57bc-a17e-179e7ca99868"))
+      (uuid "ce409c40-26ff-59c8-a5e1-633d4858b8c1"))
     (instances
       (project
         "carradio_peripheral_rev04"
@@ -41588,7 +41676,7 @@
     (in_bom no)
     (on_board yes)
     (dnp no)
-    (uuid "79db0594-e580-5eda-8599-6a258ba19a9b")
+    (uuid "c11e186a-80fc-5a0e-8124-558e7b2c1069")
     (property
       "Reference"
       "#FLG250"
@@ -41622,7 +41710,7 @@
         hide))
     (pin
       "1"
-      (uuid "f0713c91-92d2-556a-89b7-43a3dec6bf3a"))
+      (uuid "2c15a102-770f-50ef-9447-18c385d9c3a6"))
     (instances
       (project
         "carradio_peripheral_rev04"
@@ -41638,7 +41726,7 @@
       (font
         (size 1.27 1.27))
       (justify right bottom))
-    (uuid "dcace077-3228-592c-8ad0-b3df0b093500"))
+    (uuid "a0e96747-b496-55ea-9dc4-306c5e606d96"))
   (symbol
     (lib_id "power:PWR_FLAG")
     (at 345 392 0)
@@ -41646,7 +41734,7 @@
     (in_bom no)
     (on_board yes)
     (dnp no)
-    (uuid "9b574d15-a3e9-5905-811a-a33379b8a5df")
+    (uuid "e795fddd-59fd-5828-9cb0-496e2b529c43")
     (property
       "Reference"
       "#FLG251"
@@ -41680,7 +41768,7 @@
         hide))
     (pin
       "1"
-      (uuid "ce409c40-26ff-59c8-a5e1-633d4858b8c1"))
+      (uuid "05386d58-3411-56be-893e-abb94b998416"))
     (instances
       (project
         "carradio_peripheral_rev04"
@@ -41696,7 +41784,7 @@
       (font
         (size 1.27 1.27))
       (justify right bottom))
-    (uuid "c11e186a-80fc-5a0e-8124-558e7b2c1069"))
+    (uuid "01e1ffbc-09e5-50b2-8659-a0be0574a243"))
   (symbol
     (lib_id "power:PWR_FLAG")
     (at 360 392 0)
@@ -41704,7 +41792,7 @@
     (in_bom no)
     (on_board yes)
     (dnp no)
-    (uuid "2c15a102-770f-50ef-9447-18c385d9c3a6")
+    (uuid "f048f876-fe5e-5b84-b596-8440851481c6")
     (property
       "Reference"
       "#FLG252"
@@ -41738,7 +41826,7 @@
         hide))
     (pin
       "1"
-      (uuid "a0e96747-b496-55ea-9dc4-306c5e606d96"))
+      (uuid "c0f9b52a-efea-57c8-ab43-a4bff6c06e3c"))
     (instances
       (project
         "carradio_peripheral_rev04"
@@ -41754,7 +41842,7 @@
       (font
         (size 1.27 1.27))
       (justify right bottom))
-    (uuid "e795fddd-59fd-5828-9cb0-496e2b529c43"))
+    (uuid "1838792e-a276-5813-b528-c85d3f2abfd5"))
   (symbol
     (lib_id "power:PWR_FLAG")
     (at 375 392 0)
@@ -41762,7 +41850,7 @@
     (in_bom no)
     (on_board yes)
     (dnp no)
-    (uuid "05386d58-3411-56be-893e-abb94b998416")
+    (uuid "cd20e9cc-2835-5f8b-b8db-0fd3467ab974")
     (property
       "Reference"
       "#FLG253"
@@ -41796,7 +41884,7 @@
         hide))
     (pin
       "1"
-      (uuid "01e1ffbc-09e5-50b2-8659-a0be0574a243"))
+      (uuid "740b2b60-4c73-5358-b82b-9ae337f46870"))
     (instances
       (project
         "carradio_peripheral_rev04"
@@ -41812,7 +41900,7 @@
       (font
         (size 1.27 1.27))
       (justify right bottom))
-    (uuid "f048f876-fe5e-5b84-b596-8440851481c6"))
+    (uuid "bd338907-8028-5c25-9112-7cf7d7fb339c"))
   (symbol
     (lib_id "power:PWR_FLAG")
     (at 390 392 0)
@@ -41820,7 +41908,7 @@
     (in_bom no)
     (on_board yes)
     (dnp no)
-    (uuid "c0f9b52a-efea-57c8-ab43-a4bff6c06e3c")
+    (uuid "cbe96956-1b90-519e-8459-8ecc88ae0b20")
     (property
       "Reference"
       "#FLG254"
@@ -41854,7 +41942,7 @@
         hide))
     (pin
       "1"
-      (uuid "1838792e-a276-5813-b528-c85d3f2abfd5"))
+      (uuid "445e2dba-5333-5de6-b948-97b8534c3f04"))
     (instances
       (project
         "carradio_peripheral_rev04"
@@ -41870,7 +41958,7 @@
       (font
         (size 1.27 1.27))
       (justify right bottom))
-    (uuid "cd20e9cc-2835-5f8b-b8db-0fd3467ab974"))
+    (uuid "1a7edcf7-df72-532f-bafa-e7c2460914ef"))
   (symbol
     (lib_id "power:PWR_FLAG")
     (at 405 392 0)
@@ -41878,7 +41966,7 @@
     (in_bom no)
     (on_board yes)
     (dnp no)
-    (uuid "740b2b60-4c73-5358-b82b-9ae337f46870")
+    (uuid "950ea568-26ce-532b-a607-ba8c94cdb043")
     (property
       "Reference"
       "#FLG255"
@@ -41912,7 +42000,7 @@
         hide))
     (pin
       "1"
-      (uuid "bd338907-8028-5c25-9112-7cf7d7fb339c"))
+      (uuid "bba2253f-c9eb-5fd0-9788-a7b85f1ee2f1"))
     (instances
       (project
         "carradio_peripheral_rev04"
@@ -41928,7 +42016,7 @@
       (font
         (size 1.27 1.27))
       (justify right bottom))
-    (uuid "cbe96956-1b90-519e-8459-8ecc88ae0b20"))
+    (uuid "c2d1a168-3317-5bf8-9a19-0a1c4fa4a01e"))
   (symbol
     (lib_id "power:PWR_FLAG")
     (at 450 392 0)
@@ -41936,7 +42024,7 @@
     (in_bom no)
     (on_board yes)
     (dnp no)
-    (uuid "6c2df55a-663e-51fc-9912-525a55ab23d0")
+    (uuid "cefdc1d7-0f7f-5fdc-969c-0ddb12498b9f")
     (property
       "Reference"
       "#FLG258"
@@ -41970,7 +42058,7 @@
         hide))
     (pin
       "1"
-      (uuid "43daddc8-0004-5d8a-ac23-cd2d46e62429"))
+      (uuid "6994323c-e92b-545d-850a-ce20d9800ac5"))
     (instances
       (project
         "carradio_peripheral_rev04"
@@ -41986,7 +42074,7 @@
       (font
         (size 1.27 1.27))
       (justify right bottom))
-    (uuid "51330e1c-f36f-55af-9933-ea2924c13946"))
+    (uuid "80374e98-dcce-56ec-947a-aa15d650bcd7"))
   (symbol
     (lib_id "power:PWR_FLAG")
     (at 465 392 0)
@@ -41994,7 +42082,7 @@
     (in_bom no)
     (on_board yes)
     (dnp no)
-    (uuid "ab666da7-682d-5f0f-961c-5b2358d8e7e2")
+    (uuid "54264de6-0c4c-5aa6-8506-38b98653a755")
     (property
       "Reference"
       "#FLG259"
@@ -42028,7 +42116,7 @@
         hide))
     (pin
       "1"
-      (uuid "9bcbd1b6-814d-5485-842b-768a8732586b"))
+      (uuid "58da2ee2-1fe9-5102-af56-a224848ec5a3"))
     (instances
       (project
         "carradio_peripheral_rev04"
@@ -42044,7 +42132,7 @@
       (font
         (size 1.27 1.27))
       (justify right bottom))
-    (uuid "cefdc1d7-0f7f-5fdc-969c-0ddb12498b9f"))
+    (uuid "db163757-dbf8-5d18-97a5-d25bdc83da0e"))
   (symbol
     (lib_id "power:PWR_FLAG")
     (at 480 392 0)
@@ -42052,7 +42140,7 @@
     (in_bom no)
     (on_board yes)
     (dnp no)
-    (uuid "6994323c-e92b-545d-850a-ce20d9800ac5")
+    (uuid "1950663a-52bd-5860-9fb2-e0573a2f0988")
     (property
       "Reference"
       "#FLG260"
@@ -42086,7 +42174,7 @@
         hide))
     (pin
       "1"
-      (uuid "80374e98-dcce-56ec-947a-aa15d650bcd7"))
+      (uuid "641311de-9b82-58d9-81bc-7e5340802c8d"))
     (instances
       (project
         "carradio_peripheral_rev04"
@@ -42101,7 +42189,7 @@
     (in_bom no)
     (on_board yes)
     (dnp no)
-    (uuid "54264de6-0c4c-5aa6-8506-38b98653a755")
+    (uuid "fe1782a9-343b-5b1e-8cf4-74955afcc923")
     (property
       "Reference"
       "#PWR261"
@@ -42135,7 +42223,7 @@
         hide))
     (pin
       "1"
-      (uuid "58da2ee2-1fe9-5102-af56-a224848ec5a3"))
+      (uuid "8f77ddac-8033-52fd-95c5-30bd8652a425"))
     (instances
       (project
         "carradio_peripheral_rev04"
@@ -42150,7 +42238,7 @@
       (font
         (size 1.5 1.5))
       (justify left bottom))
-    (uuid "db163757-dbf8-5d18-97a5-d25bdc83da0e"))
+    (uuid "c9e5362c-a2c4-5c64-98d9-cc92445f561c"))
   (sheet_instances
     (path
       "/"

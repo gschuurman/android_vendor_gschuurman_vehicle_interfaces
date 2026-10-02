@@ -2,7 +2,7 @@
 	(version "E")
 	(design
 		(source "/w/pcb4/carradio_peripheral_rev04.kicad_sch")
-		(date "2026-10-02T06:19:58")
+		(date "2026-10-02T19:12:37")
 		(tool "Eeschema 10.0.6")
 		(sheet
 			(number "1")
@@ -3867,7 +3867,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "1006e57d-c2cf-56e6-b8a6-5fbf2ecb5ce4")
+			(tstamps "5cf9e09e-f4a2-53f3-87d3-6f56fb9a3e6e")
 			(units
 				(unit
 					(name "A")
@@ -3933,7 +3933,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "c06ebd21-b31d-5490-a4f8-3f0eb139faa2")
+			(tstamps "8c696314-404d-5f17-8e99-bfda3553843d")
 			(units
 				(unit
 					(name "A")
@@ -3999,7 +3999,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "793836a3-b7a8-59c4-af5b-339a0a667da2")
+			(tstamps "6fc6ef4b-bf06-570f-9480-d9f2d1ab6d8c")
 			(units
 				(unit
 					(name "A")
@@ -6319,7 +6319,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "3ea24791-d189-5dbb-9585-6a6244d23a3e")
+			(tstamps "6e64c4ea-bb43-5eba-9cff-bac3e5a2a8b8")
 			(units
 				(unit
 					(name "A")
@@ -11495,7 +11495,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "ac461aa7-a9e1-554a-a993-348b9e3fb8c7")
+			(tstamps "bcf421e8-e498-52f3-bda1-d2516811600c")
 			(units
 				(unit
 					(name "A")
@@ -12287,7 +12287,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "bcf421e8-e498-52f3-bda1-d2516811600c")
+			(tstamps "f0d36d2b-5ab2-5e43-8768-a0c7090b3603")
 			(units
 				(unit
 					(name "A")
@@ -12353,7 +12353,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "f0d36d2b-5ab2-5e43-8768-a0c7090b3603")
+			(tstamps "58720903-f805-5c64-9c31-b0b2939f8873")
 			(units
 				(unit
 					(name "A")
@@ -12419,7 +12419,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "27980c0d-968e-588d-a8b1-ccb6035da17c")
+			(tstamps "1c5eebd0-057b-53ff-9f4e-370d2d3543c9")
 			(units
 				(unit
 					(name "A")
@@ -12485,7 +12485,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "220c1a83-e72d-53c3-9549-d63a7a9c2b27")
+			(tstamps "a8ae6190-8a18-57de-ba47-cfe87669067e")
 			(units
 				(unit
 					(name "A")
@@ -12551,7 +12551,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "3dd60f50-ea34-53e7-9228-354102b20a06")
+			(tstamps "c989be30-bfac-5ba4-9cb3-bd63ba67563d")
 			(units
 				(unit
 					(name "A")
@@ -12617,7 +12617,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "e6275766-a99b-5053-acae-09dba3f578a1")
+			(tstamps "85b6dc3a-72b3-53df-b3df-2580032c55c6")
 			(units
 				(unit
 					(name "A")
@@ -12683,7 +12683,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "f1bbc630-3fad-51c7-baef-501d82850b20")
+			(tstamps "e277da41-d7df-5cec-8d2f-25e25b2ebc59")
 			(units
 				(unit
 					(name "A")
@@ -12749,7 +12749,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "e277da41-d7df-5cec-8d2f-25e25b2ebc59")
+			(tstamps "793836a3-b7a8-59c4-af5b-339a0a667da2")
 			(units
 				(unit
 					(name "A")
@@ -12815,7 +12815,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "6fc6ef4b-bf06-570f-9480-d9f2d1ab6d8c")
+			(tstamps "f0713c91-92d2-556a-89b7-43a3dec6bf3a")
 			(units
 				(unit
 					(name "A")
@@ -12948,6 +12948,72 @@
 				(tstamps "/")
 			)
 			(tstamps "b24ed936-544d-500a-8a58-0c26cb2442d6")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "R104")
+			(value "10k")
+			(footprint "Resistor_SMD:R_0603_1608Metric")
+			(fields
+				(field
+					(name "LCSC") "C25804")
+				(field
+					(name "MPN") "0603 10k 1%")
+				(field
+					(name "Footprint") "Resistor_SMD:R_0603_1608Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "R")
+				(description "Resistor")
+			)
+			(property
+				(name "LCSC")
+				(value "C25804")
+			)
+			(property
+				(name "MPN")
+				(value "0603 10k 1%")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_peripheral_rev04")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_peripheral_rev04.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "R res resistor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "R_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "ac461aa7-a9e1-554a-a993-348b9e3fb8c7")
 			(units
 				(unit
 					(name "A")
@@ -13137,7 +13203,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "1c5eebd0-057b-53ff-9f4e-370d2d3543c9")
+			(tstamps "4785b58f-f70b-5b88-ac34-e6043fe5bbb1")
 			(units
 				(unit
 					(name "A")
@@ -17660,6 +17726,11 @@
 				(pintype "passive")
 			)
 			(node
+				(ref "C61")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
 				(ref "C80")
 				(pin "1")
 				(pintype "passive")
@@ -17680,6 +17751,12 @@
 				(ref "R1")
 				(pin "1")
 				(pintype "passive")
+			)
+			(node
+				(ref "U13")
+				(pin "12")
+				(pinfunction "V5_12")
+				(pintype "power_in")
 			)
 			(node
 				(ref "U19")
@@ -17711,11 +17788,6 @@
 			)
 			(node
 				(ref "C47")
-				(pin "1")
-				(pintype "passive")
-			)
-			(node
-				(ref "C61")
 				(pin "1")
 				(pintype "passive")
 			)
@@ -17770,12 +17842,6 @@
 				(ref "R91")
 				(pin "1")
 				(pintype "passive")
-			)
-			(node
-				(ref "U13")
-				(pin "12")
-				(pinfunction "V5_12")
-				(pintype "power_in")
 			)
 		)
 		(net
@@ -19293,6 +19359,11 @@
 			(name "/HUB1_RST")
 			(class "Default")
 			(node
+				(ref "R104")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
 				(ref "R90")
 				(pin "2")
 				(pintype "passive")
@@ -19349,6 +19420,11 @@
 			)
 			(node
 				(ref "C63")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "R104")
 				(pin "1")
 				(pintype "passive")
 			)

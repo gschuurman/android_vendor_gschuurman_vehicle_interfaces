@@ -183,7 +183,8 @@ D16,LED green,KT-0805G green LED,C2297,LED_SMD:LED_0805_2012Metric,yes,status LE
 R87,10k,0603 10k 1%,C25804,Resistor_SMD:R_0603_1608Metric,yes,TPS2561 FAULT1: port 1 over-current
 R88,10k,0603 10k 1%,C25804,Resistor_SMD:R_0603_1608Metric,yes,TPS2561 FAULT2: port 2 over-current
 R89,10k,0603 10k 1%,C25804,Resistor_SMD:R_0603_1608Metric,yes,LMR33630 power good
-R90,1k,0603 1k 1%,C21190,Resistor_SMD:R_0603_1608Metric,yes,"firmware pulls low to reset hub 1, otherwise input (hub keeps its internal pull-up)"
+R90,1k,0603 1k 1%,C21190,Resistor_SMD:R_0603_1608Metric,yes,"firmware pulls low to reset hub 1 (e.g. while the VIM3 is off), otherwise input"
+R104,10k,0603 10k 1%,C25804,Resistor_SMD:R_0603_1608Metric,yes,keeps hub 1 out of reset on a blank MCU (RP2350 pads default to pull-down)
 R79,1k,0603 1k 1%,C21190,Resistor_SMD:R_0603_1608Metric,yes,firmware keeps this an input; low at GNSS power-up = u-blox safeboot
 R91,10k,0603 10k 1%,C25804,Resistor_SMD:R_0603_1608Metric,yes,5V system rail monitor: /2
 R92,10k,0603 10k 1%,C25804,Resistor_SMD:R_0603_1608Metric,yes,

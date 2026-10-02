@@ -589,14 +589,14 @@ text("VIN is permanent +12V so the VIM3 can finish its Android shutdown after AC
 text("11. USB HUB: VIM3 header USB (pins 3/4) -> MCU, screen touch, spare port", 610, 228, 2)
 HUB = add_lib('Interface_USB', 'CH334R')
 place(HUB, "U13", "CH334R", 700, 290,
-      {"12": "+5V_SYS", "13": "HUB_3V3", "14": "GND", "15": "HUB_XO", "16": "HUB_XI", "9": "HUB1_RST",
+      {"12": "+5V_AON", "13": "HUB_3V3", "14": "GND", "15": "HUB_XO", "16": "HUB_XI", "9": "HUB1_RST",
        "10": "USB_UP_DM", "11": "USB_UP_DP", "7": "MCU_USB_DM", "8": "MCU_USB_DP", "5": "TOUCH_DN", "6": "TOUCH_DP",
        "3": "GNSS_USB_DM", "4": "GNSS_USB_DP", "1": "HUB2_UP_DM", "2": "HUB2_UP_DP"},
       "Package_SO:QSOP-16_3.9x4.9mm_P0.635mm", "C4154405", "WCH CH334R 4-port USB 2.0 hub, QSOP-16",
       note="pinout checked against WCH CH334 datasheet (CH334R column). Upstream = VIM3 header pins 3/4 (VIM3 hub port 4)")
 place(add_lib('Device', 'Crystal_GND24'), "Y1", "12MHz", 660, 305, {"1": "HUB_XI", "3": "HUB_XO", "2": "GND", "4": "GND"}, "Crystal:Crystal_SMD_3225-4Pin_3.2x2.5mm", "",
       "12MHz crystal (pick in library)", note="CH334R has built-in load capacitors")
-cap("C61", "1u", 720, 262, "+5V_SYS", "GND", note="at V5")
+cap("C61", "1u", 720, 262, "+5V_AON", "GND", note="at V5")
 cap("C62", "10u", 728, 262, "HUB_3V3", "GND")
 cap("C63", "100n", 736, 262, "HUB_3V3", "GND")
 SEC[0] = "usb"
@@ -606,7 +606,7 @@ renumber_pin(USBA, "5", "SH")   # KiCad's USB-A footprints call the shield pads 
 place(USBA, "J17", "RTL-SDR (internal)", 805, 290, {"1": "SDR_VBUS", "2": "SDR_DM", "3": "SDR_DP", "4": "GND", "SH": "GND"}, "Connector_USB:USB_A_Molex_67643_Horizontal", "",
       "USB-A receptacle, board mount (pick in library)", note="RTL-SDR dongle for FM/DAB+ plugs in here with its existing USB-A to USB-C cable")
 SEC[0] = "main"
-text("One link to the VIM3: no USB cables. Port 1 MCU, 2 touch, 3 GNSS module USB, 4 second hub (external ports + RTL-SDR). Route D+/D- as 90 ohm pairs.", 610, 345)
+text("Hub 1 runs from the always-on +5V_AON so a blank MCU enumerates (first flash over USB). One link to the VIM3: no USB cables. Port 1 MCU, 2 touch, 3 GNSS module USB, 4 second hub (external ports + RTL-SDR). Route D+/D- as 90 ohm pairs.", 610, 345)
 text("VIM3 header pins 3/4 are a working USB host port (confirmed by Glenn, 2026-09-29).", 610, 349)
 
 # ================================================================ 12. external USB ports (phone) + their own 5V/3A supply (rev 0.4: USB module)
@@ -764,7 +764,8 @@ place(LED, "D16", "LED green", 1095, 140, {"1": "GND", "2": "MCU_LED_K"}, "LED_S
 for r, n, nt in (("R87", "MCU_USBP_FAULT1", "TPS2561 FAULT1: port 1 over-current"), ("R88", "MCU_USBP_FAULT2", "TPS2561 FAULT2: port 2 over-current"),
                  ("R89", "MCU_USBP_PG", "LMR33630 power good")):
     res(r, "10k", 1060 + 8 * int(r[-1]), 330, "+3V3_MCU", n, note=nt)
-res("R90", "1k", 1100, 360, "MCU_HUB_RST", "HUB1_RST", note="firmware pulls low to reset hub 1, otherwise input (hub keeps its internal pull-up)")
+res("R90", "1k", 1100, 360, "MCU_HUB_RST", "HUB1_RST", note="firmware pulls low to reset hub 1 (e.g. while the VIM3 is off), otherwise input")
+res("R104", "10k", 1108, 360, "HUB_3V3", "HUB1_RST", note="keeps hub 1 out of reset on a blank MCU (RP2350 pads default to pull-down)")
 res("R79", "1k", 1110, 360, "MCU_GNSS_SAFEBOOT", "GNSS_SAFEBOOT", note="firmware keeps this an input; low at GNSS power-up = u-blox safeboot")
 
 # ADC: battery (moved from GP26), 5V system rail, board temperature
