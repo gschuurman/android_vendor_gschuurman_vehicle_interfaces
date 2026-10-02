@@ -288,7 +288,7 @@ res("R57", "0", 545, 100, "AMP_REM", "ISO_A5", dnp=True, note="DNP: fit to also 
 text("LED ~2.7mA at 14.4V; EL817 C-grade CTR >= 200%. 4.7k pull-downs satisfy RP2350-E9.", 215, 140)
 
 # ================================================================ 3. amp remote
-text("3. AMPLIFIER REMOTE (+12V from ACC, MCU GP9)", 425, 16, 2)
+text("3. AMPLIFIER REMOTE (+12V from ACC, MCU GP20)", 425, 16, 2)
 place(PMOS, "Q2", "P-MOSFET -60V", 470, 45, {"S": "ACC_P", "D": "AMP_SW", "G": "AMP_G"}, FP_SOT23, "", "P-MOSFET SOT-23, -60V, Vgs +-20V, >= 1A, Rds(on) < 0.3 ohm at -10V (pick in library)",
       note="review: AO3401A (-30V) was below the 35.5V TVS clamp")
 res("R13", "10k", 440, 34, "ACC_P", "AMP_G")
@@ -317,15 +317,15 @@ res("R11", "220k", 154, 180, "MCU_VBAT_ADC", "GND")
 cap("C9", "100n", 162, 180, "MCU_VBAT_ADC", "GND")
 place(CG2, "JP1", "SERVICE jumper", 135, 215, {"1": "+3V3_MCU", "2": "MCU_SERVICE"}, "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical", "", "1x2 2.54mm pin header + jumper")
 res("R9", "4.7k", 150, 218, "MCU_SERVICE", "GND")
-place(CG8, "J10", "Expansion", 185, 205, {"1": "+3V3_MCU", "2": "EXP_GP20", "3": "EXP_GP21", "4": "EXP_GP30", "5": "+5V_AON", "6": "GND", "7": "GND", "8": "EXP_GP31"},
+place(CG8, "J10", "Expansion", 185, 205, {"1": "+3V3_MCU", "2": "EXP_GP32", "3": "EXP_GP33", "4": "EXP_GP28", "5": "+5V_AON", "6": "GND", "7": "GND", "8": "EXP_GP13"},
       "Connector_PinHeader_2.54mm:PinHeader_1x08_P2.54mm_Vertical", "", "1x8 2.54mm pin header",
-      note="GP20/21 = UART1 for a future K-line (L9637D) board; pins 4/8 = spare GP30/GP31")
+      note="pins 2/3 = GP32/GP33 UART TX/RX for a future K-line (L9637D) board; pins 4/8 = spare GP28/GP13")
 
 # ================================================================ 5. GNSS
 SEC[0] = "main"
 text("5. GNSS MODULE: u-blox NEO-M9N, active antenna on U.FL (pigtail to SMA), UART + USB to the main board. Switched 3.3V supply stays on the main board.", 215, 158, 2)
 place(LDO, "U6", "LP5907MFX-3.3", 240, 190, {"1": "+5V_AON", "3": "MCU_GNSS_EN", "2": "GND", "5": "+3V3_GNSS"}, FP_SOT23.replace("SOT-23", "SOT-23-5"),
-      "C80670", "TI LP5907MFX-3.3/NOPB 250mA LDO", note="GNSS supply, switched by MCU GP12")
+      "C80670", "TI LP5907MFX-3.3/NOPB 250mA LDO", note="GNSS supply, switched by MCU GP9")
 cap("C12", "1u", 222, 205, "+5V_AON", "GND")
 res("R35", "100k", 230, 205, "MCU_GNSS_EN", "GND", note="GNSS off by default")
 cap("C13", "1u", 255, 205, "+3V3_GNSS", "GND")
@@ -350,7 +350,7 @@ res("R100", "1k", 262, 255, "GNSS_TXD", "VIM3_UARTC_RX", note="GNSS NMEA also to
 res("R101", "1k", 270, 255, "VIM3_UARTC_TX", "GNSS_RXD_VIM", note="VIM3 UART_C TX (header pin 16)")
 place(add_lib('Jumper', 'SolderJumper_3_Bridged12'), "JP2", "GNSS RX source", 290, 255, {"1": "GNSS_RXD_VIM", "2": "GNSS_RXD", "3": "GNSS_RXD_MCU"},
       "Jumper:SolderJumper-3_P1.3mm_Bridged12_RoundedPad1.0x1.5mm", "", "3-pad solder jumper (PCB copper, no part)",
-      note="who talks to the receiver: 1-2 (default, bridged) = VIM3 UART_C, 2-3 = MCU UART0. GNSS TX always goes to both.")
+      note="who talks to the receiver: 1-2 (default, bridged) = VIM3 UART_C, 2-3 = MCU UART1 (GPIO4/5). GNSS TX always goes to both.")
 SEC[0] = "gnss"
 cap("C17", "10n", 360, 170, "GNSS_VCCRF", "GND")
 res("R41", "10", 368, 170, "GNSS_VCCRF", "ANT_FEED", note="antenna supply, limits short-circuit current")
@@ -405,7 +405,7 @@ place(add_lib('Connector_Generic', 'Conn_01x05'), "J12", "Display buttons", 568,
       {"1": "BTN_SCREEN", "2": "BTN_VOLUP", "3": "BTN_VOLDN", "4": "BTN_MUTE", "5": "GND"},
       "Connector_JST:JST_PH_B5B-PH-K_1x05_P2.00mm_Vertical", "", "JST-PH 5P (pick in library)",
       note="momentary buttons to ground: 1 screen off, 2 volume up, 3 volume down, 4 mute, 5 GND")
-text("Display buttons (to GND): GP16 screen, GP17 vol+, GP22 vol-, GP27 mute. J12.", 425, 257)
+text("Display buttons (to GND): GP18 screen, GP17 vol+, GP22 vol-, GP16 mute. J12.", 425, 257)
 
 # ================================================================ 7. audio (rev 0.4: on the plug-in audio module)
 SEC[0] = "audio"
@@ -582,7 +582,7 @@ for ref, a, b, x, why in [("NT1", "BB_ISP", "BB_VOUT", 826, "ISP Kelvin tap: pla
     bom.pop()
     sym = next(e for e in reversed(items) if e[0] == 'symbol' and e[1] == [S('lib_id'), NT])
     sym[4] = [S('in_bom'), S('no')]
-text("Input 3V-36V (runs through cranking); output 5.0V up to 5A. MCU GP28 = EN, MCU I2C0 sets OE/voltage/current limit.", 610, 205)
+text("Input 3V-36V (runs through cranking); output 5.0V up to 5A. MCU GP23 = EN, MCU I2C1 sets OE/voltage/current limit.", 610, 205)
 text("VIN is permanent +12V so the VIM3 can finish its Android shutdown after ACC drops.", 610, 209)
 
 # ================================================================ 11. USB hub: one link to the VIM3 over the 40-pin header
@@ -615,7 +615,7 @@ text("12. EXTERNAL USB PORTS (phone etc.): second hub + dedicated 5V/3A supply, 
 BUCK = add_lib('Regulator_Switching', 'LMR33630ADDA')
 place(BUCK, "U15", "LMR33630ADDA", 360, 470, {"2": "VSYS_IN", "3": "VIM3_PWR_EN", "1": "GND", "9": "GND", "6": "USBP_VCC", "7": "USBP_BOOT", "8": "USBP_SW", "5": "USBP_FB", "4": "MCU_USBP_PG"},
       "Package_SO:TI_SO-PowerPAD-8_ThermalVias", "C841384", "TI LMR33630ADDAR 36V 3A buck, 400 kHz",
-      note="pinout and values from the TI LMR33630 datasheet (5V/3A example). On whenever the VIM3 supply is enabled (GP28)")
+      note="pinout and values from the TI LMR33630 datasheet (5V/3A example). On whenever the VIM3 supply is enabled (GP23)")
 cap("C64", "10u50", 330, 460, "VSYS_IN", "GND")
 cap("C65", "100n", 338, 460, "VSYS_IN", "GND")
 cap("C66", "1u", 342, 490, "USBP_VCC", "GND")
@@ -680,14 +680,8 @@ RP_GPIO_PIN = {0: 77, 1: 78, 2: 79, 3: 80, 4: 1, 5: 2, 6: 3, 7: 4, 8: 6, 9: 7, 1
                16: 16, 17: 17, 18: 18, 19: 19, 20: 20, 21: 21, 22: 22, 23: 23, 24: 25, 25: 26, 26: 27, 27: 28, 28: 36, 29: 37,
                30: 38, 31: 39, 32: 40, 33: 42, 34: 43, 35: 44, 36: 45, 37: 46, 38: 47, 39: 48,
                40: 49, 41: 52, 42: 53, 43: 54, 44: 55, 45: 56, 46: 57, 47: 58}
-GPIO_NET = {0: "MCU_GNSS_TX", 1: "MCU_GNSS_RX", 2: "MCU_ACC_IN", 3: "MCU_REV_IN", 4: "LUX_SDA", 5: "LUX_SCL", 6: "MCU_ILLUM_IN",
-            7: "MCU_PARK_IN", 8: "MCU_PWR_KEY", 9: "MCU_AMP_EN", 10: "MCU_BL_EN", 11: "MCU_BL_PWM", 12: "MCU_GNSS_EN",
-            13: "MCU_SBC_SENSE", 14: "MCU_SERVICE", 15: "MCU_DAC_MUTE", 16: "MCU_BTN_SCREEN", 17: "MCU_BTN_VOLUP",
-            18: "MCU_GNSS_RST", 19: "MCU_GNSS_PPS", 20: "EXP_GP20", 21: "EXP_GP21", 22: "MCU_BTN_VOLDN",
-            23: "MCU_USBP_FAULT1", 24: "MCU_USBP_FAULT2", 25: "MCU_LED", 26: "MCU_USBP_PG", 27: "MCU_BTN_MUTE",
-            28: "MCU_VIM3_PWR_EN", 29: "MCU_GNSS_SAFEBOOT", 30: "EXP_GP30", 31: "EXP_GP31",
-            32: "EXP_GP32", 33: "EXP_GP33", 34: "EXP_GP34", 35: "EXP_GP35", 36: "EXP_GP36", 37: "EXP_GP37", 38: "EXP_GP38", 39: "EXP_GP39",
-            40: "MCU_VBAT_ADC", 41: "MCU_5VSYS_ADC", 42: "MCU_TEMP_ADC", 43: "MCU_HUB_RST"}
+# rev 0.4 (2026-10-02): GPIOs re-assigned so each signal leaves the QFN on the side facing its destination
+GPIO_NET = {0: "MCU_BL_EN", 1: "MCU_BL_PWM", 2: "MCU_HUB_RST", 3: "MCU_GNSS_PPS", 4: "MCU_GNSS_TX", 5: "MCU_GNSS_RX", 6: "MCU_SBC_SENSE", 7: "MCU_GNSS_RST", 8: "MCU_GNSS_SAFEBOOT", 9: "MCU_GNSS_EN", 10: "MCU_DAC_MUTE", 11: "EXP_GP11", 12: "EXP_GP12", 13: "EXP_GP13", 14: "MCU_PARK_IN", 15: "MCU_PWR_KEY", 16: "MCU_BTN_MUTE", 17: "MCU_BTN_VOLUP", 18: "MCU_BTN_SCREEN", 19: "MCU_SERVICE", 20: "MCU_AMP_EN", 21: "MCU_LED", 22: "MCU_BTN_VOLDN", 23: "MCU_VIM3_PWR_EN", 24: "EXP_GP24", 25: "EXP_GP25", 26: "EXP_GP26", 27: "EXP_GP27", 28: "EXP_GP28", 29: "EXP_GP29", 30: "LUX_SDA", 31: "LUX_SCL", 32: "EXP_GP32", 33: "EXP_GP33", 34: "EXP_GP34", 35: "MCU_REV_IN", 36: "MCU_USBP_PG", 37: "MCU_ILLUM_IN", 38: "MCU_USBP_FAULT2", 39: "MCU_USBP_FAULT1", 40: "MCU_VBAT_ADC", 41: "MCU_5VSYS_ADC", 42: "MCU_TEMP_ADC", 43: "MCU_ACC_IN"}
 RP_LEFT = [(64, "VREG_VIN"), (63, "VREG_LX"), (65, "VREG_FB"), (61, "VREG_AVDD"), (62, "VREG_PGND"), None,
            (5, "IOVDD"), (15, "IOVDD"), (24, "IOVDD"), (29, "IOVDD"), (41, "IOVDD"), (50, "IOVDD"), (60, "IOVDD"), (76, "IOVDD"), None,
            (10, "DVDD"), (32, "DVDD"), (51, "DVDD"), None, (59, "ADC_AVDD"), (68, "USB_OTP_VDD"), (69, "QSPI_IOVDD"), None,
@@ -704,7 +698,7 @@ for p in (10, 32, 51): rp_conns[str(p)] = "+1V1_MCU"
 for g, n in GPIO_NET.items(): rp_conns[str(RP_GPIO_PIN[g])] = n
 for g in range(44, 48): rp_conns[str(RP_GPIO_PIN[g])] = None
 place(RP, "U20", "RP2350B", 960, 150, rp_conns, "Package_DFN_QFN:QFN-80-1EP_10x10mm_P0.4mm_EP3.4x3.4mm", "", "Raspberry Pi RP2350B, QFN-80 (use the EasyEDA library footprint)",
-      note="GPIO map in DESIGN_rev03.md. GPIO0-29 keep the rev 0.2 Pico numbers, except the battery ADC (GP26 -> GPIO40: only GPIO40-47 have ADC on the RP2350B)")
+      note="GPIO map: rev 0.4 README (re-assigned for routing). ADCs stay on GPIO40-42 (only GPIO40-47 have ADC); GNSS on UART1 (GPIO4/5), I2C on I2C1 (GPIO30/31)")
 
 # 3.3V: low-quiescent LDO from the always-on 5.2V (the Pico module's own regulator is gone)
 LDO33 = add_lib('Regulator_Linear', 'AP2112K-3.3')
@@ -768,7 +762,7 @@ res("R90", "1k", 1100, 360, "MCU_HUB_RST", "HUB1_RST", note="firmware pulls low 
 res("R104", "10k", 1108, 360, "HUB_3V3", "HUB1_RST", note="keeps hub 1 out of reset on a blank MCU (RP2350 pads default to pull-down)")
 res("R79", "1k", 1110, 360, "MCU_GNSS_SAFEBOOT", "GNSS_SAFEBOOT", note="firmware keeps this an input; low at GNSS power-up = u-blox safeboot")
 
-# ADC: battery (moved from GP26), 5V system rail, board temperature
+# ADC: battery (GPIO40), 5V system rail (GPIO41), board temperature (GPIO42)
 res("R91", "10k", 870, 360, "+5V_SYS", "MCU_5VSYS_ADC", note="5V system rail monitor: /2")
 res("R92", "10k", 878, 360, "MCU_5VSYS_ADC", "GND")
 cap("C102", "100n", 886, 360, "MCU_5VSYS_ADC", "GND")
@@ -779,10 +773,10 @@ cap("C103", "100n", 916, 360, "MCU_TEMP_ADC", "GND")
 
 # expansion: GPIO32-39
 place(add_lib('Connector_Generic', 'Conn_01x10'), "J21", "Expansion 2", 1140, 200,
-      {"1": "+3V3_MCU", "2": "EXP_GP32", "3": "EXP_GP33", "4": "EXP_GP34", "5": "EXP_GP35", "6": "EXP_GP36", "7": "EXP_GP37", "8": "EXP_GP38", "9": "EXP_GP39", "10": "GND"},
-      "Connector_PinHeader_2.54mm:PinHeader_1x10_P2.54mm_Vertical", "", "1x10 2.54mm pin header", note="spare GPIO32-39 (e.g. CAN, extra UART/SPI)")
-text("GPIO0-29 as rev 0.2 except: GPIO40 battery ADC (was GP26), GPIO23/24 USB port faults, GPIO25 LED, GPIO26 USB supply PG,", 860, 400)
-text("GPIO29 GNSS safeboot, GPIO30/31 on J10, GPIO32-39 on J21, GPIO41 5V rail ADC, GPIO42 board temperature, GPIO43 hub 1 reset.", 860, 404)
+      {"1": "+3V3_MCU", "2": "EXP_GP34", "3": "EXP_GP29", "4": "EXP_GP11", "5": "EXP_GP12", "6": "EXP_GP27", "7": "EXP_GP26", "8": "EXP_GP25", "9": "EXP_GP24", "10": "GND"},
+      "Connector_PinHeader_2.54mm:PinHeader_1x10_P2.54mm_Vertical", "", "1x10 2.54mm pin header", note="spare GPIOs (e.g. CAN, extra UART/SPI); numbers in the net names")
+text("rev 0.4: GPIO map re-assigned for routing; see the README pin table. ADC: GPIO40 battery, 41 5V rail, 42 board temperature.", 860, 400)
+text("GPIO44-47 are unused (ADC-capable spares).", 860, 404)
 
 # RP2350-E9 (input pad can latch near 2V with only the internal pull-down): every MCU input that can float
 # gets an external resistor. Pull-downs are 4.7k (below the ~8.2k the erratum workaround calls for).

@@ -56,8 +56,8 @@ R11,220k,0603 220k 1%,C22961,Resistor_SMD:R_0603_1608Metric,yes,
 C9,100nF,0603 100nF 50V X7R,C14663,Capacitor_SMD:C_0603_1608Metric,yes,
 JP1,SERVICE jumper,1x2 male header 2.54mm + jumper cap C5305,C124375,Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical,yes,
 R9,4.7k,0603 4.7k 1%,C23162,Resistor_SMD:R_0603_1608Metric,yes,
-J10,Expansion,Ckmtw B-2100S08P-A110 1x8 male header,C124381,Connector_PinHeader_2.54mm:PinHeader_1x08_P2.54mm_Vertical,yes,GP20/21 = UART1 for a future K-line (L9637D) board; pins 4/8 = spare GP30/GP31
-U6,LP5907MFX-3.3,TI LP5907MFX-3.3/NOPB 250mA LDO (TECH PUBLIC TPLP5907MFX-3.3 clone; TI part out of stock at LCSC),C5370990,Package_TO_SOT_SMD:SOT-23-5,yes,"GNSS supply, switched by MCU GP12"
+J10,Expansion,Ckmtw B-2100S08P-A110 1x8 male header,C124381,Connector_PinHeader_2.54mm:PinHeader_1x08_P2.54mm_Vertical,yes,pins 2/3 = GP32/GP33 UART TX/RX for a future K-line (L9637D) board; pins 4/8 = spare GP28/GP13
+U6,LP5907MFX-3.3,TI LP5907MFX-3.3/NOPB 250mA LDO (TECH PUBLIC TPLP5907MFX-3.3 clone; TI part out of stock at LCSC),C5370990,Package_TO_SOT_SMD:SOT-23-5,yes,"GNSS supply, switched by MCU GP9"
 C12,1uF,0603 1uF 50V X5R (Murata GRM188R61H105KAALD),C77386,Capacitor_SMD:C_0603_1608Metric,yes,
 R35,100k,0603 100k 1%,C25803,Resistor_SMD:R_0603_1608Metric,yes,GNSS off by default
 C13,1uF,0603 1uF 50V X5R (Murata GRM188R61H105KAALD),C77386,Capacitor_SMD:C_0603_1608Metric,yes,
@@ -142,7 +142,7 @@ C61,1uF,0603 1uF 50V X5R (Murata GRM188R61H105KAALD),C77386,Capacitor_SMD:C_0603
 C62,10uF,0805 10uF 25V X5R,C15850,Capacitor_SMD:C_0805_2012Metric,yes,
 C63,100nF,0603 100nF 50V X7R,C14663,Capacitor_SMD:C_0603_1608Metric,yes,
 J25,USB module socket,BOOMELE 2.54-2*10P female 8.5mm (LCSC out of stock 2026-10-01; any 2x10 2.54mm 8.5mm socket fits),C30867,Connector_PinSocket_2.54mm:PinSocket_2x10_P2.54mm_Vertical,yes,"USB module plugs in here: 12V in for its 5V/3A supply, 5V for hub 2 and the SDR port, two USB pairs, enable and status"
-U20,RP2350B,"Raspberry Pi RP2350B QFN-80 (LCSC stock unclear; alt RP2354B C39843328 with 2MB internal flash, then leave U21 unfitted)",C42415655,Package_DFN_QFN:QFN-80-1EP_10x10mm_P0.4mm_EP3.4x3.4mm,yes,"GPIO map in DESIGN_rev03.md. GPIO0-29 keep the rev 0.2 Pico numbers, except the battery ADC (GP26 -> GPIO40: only GPIO40-47 have ADC on the RP2350B)"
+U20,RP2350B,"Raspberry Pi RP2350B QFN-80 (LCSC stock unclear; alt RP2354B C39843328 with 2MB internal flash, then leave U21 unfitted)",C42415655,Package_DFN_QFN:QFN-80-1EP_10x10mm_P0.4mm_EP3.4x3.4mm,yes,"GPIO map: rev 0.4 README (re-assigned for routing). ADCs stay on GPIO40-42 (only GPIO40-47 have ADC); GNSS on UART1 (GPIO4/5), I2C on I2C1 (GPIO30/31)"
 U19,AP2112K-3.3,Diodes AP2112K-3.3TRG1,C51118,Package_TO_SOT_SMD:SOT-23-5,yes,"MCU, GNSS backup, light sensor, pull-ups; replaces the Pico 2 regulator"
 C80,1uF,0603 1uF 50V X5R (Murata GRM188R61H105KAALD),C77386,Capacitor_SMD:C_0603_1608Metric,yes,
 C81,10uF,0805 10uF 25V X5R,C15850,Capacitor_SMD:C_0805_2012Metric,yes,
@@ -192,7 +192,7 @@ C102,100nF,0603 100nF 50V X7R,C14663,Capacitor_SMD:C_0603_1608Metric,yes,
 R93,10k,0603 10k 1%,C25804,Resistor_SMD:R_0603_1608Metric,yes,
 TH1,NTC 10k B3950,Murata NCP18XH103F03RB 10k B3380 0603,C13564,Resistor_SMD:R_0603_1608Metric,yes,place next to the TPS55288 / LMR33630: board temperature for thermal derating
 C103,100nF,0603 100nF 50V X7R,C14663,Capacitor_SMD:C_0603_1608Metric,yes,
-J21,Expansion 2,BOOMELE 1x10 male header 2.54mm,C57369,Connector_PinHeader_2.54mm:PinHeader_1x10_P2.54mm_Vertical,yes,"spare GPIO32-39 (e.g. CAN, extra UART/SPI)"
+J21,Expansion 2,BOOMELE 1x10 male header 2.54mm,C57369,Connector_PinHeader_2.54mm:PinHeader_1x10_P2.54mm_Vertical,yes,"spare GPIOs (e.g. CAN, extra UART/SPI); numbers in the net names"
 R94,4.7k,0603 4.7k 1%,C23162,Resistor_SMD:R_0603_1608Metric,yes,RP2350-E9: PPS floats while the GNSS supply is off
 R95,4.7k,0603 4.7k 1%,C23162,Resistor_SMD:R_0603_1608Metric,yes,RP2350-E9: UART RX floats while the GNSS supply is off
 R96,100k,0603 100k 1%,C25803,Resistor_SMD:R_0603_1608Metric,yes,backlight off while the MCU is in reset or booting

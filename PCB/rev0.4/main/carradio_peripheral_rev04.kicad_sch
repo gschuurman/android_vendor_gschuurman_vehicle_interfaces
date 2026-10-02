@@ -17954,7 +17954,7 @@
       (justify left bottom))
     (uuid "97d1d926-3fad-5f40-aaa1-6f325d8b3b3b"))
   (text
-    "3. AMPLIFIER REMOTE (+12V from ACC, MCU GP9)"
+    "3. AMPLIFIER REMOTE (+12V from ACC, MCU GP20)"
     (at 425 16 0)
     (effects
       (font
@@ -20131,7 +20131,7 @@
       (justify right bottom))
     (uuid "d6c9073b-a00a-5b06-bae6-10cd6673ce31"))
   (label
-    "EXP_GP20"
+    "EXP_GP32"
     (at 179.92 199.92 180)
     (fields_autoplaced)
     (effects
@@ -20140,7 +20140,7 @@
       (justify right bottom))
     (uuid "dce9e3dd-9e64-5d69-950a-aead536d7893"))
   (label
-    "EXP_GP21"
+    "EXP_GP33"
     (at 179.92 202.46 180)
     (fields_autoplaced)
     (effects
@@ -20149,7 +20149,7 @@
       (justify right bottom))
     (uuid "d02b0e1a-097f-58c3-8a55-f34d847bb708"))
   (label
-    "EXP_GP30"
+    "EXP_GP28"
     (at 179.92 205 180)
     (fields_autoplaced)
     (effects
@@ -20265,7 +20265,7 @@
           (reference "#PWR035")
           (unit 1)))))
   (label
-    "EXP_GP31"
+    "EXP_GP13"
     (at 179.92 215.16 180)
     (fields_autoplaced)
     (effects
@@ -24272,7 +24272,7 @@
           (reference "#PWR066")
           (unit 1)))))
   (text
-    "Display buttons (to GND): GP16 screen, GP17 vol+, GP22 vol-, GP27 mute. J12."
+    "Display buttons (to GND): GP18 screen, GP17 vol+, GP22 vol-, GP16 mute. J12."
     (at 425 257 0)
     (effects
       (font
@@ -32264,7 +32264,7 @@
           (reference "#PWR160")
           (unit 1)))))
   (text
-    "Input 3V-36V (runs through cranking); output 5.0V up to 5A. MCU GP28 = EN, MCU I2C0 sets OE/voltage/current limit."
+    "Input 3V-36V (runs through cranking); output 5.0V up to 5A. MCU GP23 = EN, MCU I2C1 sets OE/voltage/current limit."
     (at 610 205 0)
     (effects
       (font
@@ -34426,7 +34426,7 @@
           (reference "#PWR210")
           (unit 1)))))
   (label
-    "MCU_GNSS_TX"
+    "MCU_BL_EN"
     (at 977.78 90.31 0)
     (fields_autoplaced)
     (effects
@@ -34435,7 +34435,7 @@
       (justify left bottom))
     (uuid "540c8f6a-9268-52d8-b4f8-8f8efc3028a4"))
   (label
-    "MCU_GNSS_RX"
+    "MCU_BL_PWM"
     (at 977.78 92.85 0)
     (fields_autoplaced)
     (effects
@@ -34444,7 +34444,7 @@
       (justify left bottom))
     (uuid "57db8762-9346-5bba-a25b-8661fdc25e1d"))
   (label
-    "MCU_ACC_IN"
+    "MCU_HUB_RST"
     (at 977.78 95.39 0)
     (fields_autoplaced)
     (effects
@@ -34453,7 +34453,7 @@
       (justify left bottom))
     (uuid "8fc2ba08-39ee-5892-94b8-c290c3776690"))
   (label
-    "MCU_REV_IN"
+    "MCU_GNSS_PPS"
     (at 977.78 97.93 0)
     (fields_autoplaced)
     (effects
@@ -34462,7 +34462,7 @@
       (justify left bottom))
     (uuid "6c7d4aa7-92d7-5bd0-a231-bdcf0cfbe417"))
   (label
-    "LUX_SDA"
+    "MCU_GNSS_TX"
     (at 977.78 100.47 0)
     (fields_autoplaced)
     (effects
@@ -34471,7 +34471,7 @@
       (justify left bottom))
     (uuid "8317cc59-593e-55aa-b4ff-6abb57883879"))
   (label
-    "LUX_SCL"
+    "MCU_GNSS_RX"
     (at 977.78 103.01 0)
     (fields_autoplaced)
     (effects
@@ -34480,7 +34480,7 @@
       (justify left bottom))
     (uuid "d2bec1dc-7e61-5b80-95c0-1525c342be16"))
   (label
-    "MCU_ILLUM_IN"
+    "MCU_SBC_SENSE"
     (at 977.78 105.55 0)
     (fields_autoplaced)
     (effects
@@ -34489,7 +34489,7 @@
       (justify left bottom))
     (uuid "7924962c-9847-5545-84df-37a154ada56d"))
   (label
-    "MCU_PARK_IN"
+    "MCU_GNSS_RST"
     (at 977.78 108.09 0)
     (fields_autoplaced)
     (effects
@@ -34498,7 +34498,7 @@
       (justify left bottom))
     (uuid "8d4da0d0-1a3c-5262-9759-70686a3be4a7"))
   (label
-    "MCU_PWR_KEY"
+    "MCU_GNSS_SAFEBOOT"
     (at 977.78 110.63 0)
     (fields_autoplaced)
     (effects
@@ -34507,7 +34507,7 @@
       (justify left bottom))
     (uuid "bd9157a4-c0a9-5cf9-9ebb-d2d5d16fb5b0"))
   (label
-    "MCU_AMP_EN"
+    "MCU_GNSS_EN"
     (at 977.78 113.17 0)
     (fields_autoplaced)
     (effects
@@ -34516,7 +34516,7 @@
       (justify left bottom))
     (uuid "209bd28f-67a7-5121-ac7e-af0677e993b5"))
   (label
-    "MCU_BL_EN"
+    "MCU_DAC_MUTE"
     (at 977.78 115.71 0)
     (fields_autoplaced)
     (effects
@@ -34525,7 +34525,7 @@
       (justify left bottom))
     (uuid "76c38288-9747-59f1-a9f1-57d7019ee03a"))
   (label
-    "MCU_BL_PWM"
+    "EXP_GP11"
     (at 977.78 118.25 0)
     (fields_autoplaced)
     (effects
@@ -34534,7 +34534,7 @@
       (justify left bottom))
     (uuid "89af8d44-3735-50bc-be4a-1504dbbefeeb"))
   (label
-    "MCU_GNSS_EN"
+    "EXP_GP12"
     (at 977.78 120.79 0)
     (fields_autoplaced)
     (effects
@@ -34543,7 +34543,7 @@
       (justify left bottom))
     (uuid "a0270a7e-28a4-5099-9c8e-41224cfc7367"))
   (label
-    "MCU_SBC_SENSE"
+    "EXP_GP13"
     (at 977.78 123.33 0)
     (fields_autoplaced)
     (effects
@@ -34552,7 +34552,7 @@
       (justify left bottom))
     (uuid "655439a2-d9a1-59f6-bc64-3c273109083f"))
   (label
-    "MCU_SERVICE"
+    "MCU_PARK_IN"
     (at 977.78 125.87 0)
     (fields_autoplaced)
     (effects
@@ -34561,7 +34561,7 @@
       (justify left bottom))
     (uuid "fe6cdfe9-0689-579e-afb1-9d6580eecdb2"))
   (label
-    "MCU_DAC_MUTE"
+    "MCU_PWR_KEY"
     (at 977.78 128.41 0)
     (fields_autoplaced)
     (effects
@@ -34570,7 +34570,7 @@
       (justify left bottom))
     (uuid "fac28d9e-158a-59c1-8aa4-088c055ef497"))
   (label
-    "MCU_BTN_SCREEN"
+    "MCU_BTN_MUTE"
     (at 977.78 130.95 0)
     (fields_autoplaced)
     (effects
@@ -34588,7 +34588,7 @@
       (justify left bottom))
     (uuid "61878669-f786-5e52-ab12-f20bfa2e4e73"))
   (label
-    "MCU_GNSS_RST"
+    "MCU_BTN_SCREEN"
     (at 977.78 136.03 0)
     (fields_autoplaced)
     (effects
@@ -34597,7 +34597,7 @@
       (justify left bottom))
     (uuid "9d6453b2-bd32-588d-9bad-33a753e00e62"))
   (label
-    "MCU_GNSS_PPS"
+    "MCU_SERVICE"
     (at 977.78 138.57 0)
     (fields_autoplaced)
     (effects
@@ -34606,7 +34606,7 @@
       (justify left bottom))
     (uuid "999f5a45-ef4e-5522-8a3b-827beab025fc"))
   (label
-    "EXP_GP20"
+    "MCU_AMP_EN"
     (at 977.78 141.11 0)
     (fields_autoplaced)
     (effects
@@ -34615,7 +34615,7 @@
       (justify left bottom))
     (uuid "08d23a48-de29-526b-9d0e-b16295196829"))
   (label
-    "EXP_GP21"
+    "MCU_LED"
     (at 977.78 143.65 0)
     (fields_autoplaced)
     (effects
@@ -34633,7 +34633,7 @@
       (justify left bottom))
     (uuid "a62d7757-7ddd-5b97-bccd-d98fd20e4089"))
   (label
-    "MCU_USBP_FAULT1"
+    "MCU_VIM3_PWR_EN"
     (at 977.78 148.73 0)
     (fields_autoplaced)
     (effects
@@ -34642,7 +34642,7 @@
       (justify left bottom))
     (uuid "d2c5e715-4d8c-5cd7-8a5a-5c8ebe81beaa"))
   (label
-    "MCU_USBP_FAULT2"
+    "EXP_GP24"
     (at 977.78 151.27 0)
     (fields_autoplaced)
     (effects
@@ -34651,7 +34651,7 @@
       (justify left bottom))
     (uuid "e170d536-ef71-5c68-a122-de3e6aef8ce3"))
   (label
-    "MCU_LED"
+    "EXP_GP25"
     (at 977.78 153.81 0)
     (fields_autoplaced)
     (effects
@@ -34660,7 +34660,7 @@
       (justify left bottom))
     (uuid "f151dad7-e0e7-5ce0-a543-e58fbcd3895b"))
   (label
-    "MCU_USBP_PG"
+    "EXP_GP26"
     (at 977.78 156.35 0)
     (fields_autoplaced)
     (effects
@@ -34669,7 +34669,7 @@
       (justify left bottom))
     (uuid "c63f7e5d-58d3-5e36-8cce-b40a97da6b64"))
   (label
-    "MCU_BTN_MUTE"
+    "EXP_GP27"
     (at 977.78 158.89 0)
     (fields_autoplaced)
     (effects
@@ -34678,7 +34678,7 @@
       (justify left bottom))
     (uuid "963644b3-e653-55cc-a75f-8ac0f9167287"))
   (label
-    "MCU_VIM3_PWR_EN"
+    "EXP_GP28"
     (at 977.78 161.43 0)
     (fields_autoplaced)
     (effects
@@ -34687,7 +34687,7 @@
       (justify left bottom))
     (uuid "3f5bf3fa-ac25-5ff0-bd42-aba7bcaa938d"))
   (label
-    "MCU_GNSS_SAFEBOOT"
+    "EXP_GP29"
     (at 977.78 163.97 0)
     (fields_autoplaced)
     (effects
@@ -34696,7 +34696,7 @@
       (justify left bottom))
     (uuid "7056b14b-0acc-59b2-9285-cade7bcb6d93"))
   (label
-    "EXP_GP30"
+    "LUX_SDA"
     (at 977.78 166.51 0)
     (fields_autoplaced)
     (effects
@@ -34705,7 +34705,7 @@
       (justify left bottom))
     (uuid "44803f3e-e76d-5084-be01-035d09172861"))
   (label
-    "EXP_GP31"
+    "LUX_SCL"
     (at 977.78 169.05 0)
     (fields_autoplaced)
     (effects
@@ -34741,7 +34741,7 @@
       (justify left bottom))
     (uuid "ee0c4889-7a08-5bc0-8664-0dfe56b314d2"))
   (label
-    "EXP_GP35"
+    "MCU_REV_IN"
     (at 977.78 179.21 0)
     (fields_autoplaced)
     (effects
@@ -34750,7 +34750,7 @@
       (justify left bottom))
     (uuid "1b78a82e-3e21-59b3-9df7-4b6cf0e7b9de"))
   (label
-    "EXP_GP36"
+    "MCU_USBP_PG"
     (at 977.78 181.75 0)
     (fields_autoplaced)
     (effects
@@ -34759,7 +34759,7 @@
       (justify left bottom))
     (uuid "589f14a2-daf4-5c2c-b002-31fb9a2231a9"))
   (label
-    "EXP_GP37"
+    "MCU_ILLUM_IN"
     (at 977.78 184.29 0)
     (fields_autoplaced)
     (effects
@@ -34768,7 +34768,7 @@
       (justify left bottom))
     (uuid "51bef807-b38c-5f0a-a4ea-e4076997f44e"))
   (label
-    "EXP_GP38"
+    "MCU_USBP_FAULT2"
     (at 977.78 186.83 0)
     (fields_autoplaced)
     (effects
@@ -34777,7 +34777,7 @@
       (justify left bottom))
     (uuid "f1ed379f-942c-5862-ae29-42480625bbdd"))
   (label
-    "EXP_GP39"
+    "MCU_USBP_FAULT1"
     (at 977.78 189.37 0)
     (fields_autoplaced)
     (effects
@@ -34813,7 +34813,7 @@
       (justify left bottom))
     (uuid "bdc7143b-f8f9-51f0-8423-6d5ab25f0095"))
   (label
-    "MCU_HUB_RST"
+    "MCU_ACC_IN"
     (at 977.78 199.53 0)
     (fields_autoplaced)
     (effects
@@ -40790,7 +40790,7 @@
           (reference "#PWR245")
           (unit 1)))))
   (label
-    "EXP_GP32"
+    "EXP_GP34"
     (at 1134.92 192.38 180)
     (fields_autoplaced)
     (effects
@@ -40799,7 +40799,7 @@
       (justify right bottom))
     (uuid "4869aef1-e80e-5a14-a26c-4f304717ed57"))
   (label
-    "EXP_GP33"
+    "EXP_GP29"
     (at 1134.92 194.92 180)
     (fields_autoplaced)
     (effects
@@ -40808,7 +40808,7 @@
       (justify right bottom))
     (uuid "30f6cbbf-cf68-59cf-9642-a792a6fe7bed"))
   (label
-    "EXP_GP34"
+    "EXP_GP11"
     (at 1134.92 197.46 180)
     (fields_autoplaced)
     (effects
@@ -40817,7 +40817,7 @@
       (justify right bottom))
     (uuid "9e86c88e-71cb-544b-962e-09c2d2f6445f"))
   (label
-    "EXP_GP35"
+    "EXP_GP12"
     (at 1134.92 200 180)
     (fields_autoplaced)
     (effects
@@ -40826,7 +40826,7 @@
       (justify right bottom))
     (uuid "a6bc601c-5cf4-52e2-becb-5b2292fede32"))
   (label
-    "EXP_GP36"
+    "EXP_GP27"
     (at 1134.92 202.54 180)
     (fields_autoplaced)
     (effects
@@ -40835,7 +40835,7 @@
       (justify right bottom))
     (uuid "a8c14c0b-9f37-5e0a-a3ea-c8e85148e757"))
   (label
-    "EXP_GP37"
+    "EXP_GP26"
     (at 1134.92 205.08 180)
     (fields_autoplaced)
     (effects
@@ -40844,7 +40844,7 @@
       (justify right bottom))
     (uuid "c930e08c-0be9-58ec-be96-d4375043e448"))
   (label
-    "EXP_GP38"
+    "EXP_GP25"
     (at 1134.92 207.62 180)
     (fields_autoplaced)
     (effects
@@ -40853,7 +40853,7 @@
       (justify right bottom))
     (uuid "8af9e56c-b2b2-5e16-8c65-d214444ef38f"))
   (label
-    "EXP_GP39"
+    "EXP_GP24"
     (at 1134.92 210.16 180)
     (fields_autoplaced)
     (effects
@@ -40862,7 +40862,7 @@
       (justify right bottom))
     (uuid "220c1a83-e72d-53c3-9549-d63a7a9c2b27"))
   (text
-    "GPIO0-29 as rev 0.2 except: GPIO40 battery ADC (was GP26), GPIO23/24 USB port faults, GPIO25 LED, GPIO26 USB supply PG,"
+    "rev 0.4: GPIO map re-assigned for routing; see the README pin table. ADC: GPIO40 battery, 41 5V rail, 42 board temperature."
     (at 860 400 0)
     (effects
       (font
@@ -40870,7 +40870,7 @@
       (justify left bottom))
     (uuid "90cae169-9b9e-5311-aef1-5fd60a45a2fe"))
   (text
-    "GPIO29 GNSS safeboot, GPIO30/31 on J10, GPIO32-39 on J21, GPIO41 5V rail ADC, GPIO42 board temperature, GPIO43 hub 1 reset."
+    "GPIO44-47 are unused (ADC-capable spares)."
     (at 860 404 0)
     (effects
       (font

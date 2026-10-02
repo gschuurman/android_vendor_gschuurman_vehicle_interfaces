@@ -110,7 +110,7 @@ FIXED = [('J2', dict(rot=90, left=8.0, top=0.5)), ('J13', dict(rot=180, left=68.
          ('J8', dict(rot=90, left=54.6, bottom=99.5)), ('J12', dict(rot=0, left=65.2, bottom=99.5)), ('J7', dict(rot=0, left=78.8, bottom=99.5))]
 for ref, kw in FIXED: put_bb(ref, **kw)
 # keep a free ring around the RP2350B so its 0.4 mm pins can escape (passives keep RING + M + 0.6 mm away)
-RING = float(os.environ.get('RING', '1.2'))
+RING = float(os.environ.get('RING', '2.0'))
 _u = placed['U20']; placed['U20'] = (_u[0] - RING, _u[1] - RING, _u[2] + RING, _u[3] + RING)
 HOLES = [(4.5, 4.5), (95.5, 4.5), (4.5, 95.5), (95.5, 95.5)] + [tuple(h) for h in MODS['holes']]   # M2.5 standoffs: USB, audio, GNSS module
 for i, (x, y) in enumerate(HOLES):

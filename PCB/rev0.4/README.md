@@ -113,6 +113,63 @@ USB path (kept for the existing HAL design):
 
 Both paths can run at the same time; NEO-M9N outputs the same NMEA on UART and USB.
 
+## RP2350B GPIO map (rev 0.4)
+
+Re-assigned on 2026-10-02 so each signal leaves the QFN on the side facing its destination, which makes routing
+possible. This replaces the rev 0.3 map in DESIGN_rev03.md; the draft firmware's pin table needs the same update.
+Expansion nets are named after their GPIO (EXP_GPn).
+
+| GPIO | Net | Notes |
+|---|---|---|
+| GPIO0 | MCU_BL_EN |  |
+| GPIO1 | MCU_BL_PWM |  |
+| GPIO2 | MCU_HUB_RST |  |
+| GPIO3 | MCU_GNSS_PPS |  |
+| GPIO4 | MCU_GNSS_TX | UART1 TX to GNSS (via JP2 2-3) |
+| GPIO5 | MCU_GNSS_RX | UART1 RX from GNSS |
+| GPIO6 | MCU_SBC_SENSE |  |
+| GPIO7 | MCU_GNSS_RST |  |
+| GPIO8 | MCU_GNSS_SAFEBOOT |  |
+| GPIO9 | MCU_GNSS_EN |  |
+| GPIO10 | MCU_DAC_MUTE |  |
+| GPIO11 | EXP_GP11 | expansion header J10/J21 |
+| GPIO12 | EXP_GP12 | expansion header J10/J21 |
+| GPIO13 | EXP_GP13 | expansion header J10/J21 |
+| GPIO14 | MCU_PARK_IN |  |
+| GPIO15 | MCU_PWR_KEY |  |
+| GPIO16 | MCU_BTN_MUTE |  |
+| GPIO17 | MCU_BTN_VOLUP |  |
+| GPIO18 | MCU_BTN_SCREEN |  |
+| GPIO19 | MCU_SERVICE |  |
+| GPIO20 | MCU_AMP_EN |  |
+| GPIO21 | MCU_LED |  |
+| GPIO22 | MCU_BTN_VOLDN |  |
+| GPIO23 | MCU_VIM3_PWR_EN |  |
+| GPIO24 | EXP_GP24 | expansion header J10/J21 |
+| GPIO25 | EXP_GP25 | expansion header J10/J21 |
+| GPIO26 | EXP_GP26 | expansion header J10/J21 |
+| GPIO27 | EXP_GP27 | expansion header J10/J21 |
+| GPIO28 | EXP_GP28 | expansion header J10/J21 |
+| GPIO29 | EXP_GP29 | expansion header J10/J21 |
+| GPIO30 | LUX_SDA | I2C1 SDA (light sensor, TPS55288, audio module) |
+| GPIO31 | LUX_SCL | I2C1 SCL |
+| GPIO32 | EXP_GP32 | J10 pin 2 (K-line UART TX) |
+| GPIO33 | EXP_GP33 | J10 pin 3 (K-line UART RX) |
+| GPIO34 | EXP_GP34 | expansion header J10/J21 |
+| GPIO35 | MCU_REV_IN |  |
+| GPIO36 | MCU_USBP_PG |  |
+| GPIO37 | MCU_ILLUM_IN |  |
+| GPIO38 | MCU_USBP_FAULT2 |  |
+| GPIO39 | MCU_USBP_FAULT1 |  |
+| GPIO40 | MCU_VBAT_ADC | ADC0 battery voltage |
+| GPIO41 | MCU_5VSYS_ADC | ADC1 5V rail |
+| GPIO42 | MCU_TEMP_ADC | ADC2 board temperature |
+| GPIO43 | MCU_ACC_IN |  |
+| GPIO44 | unused |  |
+| GPIO45 | unused |  |
+| GPIO46 | unused |  |
+| GPIO47 | unused |  |
+
 ## Flashing the RP2350B
 
 - Over USB: hold SW1 (BOOTSEL), tap SW2 (RESET); the chip shows up as a USB drive `RP2350` on whatever hosts hub 1.
