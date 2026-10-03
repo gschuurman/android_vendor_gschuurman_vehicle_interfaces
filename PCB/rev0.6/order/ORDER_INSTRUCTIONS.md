@@ -47,7 +47,7 @@ pins, pad gaps opened to 0.15 mm, overlapping vias merged, silkscreen clipped at
 | Pad spacing (orange) | 0.13-0.15 mm | different-net vias/pads at the 0.13 mm design clearance, inside JLC's 0.09 mm limit |
 | THT to SMD (red) | ~300 | an assembly rule (2 mm); it measures the ring of small vias around the M2.5/M3 mounting holes. Irrelevant for hand soldering |
 | Via to pad | a few | thermal vias inside exposed pads (RP2350B, TPS55288, MOSFETs) are intentional; 9 vias stay at dense U12/U13 pins |
-| Annular ring (orange) | all vias | 0.45 mm pad on 0.2 mm hole = 0.25 mm larger than the hole; JLC needs ≥ 0.1 mm |
+| Annular ring (orange) | all vias | 0.3 mm hole in a 0.45 mm pad: exactly JLC's standard 0.3/0.45 mm via option |
 | Unconnected trace end (orange) | ~6 | overlapping same-net copper that KiCad counts as dangling; electrically connected |
 | Solder mask / silkscreen items | warnings | silkscreen is clipped at pad openings; leftover text over tented vias is cosmetic |
 
@@ -57,9 +57,9 @@ Upload each `*_gerbers.zip` as its own item. Leave **PCB Assembly off**.
 
 Main board:
 - FR-4, **4 layers, 1.6 mm**, **impedance control: yes, stack-up JLC04161H-7628**, outer 1 oz, inner 0.5 oz
-- Min via hole/diameter: an option that allows **0.2 mm holes / 0.45 mm pads**
+- Min via hole size/diameter: the standard **0.3mm/(0.4/0.45mm)** (vias are 0.3 mm holes in 0.45 mm pads; no surcharge)
+- Specify Stackup: **Yes**, JLC04161H-7628 · Via covering: Plugged (default) · Mark: Remove Mark
 - Surface finish **HASL (with lead)** (Glenn's choice, 2026-10-03; see the HASL notes below)
-- Via covering: tented
 
 Modules: 2 layers, 1.6 mm, 1 oz, standard options, surface finish **HASL (with lead)**.
 

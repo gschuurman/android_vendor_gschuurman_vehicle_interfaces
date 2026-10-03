@@ -161,7 +161,7 @@
         "min_text_thickness": 0.08,
         "min_through_hole_diameter": 0.2,
         "min_track_width": 0.15,
-        "min_via_annular_width": 0.1,
+        "min_via_annular_width": 0.075,
         "min_via_diameter": 0.45,
         "solder_mask_clearance": 0.0,
         "solder_mask_min_width": 0.0,
@@ -522,7 +522,7 @@
         "track_width": 0.2,
         "tuning_profile": "",
         "via_diameter": 0.45,
-        "via_drill": 0.2,
+        "via_drill": 0.3,
         "wire_width": 6
       },
       {
@@ -541,7 +541,7 @@
         "track_width": 0.2187,
         "tuning_profile": "",
         "via_diameter": 0.45,
-        "via_drill": 0.2,
+        "via_drill": 0.3,
         "wire_width": 6
       },
       {
@@ -579,7 +579,7 @@
         "track_width": 0.3,
         "tuning_profile": "",
         "via_diameter": 0.45,
-        "via_drill": 0.2,
+        "via_drill": 0.3,
         "wire_width": 6
       },
       {
@@ -598,7 +598,7 @@
         "track_width": 0.32,
         "tuning_profile": "",
         "via_diameter": 0.45,
-        "via_drill": 0.2,
+        "via_drill": 0.3,
         "wire_width": 6
       }
     ],

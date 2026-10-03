@@ -22,7 +22,7 @@ Each folder holds:
 Main board:
 - Layers 4, 1.6 mm, **impedance control: yes, stack-up JLC04161H-7628** (the USB_UP pair at 0.32/0.30 mm and the HDMI
   pairs at 0.2187/0.20 mm assume it). Outer copper 1 oz, inner 0.5 oz.
-- Vias are 0.45 mm pad / 0.2 mm hole. Pick the via option that allows a 0.2 mm hole (multilayer boards support it).
+- Vias are 0.3 mm holes in 0.45 mm pads: JLC's standard 0.3mm/(0.4/0.45mm) option.
   Minimum track 0.15 mm, minimum clearance 0.1 mm.
 - Surface finish: HASL with lead (chosen; ENIG would be flatter for the 0.4 mm QFN, VQFN and 0.5 mm FPC).
 - Via covering: tented.
