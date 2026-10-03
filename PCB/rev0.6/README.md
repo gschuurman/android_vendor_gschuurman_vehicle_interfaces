@@ -1,11 +1,18 @@
 # PCB rev 0.6: main board with a K-line module socket
 
-Rev 0.6 is rev 0.5 (`../rev0.5/`, kept as the reference) plus a socket for a stackable K-line module. Only the main
-board changes; the GNSS, audio and USB modules are the rev 0.4 boards (`../rev0.4/gnss|audio|usb`). Everything in
+Rev 0.6 is rev 0.5 (`../rev0.5/`, kept as the reference) plus a socket for a stackable K-line module. The GNSS and
+audio modules are the rev 0.4 boards (`../rev0.4/gnss|audio`); the USB module is `usb/` (rev 0.4 with the fix below). Everything in
 `../rev0.5/README.md` (USB_UP pair, TPS560430 layout, expansion pins) and `../rev0.4/README.md` still applies except
 J10, described here.
 
-Order files for all four boards are in `fab/` (see `fab/README.md`).
+Everything to order and hand-assemble the four boards is in `order/` (see `order/ORDER_INSTRUCTIONS.md`); `fab/` holds
+the same Gerbers plus JLC assembly BOM/CPL files in case of a PCBA order.
+
+## USB module rev 0.6
+
+`usb/carradio_usb_rev06.*` is the rev 0.4 USB module with solid zone connections on the GND pads of the 5 V / 3 A buck
+U15 (LMR33630, pin 1 and the PowerPAD), the port switch U16 (TPS2561, pin 1 and the exposed pad) and C69. KiCad 10 had
+flagged them as starved thermals. DRC: 0 unconnected, no errors.
 
 ## J10: K-line module socket
 
@@ -41,7 +48,5 @@ is untouched. J21 (SPI1 + I2C under the USB module) is unchanged from rev 0.5.
 ## Status
 
 - Main board: DRC 0 unconnected, no errors (warnings: silkscreen, unused fan-out stubs); schematic parity same as rev 0.5.
-- Module boards (rev 0.4): 0 unconnected. KiCad 10's DRC reports "starved thermal" errors there (fewer thermal spokes
-  than the minimum on some GND pads): audio J24 pin 3; USB module U15 pin 9, U16 pins 1/11 and C69 pin 2. The pads
-  are connected, but U16 is the module's 5 V / 3 A buck, so its GND pins should get solid zone connections before
-  ordering. They are not changed here.
+- USB module rev 0.6: DRC 0 unconnected, no errors. GNSS module: clean. Audio module: one starved-thermal warning on
+  the through-hole header J24 pin 3 (fine for hand soldering).

@@ -1,4 +1,6 @@
-# JLCPCB order files (rev 0.6 set)
+# JLCPCB assembly-order files (rev 0.6 set)
+
+For hand assembly use `../order/` instead; this folder adds the JLC PCBA BOM/CPL files.
 
 One folder per board, made by `../layout/jlcfab.py` from the KiCad files:
 
@@ -7,7 +9,7 @@ One folder per board, made by `../layout/jlcfab.py` from the KiCad files:
 | `main/` | main board rev 0.6, 100 x 100 mm, 4 layers | `../main/carradio_peripheral_rev06.kicad_pcb` |
 | `gnss/` | GNSS module, 26.5 x 31.5 mm, 2 layers | `../../rev0.4/gnss/` |
 | `audio/` | audio module, 36.5 x 41 mm, 2 layers | `../../rev0.4/audio/` |
-| `usb/` | USB module, 36 x 55 mm, 2 layers | `../../rev0.4/usb/` |
+| `usb/` | USB module rev 0.6, 36 x 55 mm, 2 layers | `../usb/` |
 
 Each folder holds:
 - `*_gerbers.zip`: upload as the PCB. It contains the Gerbers (Protel extensions, no X2/netlist attributes) and Excellon
@@ -46,7 +48,5 @@ impedance calculator for 50 Ω on the 2-layer 1.6 mm stack before ordering (see 
 
 ## Before you order
 
-- Main board DRC: 0 unconnected, no errors. Module boards: 0 unconnected, but KiCad 10 flags "starved thermal" on a few
-  GND pads (audio J24 pin 3; USB U15 pin 9, U16 pins 1/11, C69 pin 2). U16 is the module's 5 V / 3 A buck; solid zone
-  connections on its GND pins are advisable (see `../README.md`).
+- All boards DRC 0 unconnected; the USB module's buck/switch GND pads are solid since rev 0.6.
 - USB_UP pair: confirm 0.30 mm / 0.15 mm gives about 90 Ω in JLC's calculator for JLC04161H-7628.

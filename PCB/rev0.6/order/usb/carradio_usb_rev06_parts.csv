@@ -1,0 +1,30 @@
+Designator,Value,Description / MPN,LCSC,Footprint (KiCad name),Fit,Note
+F5,PTC 0.5A,Bourns MF-NSMF050-2,C75464,Fuse:Fuse_1206_3216Metric,yes,
+J17,RTL-SDR (internal),Molex 67643-0910 USB-A,C2798029,Connector_USB:USB_A_Molex_67643_Horizontal,yes,RTL-SDR dongle for FM/DAB+ plugs in here with its existing USB-A to USB-C cable
+U15,LMR33630ADDA,"TI LMR33630ADDAR 36V 3A buck, 400 kHz",C841384,Package_SO:TI_SO-PowerPAD-8_ThermalVias,yes,pinout and values from the TI LMR33630 datasheet (5V/3A example). On whenever the VIM3 supply is enabled (GP28)
+C64,10uF 50V,1206 10uF 50V X5R (Murata GRM31CR61H106KA12L),C77092,Capacitor_SMD:C_1206_3216Metric,yes,
+C65,100nF,0603 100nF 50V X7R,C14663,Capacitor_SMD:C_0603_1608Metric,yes,
+C66,1uF,0603 1uF 50V X5R (Murata GRM188R61H105KAALD),C77386,Capacitor_SMD:C_0603_1608Metric,yes,
+C67,100nF,0603 100nF 50V X7R,C14663,Capacitor_SMD:C_0603_1608Metric,yes,
+L4,8.2uH 5A,"Coilcraft XAL6060-822MEC 8.2uH Isat 8.4A 24 mOhm (expensive; any 8.2-10uH shielded, Isat >= 5A works)",C19191627,Inductor_SMD:L_Coilcraft_XAL6060-XXX,yes,
+R75,100k,0603 100k 1%,C25803,Resistor_SMD:R_0603_1608Metric,yes,
+R76,24k,0603 24k 1%,C23352,Resistor_SMD:R_0603_1608Metric,yes,Vout = 1.0V x (1 + 100k/24k) = 5.17V
+C68,22uF,0805 22uF 25V X5R,C45783,Capacitor_SMD:C_0805_2012Metric,yes,
+C69,22uF,0805 22uF 25V X5R,C45783,Capacitor_SMD:C_0805_2012Metric,yes,
+C70,22uF,0805 22uF 25V X5R,C45783,Capacitor_SMD:C_0805_2012Metric,yes,
+C71,22uF,0805 22uF 25V X5R,C45783,Capacitor_SMD:C_0805_2012Metric,yes,
+U16,TPS2561DRCR,TI TPS2561DRCR dual 2.8A USB power switch,C140303,Package_SON:VSON-10-1EP_3x3mm_P0.5mm_EP1.65x2.4mm,yes,current limit 56000/RILIM(k) mA: 39k = 1.44 A per port
+C72,100nF,0603 100nF 50V X7R,C14663,Capacitor_SMD:C_0603_1608Metric,yes,
+R77,39k,0603 39k 1%,C23153,Resistor_SMD:R_0603_1608Metric,yes,
+C73,100uF 6.3V,1206 100uF 6.3V X5R,C15008,Capacitor_SMD:C_1206_3216Metric,yes,
+C74,100uF 6.3V,1206 100uF 6.3V X5R,C15008,Capacitor_SMD:C_1206_3216Metric,yes,
+U14,CH334R,"WCH CH334R 4-port USB 2.0 hub, QSOP-16",C4154405,Package_SO:QSOP-16_3.9x4.9mm_P0.635mm,yes,cascaded on hub 1 port 4. RESET#/CDP tied high = BC1.2 CDP for faster phone charging (WCH: depends on batch)
+Y2,12MHz,YXC X322512MSB4SI 12MHz,C9002,Crystal:Crystal_SMD_3225-4Pin_3.2x2.5mm,yes,
+C75,1uF,0603 1uF 50V X5R (Murata GRM188R61H105KAALD),C77386,Capacitor_SMD:C_0603_1608Metric,yes,
+C76,10uF,0805 10uF 25V X5R,C15850,Capacitor_SMD:C_0805_2012Metric,yes,
+C77,100nF,0603 100nF 50V X7R,C14663,Capacitor_SMD:C_0603_1608Metric,yes,
+J19,External USB 1,Molex 67643-0910 USB-A,C2798029,Connector_USB:USB_A_Molex_67643_Horizontal,yes,
+J20,External USB 2,Molex 67643-0910 USB-A,C2798029,Connector_USB:USB_A_Molex_67643_Horizontal,yes,
+U17,USBLC6-2SC6,ST USBLC6-2SC6,C7519,Package_TO_SOT_SMD:SOT-23-6,yes,"review: ESD for the user-facing USB ports; place right at the connector, pairs route straight through pins 1-6 and 3-4"
+U18,USBLC6-2SC6,ST USBLC6-2SC6,C7519,Package_TO_SOT_SMD:SOT-23-6,yes,"review: ESD for the user-facing USB ports; place right at the connector, pairs route straight through pins 1-6 and 3-4"
+J26,Main board plug,ZHOURI 2.54-2*10 male pin header,C5116480,Connector_PinHeader_2.54mm:PinHeader_2x10_P2.54mm_Vertical,yes,mates with J25 on the main board
