@@ -19,7 +19,8 @@ Each board folder has:
 | `*_schematic.pdf` | schematic |
 | `*_cpl.csv` + `*_jlc_bom.csv` | pick-and-place and BOM in JLC's format: for JLC's SMT DFM check (or a PCBA order) |
 
-`lcsc_cart_one_set.csv` lists every part for one complete set (all four boards) by LCSC number.
+`lcsc_cart_one_set_upload.csv` is the LCSC upload file for one complete set (all four boards); `lcsc_cart_one_set.csv`
+is the readable version of the same list.
 
 ## 1. Impedances (done)
 
@@ -80,7 +81,9 @@ SOT-23s can go on in the same reflow or by iron.
 
 ## 3. Order the parts (LCSC)
 
-1. lcsc.com > BOM Tool > upload `lcsc_cart_one_set.csv`; map **LCSC Part Number** and **Quantity**.
+1. lcsc.com > BOM Tool > upload **`lcsc_cart_one_set_upload.csv`** (only LCSC part numbers and quantities, so the tool
+   matches by part number instead of searching value/footprint text). Map **LCSC Part Number** -> LCSC Part # and
+   **Quantity** -> Quantity. `lcsc_cart_one_set.csv` is the same list with values, descriptions and where each part goes.
    Quantities are for one set plus 3 spares of each 0402/0603/0805 resistor and capacitor; LCSC rounds up to its
    minimum order quantities. It also includes the 7.5 A blade fuse for holder F4 (C178942) and the jumper cap for JP1
    (C5305), which the BOM only names in notes.
