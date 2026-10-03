@@ -20,49 +20,19 @@ Each board folder has:
 
 `lcsc_cart_one_set.csv` lists every part for one complete set (all four boards) by LCSC number.
 
-## 1. Check impedances first (JLCPCB impedance calculator)
+## 1. Impedances (done)
 
-Open jlcpcb.com > Tools > Impedance Calculator and do these three checks. Each one gives a trace width; compare it
-with the width on the board and send me the numbers if they differ.
+Checked with JLCPCB's impedance calculator (4 layers, 1.6 mm, 1 oz / 0.5 oz, JLC04161H-7628, L1 over L2) and applied:
 
-**A. Main board, USB_UP pair (USB 2.0 HS, 90 Ω)**
+| Pairs | Target | Calculator | On the board |
+|---|---|---|---|
+| USB_UP (VIM3 to hub 1) | 90 Ω differential | 0.334 mm / 0.300 mm gap | 0.32 mm / 0.30 mm (0.32 fits between U13 and J23; about 1 Ω higher) |
+| HDMI D0-D2, CLK | 100 Ω differential | 0.2187 mm / 0.1999 mm gap | 0.2187 mm / 0.20 mm (re-routed as coupled pairs) |
 
-| Field | Value |
-|---|---|
-| Layers | 4 |
-| PCB thickness | 1.6 mm |
-| Outer / inner copper | 1 oz / 0.5 oz |
-| Layer stack-up | JLC04161H-7628 |
-| Impedance type | Differential pair (non-coplanar) |
-| Target impedance | 90 Ω |
-| Signal layer / reference | L1 (top) / L2 |
-| Trace spacing | 0.15 mm |
+Order the main board **with impedance control on and stack-up JLC04161H-7628**, otherwise these numbers do not hold.
 
-Board has **0.30 mm** traces. Within about ±0.03 mm of the calculator's width is fine.
-
-**B. Main board, HDMI pairs (100 Ω)**: same as A, but target **100 Ω**.
-
-- First with spacing **0.15 mm**: note the width it gives (call it W100).
-- The board's HDMI pairs are **0.20 mm wide with a 0.80 mm gap** (loosely coupled, about 27 mm long). My estimate puts
-  that near 140 Ω differential, well above 100 Ω. If the calculator agrees that 0.20 mm only reaches 100 Ω with a much
-  smaller gap, the HDMI pairs should be re-routed as tight 100 Ω pairs (W100 / 0.15 mm) before ordering. Send me W100
-  and I'll do it. A 27 mm run often still works at 1080p, but it is out of spec and the first thing to suspect if the
-  screen shows sparkles or drops out.
-
-**C. GNSS module, RF trace (50 Ω)**
-
-| Field | Value |
-|---|---|
-| Layers | 2 |
-| PCB thickness | 1.6 mm |
-| Outer copper | 1 oz |
-| Impedance type | Coplanar single-ended (with ground), i.e. grounded coplanar waveguide |
-| Target impedance | 50 Ω |
-| Signal layer / reference | top / bottom |
-| Spacing to coplanar ground | 0.30 mm |
-
-Board has a **1.0 mm** trace with 0.30 mm gaps to the top-side ground pour over solid bottom ground (my estimate is
-50-55 Ω). The RF run is short (about 5.7 mm), so a few ohms either way do not matter.
+The GNSS module's RF line (1.0 mm trace, 0.30 mm gaps to top ground, solid bottom ground, about 5.7 mm long) was not
+re-checked; it is short enough that a few ohms either way do not matter.
 
 ## 2. Order the PCBs (JLCPCB)
 

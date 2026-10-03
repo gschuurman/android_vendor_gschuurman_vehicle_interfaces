@@ -20,8 +20,8 @@ Each folder holds:
 ## PCB options
 
 Main board:
-- Layers 4, 1.6 mm, **impedance control: yes, stack-up JLC04161H-7628** (the USB_UP pair at 0.30/0.15 mm and the HDMI
-  pairs assume it). Outer copper 1 oz, inner 0.5 oz.
+- Layers 4, 1.6 mm, **impedance control: yes, stack-up JLC04161H-7628** (the USB_UP pair at 0.32/0.30 mm and the HDMI
+  pairs at 0.2187/0.20 mm assume it). Outer copper 1 oz, inner 0.5 oz.
 - Vias are 0.45 mm pad / 0.2 mm hole. Pick the via option that allows a 0.2 mm hole (multilayer boards support it).
   Minimum track 0.15 mm, minimum clearance 0.1 mm.
 - Surface finish: ENIG recommended (0.4 mm QFN RP2350B, 0.5 mm FPC J14, TPS55288 VQFN). Leaded HASL works but is less flat.
@@ -49,4 +49,4 @@ impedance calculator for 50 Ω on the 2-layer 1.6 mm stack before ordering (see 
 ## Before you order
 
 - All boards DRC 0 unconnected; the USB module's buck/switch GND pads are solid since rev 0.6.
-- USB_UP pair: confirm 0.30 mm / 0.15 mm gives about 90 Ω in JLC's calculator for JLC04161H-7628.
+- Impedance-controlled pairs follow JLC's calculator for JLC04161H-7628: USB_UP 0.32/0.30 mm (90 Ω), HDMI 0.2187/0.20 mm (100 Ω).

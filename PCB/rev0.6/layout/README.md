@@ -35,3 +35,5 @@ KiCad 7 library.
 3. `bridgeall.sh` (`ONLY=/VBAT_P,/VBAT_KLINE HW=0.2`), `riploop.sh`, `addvia.py` (a layer change the old THT pad used to
    make), `fixclear.py` + `bridgeall.sh CL=0.21` (grid-rounding clearance misses), `solidgnd.py`, `clean.py`, `widen.py`.
 4. `jlcfab.py` writes the JLCPCB order files (`../fab/`).
+5. Impedance: `hdmipairs.py` (HDMI as coupled 0.2187/0.20 pairs), `pairroute.py` with `W=0.32 G=0.30` (USB_UP, same
+   PRE/POST/SWAPSTART as rev 0.5), `pairkeep.py` with `BUF=0.5 EXCLUDE_FP=U13 EXCLUDE_XY=...`, `riploop.sh`, `addvia.py`.

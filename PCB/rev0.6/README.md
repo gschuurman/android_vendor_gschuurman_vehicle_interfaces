@@ -14,6 +14,21 @@ the same Gerbers plus JLC assembly BOM/CPL files in case of a PCBA order.
 U15 (LMR33630, pin 1 and the PowerPAD), the port switch U16 (TPS2561, pin 1 and the exposed pad) and C69. KiCad 10 had
 flagged them as starved thermals. DRC: 0 unconnected, no errors.
 
+## Impedance-controlled pairs (JLCPCB calculator)
+
+JLCPCB's impedance calculator for JLC04161H-7628 (L1 over L2) gives 0.334 / 0.300 mm for 90 Ω and 0.2187 / 0.20 mm
+for 100 Ω edge-coupled pairs. Rev 0.6 uses them:
+
+- **USB_UP** (VIM3 to hub 1): re-routed at **0.32 mm / 0.30 mm gap** (rev 0.5: 0.30 / 0.15; the tight gap put it
+  below 90 Ω). 0.32 instead of 0.334 so the pair fits the gap between U13's pins and the J23 socket; that is about 1 Ω
+  higher. DP 51.3 mm, DM 53.2 mm. The In1 keep-out under it is 0.5 mm each side, opened at U13's pin escapes and for
+  two vias beside the pair (`pairkeep.py` BUF / EXCLUDE_FP / EXCLUDE_XY).
+- **HDMI** D0, D1, D2, CLK (J13 to J14): rebuilt by `hdmipairs.py` as coupled **0.2187 mm / 0.20 mm** pairs. Before
+  they were 0.20 mm traces 0.80 mm apart (about 140 Ω, each trace closer to the neighbouring pair than to its partner).
+  Each pair now runs centred over its GND pin with a short 45° jog at both connectors; P/N lengths match within 0.69 mm
+  (about 5 ps).
+- Net classes in the project: USB 0.32 / 0.30, HDMI 0.2187 / 0.20.
+
 ## J10: K-line module socket
 
 In rev 0.5, J10 was a 1x8 male header under the USB module with no battery voltage. Now it is a **2x4 female socket,
