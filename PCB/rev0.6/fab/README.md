@@ -42,8 +42,8 @@ impedance calculator for 50 Ω on the 2-layer 1.6 mm stack before ordering (see 
   - gnss: J28 (2x8 male header, bottom side).
   - GNSS R102/R103 had no LCSC number in the rev 0.4 BOM; the order BOM uses C25190 (27 Ω 0603, the part used for R83/R84
     on the main board).
-- The RP2350B (C42415655) had unclear LCSC stock; the BOM note on U20 names the RP2354B (C39843328, internal flash, then
-  leave U21 unfitted) as the alternative.
+- U20 is the RP2354B (C39843328, 2 MB flash in the package): LCSC does not sell the RP2350B (C42415655) outside China.
+  U21 (external flash) is marked not fitted and left out of the JLC BOM/CPL; fit it only with an RP2350B.
 - JP2 is a solder jumper (PCB copper), not a part; it ships bridged 1-2.
 
 ## Before you order

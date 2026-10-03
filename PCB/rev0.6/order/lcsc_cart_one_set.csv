@@ -12,7 +12,7 @@ C1589,4,1,10nF,0603 10nF 50V X7R (Samsung CL10B103KB8NNNC),C_0603_1608Metric,car
 C23630,7,4,2.2uF,0603 2.2uF 16V X5R,C_0603_1608Metric,carradio_audio_rev04:C22 carradio_audio_rev04:C23 carradio_audio_rev04:C32 carradio_audio_rev04:C33
 C45783,12,9,22uF,0805 22uF 25V X5R,C_0805_2012Metric,carradio_peripheral_rev06:C4 carradio_peripheral_rev06:C56 carradio_peripheral_rev06:C57 carradio_peripheral_rev06:C58 carradio_peripheral_rev06:C59 carradio_usb_rev06:C68 carradio_usb_rev06:C69 carradio_usb_rev06:C70 carradio_usb_rev06:C71
 C15850,12,9,10uF,0805 10uF 25V X5R,C_0805_2012Metric,carradio_peripheral_rev06:C46 carradio_peripheral_rev06:C62 carradio_peripheral_rev06:C81 carradio_gnss_rev04:C14 carradio_audio_rev04:C28 carradio_audio_rev04:C29 carradio_audio_rev04:C38 carradio_audio_rev04:C39 carradio_usb_rev06:C76
-C28260,7,4,2.2nF C0G,0805 2.2nF 50V C0G,C_0805_2012Metric,carradio_audio_rev04:C30 carradio_audio_rev04:C31 carradio_audio_rev04:C40 carradio_audio_rev04:C41
+C77060,7,4,2.2nF C0G,0805 2.2nF 50V C0G,C_0805_2012Metric,carradio_audio_rev04:C30 carradio_audio_rev04:C31 carradio_audio_rev04:C40 carradio_audio_rev04:C41
 C77092,4,4,10uF 50V,1206 10uF 50V X5R (Murata GRM31CR61H106KA12L),C_1206_3216Metric,carradio_peripheral_rev06:C1 carradio_peripheral_rev06:C49 carradio_peripheral_rev06:C50 carradio_usb_rev06:C64
 C15008,2,2,100uF 6.3V,1206 100uF 6.3V X5R,C_1206_3216Metric,carradio_usb_rev06:C73 carradio_usb_rev06:C74
 C9002,2,2,12MHz,YXC X322512MSB4SI 12MHz,Crystal_SMD_3225-4Pin_3.2x2.5mm,carradio_peripheral_rev06:Y1 carradio_usb_rev06:Y2
@@ -37,22 +37,25 @@ C12669,1,1,27nH RF,Murata LQG15HS27NJ02D,L_0402_1005Metric,carradio_gnss_rev04:L
 C780205,1,1,4.7uH 12A+,"Bourns SRP1265A-4R7M 4.7uH Isat 28A 8.4 mOhm, 13.5x12.5mm (SRP1245A land pattern)",L_Bourns_SRP1245A,carradio_peripheral_rev06:L3
 C19191627,1,1,8.2uH 5A,"Coilcraft XAL6060-822MEC 8.2uH Isat 8.4A 24 mOhm (expensive; any 8.2-10uH shielded, Isat >= 5A works)",L_Coilcraft_XAL6060-XXX,carradio_usb_rev06:L4
 C42411119,1,1,3.3uH,Abracon AOTA-B201610S3R3-101-T 3.3uH (Raspberry Pi reference part),L_Murata_DFE201610P,carradio_peripheral_rev06:L5
-C96895,1,1,18uH,SWPA4030S180MT 18uH,L_Sunlord_SWPA4030S,carradio_peripheral_rev06:L1
+C167882,1,1,18uH,"cjiang FNR4030S180MT 18uH 4x4mm shielded, Isat 1.5A, Irms 1.2A, 260 mOhm (SWPA4030S180MT C96895 discontinued at LCSC)",L_Sunlord_SWPA4030S,carradio_peripheral_rev06:L1
 C206907,1,1,7.5A fuse,Littelfuse 01530008Z mini blade holder + fuse C178942 Littelfuse 029707.5WXNV 7.5A,Littelfuse_01530008Z,carradio_peripheral_rev06:F4
 C234188,1,1,ISO 10487 C1 (via pigtail),Molex 43045-0612,Molex_Micro-Fit_3.0_43045-0612_2x03_P3.00mm_Vertical,carradio_peripheral_rev06:J8
 C277661,1,1,ISO 10487 A (via pigtail),Molex 43045-0812,Molex_Micro-Fit_3.0_43045-0812_2x04_P3.00mm_Vertical,carradio_peripheral_rev06:J1
 C124375,1,1,SERVICE jumper,1x2 male header 2.54mm + jumper cap C5305,PinHeader_1x02_P2.54mm_Vertical,carradio_peripheral_rev06:JP1
 C124378,1,1,SWD,1x4 male header 2.54mm,PinHeader_1x04_P2.54mm_Vertical,carradio_peripheral_rev06:J22
 C57369,1,1,Expansion 2,BOOMELE 1x10 male header 2.54mm,PinHeader_1x10_P2.54mm_Vertical,carradio_peripheral_rev06:J21
+C19630936,1,1,Main board plug,2x8 2.54mm male pin header,PinHeader_2x08_P2.54mm_Vertical,carradio_gnss_rev04:J28
 C5116480,2,2,Main board plug,ZHOURI 2.54-2*10 male pin header,PinHeader_2x10_P2.54mm_Vertical,carradio_audio_rev04:J24 carradio_usb_rev06:J26
-C30867,2,2,USB module socket,BOOMELE 2.54-2*10P female 8.5mm (LCSC out of stock 2026-10-01; any 2x10 2.54mm 8.5mm socket fits),PinSocket_2x10_P2.54mm_Vertical,carradio_peripheral_rev06:J23 carradio_peripheral_rev06:J25
-C42415655,1,1,RP2350B,"Raspberry Pi RP2350B QFN-80 (LCSC stock unclear; alt RP2354B C39843328 with 2MB internal flash, then leave U21 unfitted)",QFN-80-1EP_10x10mm_P0.4mm_EP3.4x3.4mm,carradio_peripheral_rev06:U20
+C239344,1,1,K-line module socket,"CJT A2541HWV-2x4P 2x4 2.54mm female socket, 8.5mm body",PinSocket_2x04_P2.54mm_Vertical,carradio_peripheral_rev06:J10
+C22440830,1,1,GNSS module socket,"kinghelm KH-2.54FH-2X8P-H8.5 2x8 2.54mm female socket, 8.5mm body",PinSocket_2x08_P2.54mm_Vertical,carradio_peripheral_rev06:J27
+C5821035,2,2,USB module socket,"CJT A2541HWV-2x10P 2x10 2.54mm female socket, 8.5mm body",PinSocket_2x10_P2.54mm_Vertical,carradio_peripheral_rev06:J23 carradio_peripheral_rev06:J25
+C39843328,1,1,RP2354B,Raspberry Pi RP2354B QFN-80 (RP2350B with 2 MB flash in the package; the RP2350B C42415655 is not sold outside China by LCSC). U21 stays unfitted.,QFN-80-1EP_10x10mm_P0.4mm_EP3.4x3.4mm,carradio_peripheral_rev06:U20
 C4154405,2,2,CH334R,"WCH CH334R 4-port USB 2.0 hub, QSOP-16",QSOP-16_3.9x4.9mm_P0.635mm,carradio_peripheral_rev06:U13 carradio_usb_rev06:U14
 C17168,5,2,0Ω,UNI-ROYAL 0402WGF0000TCE 0402 0R,R_0402_1005Metric,carradio_peripheral_rev06:R97 carradio_peripheral_rev06:R98
 C25803,11,8,100k,0603 100k 1%,R_0603_1608Metric,carradio_peripheral_rev06:R1 carradio_peripheral_rev06:R15 carradio_peripheral_rev06:R35 carradio_peripheral_rev06:R19 carradio_peripheral_rev06:R70 carradio_peripheral_rev06:R72 carradio_peripheral_rev06:R96 carradio_usb_rev06:R75
 C23352,5,2,24k,0603 24k 1%,R_0603_1608Metric,carradio_peripheral_rev06:R2 carradio_usb_rev06:R76
 C23162,14,11,4.7k,0603 4.7k 1%,R_0603_1608Metric,carradio_peripheral_rev06:R4 carradio_peripheral_rev06:R6 carradio_peripheral_rev06:R30 carradio_peripheral_rev06:R32 carradio_peripheral_rev06:R18 carradio_peripheral_rev06:R8 carradio_peripheral_rev06:R9 carradio_peripheral_rev06:R33 carradio_peripheral_rev06:R34 carradio_peripheral_rev06:R94 carradio_peripheral_rev06:R95
-C25804,19,16,10k,0603 10k 1%,R_0603_1608Metric,carradio_peripheral_rev06:R13 carradio_peripheral_rev06:R14 carradio_peripheral_rev06:R58 carradio_peripheral_rev06:R60 carradio_peripheral_rev06:R62 carradio_peripheral_rev06:R64 carradio_peripheral_rev06:R47 carradio_peripheral_rev06:R66 carradio_peripheral_rev06:R85 carradio_peripheral_rev06:R87 carradio_peripheral_rev06:R88 carradio_peripheral_rev06:R89 carradio_peripheral_rev06:R104 carradio_peripheral_rev06:R91 carradio_peripheral_rev06:R92 carradio_peripheral_rev06:R93
+C98220,19,16,10k,YAGEO RC0603FR-0710KL 0603 10k 1%,R_0603_1608Metric,carradio_peripheral_rev06:R13 carradio_peripheral_rev06:R14 carradio_peripheral_rev06:R58 carradio_peripheral_rev06:R60 carradio_peripheral_rev06:R62 carradio_peripheral_rev06:R64 carradio_peripheral_rev06:R47 carradio_peripheral_rev06:R66 carradio_peripheral_rev06:R85 carradio_peripheral_rev06:R87 carradio_peripheral_rev06:R88 carradio_peripheral_rev06:R89 carradio_peripheral_rev06:R104 carradio_peripheral_rev06:R91 carradio_peripheral_rev06:R92 carradio_peripheral_rev06:R93
 C22775,7,4,100Ω,0603 100 1%,R_0603_1608Metric,carradio_peripheral_rev06:R16 carradio_peripheral_rev06:R12 carradio_peripheral_rev06:R23 carradio_peripheral_rev06:R24
 C21190,21,18,1k,0603 1k 1%,R_0603_1608Metric,carradio_peripheral_rev06:R7 carradio_peripheral_rev06:R37 carradio_peripheral_rev06:R38 carradio_peripheral_rev06:R39 carradio_peripheral_rev06:R40 carradio_peripheral_rev06:R100 carradio_peripheral_rev06:R101 carradio_peripheral_rev06:R59 carradio_peripheral_rev06:R61 carradio_peripheral_rev06:R63 carradio_peripheral_rev06:R65 carradio_peripheral_rev06:R46 carradio_peripheral_rev06:R73 carradio_peripheral_rev06:R81 carradio_peripheral_rev06:R82 carradio_peripheral_rev06:R86 carradio_peripheral_rev06:R90 carradio_peripheral_rev06:R79
 C22935,4,1,1M,0603 1M 1%,R_0603_1608Metric,carradio_peripheral_rev06:R10
@@ -70,8 +73,7 @@ C23153,4,1,39k,0603 39k 1%,R_0603_1608Metric,carradio_usb_rev06:R77
 C17673,7,4,4.7kΩ 0805,0805 4.7k 1%,R_0805_2012Metric,carradio_peripheral_rev06:R3 carradio_peripheral_rev06:R5 carradio_peripheral_rev06:R29 carradio_peripheral_rev06:R31
 C17521,4,1,2.2Ω 0805,UNI-ROYAL 0805W8F220KT5E 0805 2.2R 125mW,R_0805_2012Metric,carradio_peripheral_rev06:R99
 C375691,1,1,10mΩ 2512,Yageo PA2512FKE7T0R01E 10 mOhm 1% 3W,R_2512_6332Metric,carradio_peripheral_rev06:R74
-C470884,4,4,EL817S1(C),EL817S1(C)(TU)-F (EL817S1(C)(TU)-FV),SMDIP-4_W7.62mm,carradio_peripheral_rev06:U2 carradio_peripheral_rev06:U3 carradio_peripheral_rev06:U4 carradio_peripheral_rev06:U5
-C97521,1,1,W25Q128JVS,Winbond W25Q128JVSIQ,SOIC-8_5.3x5.3mm_P1.27mm,carradio_peripheral_rev06:U21
+C109227,4,4,EL817S1(C),EL817S1(C)(TU)-F (EL817S1(C)(TU)-FV),SMDIP-4_W7.62mm,carradio_peripheral_rev06:U2 carradio_peripheral_rev06:U3 carradio_peripheral_rev06:U4 carradio_peripheral_rev06:U5
 C400792,1,1,P-MOSFET -60V,onsemi FDN5618P -60V P-MOSFET (check 1=G 2=S 3=D in datasheet),SOT-23,carradio_peripheral_rev06:Q2
 C8545,1,1,2N7002,JSCJ 2N7002,SOT-23,carradio_peripheral_rev06:Q3
 C20917,1,1,AO3400A,AO3400A 30V 5.7A N-MOSFET,SOT-23,carradio_peripheral_rev06:Q1
@@ -92,6 +94,3 @@ C2856837,1,1,Display FPC 40P 0.5mm,"XUNPU FPC-05FB-40PH20, 40P 0.5mm dual-contac
 C5119087,1,1,NEO-M9N-00B,u-blox NEO-M9N-00B,ublox_NEO,carradio_gnss_rev04:U7
 C178942,1,1,,Littelfuse 029707.5WXNV 7.5A mini blade fuse for holder F4,,extra (named in a BOM note)
 C5305,1,1,,2.54 mm jumper cap for JP1,,extra (named in a BOM note)
-,0,1,K-line module socket,"2x4 2.54mm female socket, 8.5mm body (same family as J23/J25/J27)",,carradio_peripheral_rev06:J10 (no LCSC number: source separately)
-,0,1,GNSS module socket,"2x8 2.54mm female socket, 8.5mm body (same family as J23/J25)",,carradio_peripheral_rev06:J27 (no LCSC number: source separately)
-,0,1,Main board plug,2x8 2.54mm male pin header,,carradio_gnss_rev04:J28 (no LCSC number: source separately)

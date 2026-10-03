@@ -19,7 +19,7 @@ Each board folder has:
 | `*_schematic.pdf` | schematic |
 | `*_cpl.csv` + `*_jlc_bom.csv` | pick-and-place and BOM in JLC's format: for JLC's SMT DFM check (or a PCBA order) |
 
-`lcsc_cart_one_set_upload.csv` is the LCSC upload file for one complete set (all four boards); `lcsc_cart_one_set.csv`
+`lcsc_paste.txt` is the LCSC list for one complete set (all four boards), for the BOM Tool's Copy & Paste box; `lcsc_cart_one_set.csv`
 is the readable version of the same list.
 
 ## 1. Impedances (done)
@@ -81,32 +81,34 @@ SOT-23s can go on in the same reflow or by iron.
 
 ## 3. Order the parts (LCSC)
 
-1. lcsc.com > BOM Tool > upload **`lcsc_cart_one_set_upload.xlsx`** (Quantity, LCSC Part Number, Description, in the
-   order of LCSC's template; `lcsc_cart_one_set_upload.csv` has the first two columns only). On the mapping page set
-   **Quantity** -> Quantity and **LCSC Part Number** -> LCSC Part #, and leave Description unmapped so the tool matches
-   by part number. `lcsc_cart_one_set.csv` is the same list with values, descriptions and where each part goes.
+1. lcsc.com > **BOM Tool** > **Copy & Paste** tab: paste the whole of **`lcsc_paste.txt`** (one `LCSC number, quantity`
+   per line) and press Continue. Checked on 2026-10-03: 95 of 95 lines matched, about $100 for one set.
+   File upload works less well: LCSC tries to match by value/description text. If you want a file anyway, use
+   `lcsc_cart_one_set_upload.xlsx` and map only **Quantity** and **LCSC Part Number**.
+   `lcsc_cart_one_set.csv` is the same list with values, descriptions and where each part goes.
    Quantities are for one set plus 3 spares of each 0402/0603/0805 resistor and capacitor; LCSC rounds up to its
    minimum order quantities. It also includes the 7.5 A blade fuse for holder F4 (C178942) and the jumper cap for JP1
    (C5305), which the BOM only names in notes.
-2. For more sets, multiply the **Needed** column and re-upload.
-3. Replace anything out of stock with the same value, package and rating. Known cases:
-   - RP2350B (C42415655): if unavailable, RP2354B (C39843328, internal flash; then leave U21 off).
-   - J23/J25 BOOMELE C30867 (2x10 female, 8.5 mm): out of stock on 2026-10-01; any 2x10 2.54 mm 8.5 mm socket fits.
-4. Not on LCSC (lines with quantity 0): **J10** 2x4 female socket 8.5 mm, **J27** 2x8 female socket 8.5 mm,
-   **J28** 2x8 male header. Any 2.54 mm socket/header with an 8.5 mm body works.
-5. Extra hardware: M2.5 x 11 mm standoffs (3, for the GNSS, audio and USB modules), M3 screws/standoffs for the four
+2. For more sets, multiply the **Needed** column of `lcsc_cart_one_set.csv` and paste again.
+3. Substitutions already in the list (out of stock or not sold outside China on 2026-10-03):
+   - **U20 is the RP2354B** (C39843328): the RP2350B with 2 MB flash inside the package. LCSC does not sell the RP2350B
+     (C42415655) outside China. With the RP2354B, **U21 (W25Q128 flash) stays empty**; build the firmware for 2 MB flash (PICO_BOARD with PICO_FLASH_SIZE_BYTES 2 MB), plenty for an I/O controller.
+     If you get an RP2350B elsewhere, fit U21 (W25Q128JVSIQ, C113767) as well.
+   - L1 C96895 -> C167882, 10 kΩ C25804 -> C98220, 2.2 nF C28260 -> C77060, J23/J25 C30867 -> C5821035,
+     optocoupler EL817S1 C470884 -> LTV-817S-TA1-C C109227 (same pinout and package). All same value, package and rating.
+4. Extra hardware: M2.5 x 11 mm standoffs (3, for the GNSS, audio and USB modules), M3 screws/standoffs for the four
    main board corners, and an M2 x 11 mm standoff for a future K-line module (H8).
 
 ## 4. Assembly order (suggested)
 
-1. Main board, paste + reflow: U20, U21, TPS55288 stage (U12, Q11, Q12, L3), then the rest of the SMD parts.
+1. Main board, paste + reflow: U20 (U21 stays empty with the RP2354B), TPS55288 stage (U12, Q11, Q12, L3), then the rest of the SMD parts.
    Check U20 and U12 for bridges under a loupe before going on.
 2. Hand-solder the through-hole parts: module sockets J10/J23/J25/J27, J2 (VIM3 box header), loom connectors, F4 fuse
    holder, the large electrolytics.
 3. Modules: SMD first (paste + reflow), then their headers J24/J26/J28 on the **bottom side**, pins pointing down.
 4. JP2 (GNSS RX source) is copper, bridged 1-2 from the factory.
 5. Before the first power-up: measure for shorts on VSYS_IN, +5V_SYS, +5V_AON, +3V3_MCU and +1V1_MCU to GND.
-6. Flash the RP2350B over USB (hold SW1, tap SW2) or SWD on J22; see `../../rev0.4/README.md`, "Flashing the RP2350B".
+6. Flash the RP2354B over USB (same firmware and procedure as the RP2350B) (hold SW1, tap SW2) or SWD on J22; see `../../rev0.4/README.md`, "Flashing the RP2350B".
 
 ## Status
 

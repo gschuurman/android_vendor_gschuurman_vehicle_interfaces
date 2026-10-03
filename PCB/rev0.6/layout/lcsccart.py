@@ -1,20 +1,21 @@
-"""lcsccart.py out.csv bom.csv [bom.csv ...] [REF=LCSC ...] [+LCSC=QTY:description ...] : one LCSC order list for a set of boards (hand assembly).
+"""lcsccart.py out.csv bom.csv [bom.csv ...] [REF=LCSC ...] [+LCSC=QTY:description ...] [OLD->NEW ...] : one LCSC order list for a set of boards (hand assembly).
 Sums fitted parts per LCSC number over all BOMs (solder jumpers skipped); 0402/0603/0805 resistors and capacitors get
-3 spares. +LCSC=QTY:description adds a part the BOM only names in a note (fuse insert, jumper cap). Parts without an
+3 spares. OLD->NEW swaps an LCSC number everywhere (out of stock, BOM left as it is). +LCSC=QTY:description adds a part the BOM only names in a note (fuse insert, jumper cap). Parts without an
 LCSC number are listed at the end with quantity 0 for manual sourcing.
 Also writes <out>_upload.csv: only 'LCSC Part Number,Quantity', ASCII, no zero rows, for LCSC's BOM tool (it matches
 by value/footprint text when other columns are present, and reads plain UTF-8 as GBK). The full list is UTF-8 with BOM.
 With openpyxl available (withlib.py), also <out>_upload.xlsx: Quantity, LCSC Part Number, Description (ASCII), in the
 column order of LCSC's BOM template."""
 import csv, sys, collections
-out = sys.argv[1]; boms = [a for a in sys.argv[2:] if '=' not in a and not a.startswith('+')]; OVR = dict(a.split('=', 1) for a in sys.argv[2:] if '=' in a and not a.startswith('+'))
+out = sys.argv[1]; boms = [a for a in sys.argv[2:] if '=' not in a and not a.startswith('+') and '->' not in a]
+SWAP = dict(a.split('->', 1) for a in sys.argv[2:] if '->' in a); OVR = dict(a.split('=', 1) for a in sys.argv[2:] if '=' in a and not a.startswith('+'))
 EXTRA = [a[1:].split('=', 1) for a in sys.argv[2:] if a.startswith('+')]
 qty = collections.Counter(); info = {}; refs = collections.defaultdict(list); nolcsc = []
 for fn in boms:
     board = fn.replace(chr(92), '/').split('/')[-1].replace('_bom.csv', '')
     for r in csv.DictReader(open(fn, encoding='utf-8')):
         if r.get('Fit', 'yes').strip().lower() != 'yes' or r['Footprint (KiCad name)'].startswith('Jumper:SolderJumper'): continue
-        l = r['LCSC'].strip() or OVR.get(r['Designator'], '')
+        l = r['LCSC'].strip() or OVR.get(r['Designator'], ''); l = SWAP.get(l, l)
         if not l: nolcsc.append((board, r['Designator'], r['Value'], r['Description / MPN'])); continue
         qty[l] += 1; info[l] = (r['Value'], r['Description / MPN'], r['Footprint (KiCad name)'].split(':')[-1]); refs[l].append(f"{board}:{r['Designator']}")
 rows = []

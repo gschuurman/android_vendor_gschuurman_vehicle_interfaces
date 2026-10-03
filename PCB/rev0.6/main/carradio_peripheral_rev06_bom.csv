@@ -8,7 +8,7 @@ C1,10uF 50V,1206 10uF 50V X5R (Murata GRM31CR61H106KA12L),C77092,Capacitor_SMD:C
 C2,100nF,0603 100nF 50V X7R,C14663,Capacitor_SMD:C_0603_1608Metric,yes,
 U1,TPS560430XDBVR,"TPS560430XDBVR 36V 600mA buck, 1.1MHz",C524782,Package_TO_SOT_SMD:SOT-23-6,yes,pinout checked against TI datasheet
 C3,100nF,0603 100nF 50V X7R,C14663,Capacitor_SMD:C_0603_1608Metric,yes,
-L1,18uH,SWPA4030S180MT 18uH,C96895,Inductor_SMD:L_Sunlord_SWPA4030S,yes,
+L1,18uH,"cjiang FNR4030S180MT 18uH 4x4mm shielded, Isat 1.5A, Irms 1.2A, 260 mOhm (SWPA4030S180MT C96895 discontinued at LCSC)",C167882,Inductor_SMD:L_Sunlord_SWPA4030S,yes,
 R1,100k,0603 100k 1%,C25803,Resistor_SMD:R_0603_1608Metric,yes,
 R2,24k,0603 24k 1%,C23352,Resistor_SMD:R_0603_1608Metric,yes,Vout = 1.0V x (1 + 100k/24k) = 5.17V
 C4,22uF,0805 22uF 25V X5R,C45783,Capacitor_SMD:C_0805_2012Metric,yes,
@@ -39,9 +39,9 @@ C11,100nF,0603 100nF 50V X7R,C14663,Capacitor_SMD:C_0603_1608Metric,yes,
 C8,100nF,0603 100nF 50V X7R,C14663,Capacitor_SMD:C_0603_1608Metric,yes,
 R57,0Ω,0603 0 1%,C21189,Resistor_SMD:R_0603_1608Metric,DNP,DNP: fit to also put the amp remote on ISO A5 (the usual antenna/amp remote pin)
 Q2,P-MOSFET -60V,onsemi FDN5618P -60V P-MOSFET (check 1=G 2=S 3=D in datasheet),C400792,Package_TO_SOT_SMD:SOT-23,yes,review: AO3401A (-30V) was below the 35.5V TVS clamp
-R13,10k,0603 10k 1%,C25804,Resistor_SMD:R_0603_1608Metric,yes,
+R13,10k,YAGEO RC0603FR-0710KL 0603 10k 1%,C98220,Resistor_SMD:R_0603_1608Metric,yes,
 D8,BZT52C12,BZT52C12-7-F 12V zener,C124196,Diode_SMD:D_SOD-123,yes,Vgs clamp
-R14,10k,0603 10k 1%,C25804,Resistor_SMD:R_0603_1608Metric,yes,
+R14,10k,YAGEO RC0603FR-0710KL 0603 10k 1%,C98220,Resistor_SMD:R_0603_1608Metric,yes,
 Q3,2N7002,JSCJ 2N7002,C8545,Package_TO_SOT_SMD:SOT-23,yes,"review: drain sees ACC through R13, so it needs more than 30V"
 R16,100Ω,0603 100 1%,C22775,Resistor_SMD:R_0603_1608Metric,yes,
 R15,100k,0603 100k 1%,C25803,Resistor_SMD:R_0603_1608Metric,yes,amp off while the MCU is in reset
@@ -57,7 +57,7 @@ R11,220k,0603 220k 1%,C22961,Resistor_SMD:R_0603_1608Metric,yes,
 C9,100nF,0603 100nF 50V X7R,C14663,Capacitor_SMD:C_0603_1608Metric,yes,
 JP1,SERVICE jumper,1x2 male header 2.54mm + jumper cap C5305,C124375,Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical,yes,
 R9,4.7k,0603 4.7k 1%,C23162,Resistor_SMD:R_0603_1608Metric,yes,
-J10,K-line module socket,"2x4 2.54mm female socket, 8.5mm body (same family as J23/J25/J27)",,Connector_PinSocket_2.54mm:PinSocket_2x04_P2.54mm_Vertical,yes,"K-line module plugs in here: 3V3, UART TX/RX (GP32/GP33), enable (GP28), VBAT_KLINE (via F6), 5V_AON"
+J10,K-line module socket,"CJT A2541HWV-2x4P 2x4 2.54mm female socket, 8.5mm body",C239344,Connector_PinSocket_2.54mm:PinSocket_2x04_P2.54mm_Vertical,yes,"K-line module plugs in here: 3V3, UART TX/RX (GP32/GP33), enable (GP28), VBAT_KLINE (via F6), 5V_AON"
 U6,LP5907MFX-3.3,TI LP5907MFX-3.3/NOPB 250mA LDO (TECH PUBLIC TPLP5907MFX-3.3 clone; TI part out of stock at LCSC),C5370990,Package_TO_SOT_SMD:SOT-23-5,yes,"GNSS supply, switched by MCU GP9"
 C12,1uF,0603 1uF 50V X5R (Murata GRM188R61H105KAALD),C77386,Capacitor_SMD:C_0603_1608Metric,yes,
 R35,100k,0603 100k 1%,C25803,Resistor_SMD:R_0603_1608Metric,yes,GNSS off by default
@@ -69,7 +69,7 @@ R40,1k,0603 1k 1%,C21190,Resistor_SMD:R_0603_1608Metric,yes,
 R100,1k,0603 1k 1%,C21190,Resistor_SMD:R_0603_1608Metric,yes,GNSS NMEA also to VIM3 UART_C (header pin 15) for the existing GNSS HAL / kernel gnss driver
 R101,1k,0603 1k 1%,C21190,Resistor_SMD:R_0603_1608Metric,yes,VIM3 UART_C TX (header pin 16)
 JP2,GNSS RX source,"3-pad solder jumper (PCB copper, no part)",,Jumper:SolderJumper-3_P1.3mm_Bridged12_RoundedPad1.0x1.5mm,yes,"who talks to the receiver: 1-2 (default, bridged) = VIM3 UART_C, 2-3 = MCU UART0. GNSS TX always goes to both."
-J27,GNSS module socket,"2x8 2.54mm female socket, 8.5mm body (same family as J23/J25)",,Connector_PinSocket_2.54mm:PinSocket_2x08_P2.54mm_Vertical,yes,"GNSS module plugs in here: switched 3V3 (U6), backup 3V3, UART, USB, reset, PPS, safeboot"
+J27,GNSS module socket,"kinghelm KH-2.54FH-2X8P-H8.5 2x8 2.54mm female socket, 8.5mm body",C22440830,Connector_PinSocket_2.54mm:PinSocket_2x08_P2.54mm_Vertical,yes,"GNSS module plugs in here: switched 3V3 (U6), backup 3V3, UART, USB, reset, PPS, safeboot"
 Q1,AO3400A,AO3400A 30V 5.7A N-MOSFET,C20917,Package_TO_SOT_SMD:SOT-23,yes,open-drain press of the active-low VIM3 POWER key (GPIOAO_7)
 R12,100Ω,0603 100 1%,C22775,Resistor_SMD:R_0603_1608Metric,yes,
 R19,100k,0603 100k 1%,C25803,Resistor_SMD:R_0603_1608Metric,yes,
@@ -79,16 +79,16 @@ R24,100Ω,0603 100 1%,C22775,Resistor_SMD:R_0603_1608Metric,yes,
 R33,4.7k,0603 4.7k 1%,C23162,Resistor_SMD:R_0603_1608Metric,yes,
 R34,4.7k,0603 4.7k 1%,C23162,Resistor_SMD:R_0603_1608Metric,yes,
 J7,BH1750 light sensor,JST B4B-PH-K-S,C131334,Connector_JST:JST_PH_B4B-PH-K_1x04_P2.00mm_Vertical,yes,
-R58,10k,0603 10k 1%,C25804,Resistor_SMD:R_0603_1608Metric,yes,
+R58,10k,YAGEO RC0603FR-0710KL 0603 10k 1%,C98220,Resistor_SMD:R_0603_1608Metric,yes,
 R59,1k,0603 1k 1%,C21190,Resistor_SMD:R_0603_1608Metric,yes,
 C42,100nF,0603 100nF 50V X7R,C14663,Capacitor_SMD:C_0603_1608Metric,yes,
-R60,10k,0603 10k 1%,C25804,Resistor_SMD:R_0603_1608Metric,yes,
+R60,10k,YAGEO RC0603FR-0710KL 0603 10k 1%,C98220,Resistor_SMD:R_0603_1608Metric,yes,
 R61,1k,0603 1k 1%,C21190,Resistor_SMD:R_0603_1608Metric,yes,
 C43,100nF,0603 100nF 50V X7R,C14663,Capacitor_SMD:C_0603_1608Metric,yes,
-R62,10k,0603 10k 1%,C25804,Resistor_SMD:R_0603_1608Metric,yes,
+R62,10k,YAGEO RC0603FR-0710KL 0603 10k 1%,C98220,Resistor_SMD:R_0603_1608Metric,yes,
 R63,1k,0603 1k 1%,C21190,Resistor_SMD:R_0603_1608Metric,yes,
 C44,100nF,0603 100nF 50V X7R,C14663,Capacitor_SMD:C_0603_1608Metric,yes,
-R64,10k,0603 10k 1%,C25804,Resistor_SMD:R_0603_1608Metric,yes,
+R64,10k,YAGEO RC0603FR-0710KL 0603 10k 1%,C98220,Resistor_SMD:R_0603_1608Metric,yes,
 R65,1k,0603 1k 1%,C21190,Resistor_SMD:R_0603_1608Metric,yes,
 C45,100nF,0603 100nF 50V X7R,C14663,Capacitor_SMD:C_0603_1608Metric,yes,
 J12,Display buttons,JST B5B-PH-K-S,C157993,Connector_JST:JST_PH_B5B-PH-K_1x05_P2.00mm_Vertical,yes,"momentary buttons to ground: 1 screen off, 2 volume up, 3 volume down, 4 mute, 5 GND"
@@ -97,8 +97,8 @@ R43,33Ω,0603 33 1%,C23140,Resistor_SMD:R_0603_1608Metric,yes,
 R44,33Ω,0603 33 1%,C23140,Resistor_SMD:R_0603_1608Metric,yes,
 R45,33Ω,0603 33 1%,C23140,Resistor_SMD:R_0603_1608Metric,yes,
 R46,1k,0603 1k 1%,C21190,Resistor_SMD:R_0603_1608Metric,yes,limits back-feed when the VIM3 (DAC supply) is off
-R47,10k,0603 10k 1%,C25804,Resistor_SMD:R_0603_1608Metric,yes,DACs muted unless the MCU unmutes
-J23,Audio module socket,BOOMELE 2.54-2*10P female 8.5mm (LCSC out of stock 2026-10-01; any 2x10 2.54mm 8.5mm socket fits),C30867,Connector_PinSocket_2.54mm:PinSocket_2x10_P2.54mm_Vertical,yes,"audio module plugs in here; 5V, I2S, DAC mute, MCU I2C and the four line outs"
+R47,10k,YAGEO RC0603FR-0710KL 0603 10k 1%,C98220,Resistor_SMD:R_0603_1608Metric,yes,DACs muted unless the MCU unmutes
+J23,Audio module socket,"CJT A2541HWV-2x10P 2x10 2.54mm female socket, 8.5mm body",C5821035,Connector_PinSocket_2.54mm:PinSocket_2x10_P2.54mm_Vertical,yes,"audio module plugs in here; 5V, I2S, DAC mute, MCU I2C and the four line outs"
 J2,VIM3 40-pin via 2x20 IDC ribbon,BOOMELE 2.54-2*20P box header (check it is shrouded),C9138,Connector_IDC:IDC-Header_2x20_P2.54mm_Vertical,yes,pin names are VIM3 numbers (Vn); pad numbers are IDC odd/even
 J8,ISO 10487 C1 (via pigtail),Molex 43045-0612,C234188,Connector_Molex:Molex_Micro-Fit_3.0_43045-0612_2x03_P3.00mm_Vertical,yes,"pad n = ISO C1 pin n: 1 rear L, 2 rear R, 3 front L, 4 front R, 5 line-out ground, 6 remote"
 R56,0Ω,0603 0 1%,C21189,Resistor_SMD:R_0603_1608Metric,yes,"ground-lift option: fit 0R, or 10R if the amp hums (alternator whine)"
@@ -109,7 +109,7 @@ C47,100nF,0603 100nF 50V X7R,C14663,Capacitor_SMD:C_0603_1608Metric,yes,
 F4,7.5A fuse,Littelfuse 01530008Z mini blade holder + fuse C178942 Littelfuse 029707.5WXNV 7.5A,C206907,carradio:Littelfuse_01530008Z,yes,feeds the VIM3 supply from permanent +12V (ISO A4)
 Q10,P-MOSFET -40V,NCE40P70K -40V 10 mOhm P-MOSFET TO-252 (alt Diodes DMP4015SK3-13 C513222),C130101,Package_TO_SOT_SMD:TO-252-2,yes,"reverse-polarity protection, no diode drop"
 D15,BZT52C12,BZT52C12-7-F 12V zener,C124196,Diode_SMD:D_SOD-123,yes,Vgs clamp
-R66,10k,0603 10k 1%,C25804,Resistor_SMD:R_0603_1608Metric,yes,
+R66,10k,YAGEO RC0603FR-0710KL 0603 10k 1%,C98220,Resistor_SMD:R_0603_1608Metric,yes,
 D14,Load-dump TVS,"Liown 5.0SMDJ22A, 5 kW SMC",C2990362,Diode_SMD:D_SMC,yes,"SM8S: 6.6 kW, rated for ISO 16750 load dump. 24.4V min breakdown (survives a 24V jump start), 35.5V max clamp, under the 38V limit of U15 and 40V of U12"
 C48,100uF 50V,Panasonic EEEFK1H101P 100uF 50V 8x10.2,C178548,Capacitor_SMD:CP_Elec_8x10,yes,bulk + input damping
 C49,10uF 50V,1206 10uF 50V X5R (Murata GRM31CR61H106KA12L),C77092,Capacitor_SMD:C_1206_3216Metric,yes,
@@ -142,8 +142,8 @@ Y1,12MHz,YXC X322512MSB4SI 12MHz,C9002,Crystal:Crystal_SMD_3225-4Pin_3.2x2.5mm,y
 C61,1uF,0603 1uF 50V X5R (Murata GRM188R61H105KAALD),C77386,Capacitor_SMD:C_0603_1608Metric,yes,at V5
 C62,10uF,0805 10uF 25V X5R,C15850,Capacitor_SMD:C_0805_2012Metric,yes,
 C63,100nF,0603 100nF 50V X7R,C14663,Capacitor_SMD:C_0603_1608Metric,yes,
-J25,USB module socket,BOOMELE 2.54-2*10P female 8.5mm (LCSC out of stock 2026-10-01; any 2x10 2.54mm 8.5mm socket fits),C30867,Connector_PinSocket_2.54mm:PinSocket_2x10_P2.54mm_Vertical,yes,"USB module plugs in here: 12V in for its 5V/3A supply, 5V for hub 2 and the SDR port, two USB pairs, enable and status"
-U20,RP2350B,"Raspberry Pi RP2350B QFN-80 (LCSC stock unclear; alt RP2354B C39843328 with 2MB internal flash, then leave U21 unfitted)",C42415655,Package_DFN_QFN:QFN-80-1EP_10x10mm_P0.4mm_EP3.4x3.4mm,yes,"GPIO map: rev 0.4 README (re-assigned for routing). ADCs stay on GPIO40-42 (only GPIO40-47 have ADC); GNSS on UART1 (GPIO4/5), I2C on I2C1 (GPIO30/31)"
+J25,USB module socket,"CJT A2541HWV-2x10P 2x10 2.54mm female socket, 8.5mm body",C5821035,Connector_PinSocket_2.54mm:PinSocket_2x10_P2.54mm_Vertical,yes,"USB module plugs in here: 12V in for its 5V/3A supply, 5V for hub 2 and the SDR port, two USB pairs, enable and status"
+U20,RP2354B,Raspberry Pi RP2354B QFN-80 (RP2350B with 2 MB flash in the package; the RP2350B C42415655 is not sold outside China by LCSC). U21 stays unfitted.,C39843328,Package_DFN_QFN:QFN-80-1EP_10x10mm_P0.4mm_EP3.4x3.4mm,yes,"GPIO map: rev 0.4 README (re-assigned for routing). ADCs stay on GPIO40-42 (only GPIO40-47 have ADC); GNSS on UART1 (GPIO4/5), I2C on I2C1 (GPIO30/31)"
 U19,AP2112K-3.3,Diodes AP2112K-3.3TRG1,C51118,Package_TO_SOT_SMD:SOT-23-5,yes,"MCU, GNSS backup, light sensor, pull-ups; replaces the Pico 2 regulator"
 C80,1uF,0603 1uF 50V X5R (Murata GRM188R61H105KAALD),C77386,Capacitor_SMD:C_0603_1608Metric,yes,
 C81,10uF,0805 10uF 25V X5R,C15850,Capacitor_SMD:C_0805_2012Metric,yes,
@@ -165,7 +165,7 @@ C94,100nF,0603 100nF 50V X7R,C14663,Capacitor_SMD:C_0603_1608Metric,yes,at DVDD 
 C95,100nF,0603 100nF 50V X7R,C14663,Capacitor_SMD:C_0603_1608Metric,yes,at DVDD 51
 C96,100nF,0603 100nF 50V X7R,C14663,Capacitor_SMD:C_0603_1608Metric,yes,at ADC_AVDD 59
 C97,100nF,0603 100nF 50V X7R,C14663,Capacitor_SMD:C_0603_1608Metric,yes,at USB_OTP_VDD 68 + QSPI_IOVDD 69
-U21,W25Q128JVS,Winbond W25Q128JVSIQ,C97521,Package_SO:SOIC-8_5.3x5.3mm_P1.27mm,yes,
+U21,W25Q128JVS,Winbond W25Q128JVSIQ (tube packaging),C113767,Package_SO:SOIC-8_5.3x5.3mm_P1.27mm,no,"Not fitted with the RP2354B (U20 has 2 MB internal flash on the same QSPI pins). Fit only with an RP2350B, then 16 MB."
 C98,100nF,0603 100nF 50V X7R,C14663,Capacitor_SMD:C_0603_1608Metric,yes,at flash VCC
 R81,1k,0603 1k 1%,C21190,Resistor_SMD:R_0603_1608Metric,yes,
 SW1,BOOTSEL,E-Switch TL3342F160QG,C2886898,Button_Switch_SMD:SW_SPST_TL3342,yes,hold while resetting to enter the USB bootloader
@@ -176,21 +176,21 @@ C100,15pF,Samsung CL10C150JB8NNNC 15pF C0G,C1644,Capacitor_SMD:C_0603_1608Metric
 R83,27Ω,UNI-ROYAL 0603WAF270JT5E 27R,C25190,Resistor_SMD:R_0603_1608Metric,yes,USB series termination
 R84,27Ω,UNI-ROYAL 0603WAF270JT5E 27R,C25190,Resistor_SMD:R_0603_1608Metric,yes,
 J22,SWD,1x4 male header 2.54mm,C124378,Connector_PinHeader_2.54mm:PinHeader_1x04_P2.54mm_Vertical,yes,"Debug probe: SWCLK, GND, SWDIO, RUN"
-R85,10k,0603 10k 1%,C25804,Resistor_SMD:R_0603_1608Metric,yes,
+R85,10k,YAGEO RC0603FR-0710KL 0603 10k 1%,C98220,Resistor_SMD:R_0603_1608Metric,yes,
 C101,100nF,0603 100nF 50V X7R,C14663,Capacitor_SMD:C_0603_1608Metric,yes,
 SW2,RESET,E-Switch TL3342F160QG,C2886898,Button_Switch_SMD:SW_SPST_TL3342,yes,
 R86,1k,0603 1k 1%,C21190,Resistor_SMD:R_0603_1608Metric,yes,
 D16,LED green,KT-0805G green LED,C2297,LED_SMD:LED_0805_2012Metric,yes,status LED (Pico LED was on GP25)
-R87,10k,0603 10k 1%,C25804,Resistor_SMD:R_0603_1608Metric,yes,TPS2561 FAULT1: port 1 over-current
-R88,10k,0603 10k 1%,C25804,Resistor_SMD:R_0603_1608Metric,yes,TPS2561 FAULT2: port 2 over-current
-R89,10k,0603 10k 1%,C25804,Resistor_SMD:R_0603_1608Metric,yes,LMR33630 power good
+R87,10k,YAGEO RC0603FR-0710KL 0603 10k 1%,C98220,Resistor_SMD:R_0603_1608Metric,yes,TPS2561 FAULT1: port 1 over-current
+R88,10k,YAGEO RC0603FR-0710KL 0603 10k 1%,C98220,Resistor_SMD:R_0603_1608Metric,yes,TPS2561 FAULT2: port 2 over-current
+R89,10k,YAGEO RC0603FR-0710KL 0603 10k 1%,C98220,Resistor_SMD:R_0603_1608Metric,yes,LMR33630 power good
 R90,1k,0603 1k 1%,C21190,Resistor_SMD:R_0603_1608Metric,yes,"firmware pulls low to reset hub 1 (e.g. while the VIM3 is off), otherwise input"
-R104,10k,0603 10k 1%,C25804,Resistor_SMD:R_0603_1608Metric,yes,keeps hub 1 out of reset on a blank MCU (RP2350 pads default to pull-down)
+R104,10k,YAGEO RC0603FR-0710KL 0603 10k 1%,C98220,Resistor_SMD:R_0603_1608Metric,yes,keeps hub 1 out of reset on a blank MCU (RP2350 pads default to pull-down)
 R79,1k,0603 1k 1%,C21190,Resistor_SMD:R_0603_1608Metric,yes,firmware keeps this an input; low at GNSS power-up = u-blox safeboot
-R91,10k,0603 10k 1%,C25804,Resistor_SMD:R_0603_1608Metric,yes,5V system rail monitor: /2
-R92,10k,0603 10k 1%,C25804,Resistor_SMD:R_0603_1608Metric,yes,
+R91,10k,YAGEO RC0603FR-0710KL 0603 10k 1%,C98220,Resistor_SMD:R_0603_1608Metric,yes,5V system rail monitor: /2
+R92,10k,YAGEO RC0603FR-0710KL 0603 10k 1%,C98220,Resistor_SMD:R_0603_1608Metric,yes,
 C102,100nF,0603 100nF 50V X7R,C14663,Capacitor_SMD:C_0603_1608Metric,yes,
-R93,10k,0603 10k 1%,C25804,Resistor_SMD:R_0603_1608Metric,yes,
+R93,10k,YAGEO RC0603FR-0710KL 0603 10k 1%,C98220,Resistor_SMD:R_0603_1608Metric,yes,
 TH1,NTC 10k B3950,Murata NCP18XH103F03RB 10k B3380 0603,C13564,Resistor_SMD:R_0603_1608Metric,yes,place next to the TPS55288 / LMR33630: board temperature for thermal derating
 C103,100nF,0603 100nF 50V X7R,C14663,Capacitor_SMD:C_0603_1608Metric,yes,
 J21,Expansion 2,BOOMELE 1x10 male header 2.54mm,C57369,Connector_PinHeader_2.54mm:PinHeader_1x10_P2.54mm_Vertical,yes,"spare GPIOs (e.g. CAN, extra UART/SPI); numbers in the net names"
