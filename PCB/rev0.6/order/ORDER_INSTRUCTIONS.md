@@ -35,6 +35,22 @@ Order the main board **with impedance control on and stack-up JLC04161H-7628**, 
 The GNSS module's RF line (1.0 mm trace, 0.30 mm gaps to top ground, solid bottom ground, about 5.7 mm long) was not
 re-checked; it is short enough that a few ohms either way do not matter.
 
+## JLC DFM check: what may still show up
+
+JLC's DFM tool reads only the Gerbers, without net information, so it flags copper of the **same net** that comes close
+without touching, which cannot cause a defect. After the clean-up (dangling vias and stubs removed, vias moved off
+pins, pad gaps opened to 0.15 mm, overlapping vias merged, silkscreen clipped at pads), expect:
+
+| DFM item | Expected | Why it is fine |
+|---|---|---|
+| Trace spacing (red/orange) | a few, 0.001-0.08 mm | same-net jogs left by the router (two parallel pieces of one track offset by a fraction of a mm); KiCad DRC confirms no clearance problem between different nets |
+| Pad spacing (orange) | 0.13-0.15 mm | different-net vias/pads at the 0.13 mm design clearance, inside JLC's 0.09 mm limit |
+| THT to SMD (red) | ~300 | an assembly rule (2 mm); it measures the ring of small vias around the M2.5/M3 mounting holes. Irrelevant for hand soldering |
+| Via to pad | a few | thermal vias inside exposed pads (RP2350B, TPS55288, MOSFETs) are intentional; 9 vias stay at dense U12/U13 pins |
+| Annular ring (orange) | all vias | 0.45 mm pad on 0.2 mm hole = 0.25 mm larger than the hole; JLC needs ≥ 0.1 mm |
+| Unconnected trace end (orange) | ~6 | overlapping same-net copper that KiCad counts as dangling; electrically connected |
+| Solder mask / silkscreen items | warnings | silkscreen is clipped at pad openings; leftover text over tented vias is cosmetic |
+
 ## 2. Order the PCBs (JLCPCB)
 
 Upload each `*_gerbers.zip` as its own item. Leave **PCB Assembly off**.

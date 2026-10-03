@@ -1,4 +1,4 @@
-"""fixvip.py in out : move vias off SMD pins (via-in-pad / via on the pad edge) so solder cannot wick into them.
+"""fixvip.py in out : move vias off SMD pins (via-in-pad / via on the pad edge / via within 0.1 mm of the pad) so solder cannot wick into them.
 Exposed / thermal pads (both sides > 1.5 mm) keep their vias. Each offending via moves along one of 8 directions from
 the pad centre until it clears the pad by 0.15 mm; the tracks that ended at the via follow it, and a short track on the
 pad's layer joins pad centre and via. The first direction that clears all other-net copper (0.15 mm) wins."""
@@ -17,7 +17,8 @@ for v in [t for t in b.GetTracks() if isinstance(t, pcbnew.PCB_VIA)]:
     hit = None
     for ref, p in pads:
         l = pcbnew.F_Cu if p.IsOnLayer(pcbnew.F_Cu) else pcbnew.B_Cu
-        if p.GetNetCode() == v.GetNetCode() and small(p, l) and p.GetEffectiveShape(l).Collide(pcbnew.SHAPE_CIRCLE(c0, r), 0):
+        # in the pad, on its edge, or less than 0.1 mm from it (a Gerber-only DFM sees that as a spacing error)
+        if p.GetNetCode() == v.GetNetCode() and small(p, l) and p.GetEffectiveShape(l).Collide(pcbnew.SHAPE_CIRCLE(c0, r), MM(0.1)):
             hit = (ref, p, l); break
     if not hit: continue
     ref, p, l = hit; pc = p.GetPosition()

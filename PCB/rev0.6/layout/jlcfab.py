@@ -2,8 +2,8 @@
 REF=LCSC fills in a missing LCSC number. Solder jumpers (PCB copper, no part) are left out of the BOM and CPL.
 
 Writes into outdir:
-  <name>_gerbers.zip   Gerbers (Protel extensions, no X2/netlist attributes, mask not subtracted from silk)
-                       plus Excellon drill files (mm, absolute origin, PTH and NPTH separate)
+  <name>_gerbers.zip   Gerbers (Protel extensions, no X2/netlist attributes,
+                       silkscreen clipped at mask openings) plus Excellon drill files (mm, absolute origin, PTH and NPTH separate)
   <name>_bom.csv       JLC assembly BOM: Comment, Designator, Footprint, JLCPCB Part # (fitted parts only)
   <name>_cpl.csv       JLC pick-and-place: Designator, Mid X, Mid Y, Layer, Rotation (DNP excluded)
 Settings follow JLCPCB's KiCad export guide; check the rotations in JLC's assembly preview before ordering."""
@@ -17,7 +17,7 @@ txt = open(pcb, encoding='utf-8').read()
 inner = [l for l in ('In1.Cu', 'In2.Cu', 'In3.Cu', 'In4.Cu') if f'"{l}"' in txt.split('(setup')[0]]
 layers = ['F.Cu'] + inner + ['B.Cu', 'F.Paste', 'B.Paste', 'F.Silkscreen', 'B.Silkscreen', 'F.Mask', 'B.Mask', 'Edge.Cuts']
 def run(*a): subprocess.run([KCLI, *a], check=True, stdout=subprocess.DEVNULL)
-run('pcb', 'export', 'gerbers', '--layers', ','.join(layers), '--no-x2', '--no-netlist', '-o', tmp + os.sep, pcb)
+run('pcb', 'export', 'gerbers', '--layers', ','.join(layers), '--no-x2', '--no-netlist', '--subtract-soldermask', '-o', tmp + os.sep, pcb)
 run('pcb', 'export', 'drill', '--format', 'excellon', '--excellon-units', 'mm', '--drill-origin', 'absolute',
     '--excellon-zeros-format', 'decimal', '--excellon-oval-format', 'route', '--excellon-separate-th', '-o', tmp + os.sep, pcb)
 files = sorted(f for f in os.listdir(tmp) if not f.endswith('.json'))
