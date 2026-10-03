@@ -24,7 +24,7 @@ Main board:
   pairs at 0.2187/0.20 mm assume it). Outer copper 1 oz, inner 0.5 oz.
 - Vias are 0.45 mm pad / 0.2 mm hole. Pick the via option that allows a 0.2 mm hole (multilayer boards support it).
   Minimum track 0.15 mm, minimum clearance 0.1 mm.
-- Surface finish: ENIG recommended (0.4 mm QFN RP2350B, 0.5 mm FPC J14, TPS55288 VQFN). Leaded HASL works but is less flat.
+- Surface finish: HASL with lead (chosen; ENIG would be flatter for the 0.4 mm QFN, VQFN and 0.5 mm FPC).
 - Via covering: tented.
 
 Modules: 2 layers, 1.6 mm, 1 oz, standard options. On the GNSS module, check the 1.0 mm RF trace width against JLC's

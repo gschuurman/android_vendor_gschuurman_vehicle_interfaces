@@ -58,11 +58,19 @@ Upload each `*_gerbers.zip` as its own item. Leave **PCB Assembly off**.
 Main board:
 - FR-4, **4 layers, 1.6 mm**, **impedance control: yes, stack-up JLC04161H-7628**, outer 1 oz, inner 0.5 oz
 - Min via hole/diameter: an option that allows **0.2 mm holes / 0.45 mm pads**
-- Surface finish **ENIG** (flat pads for the 0.4 mm QFN, VQFN and 0.5 mm FPC connector)
+- Surface finish **HASL (with lead)** (Glenn's choice, 2026-10-03; see the HASL notes below)
 - Via covering: tented
 
-Modules: 2 layers, 1.6 mm, 1 oz, standard options. ENIG on the GNSS (LGA receiver) and USB (VSON, PowerPAD) modules
-makes paste soldering easier; HASL works on the audio module.
+Modules: 2 layers, 1.6 mm, 1 oz, standard options, surface finish **HASL (with lead)**.
+
+HASL notes: leaded HASL wets well and melts low, which suits hand and hot-air work, but its pads are domed rather than
+flat. Where that matters:
+- RP2350B (QFN-80, 0.4 mm): stencil paste, then check every side for bridges under a loupe; flux and wick clear them.
+- TPS55288 (VQFN), Q11/Q12 (VSON), LMR33630 (PowerPAD), TPS2561 (VSON): paste through the stencil; if a part sits
+  tilted on the domed pads, press it down lightly while the solder is molten.
+- NEO-M9N (LGA, GNSS module): the trickiest on HASL. Thin, even paste layer, hotplate, no extra solder; check that it
+  sits flat.
+- J14 (0.5 mm FPC): drag-solder with plenty of flux.
 
 **Stencils:** on each PCB's order page, add an **SMD stencil, top side** (frameless is fine for hand work). Paste is
 practically required for: RP2350B (QFN-80 0.4 mm), TPS55288 (VQFN-HR), Q11/Q12 (VSON),
