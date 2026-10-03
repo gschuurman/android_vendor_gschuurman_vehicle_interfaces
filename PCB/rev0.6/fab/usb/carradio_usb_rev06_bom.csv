@@ -9,7 +9,6 @@ PTC 0.5A,F5,Fuse_1206_3216Metric,C75464
 RTL-SDR (internal),J17,USB_A_Molex_67643_Horizontal,C2798029
 External USB 1,J19,USB_A_Molex_67643_Horizontal,C2798029
 External USB 2,J20,USB_A_Molex_67643_Horizontal,C2798029
-Main board plug,J26,PinHeader_2x10_P2.54mm_Vertical,C5116480
 8.2uH 5A,L4,L_Coilcraft_XAL6060-XXX,C2045598
 100k,R75,R_0603_1608Metric,C25803
 24k,R76,R_0603_1608Metric,C23352

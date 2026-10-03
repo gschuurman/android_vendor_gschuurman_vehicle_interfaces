@@ -1,5 +1,6 @@
 """jlcfab.py board.kicad_pcb bom.csv outdir name [REF=LCSC ...] : JLCPCB order package for one board (KiCad 10, kicad-cli).
-REF=LCSC fills in a missing LCSC number. Solder jumpers (PCB copper, no part) are left out of the BOM and CPL.
+REF=LCSC fills in a missing LCSC number. Solder jumpers (PCB copper, no part) are left out of the BOM and CPL, and so are
+2.54 mm pin headers, pin sockets and IDC box headers (bought through the LCSC cart, soldered by hand).
 
 Writes into outdir:
   <name>_gerbers.zip   Gerbers (Protel extensions, no X2/netlist attributes,
@@ -27,7 +28,7 @@ with zipfile.ZipFile(os.path.join(out, f'{name}_gerbers.zip'), 'w', zipfile.ZIP_
 groups = {}
 for r in csv.DictReader(open(bomsrc, encoding='utf-8')):
     if r.get('Fit', 'yes').strip().lower() != 'yes': continue
-    if r['Footprint (KiCad name)'].startswith('Jumper:SolderJumper'): continue
+    if r['Footprint (KiCad name)'].startswith(('Jumper:SolderJumper', 'Connector_PinHeader', 'Connector_PinSocket', 'Connector_IDC')): continue
     fp = r['Footprint (KiCad name)'].split(':')[-1]
     key = (r['Value'], fp, r['LCSC'].strip() or OVR.get(r['Designator'], ''))
     groups.setdefault(key, []).append(r['Designator'])
