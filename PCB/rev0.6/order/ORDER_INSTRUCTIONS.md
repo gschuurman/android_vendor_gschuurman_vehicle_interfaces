@@ -82,7 +82,9 @@ SOT-23s can go on in the same reflow or by iron.
 ## 3. Order the parts (LCSC)
 
 1. lcsc.com > **BOM Tool** > **Copy & Paste** tab: paste the whole of **`lcsc_paste.txt`** (one `LCSC number, quantity`
-   per line) and press Continue. Checked on 2026-10-03: 95 of 95 lines matched, about $100 for one set.
+   per line) and press Continue. Checked on 2026-10-03: 95 of 95 lines matched, about $91 for one set (before shipping). The biggest items are the
+   NEO-M9N GNSS module (~$16.50), the F4 fuse holder (~$4) and the TPS55288 (~$2.20); about $34 is minimum order
+   quantities of cheap passives (you get 50 of a resistor you need 2 of: spares for a second set).
    File upload works less well: LCSC tries to match by value/description text. If you want a file anyway, use
    `lcsc_cart_one_set_upload.xlsx` and map only **Quantity** and **LCSC Part Number**.
    `lcsc_cart_one_set.csv` is the same list with values, descriptions and where each part goes.
@@ -95,7 +97,9 @@ SOT-23s can go on in the same reflow or by iron.
      (C42415655) outside China. With the RP2354B, **U21 (W25Q128 flash) stays empty**; build the firmware for 2 MB flash (PICO_BOARD with PICO_FLASH_SIZE_BYTES 2 MB), plenty for an I/O controller.
      If you get an RP2350B elsewhere, fit U21 (W25Q128JVSIQ, C113767) as well.
    - L1 C96895 -> C167882, 10 kΩ C25804 -> C98220, 2.2 nF C28260 -> C77060, J23/J25 C30867 -> C5821035,
-     optocoupler EL817S1 C470884 -> LTV-817S-TA1-C C109227 (same pinout and package). All same value, package and rating.
+     optocoupler EL817S1 C470884 -> LTV-817S-TA1-C C109227 (same pinout and package).
+   - USB module L4: Bourns SRP6060FA-8R2M (C2045598, $1.38) instead of the Coilcraft XAL6060-822MEC ($12.34). Same
+     8.2 uH, 8.5 A saturation, 22.5 mOhm, and the same land pattern (pads 4.05 vs 4.04 mm apart). All same value, package and rating.
 4. Extra hardware: M2.5 x 11 mm standoffs (3, for the GNSS, audio and USB modules), M3 screws/standoffs for the four
    main board corners, and an M2 x 11 mm standoff for a future K-line module (H8).
 

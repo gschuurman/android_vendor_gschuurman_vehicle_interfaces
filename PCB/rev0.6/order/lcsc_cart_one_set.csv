@@ -35,7 +35,7 @@ C158012,1,1,VIM3 VIN (JST-XH 2P),JST B2B-XH-A,JST_XH_B2B-XH-A_1x02_P2.50mm_Verti
 C2297,2,2,LED green,KT-0805G green LED,LED_0805_2012Metric,carradio_peripheral_rev06:D10 carradio_peripheral_rev06:D16
 C12669,1,1,27nH RF,Murata LQG15HS27NJ02D,L_0402_1005Metric,carradio_gnss_rev04:L2
 C780205,1,1,4.7uH 12A+,"Bourns SRP1265A-4R7M 4.7uH Isat 28A 8.4 mOhm, 13.5x12.5mm (SRP1245A land pattern)",L_Bourns_SRP1245A,carradio_peripheral_rev06:L3
-C19191627,1,1,8.2uH 5A,"Coilcraft XAL6060-822MEC 8.2uH Isat 8.4A 24 mOhm (expensive; any 8.2-10uH shielded, Isat >= 5A works)",L_Coilcraft_XAL6060-XXX,carradio_usb_rev06:L4
+C2045598,1,1,8.2uH 5A,Bourns SRP6060FA-8R2M 8.2uH Isat 8.5A Irms 6A 22.5 mOhm (same land pattern as the Coilcraft XAL6060-822MEC footprint; XAL6060 C19191627 also fits),L_Coilcraft_XAL6060-XXX,carradio_usb_rev06:L4
 C42411119,1,1,3.3uH,Abracon AOTA-B201610S3R3-101-T 3.3uH (Raspberry Pi reference part),L_Murata_DFE201610P,carradio_peripheral_rev06:L5
 C167882,1,1,18uH,"cjiang FNR4030S180MT 18uH 4x4mm shielded, Isat 1.5A, Irms 1.2A, 260 mOhm (SWPA4030S180MT C96895 discontinued at LCSC)",L_Sunlord_SWPA4030S,carradio_peripheral_rev06:L1
 C206907,1,1,7.5A fuse,Littelfuse 01530008Z mini blade holder + fuse C178942 Littelfuse 029707.5WXNV 7.5A,Littelfuse_01530008Z,carradio_peripheral_rev06:F4
