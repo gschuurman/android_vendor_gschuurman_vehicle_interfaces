@@ -17,6 +17,7 @@ Each board folder has:
 | `*_parts.csv` | full parts list: designator, value, part/MPN, LCSC number, footprint, notes |
 | `*_assembly_top.pdf` / `*_assembly_bottom.pdf` | placement drawings (fab outlines with designators, silkscreen, board edge) |
 | `*_schematic.pdf` | schematic |
+| `*_cpl.csv` + `*_jlc_bom.csv` | pick-and-place and BOM in JLC's format: for JLC's SMT DFM check (or a PCBA order) |
 
 `lcsc_cart_one_set.csv` lists every part for one complete set (all four boards) by LCSC number.
 

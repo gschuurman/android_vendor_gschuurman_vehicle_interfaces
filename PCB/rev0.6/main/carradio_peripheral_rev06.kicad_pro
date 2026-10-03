@@ -501,7 +501,7 @@
     "pinned_symbol_libs": []
   },
   "meta": {
-    "filename": "n4j.kicad_pro",
+    "filename": "carradio_peripheral_rev06.kicad_pro",
     "version": 3
   },
   "net_settings": {
@@ -823,8 +823,8 @@
     "subpart_id_separator": 0,
     "top_level_sheets": [
       {
-        "filename": "r9.kicad_sch",
-        "name": "r9",
+        "filename": "carradio_peripheral_rev06.kicad_sch",
+        "name": "carradio_peripheral_rev06",
         "uuid": "00000000-0000-0000-0000-000000000000"
       }
     ]

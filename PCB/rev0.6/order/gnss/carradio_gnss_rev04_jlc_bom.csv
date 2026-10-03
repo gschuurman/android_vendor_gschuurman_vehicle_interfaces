@@ -1,0 +1,10 @@
+Comment,Designator,Footprint,JLCPCB Part #
+10uF,C14,C_0805_2012Metric,C15850
+100nF,"C15,C16",C_0603_1608Metric,C14663
+10nF,C17,C_0603_1608Metric,C1589
+U.FL GNSS antenna,J11,U.FL_Hirose_U.FL-R-SMT-1_Vertical,C88374
+Main board plug,J28,PinHeader_2x08_P2.54mm_Vertical,
+27nH RF,L2,L_0402_1005Metric,C12669
+10Ω,R41,R_0603_1608Metric,C22859
+27Ω,"R102,R103",R_0603_1608Metric,C25190
+NEO-M9N-00B,U7,ublox_NEO,C5119087
