@@ -82,7 +82,8 @@ SOT-23s can go on in the same reflow or by iron.
 
 1. lcsc.com > BOM Tool > upload `lcsc_cart_one_set.csv`; map **LCSC Part Number** and **Quantity**.
    Quantities are for one set plus 3 spares of each 0402/0603/0805 resistor and capacitor; LCSC rounds up to its
-   minimum order quantities.
+   minimum order quantities. It also includes the 7.5 A blade fuse for holder F4 (C178942) and the jumper cap for JP1
+   (C5305), which the BOM only names in notes.
 2. For more sets, multiply the **Needed** column and re-upload.
 3. Replace anything out of stock with the same value, package and rating. Known cases:
    - RP2350B (C42415655): if unavailable, RP2354B (C39843328, internal flash; then leave U21 off).

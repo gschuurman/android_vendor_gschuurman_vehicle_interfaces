@@ -90,6 +90,8 @@ C140303,1,1,TPS2561DRCR,TI TPS2561DRCR dual 2.8A USB power switch,VSON-10-1EP_3x
 C840100,2,2,CSD18543Q3A,TI CSD18543Q3A 60V 8.5mOhm N-MOSFET,VSON-8_3.3x3.3mm_P0.65mm_NexFET,carradio_peripheral_rev06:Q11 carradio_peripheral_rev06:Q12
 C2856837,1,1,Display FPC 40P 0.5mm,"XUNPU FPC-05FB-40PH20, 40P 0.5mm dual-contact flip-top 2.0mm (pads numbered by panel pin: pin 1 on the right, ribbon leaving the edge)",XUNPU_FPC-05FB-40PH20,carradio_peripheral_rev06:J14
 C5119087,1,1,NEO-M9N-00B,u-blox NEO-M9N-00B,ublox_NEO,carradio_gnss_rev04:U7
+C178942,1,1,,Littelfuse 029707.5WXNV 7.5A mini blade fuse for holder F4,,extra (named in a BOM note)
+C5305,1,1,,2.54 mm jumper cap for JP1,,extra (named in a BOM note)
 ,0,1,K-line module socket,"2x4 2.54mm female socket, 8.5mm body (same family as J23/J25/J27)",,carradio_peripheral_rev06:J10 (no LCSC number: source separately)
 ,0,1,GNSS module socket,"2x8 2.54mm female socket, 8.5mm body (same family as J23/J25)",,carradio_peripheral_rev06:J27 (no LCSC number: source separately)
 ,0,1,Main board plug,2x8 2.54mm male pin header,,carradio_gnss_rev04:J28 (no LCSC number: source separately)
