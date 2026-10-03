@@ -81,9 +81,10 @@ SOT-23s can go on in the same reflow or by iron.
 
 ## 3. Order the parts (LCSC)
 
-1. lcsc.com > BOM Tool > upload **`lcsc_cart_one_set_upload.csv`** (only LCSC part numbers and quantities, so the tool
-   matches by part number instead of searching value/footprint text). Map **LCSC Part Number** -> LCSC Part # and
-   **Quantity** -> Quantity. `lcsc_cart_one_set.csv` is the same list with values, descriptions and where each part goes.
+1. lcsc.com > BOM Tool > upload **`lcsc_cart_one_set_upload.xlsx`** (Quantity, LCSC Part Number, Description, in the
+   order of LCSC's template; `lcsc_cart_one_set_upload.csv` has the first two columns only). On the mapping page set
+   **Quantity** -> Quantity and **LCSC Part Number** -> LCSC Part #, and leave Description unmapped so the tool matches
+   by part number. `lcsc_cart_one_set.csv` is the same list with values, descriptions and where each part goes.
    Quantities are for one set plus 3 spares of each 0402/0603/0805 resistor and capacitor; LCSC rounds up to its
    minimum order quantities. It also includes the 7.5 A blade fuse for holder F4 (C178942) and the jumper cap for JP1
    (C5305), which the BOM only names in notes.
