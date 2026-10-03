@@ -21,7 +21,8 @@ full = [(0.3, 0.3), (W - 0.3, 0.3), (W - 0.3, H - 0.3), (0.3, H - 0.3)]
 for layer, nm in [(pcbnew.F_Cu, 'F GND'), (pcbnew.In1_Cu, 'GND plane'), (pcbnew.In2_Cu, 'In2 GND'), (pcbnew.B_Cu, 'B GND')]:
     if (layer, 'GND') not in have: zone(layer, 'GND', full, 0, nm)
 # DNP flags from the schematic
-net = open('/w/pcb4/net_carradio_peripheral_rev04.net').read()
+import os
+net = open(os.environ.get('NETLIST', '/w/pcb4/net_carradio_peripheral_rev04.net')).read()
 for m in re.finditer(r'\(comp\s+\(ref "([^"]+)"\)(.*?)\(tstamps "', net, re.S):
     if '(name "dnp")' in m.group(2):
         f = b.FindFootprintByReference(m.group(1))

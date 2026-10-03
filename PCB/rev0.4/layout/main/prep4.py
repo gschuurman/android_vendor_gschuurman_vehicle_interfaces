@@ -23,7 +23,8 @@ PATTERNS = [
     ('Power', '/+3V3_*'), ('Power', '/+1V1_MCU'), ('Power', '/BUCK_SW'), ('Power', '/VIM3_5V'), ('Power', '/BATT_F'),
     ('Power', '/HUB*_3V3'), ('Power', '/GNSS_VCCRF'),
 ]
-tmpl = json.load(open('/usr/share/kicad/template/KiCad_MR_diagrams_large_parts/mr_diagrams_large_parts.kicad_pro'))
+import os
+tmpl = json.load(open(os.path.join(os.environ.get('KICAD_TEMPLATES', '/usr/share/kicad/template'), 'KiCad_MR_diagrams_large_parts', 'mr_diagrams_large_parts.kicad_pro')))
 cls = []
 for i, (n, (tw, cl, vd, vh, dw, dg)) in enumerate(CLASSES.items()):
     c = dict(tmpl['net_settings']['classes'][0])
@@ -35,7 +36,7 @@ tmpl['net_settings']['netclass_patterns'] = [{'netclass': c, 'pattern': p} for c
 r = tmpl['board']['design_settings']['rules']
 r.update(min_clearance=0.1, min_track_width=0.15, min_via_diameter=0.45, min_through_hole_diameter=0.2,
          min_via_annular_width=0.1, min_copper_edge_clearance=0.3, min_hole_clearance=0.2, min_hole_to_hole=0.25)
-tmpl['meta']['filename'] = base.split('/')[-1] + '.kicad_pro'
+tmpl['meta']['filename'] = os.path.basename(base) + '.kicad_pro'
 json.dump(tmpl, open(base + '.kicad_pro', 'w'), indent=2)
 shutil.copy(src, base + '.kicad_pcb')
 b = pcbnew.LoadBoard(base + '.kicad_pcb')

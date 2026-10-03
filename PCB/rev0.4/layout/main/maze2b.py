@@ -292,7 +292,7 @@ if PRIO:
     pn = {NID[it['net']] for it in st['items'] if it['net'] in NID and it['ref'].split('.')[0] in PRIO.split(',')}
     work.sort(key=lambda n: 0 if n in pn else 1)
 queue = list(work)
-while queue and it_n < 1500 and time.time() - t0 < 3000:
+while queue and it_n < 1500 and time.time() - t0 < float(os.environ.get("MAZE_T", 3000)):
     nid = queue.pop(0)
     comps, labs, offs, find, dang = components(nid)
     if len(comps) <= 1: continue
