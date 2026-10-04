@@ -70,9 +70,8 @@ R100,1k,0603 1k 1%,C21190,Resistor_SMD:R_0603_1608Metric,yes,GNSS NMEA also to V
 R101,1k,0603 1k 1%,C21190,Resistor_SMD:R_0603_1608Metric,yes,VIM3 UART_C TX (header pin 16)
 JP2,GNSS RX source,"3-pad solder jumper (PCB copper, no part)",,Jumper:SolderJumper-3_P1.3mm_Bridged12_RoundedPad1.0x1.5mm,yes,"who talks to the receiver: 1-2 (default, bridged) = VIM3 UART_C, 2-3 = MCU UART0. GNSS TX always goes to both."
 J27,GNSS module socket,"kinghelm KH-2.54FH-2X8P-H8.5 2x8 2.54mm female socket, 8.5mm body",C22440830,Connector_PinSocket_2.54mm:PinSocket_2x08_P2.54mm_Vertical,yes,"GNSS module plugs in here: switched 3V3 (U6), backup 3V3, UART, USB, reset, PPS, safeboot"
-Q1,AO3400A,AO3400A 30V 5.7A N-MOSFET,C20917,Package_TO_SOT_SMD:SOT-23,yes,open-drain press of the active-low VIM3 POWER key (GPIOAO_7)
-R12,100Ω,0603 100 1%,C22775,Resistor_SMD:R_0603_1608Metric,yes,
-R19,100k,0603 100k 1%,C25803,Resistor_SMD:R_0603_1608Metric,yes,
+U22,AQY210S,"Panasonic AQY210S PhotoMOS 350V 120mA 1 Form A, SOP-4 (own stock)",,Package_SO:SO-4_4.4x4.3mm_P2.54mm,yes,"bottom side next to J5. Output shorts the two J5 pins (the VIM3 POWER key pads), isolated; LED from GPIO15 through R12"
+R12,390Ω,UNI-ROYAL 0603WAF3900T5E 390 1%,C23151,Resistor_SMD:R_0603_1608Metric,yes,"U22 LED current, ~5 mA from 3.3 V"
 J5,VIM3 POWER key lead,JST B2B-PH-K-S,C131337,Connector_JST:JST_PH_B2B-PH-K_1x02_P2.00mm_Vertical,yes,wire to the VIM3 power-key pad
 R23,100Ω,0603 100 1%,C22775,Resistor_SMD:R_0603_1608Metric,yes,
 R24,100Ω,0603 100 1%,C22775,Resistor_SMD:R_0603_1608Metric,yes,

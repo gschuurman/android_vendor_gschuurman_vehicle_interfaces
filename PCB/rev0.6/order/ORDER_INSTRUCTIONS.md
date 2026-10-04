@@ -100,19 +100,23 @@ SOT-23s can go on in the same reflow or by iron.
      optocoupler EL817S1 C470884 -> LTV-817S-TA1-C C109227 (same pinout and package).
    - USB module L4: Bourns SRP6060FA-8R2M (C2045598, $1.38) instead of the Coilcraft XAL6060-822MEC ($12.34). Same
      8.2 uH, 8.5 A saturation, 22.5 mOhm, and the same land pattern (pads 4.05 vs 4.04 mm apart). All same value, package and rating.
-4. Extra hardware: M2.5 x 11 mm standoffs (3, for the GNSS, audio and USB modules), M3 screws/standoffs for the four
+4. **Not in the LCSC list:** U22, the Panasonic AQY210S PhotoMOS for the VIM3 power key, comes from your own stock
+   (it shows in `lcsc_cart_one_set.csv` with quantity 0).
+5. Extra hardware: M2.5 x 11 mm standoffs (3, for the GNSS, audio and USB modules), M3 screws/standoffs for the four
    main board corners, and an M2 x 11 mm standoff for a future K-line module (H8).
 
 ## 4. Assembly order (suggested)
 
 1. Main board, paste + reflow: U20 (U21 stays empty with the RP2354B), TPS55288 stage (U12, Q11, Q12, L3), then the rest of the SMD parts.
-   Check U20 and U12 for bridges under a loupe before going on.
+   Check U20 and U12 for bridges under a loupe before going on. Bottom side: U22 (AQY210S PhotoMOS) next to J5,
+   pin 1 dot as on the bottom assembly drawing.
 2. Hand-solder the through-hole parts: module sockets J10/J23/J25/J27, J2 (VIM3 box header), loom connectors, F4 fuse
    holder, the large electrolytics.
 3. Modules: SMD first (paste + reflow), then their headers J24/J26/J28 on the **bottom side**, pins pointing down.
-4. JP2 (GNSS RX source) is copper, bridged 1-2 from the factory.
-5. Before the first power-up: measure for shorts on VSYS_IN, +5V_SYS, +5V_AON, +3V3_MCU and +1V1_MCU to GND.
-6. Flash the RP2354B over USB (same firmware and procedure as the RP2350B) (hold SW1, tap SW2) or SWD on J22; see `../../rev0.4/README.md`, "Flashing the RP2350B".
+4. J5 (VIM3 power key lead): wire pins 1 and 2 to the two pads of the VIM3 POWER key; either way round.
+5. JP2 (GNSS RX source) is copper, bridged 1-2 from the factory.
+6. Before the first power-up: measure for shorts on VSYS_IN, +5V_SYS, +5V_AON, +3V3_MCU and +1V1_MCU to GND.
+7. Flash the RP2354B over USB (same firmware and procedure as the RP2350B) (hold SW1, tap SW2) or SWD on J22; see `../../rev0.4/README.md`, "Flashing the RP2350B".
 
 ## Status
 

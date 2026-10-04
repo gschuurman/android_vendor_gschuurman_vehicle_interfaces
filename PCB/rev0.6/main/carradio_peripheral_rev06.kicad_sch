@@ -8,6 +8,541 @@
     (date "2026-10-01")
     (rev "0.4"))
   (lib_symbols
+    (symbol "Relay_SolidState:AQY210S"
+		(in_bom yes)
+		(on_board yes)
+		(property "Reference" "U"
+			(at -5.08 5.08 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "AQY210S"
+			(at 0 5.08 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Package_SO:SO-4_4.4x4.3mm_P2.54mm"
+			(at -5.08 -5.08 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+					(italic yes)
+				)
+				(justify left)
+			)
+		)
+		(property "Datasheet" "https://toshiba.semicon-storage.com/info/docget.jsp?did=10047&prodName=TLP3123"
+			(at 0 0 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Description" "Solid State Relay (Photo MOSFET) 40V, 1A, 0.1Ohm, SO-4"
+			(at 0 0 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "ki_keywords" "MOSFET Output Photorelay 1-Form-A"
+			(at 0 0 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "ki_fp_filters" "SO*4.4x3.9mm*P2.54mm*"
+			(at 0 0 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(symbol "AQY210S_0_1"
+			(rectangle
+				(start -5.08 3.81)
+				(end 5.08 -3.81)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type background)
+				)
+			)
+			(polyline
+				(pts
+					(xy -5.08 2.54) (xy -3.175 2.54) (xy -3.175 -2.54) (xy -5.08 -2.54)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy -3.81 -0.635) (xy -2.54 -0.635)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy -3.175 -0.635) (xy -3.81 0.635) (xy -2.54 0.635) (xy -3.175 -0.635)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy -1.905 0.508) (xy -0.635 0.508) (xy -1.016 0.381) (xy -1.016 0.635) (xy -0.635 0.508)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy -1.905 -0.508) (xy -0.635 -0.508) (xy -1.016 -0.635) (xy -1.016 -0.381) (xy -0.635 -0.508)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy 1.016 2.159) (xy 1.016 0.635)
+				)
+				(stroke
+					(width 0.2032)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy 1.016 -0.635) (xy 1.016 -2.159)
+				)
+				(stroke
+					(width 0.2032)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy 1.524 2.286) (xy 1.524 2.032) (xy 1.524 2.032)
+				)
+				(stroke
+					(width 0.3556)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy 1.524 1.524) (xy 1.524 1.27) (xy 1.524 1.27)
+				)
+				(stroke
+					(width 0.3556)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy 1.524 0.762) (xy 1.524 0.508) (xy 1.524 0.508)
+				)
+				(stroke
+					(width 0.3556)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy 1.524 -0.508) (xy 1.524 -0.762)
+				)
+				(stroke
+					(width 0.3556)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy 1.524 -1.27) (xy 1.524 -1.524) (xy 1.524 -1.524)
+				)
+				(stroke
+					(width 0.3556)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy 1.524 -2.032) (xy 1.524 -2.286) (xy 1.524 -2.286)
+				)
+				(stroke
+					(width 0.3556)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy 1.651 2.159) (xy 2.794 2.159) (xy 2.794 2.54) (xy 5.08 2.54)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy 1.651 1.397) (xy 2.794 1.397) (xy 2.794 0.635)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy 1.651 -0.635) (xy 2.794 -0.635) (xy 2.794 0.635) (xy 1.651 0.635)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy 1.651 -1.397) (xy 2.794 -1.397) (xy 2.794 -0.635)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy 1.651 -2.159) (xy 2.794 -2.159) (xy 2.794 -2.54) (xy 5.08 -2.54)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy 1.778 1.397) (xy 2.286 1.524) (xy 2.286 1.27) (xy 1.778 1.397)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy 1.778 -1.397) (xy 2.286 -1.27) (xy 2.286 -1.524) (xy 1.778 -1.397)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(circle
+				(center 2.794 0.635)
+				(radius 0.127)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy 2.794 0) (xy 3.81 0)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(circle
+				(center 2.794 0)
+				(radius 0.127)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(circle
+				(center 2.794 -0.635)
+				(radius 0.127)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy 3.429 1.651) (xy 4.191 1.651)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy 3.429 -1.651) (xy 4.191 -1.651)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(circle
+				(center 3.81 2.54)
+				(radius 0.127)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy 3.81 1.651) (xy 3.429 0.889) (xy 4.191 0.889) (xy 3.81 1.651)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(circle
+				(center 3.81 0)
+				(radius 0.127)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy 3.81 -1.651) (xy 3.429 -0.889) (xy 4.191 -0.889) (xy 3.81 -1.651)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy 3.81 -2.54) (xy 3.81 2.54)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(circle
+				(center 3.81 -2.54)
+				(radius 0.127)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+		)
+		(symbol "AQY210S_1_1"
+			(pin passive line
+				(at -7.62 2.54 0)
+				(length 2.54)
+				(name ""
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at -7.62 -2.54 0)
+				(length 2.54)
+				(name ""
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at 7.62 -2.54 180)
+				(length 2.54)
+				(name ""
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "3"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at 7.62 2.54 180)
+				(length 2.54)
+				(name ""
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "4"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+		)
+	)
     (symbol
       "Device:R"
       (pin_numbers hide)
@@ -13484,6 +14019,60 @@
           (reference "J1")
           (unit 1)))))
   (label
+    "PWR_KEY_LED"
+    (at 430 188.81 270)
+    (fields_autoplaced)
+    (effects
+      (font
+        (size 1.27 1.27))
+      (justify left bottom))
+    (uuid "f28ea67e-7beb-5a38-8107-4e30f308fad4"))
+  (label
+    "PWR_KEY_LED"
+    (at 442.38 182.46 180)
+    (fields_autoplaced)
+    (effects
+      (font
+        (size 1.27 1.27))
+      (justify right bottom))
+    (uuid "f112b789-6fe9-5502-b39f-da6100b66a45"))
+  (label
+    "VIM3_PWR_KEY_B"
+    (at 457.62 182.46 0)
+    (fields_autoplaced)
+    (effects
+      (font
+        (size 1.27 1.27))
+      (justify left bottom))
+    (uuid "4dc7e521-e421-509b-bc34-0fbc58ac3dc1"))
+  (label
+    "VIM3_PWR_KEY_A"
+    (at 457.62 187.54 0)
+    (fields_autoplaced)
+    (effects
+      (font
+        (size 1.27 1.27))
+      (justify left bottom))
+    (uuid "e8834870-d741-5ade-a6ce-0056c3628d41"))
+  (label
+    "VIM3_PWR_KEY_A"
+    (at 469.92 185 180)
+    (fields_autoplaced)
+    (effects
+      (font
+        (size 1.27 1.27))
+      (justify right bottom))
+    (uuid "91065077-fe5a-5288-b99b-80b874bfdf70"))
+  (label
+    "VIM3_PWR_KEY_B"
+    (at 469.92 187.54 180)
+    (fields_autoplaced)
+    (effects
+      (font
+        (size 1.27 1.27))
+      (justify right bottom))
+    (uuid "582541f2-516d-527f-8de3-00b8d2a938d7"))
+  (label
     "+3V3_MCU"
     (at 179.92 202.46 180)
     (fields_autoplaced)
@@ -21992,31 +22581,30 @@
       (justify left bottom))
     (uuid "3391a925-f341-529d-8add-2f8031ad23a7"))
   (symbol
-    (lib_id "Transistor_FET:AO3400A")
+    (lib_id "Relay_SolidState:AQY210S")
     (at 450 185 0)
     (unit 1)
     (in_bom yes)
     (on_board yes)
     (dnp no)
-    (fields_autoplaced)
-    (uuid "56ce5cee-958e-5994-82b2-e5f33727a7ac")
+    (uuid "2c6f824b-0e1e-5884-8a8d-99490e7dd04c")
     (property
       "Reference"
-      "Q1"
-      (at 450 174.62 0)
+      "U22"
+      (at 450 178.65 0)
       (effects
         (font
           (size 1.27 1.27))))
     (property
       "Value"
-      "AO3400A"
-      (at 450 194.08 0)
+      "AQY210S"
+      (at 450 191.35 0)
       (effects
         (font
           (size 1 1))))
     (property
       "Footprint"
-      "Package_TO_SOT_SMD:SOT-23"
+      "Package_SO:SO-4_4.4x4.3mm_P2.54mm"
       (at 450 185 0)
       (effects
         (font
@@ -22032,7 +22620,7 @@
         hide))
     (property
       "LCSC"
-      "C20917"
+      ""
       (at 450 185 0)
       (effects
         (font
@@ -22040,7 +22628,7 @@
         hide))
     (property
       "MPN"
-      "AO3400A 30V 5.7A N-MOSFET"
+      "Panasonic AQY210S PhotoMOS 350V 120mA 1 Form A, SOP-4 (own stock)"
       (at 450 185 0)
       (effects
         (font
@@ -22048,32 +22636,26 @@
         hide))
     (pin
       "1"
-      (uuid "6dc7cf4d-da10-5c6b-a52d-5d667bd64763"))
+      (uuid "c309ffac-a644-53df-b905-25452d8be060"))
     (pin
       "2"
-      (uuid "f554da59-8634-57c3-b105-0b7af1c8f969"))
+      (uuid "df5de0d9-669b-58a0-90cd-edc963806dbe"))
     (pin
       "3"
-      (uuid "b8e2bb49-4c93-5401-ae76-3030ae6225d8"))
+      (uuid "f4df1e94-61bb-5d4b-886f-c06eedce8896"))
+    (pin
+      "4"
+      (uuid "8d7b7447-dc09-5505-a565-36ef400fdbfc"))
     (instances
       (project
         "carradio_peripheral_rev06"
         (path
           "/3b49dff3-5af1-5299-8484-b6e3bf9b1595"
-          (reference "Q1")
+          (reference "U22")
           (unit 1)))))
-  (label
-    "PWR_KEY_G"
-    (at 444.92 185 180)
-    (fields_autoplaced)
-    (effects
-      (font
-        (size 1.27 1.27))
-      (justify right bottom))
-    (uuid "a1cbe1bc-b381-52c7-a8ea-688e0a48f35e"))
   (symbol
     (lib_id "power:GND")
-    (at 452.54 190.08 0)
+    (at 442.38 187.54 270)
     (unit 1)
     (in_bom no)
     (on_board yes)
@@ -22082,7 +22664,7 @@
     (property
       "Reference"
       "#PWR058"
-      (at 452.54 195.08 0)
+      (at 442.38 187.54 0)
       (effects
         (font
           (size 1.27 1.27))
@@ -22090,14 +22672,14 @@
     (property
       "Value"
       "GND"
-      (at 452.54 193.58 0)
+      (at 442.38 187.54 0)
       (effects
         (font
           (size 1 1))))
     (property
       "Footprint"
       ""
-      (at 452.54 190.08 0)
+      (at 442.38 187.54 0)
       (effects
         (font
           (size 1.27 1.27))
@@ -22105,7 +22687,7 @@
     (property
       "Datasheet"
       ""
-      (at 452.54 190.08 0)
+      (at 442.38 187.54 0)
       (effects
         (font
           (size 1.27 1.27))
@@ -22120,15 +22702,6 @@
           "/3b49dff3-5af1-5299-8484-b6e3bf9b1595"
           (reference "#PWR058")
           (unit 1)))))
-  (label
-    "VIM3_PWR_KEY"
-    (at 452.54 179.92 90)
-    (fields_autoplaced)
-    (effects
-      (font
-        (size 1.27 1.27))
-      (justify left bottom))
-    (uuid "967cdbfa-1cc5-5abb-a542-e86afb312140"))
   (symbol
     (lib_id "Device:R")
     (at 430 185 0)
@@ -22148,7 +22721,7 @@
         (justify left)))
     (property
       "Value"
-      "100Ω"
+      "390Ω"
       (at 432.2 186.2 0)
       (effects
         (font
@@ -22172,7 +22745,7 @@
         hide))
     (property
       "LCSC"
-      "C22775"
+      "C23151"
       (at 430 185 0)
       (effects
         (font
@@ -22180,7 +22753,7 @@
         hide))
     (property
       "MPN"
-      "0603 100 1%"
+      "UNI-ROYAL 0603WAF3900T5E 390 1%"
       (at 430 185 0)
       (effects
         (font
@@ -22208,143 +22781,6 @@
         (size 1.27 1.27))
       (justify left bottom))
     (uuid "790d964d-28f3-5bdf-bc1f-0b0195b39f9d"))
-  (label
-    "PWR_KEY_G"
-    (at 430 188.81 270)
-    (fields_autoplaced)
-    (effects
-      (font
-        (size 1.27 1.27))
-      (justify right bottom))
-    (uuid "d04d223b-a7b4-507e-95e7-24e7e8cfa289"))
-  (symbol
-    (lib_id "Device:R")
-    (at 438 200 0)
-    (unit 1)
-    (in_bom yes)
-    (on_board yes)
-    (dnp no)
-    (fields_autoplaced)
-    (uuid "ac4d409b-29fd-5595-99dd-e97e81a2e27f")
-    (property
-      "Reference"
-      "R19"
-      (at 440.2 198.8 0)
-      (effects
-        (font
-          (size 1.27 1.27))
-        (justify left)))
-    (property
-      "Value"
-      "100k"
-      (at 440.2 201.2 0)
-      (effects
-        (font
-          (size 1 1))
-        (justify left)))
-    (property
-      "Footprint"
-      "Resistor_SMD:R_0603_1608Metric"
-      (at 438 200 0)
-      (effects
-        (font
-          (size 1.27 1.27))
-        hide))
-    (property
-      "Datasheet"
-      ""
-      (at 438 200 0)
-      (effects
-        (font
-          (size 1.27 1.27))
-        hide))
-    (property
-      "LCSC"
-      "C25803"
-      (at 438 200 0)
-      (effects
-        (font
-          (size 1.27 1.27))
-        hide))
-    (property
-      "MPN"
-      "0603 100k 1%"
-      (at 438 200 0)
-      (effects
-        (font
-          (size 1.27 1.27))
-        hide))
-    (pin
-      "1"
-      (uuid "d3bd25b9-8cd5-5ab7-b5cd-15cc75ac0b61"))
-    (pin
-      "2"
-      (uuid "cbeb4e02-8601-501e-8914-5c4f97c49e30"))
-    (instances
-      (project
-        "carradio_peripheral_rev06"
-        (path
-          "/3b49dff3-5af1-5299-8484-b6e3bf9b1595"
-          (reference "R19")
-          (unit 1)))))
-  (label
-    "PWR_KEY_G"
-    (at 438 196.19 90)
-    (fields_autoplaced)
-    (effects
-      (font
-        (size 1.27 1.27))
-      (justify left bottom))
-    (uuid "c52b11ab-f03b-5cde-a6f9-3f80012ead8c"))
-  (symbol
-    (lib_id "power:GND")
-    (at 438 203.81 0)
-    (unit 1)
-    (in_bom no)
-    (on_board yes)
-    (dnp no)
-    (uuid "a966d614-569f-5671-a667-d5cf8011de69")
-    (property
-      "Reference"
-      "#PWR059"
-      (at 438 208.81 0)
-      (effects
-        (font
-          (size 1.27 1.27))
-        hide))
-    (property
-      "Value"
-      "GND"
-      (at 438 207.31 0)
-      (effects
-        (font
-          (size 1 1))))
-    (property
-      "Footprint"
-      ""
-      (at 438 203.81 0)
-      (effects
-        (font
-          (size 1.27 1.27))
-        hide))
-    (property
-      "Datasheet"
-      ""
-      (at 438 203.81 0)
-      (effects
-        (font
-          (size 1.27 1.27))
-        hide))
-    (pin
-      "1"
-      (uuid "ca3d179b-bba1-5fd1-a929-e5ec48e7e36e"))
-    (instances
-      (project
-        "carradio_peripheral_rev06"
-        (path
-          "/3b49dff3-5af1-5299-8484-b6e3bf9b1595"
-          (reference "#PWR059")
-          (unit 1)))))
   (symbol
     (lib_id "Connector_Generic:Conn_01x02")
     (at 475 185 0)
@@ -22412,64 +22848,6 @@
         (path
           "/3b49dff3-5af1-5299-8484-b6e3bf9b1595"
           (reference "J5")
-          (unit 1)))))
-  (label
-    "VIM3_PWR_KEY"
-    (at 469.92 185 180)
-    (fields_autoplaced)
-    (effects
-      (font
-        (size 1.27 1.27))
-      (justify right bottom))
-    (uuid "00674933-349c-5680-a5cd-534ea1ad1c72"))
-  (symbol
-    (lib_id "power:GND")
-    (at 469.92 187.54 270)
-    (unit 1)
-    (in_bom no)
-    (on_board yes)
-    (dnp no)
-    (uuid "29b621e2-6de7-5638-a63b-ce0fdd8e43c0")
-    (property
-      "Reference"
-      "#PWR060"
-      (at 469.92 192.54 0)
-      (effects
-        (font
-          (size 1.27 1.27))
-        hide))
-    (property
-      "Value"
-      "GND"
-      (at 469.92 191.04 0)
-      (effects
-        (font
-          (size 1 1))))
-    (property
-      "Footprint"
-      ""
-      (at 469.92 187.54 0)
-      (effects
-        (font
-          (size 1.27 1.27))
-        hide))
-    (property
-      "Datasheet"
-      ""
-      (at 469.92 187.54 0)
-      (effects
-        (font
-          (size 1.27 1.27))
-        hide))
-    (pin
-      "1"
-      (uuid "cb8caa49-1a19-5e31-9e67-7e7775d66cbb"))
-    (instances
-      (project
-        "carradio_peripheral_rev06"
-        (path
-          "/3b49dff3-5af1-5299-8484-b6e3bf9b1595"
-          (reference "#PWR060")
           (unit 1)))))
   (symbol
     (lib_id "Device:R")

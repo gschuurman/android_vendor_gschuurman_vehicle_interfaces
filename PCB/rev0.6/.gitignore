@@ -1,3 +1,4 @@
 # local editor/tool settings
 .codex/
 *.kicad_prl
+*.lck

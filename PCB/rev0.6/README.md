@@ -3,7 +3,7 @@
 Rev 0.6 is rev 0.5 (`../rev0.5/`, kept as the reference) plus a socket for a stackable K-line module. The GNSS and
 audio modules are the rev 0.4 boards (`../rev0.4/gnss|audio`); the USB module is `usb/` (rev 0.4 with the fix below). Everything in
 `../rev0.5/README.md` (USB_UP pair, TPS560430 layout, expansion pins) and `../rev0.4/README.md` still applies except
-J10, described here.
+J10 and the VIM3 power key, described here.
 
 Everything to order and hand-assemble the four boards is in `order/` (see `order/ORDER_INSTRUCTIONS.md`); `fab/` holds
 the same Gerbers plus JLC assembly BOM/CPL files in case of a PCBA order.
@@ -59,6 +59,23 @@ held by one **M2 standoff at H8 (69.6, 18.5)**.
 
 The socket and standoff stay outside the HDMI corridor (In1 "HDMI reference" keep-out), so the HDMI ground reference
 is untouched. J21 (SPI1 + I2C under the USB module) is unchanged from rev 0.5.
+
+## VIM3 power key: PhotoMOS U22
+
+The VIM3 POWER key is pressed by a PhotoMOS that shorts the key's own two pins, isolated, as in the earlier hand-wired
+setup. Up to rev 0.5, Q1 (AO3400A) pulled J5 pin 1 to the board's GND.
+
+- **U22**: Panasonic **AQY210S** (SOP-4, 350 V / 120 mA, 25 Ω max on), on the **bottom side** right next to J5 at
+  (19.2, 15.0). Pins 3/4 (the switch) go to J5 pins 1/2 over a few mm of bottom copper; pin 2 (LED cathode) to GND.
+- **R12**: 390 Ω from GPIO15 (`MCU_PWR_KEY`) to the LED anode, about 5 mA from 3.3 V. The AQY210S needs 3 mA at most
+  to switch on. The GPIO's default 4 mA drive is fine; the 8 mA setting gives more margin. Firmware is unchanged:
+  GPIO15 high = key pressed.
+- **R19** (the MOSFET's gate pull-down) is gone: an undriven LED is off.
+- **J5** (JST-PH 2P): pins 1 and 2 go to the two pads of the VIM3 POWER key. Either way round works, J5 no longer
+  carries GND.
+- Scripts: `layout/schematic/pwrkey_sch.py` (schematic) and `layout/main/pwrkeypcb.py` (place U22, rip the old
+  copper), then `bridge.py` routed `/VIM3_PWR_KEY_A`, `/VIM3_PWR_KEY_B` and `/PWR_KEY_LED`. DRC: 0 unconnected, no
+  errors; schematic parity unchanged (field mismatches only).
 
 ## Status
 

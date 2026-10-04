@@ -1,6 +1,6 @@
 """bridge.py in out net sx sy [x0 y0 x1 y1]: route one connection for `net` from the copper island containing (sx, sy) to any
 other piece of that net's copper (zone fill, track, via, pad), on F/In1/In2/B with through vias. Grid router on a
-0.05 mm raster of other-net copper inflated by clearance + half track width. Adds locked 0.2 mm tracks / 0.45 vias."""
+0.05 mm raster of other-net copper inflated by clearance + half track width. Adds locked 0.2 mm tracks / 0.45 / 0.3 mm drill vias."""
 import pcbnew, sys, heapq, math
 import numpy as np
 from PIL import Image, ImageDraw
@@ -156,7 +156,7 @@ def flush(run):
 for a, c in zip(path, path[1:]):
     if a[0] != c[0]:
         flush(run); run = [c]
-        v = pcbnew.PCB_VIA(b); v.SetPosition(XY(a[1], a[2])); v.SetWidth(MM(0.45)); v.SetDrill(MM(0.2)); v.SetNet(net); v.SetLocked(True); b.Add(v); vias += 1
+        v = pcbnew.PCB_VIA(b); v.SetPosition(XY(a[1], a[2])); v.SetWidth(MM(0.45)); v.SetDrill(MM(0.3)); v.SetNet(net); v.SetLocked(True); b.Add(v); vias += 1
     else: run.append(c)
 flush(run)
 print('path cells', len(path), 'segs', segs, 'vias', vias, 'from', LAY[path[0][0]], 'to layer', b.GetLayerName(LAY[goal[0]]), X0 + goal[2] * R, Y0 + goal[1] * R)

@@ -2,7 +2,7 @@
 	(version "E")
 	(design
 		(source "C:\\Users\\glenn\\repos\\headunit\\android_vendor_gschuurman_vehicle_interfaces\\PCB\\rev0.6\\main\\carradio_peripheral_rev06.kicad_sch")
-		(date "2026-10-03T11:45:11")
+		(date "2026-10-04T10:22:17")
 		(tool "Eeschema 10.0.6")
 		(sheet
 			(number "1")
@@ -7391,75 +7391,6 @@
 			)
 		)
 		(comp
-			(ref "Q1")
-			(value "AO3400A")
-			(footprint "Package_TO_SOT_SMD:SOT-23")
-			(fields
-				(field
-					(name "LCSC") "C20917")
-				(field
-					(name "MPN") "AO3400A 30V 5.7A N-MOSFET")
-				(field
-					(name "Footprint") "Package_TO_SOT_SMD:SOT-23")
-				(field
-					(name "Datasheet")
-				)
-				(field
-					(name "Description")
-				)
-			)
-			(libsource
-				(lib "Transistor_FET")
-				(part "AO3400A")
-				(description "30V Vds, 5.7A Id, N-Channel MOSFET, SOT-23")
-			)
-			(property
-				(name "LCSC")
-				(value "C20917")
-			)
-			(property
-				(name "MPN")
-				(value "AO3400A 30V 5.7A N-MOSFET")
-			)
-			(property
-				(name "Sheetname")
-				(value "carradio_peripheral_rev06")
-			)
-			(property
-				(name "Sheetfile")
-				(value "carradio_peripheral_rev06.kicad_sch")
-			)
-			(property
-				(name "ki_keywords")
-				(value "N-Channel MOSFET")
-			)
-			(property
-				(name "ki_fp_filters")
-				(value "SOT?23*")
-			)
-			(sheetpath
-				(names "/")
-				(tstamps "/")
-			)
-			(tstamps "56ce5cee-958e-5994-82b2-e5f33727a7ac")
-			(units
-				(unit
-					(name "A")
-					(pins
-						(pin
-							(num "1")
-						)
-						(pin
-							(num "3")
-						)
-						(pin
-							(num "2")
-						)
-					)
-				)
-			)
-		)
-		(comp
 			(ref "Q2")
 			(value "P-MOSFET -60V")
 			(footprint "Package_TO_SOT_SMD:SOT-23")
@@ -8540,13 +8471,13 @@
 		)
 		(comp
 			(ref "R12")
-			(value "100Ω")
+			(value "390Ω")
 			(footprint "Resistor_SMD:R_0603_1608Metric")
 			(fields
 				(field
-					(name "LCSC") "C22775")
+					(name "LCSC") "C23151")
 				(field
-					(name "MPN") "0603 100 1%")
+					(name "MPN") "UNI-ROYAL 0603WAF3900T5E 390 1%")
 				(field
 					(name "Footprint") "Resistor_SMD:R_0603_1608Metric")
 				(field
@@ -8563,11 +8494,11 @@
 			)
 			(property
 				(name "LCSC")
-				(value "C22775")
+				(value "C23151")
 			)
 			(property
 				(name "MPN")
-				(value "0603 100 1%")
+				(value "UNI-ROYAL 0603WAF3900T5E 390 1%")
 			)
 			(property
 				(name "Sheetname")
@@ -8920,72 +8851,6 @@
 				(tstamps "/")
 			)
 			(tstamps "0e95d6fe-f67b-56b3-a9cb-3c9df5ec8686")
-			(units
-				(unit
-					(name "A")
-					(pins
-						(pin
-							(num "1")
-						)
-						(pin
-							(num "2")
-						)
-					)
-				)
-			)
-		)
-		(comp
-			(ref "R19")
-			(value "100k")
-			(footprint "Resistor_SMD:R_0603_1608Metric")
-			(fields
-				(field
-					(name "LCSC") "C25803")
-				(field
-					(name "MPN") "0603 100k 1%")
-				(field
-					(name "Footprint") "Resistor_SMD:R_0603_1608Metric")
-				(field
-					(name "Datasheet")
-				)
-				(field
-					(name "Description")
-				)
-			)
-			(libsource
-				(lib "Device")
-				(part "R")
-				(description "Resistor")
-			)
-			(property
-				(name "LCSC")
-				(value "C25803")
-			)
-			(property
-				(name "MPN")
-				(value "0603 100k 1%")
-			)
-			(property
-				(name "Sheetname")
-				(value "carradio_peripheral_rev06")
-			)
-			(property
-				(name "Sheetfile")
-				(value "carradio_peripheral_rev06.kicad_sch")
-			)
-			(property
-				(name "ki_keywords")
-				(value "R res resistor")
-			)
-			(property
-				(name "ki_fp_filters")
-				(value "R_*")
-			)
-			(sheetpath
-				(names "/")
-				(tstamps "/")
-			)
-			(tstamps "ac4d409b-29fd-5595-99dd-e97e81a2e27f")
 			(units
 				(unit
 					(name "A")
@@ -14411,6 +14276,79 @@
 			)
 		)
 		(comp
+			(ref "U22")
+			(value "AQY210S")
+			(footprint "Package_SO:SO-4_4.4x4.3mm_P2.54mm")
+			(fields
+				(field
+					(name "LCSC")
+				)
+				(field
+					(name "MPN") "Panasonic AQY210S PhotoMOS 350V 120mA 1 Form A, SOP-4 (own stock)")
+				(field
+					(name "Footprint") "Package_SO:SO-4_4.4x4.3mm_P2.54mm")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Relay_SolidState")
+				(part "AQY210S")
+				(description "Solid State Relay (Photo MOSFET) 40V, 1A, 0.1Ohm, SO-4")
+			)
+			(property
+				(name "LCSC")
+				(value "")
+			)
+			(property
+				(name "MPN")
+				(value "Panasonic AQY210S PhotoMOS 350V 120mA 1 Form A, SOP-4 (own stock)")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_peripheral_rev06")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_peripheral_rev06.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "MOSFET Output Photorelay 1-Form-A")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "SO*4.4x3.9mm*P2.54mm*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "2c6f824b-0e1e-5884-8a8d-99490e7dd04c")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+						(pin
+							(num "4")
+						)
+						(pin
+							(num "3")
+						)
+					)
+				)
+			)
+		)
+		(comp
 			(ref "Y1")
 			(value "12MHz")
 			(footprint "Crystal:Crystal_SMD_3225-4Pin_3.2x2.5mm")
@@ -16307,6 +16245,49 @@
 			)
 		)
 		(libpart
+			(lib "Relay_SolidState")
+			(part "AQY210S")
+			(description "Solid State Relay (Photo MOSFET) 40V, 1A, 0.1Ohm, SO-4")
+			(docs "https://toshiba.semicon-storage.com/info/docget.jsp?did=10047&prodName=TLP3123")
+			(footprints
+				(fp "SO*4.4x3.9mm*P2.54mm*")
+			)
+			(fields
+				(field
+					(name "Reference") "U")
+				(field
+					(name "Value") "AQY210S")
+				(field
+					(name "Footprint") "Package_SO:SO-4_4.4x4.3mm_P2.54mm")
+				(field
+					(name "Datasheet") "https://toshiba.semicon-storage.com/info/docget.jsp?did=10047&prodName=TLP3123")
+				(field
+					(name "Description") "Solid State Relay (Photo MOSFET) 40V, 1A, 0.1Ohm, SO-4")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "")
+					(type "passive")
+				)
+				(pin
+					(num "2")
+					(name "")
+					(type "passive")
+				)
+				(pin
+					(num "3")
+					(name "")
+					(type "passive")
+				)
+				(pin
+					(num "4")
+					(name "")
+					(type "passive")
+				)
+			)
+		)
+		(libpart
 			(lib "Switch")
 			(part "SW_Push")
 			(description "Push button switch, generic, two pins")
@@ -17351,6 +17332,10 @@
 		(library
 			(logical "Regulator_Linear")
 			(uri "${KICAD10_SYMBOL_DIR}/Regulator_Linear.kicad_sym")
+		)
+		(library
+			(logical "Relay_SolidState")
+			(uri "${KICAD10_SYMBOL_DIR}/Relay_SolidState.kicad_sym")
 		)
 		(library
 			(logical "Switch")
@@ -20602,21 +20587,15 @@
 		)
 		(net
 			(code "145")
-			(name "/PWR_KEY_G")
+			(name "/PWR_KEY_LED")
 			(class "Default")
-			(node
-				(ref "Q1")
-				(pin "1")
-				(pinfunction "G_1")
-				(pintype "input")
-			)
 			(node
 				(ref "R12")
 				(pin "2")
 				(pintype "passive")
 			)
 			(node
-				(ref "R19")
+				(ref "U22")
 				(pin "1")
 				(pintype "passive")
 			)
@@ -21098,7 +21077,7 @@
 		)
 		(net
 			(code "170")
-			(name "/VIM3_PWR_KEY")
+			(name "/VIM3_PWR_KEY_A")
 			(class "Default")
 			(node
 				(ref "J5")
@@ -21107,14 +21086,29 @@
 				(pintype "passive")
 			)
 			(node
-				(ref "Q1")
+				(ref "U22")
 				(pin "3")
-				(pinfunction "D_3")
 				(pintype "passive")
 			)
 		)
 		(net
 			(code "171")
+			(name "/VIM3_PWR_KEY_B")
+			(class "Default")
+			(node
+				(ref "J5")
+				(pin "2")
+				(pinfunction "Pin_2_2")
+				(pintype "passive")
+			)
+			(node
+				(ref "U22")
+				(pin "4")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "172")
 			(name "/VIM3_UARTC_RX")
 			(class "Default")
 			(node
@@ -21130,7 +21124,7 @@
 			)
 		)
 		(net
-			(code "172")
+			(code "173")
 			(name "/VIM3_UARTC_TX")
 			(class "Default")
 			(node
@@ -21146,7 +21140,7 @@
 			)
 		)
 		(net
-			(code "173")
+			(code "174")
 			(name "/VSYS_IN")
 			(class "HighCurrent")
 			(node
@@ -21208,7 +21202,7 @@
 			)
 		)
 		(net
-			(code "174")
+			(code "175")
 			(name "GND")
 			(class "Default")
 			(node
@@ -21836,12 +21830,6 @@
 				(pintype "passive")
 			)
 			(node
-				(ref "J5")
-				(pin "2")
-				(pinfunction "Pin_2_2")
-				(pintype "passive")
-			)
-			(node
 				(ref "J7")
 				(pin "2")
 				(pinfunction "Pin_2_2")
@@ -21851,12 +21839,6 @@
 				(ref "NT3")
 				(pin "2")
 				(pinfunction "2_2")
-				(pintype "passive")
-			)
-			(node
-				(ref "Q1")
-				(pin "2")
-				(pinfunction "S_2")
 				(pintype "passive")
 			)
 			(node
@@ -21890,11 +21872,6 @@
 			)
 			(node
 				(ref "R15")
-				(pin "2")
-				(pintype "passive")
-			)
-			(node
-				(ref "R19")
 				(pin "2")
 				(pintype "passive")
 			)
@@ -22054,6 +22031,11 @@
 				(pintype "power_in")
 			)
 			(node
+				(ref "U22")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
 				(ref "U3")
 				(pin "2")
 				(pintype "passive")
@@ -22095,7 +22077,7 @@
 			)
 		)
 		(net
-			(code "175")
+			(code "176")
 			(name "unconnected-(J2-V6:VCC_MCU-Pad11)")
 			(class "Default")
 			(node
@@ -22106,7 +22088,7 @@
 			)
 		)
 		(net
-			(code "176")
+			(code "177")
 			(name "unconnected-(J2-V7:MCU_NRST-Pad13)")
 			(class "Default")
 			(node
@@ -22117,7 +22099,7 @@
 			)
 		)
 		(net
-			(code "177")
+			(code "178")
 			(name "unconnected-(J2-V8:MCU_SWIM-Pad15)")
 			(class "Default")
 			(node
@@ -22128,7 +22110,7 @@
 			)
 		)
 		(net
-			(code "178")
+			(code "179")
 			(name "unconnected-(J2-V10:ADC_CH0-Pad19)")
 			(class "Default")
 			(node
@@ -22139,7 +22121,7 @@
 			)
 		)
 		(net
-			(code "179")
+			(code "180")
 			(name "unconnected-(J2-V11:1V8-Pad21)")
 			(class "Default")
 			(node
@@ -22150,7 +22132,7 @@
 			)
 		)
 		(net
-			(code "180")
+			(code "181")
 			(name "unconnected-(J2-V12:ADC_CH3-Pad23)")
 			(class "Default")
 			(node
@@ -22161,7 +22143,7 @@
 			)
 		)
 		(net
-			(code "181")
+			(code "182")
 			(name "unconnected-(J2-V13:SPDIF_OUT-Pad25)")
 			(class "Default")
 			(node
@@ -22172,7 +22154,7 @@
 			)
 		)
 		(net
-			(code "182")
+			(code "183")
 			(name "unconnected-(J2-V18:Linux_RX-Pad35)")
 			(class "Default")
 			(node
@@ -22183,7 +22165,7 @@
 			)
 		)
 		(net
-			(code "183")
+			(code "184")
 			(name "unconnected-(J2-V19:Linux_TX-Pad37)")
 			(class "Default")
 			(node
@@ -22194,7 +22176,7 @@
 			)
 		)
 		(net
-			(code "184")
+			(code "185")
 			(name "unconnected-(J2-V22:I2C_M3_SCL-Pad4)")
 			(class "Default")
 			(node
@@ -22205,7 +22187,7 @@
 			)
 		)
 		(net
-			(code "185")
+			(code "186")
 			(name "unconnected-(J2-V23:I2C_M3_SDA-Pad6)")
 			(class "Default")
 			(node
@@ -22216,7 +22198,7 @@
 			)
 		)
 		(net
-			(code "186")
+			(code "187")
 			(name "unconnected-(J2-V25:I2C_AO_SCK-Pad10)")
 			(class "Default")
 			(node
@@ -22227,7 +22209,7 @@
 			)
 		)
 		(net
-			(code "187")
+			(code "188")
 			(name "unconnected-(J2-V26:I2C_AO_SDA-Pad12)")
 			(class "Default")
 			(node
@@ -22238,7 +22220,7 @@
 			)
 		)
 		(net
-			(code "188")
+			(code "189")
 			(name "unconnected-(J2-V36:RTC_CLK-Pad32)")
 			(class "Default")
 			(node
@@ -22249,7 +22231,7 @@
 			)
 		)
 		(net
-			(code "189")
+			(code "190")
 			(name "unconnected-(J2-V37:GPIOH_4-Pad34)")
 			(class "Default")
 			(node
@@ -22260,7 +22242,7 @@
 			)
 		)
 		(net
-			(code "190")
+			(code "191")
 			(name "unconnected-(J2-V38:MCU_PA1-Pad36)")
 			(class "Default")
 			(node
@@ -22271,7 +22253,7 @@
 			)
 		)
 		(net
-			(code "191")
+			(code "192")
 			(name "unconnected-(J2-V39:GPIODZ_15-Pad38)")
 			(class "Default")
 			(node
@@ -22282,7 +22264,7 @@
 			)
 		)
 		(net
-			(code "192")
+			(code "193")
 			(name "unconnected-(J13-UTILITY-Pad14)")
 			(class "Default")
 			(node
@@ -22293,7 +22275,7 @@
 			)
 		)
 		(net
-			(code "193")
+			(code "194")
 			(name "unconnected-(J14-Pin_1-Pad1)")
 			(class "Default")
 			(node
@@ -22304,7 +22286,7 @@
 			)
 		)
 		(net
-			(code "194")
+			(code "195")
 			(name "unconnected-(J14-Pin_2-Pad2)")
 			(class "Default")
 			(node
@@ -22315,7 +22297,7 @@
 			)
 		)
 		(net
-			(code "195")
+			(code "196")
 			(name "unconnected-(J14-Pin_3-Pad3)")
 			(class "Default")
 			(node
@@ -22326,7 +22308,7 @@
 			)
 		)
 		(net
-			(code "196")
+			(code "197")
 			(name "unconnected-(J14-Pin_7-Pad7)")
 			(class "Default")
 			(node
@@ -22337,7 +22319,7 @@
 			)
 		)
 		(net
-			(code "197")
+			(code "198")
 			(name "unconnected-(J14-Pin_29-Pad29)")
 			(class "Default")
 			(node
@@ -22348,7 +22330,7 @@
 			)
 		)
 		(net
-			(code "198")
+			(code "199")
 			(name "unconnected-(J14-Pin_30-Pad30)")
 			(class "Default")
 			(node
@@ -22359,7 +22341,7 @@
 			)
 		)
 		(net
-			(code "199")
+			(code "200")
 			(name "unconnected-(J14-Pin_31-Pad31)")
 			(class "Default")
 			(node
@@ -22370,7 +22352,7 @@
 			)
 		)
 		(net
-			(code "200")
+			(code "201")
 			(name "unconnected-(J14-Pin_32-Pad32)")
 			(class "Default")
 			(node
@@ -22381,7 +22363,7 @@
 			)
 		)
 		(net
-			(code "201")
+			(code "202")
 			(name "unconnected-(J14-Pin_38-Pad38)")
 			(class "Default")
 			(node
@@ -22392,7 +22374,7 @@
 			)
 		)
 		(net
-			(code "202")
+			(code "203")
 			(name "unconnected-(J14-Pin_39-Pad39)")
 			(class "Default")
 			(node
@@ -22403,7 +22385,7 @@
 			)
 		)
 		(net
-			(code "203")
+			(code "204")
 			(name "unconnected-(J14-Pin_40-Pad40)")
 			(class "Default")
 			(node
@@ -22414,7 +22396,7 @@
 			)
 		)
 		(net
-			(code "204")
+			(code "205")
 			(name "unconnected-(J21-Pin_4-Pad4)")
 			(class "Default")
 			(node
@@ -22425,7 +22407,7 @@
 			)
 		)
 		(net
-			(code "205")
+			(code "206")
 			(name "unconnected-(J21-Pin_5-Pad5)")
 			(class "Default")
 			(node
@@ -22436,7 +22418,7 @@
 			)
 		)
 		(net
-			(code "206")
+			(code "207")
 			(name "unconnected-(J25-Pin_9-Pad9)")
 			(class "Default")
 			(node
@@ -22447,7 +22429,7 @@
 			)
 		)
 		(net
-			(code "207")
+			(code "208")
 			(name "unconnected-(J25-Pin_11-Pad11)")
 			(class "Default")
 			(node
@@ -22458,7 +22440,7 @@
 			)
 		)
 		(net
-			(code "208")
+			(code "209")
 			(name "unconnected-(J25-Pin_19-Pad19)")
 			(class "Default")
 			(node
@@ -22469,7 +22451,7 @@
 			)
 		)
 		(net
-			(code "209")
+			(code "210")
 			(name "unconnected-(J27-Pin_5-Pad5)")
 			(class "Default")
 			(node
@@ -22480,7 +22462,7 @@
 			)
 		)
 		(net
-			(code "210")
+			(code "211")
 			(name "unconnected-(U6-NC-Pad4)")
 			(class "Default")
 			(node
@@ -22491,7 +22473,7 @@
 			)
 		)
 		(net
-			(code "211")
+			(code "212")
 			(name "unconnected-(U12-FB{slash}INT-Pad14)")
 			(class "Default")
 			(node
@@ -22502,7 +22484,7 @@
 			)
 		)
 		(net
-			(code "212")
+			(code "213")
 			(name "unconnected-(U19-NC-Pad4)")
 			(class "Default")
 			(node
@@ -22513,7 +22495,7 @@
 			)
 		)
 		(net
-			(code "213")
+			(code "214")
 			(name "unconnected-(U20-GPIO11-Pad9)")
 			(class "Default")
 			(node
@@ -22524,7 +22506,7 @@
 			)
 		)
 		(net
-			(code "214")
+			(code "215")
 			(name "unconnected-(U20-GPIO12-Pad11)")
 			(class "Default")
 			(node
@@ -22535,7 +22517,7 @@
 			)
 		)
 		(net
-			(code "215")
+			(code "216")
 			(name "unconnected-(U20-GPIO13-Pad12)")
 			(class "Default")
 			(node
@@ -22546,7 +22528,7 @@
 			)
 		)
 		(net
-			(code "216")
+			(code "217")
 			(name "unconnected-(U20-GPIO29-Pad37)")
 			(class "Default")
 			(node
@@ -22557,7 +22539,7 @@
 			)
 		)
 		(net
-			(code "217")
+			(code "218")
 			(name "unconnected-(U20-GPIO34-Pad43)")
 			(class "Default")
 			(node
@@ -22568,7 +22550,7 @@
 			)
 		)
 		(net
-			(code "218")
+			(code "219")
 			(name "unconnected-(U20-GPIO44{slash}ADC4-Pad55)")
 			(class "Default")
 			(node
@@ -22579,7 +22561,7 @@
 			)
 		)
 		(net
-			(code "219")
+			(code "220")
 			(name "unconnected-(U20-GPIO45{slash}ADC5-Pad56)")
 			(class "Default")
 			(node
@@ -22590,7 +22572,7 @@
 			)
 		)
 		(net
-			(code "220")
+			(code "221")
 			(name "unconnected-(U20-GPIO46{slash}ADC6-Pad57)")
 			(class "Default")
 			(node
@@ -22601,7 +22583,7 @@
 			)
 		)
 		(net
-			(code "221")
+			(code "222")
 			(name "unconnected-(U20-GPIO47{slash}ADC7-Pad58)")
 			(class "Default")
 			(node
