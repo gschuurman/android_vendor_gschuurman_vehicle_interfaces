@@ -94,4 +94,11 @@ C2856837,1,1,Display FPC 40P 0.5mm,"XUNPU FPC-05FB-40PH20, 40P 0.5mm dual-contac
 C5119087,1,1,NEO-M9N-00B,u-blox NEO-M9N-00B,ublox_NEO,carradio_gnss_rev04:U7
 C178942,1,1,,Littelfuse 029707.5WXNV 7.5A mini blade fuse for holder F4,,extra (named in a BOM note)
 C5305,1,1,,2.54 mm jumper cap for JP1,,extra (named in a BOM note)
+C127351,5,5,,"Molex 43025-0800 Micro-Fit 2x4 plug housing for J1 (ISO A pigtail), min 5",,extra (named in a BOM note)
+C293525,5,5,,"Molex 43025-0600 Micro-Fit 2x3 plug housing for J8 (ISO C1 pigtail), min 5",,extra (named in a BOM note)
+C293530,20,20,,Molex 43030-0007 Micro-Fit crimp 20-24 AWG for J1/J8 (14 used),,extra (named in a BOM note)
+C157955,50,50,,"JST PHR-2 housing for J5 (VIM3 power key), min 50",,extra (named in a BOM note)
+C111514,50,50,,"JST PHR-4 housing for J7 (light sensor), min 50",,extra (named in a BOM note)
+C157953,20,20,,"JST PHR-5 housing for J12 (display buttons), min 20",,extra (named in a BOM note)
+C111515,100,100,,"JST SPH-002T-P0.5S PH crimp 24-30 AWG for J5/J7/J12 (11 used), min 100",,extra (named in a BOM note)
 ,0,1,AQY210S,"Panasonic AQY210S PhotoMOS 350V 120mA 1 Form A, SOP-4 (own stock)",,carradio_peripheral_rev06:U22 (no LCSC number: source separately)

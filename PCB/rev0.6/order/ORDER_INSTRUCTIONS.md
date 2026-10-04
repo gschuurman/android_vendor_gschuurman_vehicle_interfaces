@@ -102,7 +102,18 @@ SOT-23s can go on in the same reflow or by iron.
      8.2 uH, 8.5 A saturation, 22.5 mOhm, and the same land pattern (pads 4.05 vs 4.04 mm apart). All same value, package and rating.
 4. **Not in the LCSC list:** U22, the Panasonic AQY210S PhotoMOS for the VIM3 power key, comes from your own stock
    (it shows in `lcsc_cart_one_set.csv` with quantity 0).
-5. Extra hardware: M2.5 x 11 mm standoffs (3, for the GNSS, audio and USB modules), M3 screws/standoffs for the four
+5. **Cable-side connectors (in the list):** Molex Micro-Fit 3.0 plug housings 43025-0800 (J1) and 43025-0600 (J8) with
+   43030-0007 crimps (20-24 AWG; use 20 AWG for A4 +12 V and A8 GND), and JST-PH housings PHR-2 (J5), PHR-4 (J7),
+   PHR-5 (J12) with SPH-002T-P0.5S crimps. LCSC's minimum quantities mean you get spares. The J18 plug (JST-XH 2P) is
+   not in the list: you have those.
+6. **Not from LCSC, buy ready-made:**
+   - ISO 10487 plugs/harness for the car side of the J1 and J8 pigtails (J1 pin n = ISO A pin n, J8 pin n = ISO C1 pin n).
+   - 40-pin IDC ribbon cable, 2x20 2.54 mm female-female, short (J2 to the VIM3 header).
+   - Short HDMI cable (VIM3 to J13).
+   - U.FL to SMA (or Fakra, to match the car) pigtail for the GNSS antenna on J11, plus an active GNSS antenna.
+   - 40-pin 0.5 mm FPC ribbon for the display (J14), usually supplied with the panel.
+   - A crimp tool for Micro-Fit and JST-PH if you do not have one.
+7. Extra hardware: M2.5 x 11 mm standoffs (3, for the GNSS, audio and USB modules), M3 screws/standoffs for the four
    main board corners, and an M2 x 11 mm standoff for a future K-line module (H8).
 
 ## 4. Assembly order (suggested)
