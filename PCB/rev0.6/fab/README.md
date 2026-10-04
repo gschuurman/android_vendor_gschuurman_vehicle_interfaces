@@ -40,7 +40,7 @@ impedance calculator for 50 Ω on the 2-layer 1.6 mm stack before ordering (see 
   - main: J10 (2x4 female socket, 8.5 mm) and J27 (2x8 female socket, 8.5 mm). J23/J25 use BOOMELE C30867, which was
     out of stock on 2026-10-01; any 2x10 2.54 mm 8.5 mm socket fits.
   - gnss: J28 (2x8 male header, bottom side).
-  - GNSS R102/R103 had no LCSC number in the rev 0.4 BOM; the order BOM uses C25190 (27 Ω 0603, the part used for R83/R84
+  - GNSS R102/R103 had no LCSC number in the rev 0.4 BOM; the order BOM uses C2907021 (FOJAN 27 Ω 1% 0603, the part used for R83/R84; UNI-ROYAL C25190 was backordered on 2026-10-04
     on the main board).
 - U20 is the RP2354B (C39843328, 2 MB flash in the package): LCSC does not sell the RP2350B (C42415655) outside China.
   U21 (external flash) is marked not fitted and left out of the JLC BOM/CPL; fit it only with an RP2350B.

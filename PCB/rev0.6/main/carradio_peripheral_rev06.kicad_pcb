@@ -1377,7 +1377,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C25190"
+		(property "LCSC" "C2907021"
 			(at 0 0 90)
 			(layer "F.SilkS")
 			(hide yes)
@@ -1389,7 +1389,7 @@
 				)
 			)
 		)
-		(property "MPN" "UNI-ROYAL 0603WAF270JT5E 27R"
+		(property "MPN" "FOJAN FRC0603F27R0TS 27R 1%"
 			(at 0 0 90)
 			(layer "F.SilkS")
 			(hide yes)
@@ -33418,7 +33418,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C25190"
+		(property "LCSC" "C2907021"
 			(at 0 0 0)
 			(layer "F.SilkS")
 			(hide yes)
@@ -33430,7 +33430,7 @@
 				)
 			)
 		)
-		(property "MPN" "UNI-ROYAL 0603WAF270JT5E 27R"
+		(property "MPN" "FOJAN FRC0603F27R0TS 27R 1%"
 			(at 0 0 0)
 			(layer "F.SilkS")
 			(hide yes)

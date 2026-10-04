@@ -39022,7 +39022,7 @@
         hide))
     (property
       "LCSC"
-      "C25190"
+      "C2907021"
       (at 1060 230 0)
       (effects
         (font
@@ -39030,7 +39030,7 @@
         hide))
     (property
       "MPN"
-      "UNI-ROYAL 0603WAF270JT5E 27R"
+      "FOJAN FRC0603F27R0TS 27R 1%"
       (at 1060 230 0)
       (effects
         (font
@@ -39110,7 +39110,7 @@
         hide))
     (property
       "LCSC"
-      "C25190"
+      "C2907021"
       (at 1068 230 0)
       (effects
         (font
@@ -39118,7 +39118,7 @@
         hide))
     (property
       "MPN"
-      "UNI-ROYAL 0603WAF270JT5E 27R"
+      "FOJAN FRC0603F27R0TS 27R 1%"
       (at 1068 230 0)
       (effects
         (font
