@@ -1,3 +1,7 @@
+> **Rev 0.6 peripheral board:** the C firmware for its RP2350B is in [`firmware/`](firmware/README.md), and the
+> USB protocol it shares with the VHAL is [`protocol/mcu_protocol.h`](protocol/mcu_protocol.h). This page and
+> `main.py` describe the older MicroPython firmware for the perfboard and Pico 2 setup.
+
 # Vehicle Power Manager (MCU)
 
 MicroPython firmware for a Raspberry Pi Pico 2 (RP2350) that acts as a power

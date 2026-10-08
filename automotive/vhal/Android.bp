@@ -13,12 +13,9 @@ cc_binary {
         "VehicleHalDefaults",
     ],
 
-    required: [
-        "init.vehicle.sh",
-    ],
-
     srcs: [
         "Main.cpp",
+        "McuLink.cpp",
         "SchuurmanVehicleHardware.cpp",
     ],
 
@@ -39,6 +36,7 @@ cc_binary {
     
     header_libs: [
         "IVehicleHardware",
+        "gschuurman_mcu_protocol_headers",
     ],
     
     cflags: [
@@ -46,6 +44,25 @@ cc_binary {
     ]
 }
 
+// Debug tool for the peripheral board MCU (adb root shell): mcutool status | watch | set | bootsel
+cc_binary {
+    name: "mcutool",
+    vendor: true,
+    srcs: [
+        "mcutool.cpp",
+        "McuLink.cpp",
+    ],
+    local_include_dirs: ["."],
+    header_libs: ["gschuurman_mcu_protocol_headers"],
+    shared_libs: [
+        "libbase",
+        "liblog",
+    ],
+    cflags: ["-Wall", "-Wextra", "-Werror"],
+}
+
+// Not needed with the rev 0.6 peripheral board: the BH1750 sits on the MCU's I2C bus and
+// reaches the VHAL as MCU_PROP_LUX.
 cc_binary {
     name: "bh1750d",
     vendor: true,
@@ -64,6 +81,8 @@ cc_binary {
     init_rc: ["init.bh1750d.rc"],
 }
 
+// Backlight PWM and reverse GPIO on the VIM3 header: only for the old perfboard setup. With the
+// rev 0.6 peripheral board the MCU drives both, and header pins 32/33/35 carry audio.
 sh_binary {
     name: "init.vehicle.sh",
     src: "init.vehicle.sh",

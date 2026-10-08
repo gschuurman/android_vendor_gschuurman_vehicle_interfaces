@@ -16,11 +16,11 @@
 
 #include <android-base/logging.h>
 #include <android-base/properties.h>
+#include <android-base/stringprintf.h>
 
 #include <algorithm>
 #include <errno.h>
 #include <fcntl.h>
-#include <linux/gpio.h>
 #include <linux/input.h>
 #include <poll.h>
 #include <string.h>
@@ -55,35 +55,55 @@ using ::aidl::android::hardware::automotive::vehicle::VehiclePropertyChangeMode;
 using ::aidl::android::hardware::automotive::vehicle::VehicleSeatOccupancyState;
 
 static const int32_t VENDOR_AUTO_BRIGHTNESS = 0x12000001;
-static const int32_t VENDOR_SCREEN_POWER = 0x21400555;
+static const int32_t VENDOR_SCREEN_POWER = MCU_PROP_SCREEN_POWER;  // 0x21400555
+// VENDOR | GLOBAL | STRING: MCU firmware version and build, read-only.
+static const int32_t VENDOR_MCU_FW_VERSION = 0x2110060D;
 
 // SYSTEM | GLOBAL | STRING — VHAL → CarPowerPolicyService
 static const int32_t POWER_POLICY_REQ       = 0x11100F21;
 static const int32_t POWER_POLICY_GROUP_REQ = 0x11100F22;
 
-static constexpr int32_t PWM_PERIOD_NS = 30518;
 static constexpr int32_t GLOBAL_AREA_ID = 0;
 static constexpr int32_t DRIVER_SEAT_ID = 1;
 
-static std::string findPwmChipPath() {
-    const std::string baseDir = "/sys/class/pwm/";
-    for (int i = 0; i < 10; i++) {
-        const std::string chipName = "pwmchip" + std::to_string(i);
-        const std::string fullPath = baseDir + chipName;
-        const std::string linkPath = fullPath + "/device/of_node";
+// Publish AP_POWER_STATE_REQ ON ourselves if Android waits for us and the MCU does not
+// answer within this time (MCU missing, old firmware, or link trouble).
+static constexpr int64_t kFallbackOnNs = 10'000'000'000LL;
 
-        char buf[1024];
-        ssize_t len = readlink(linkPath.c_str(), buf, sizeof(buf) - 1);
-        if (len != -1) {
-            buf[len] = '\0';
-            if (std::string(buf).find("19000") != std::string::npos) {
-                LOG(INFO) << "Found PWM chip " << chipName << " for address 19000";
-                return fullPath;
-            }
-        }
-    }
-    LOG(WARNING) << "PWM chip for address 19000 not found, falling back to pwmchip0";
-    return baseDir + "pwmchip0";
+// Handbrake from GNSS speed: parked below 0.5 m/s for 3 s, moving above 2 m/s.
+static constexpr float kParkedBelowMps = 0.5f;
+static constexpr float kMovingAboveMps = 2.0f;
+static constexpr int64_t kParkedAfterNs = 3'000'000'000LL;
+
+// MCU vendor properties exposed to Android: {property, writable}.
+struct McuVendorProp {
+    int32_t prop;
+    bool writable;
+};
+static const McuVendorProp kMcuVendorProps[] = {
+        {static_cast<int32_t>(MCU_PROP_BATTERY_MV), false},
+        {static_cast<int32_t>(MCU_PROP_RAIL_5V_MV), false},
+        {static_cast<int32_t>(MCU_PROP_BOARD_TEMP), false},
+        {static_cast<int32_t>(MCU_PROP_LUX), false},
+        {static_cast<int32_t>(MCU_PROP_AMP_MODE), true},
+        {static_cast<int32_t>(MCU_PROP_AMP_ON), false},
+        {static_cast<int32_t>(MCU_PROP_AUDIO_MUTE), true},
+        {static_cast<int32_t>(MCU_PROP_INPUTS), false},
+        {static_cast<int32_t>(MCU_PROP_STATUS), false},
+        {static_cast<int32_t>(MCU_PROP_POWER_STATE), false},
+        {static_cast<int32_t>(MCU_PROP_OFF_DELAY_S), true},
+        {static_cast<int32_t>(MCU_PROP_GNSS_CMD), true},
+        {static_cast<int32_t>(MCU_PROP_GNSS_FIX), false},
+};
+
+static bool isMcuVendorProp(int32_t prop) {
+    for (const auto& p : kMcuVendorProps)
+        if (p.prop == prop) return true;
+    return false;
+}
+
+static bool isVecProp(int32_t prop) {
+    return (static_cast<uint32_t>(prop) & 0x00FF0000u) == 0x00410000u;
 }
 
 static int64_t elapsedRealtimeNano() {
@@ -111,6 +131,11 @@ static std::string readSysFsString(const std::string& path, int retries = 3,
 static constexpr char kDistanceUnitsProp[] = "persist.vendor.vehicle.distance_units";
 static constexpr char kTemperatureUnitsProp[] = "persist.vendor.vehicle.temperature_units";
 static constexpr char kFuelVolumeUnitsProp[] = "persist.vendor.vehicle.fuel_volume_units";
+static constexpr char kHandbrakeModeProp[] = "persist.vendor.vehicle.handbrake";
+static constexpr char kHandbrakeSeenProp[] = "persist.vendor.vehicle.handbrake_seen";
+static constexpr char kAmpModeProp[] = "persist.vendor.vehicle.amp_mode";
+static constexpr char kOffDelayProp[] = "persist.vendor.vehicle.off_delay_s";
+static constexpr char kLuxMaxProp[] = "ro.vendor.vehicle.lux_max";
 
 static const std::vector<int32_t> kDistanceUnits = {
         static_cast<int32_t>(VehicleUnit::KILOMETER), static_cast<int32_t>(VehicleUnit::MILE)};
@@ -120,14 +145,6 @@ static const std::vector<int32_t> kFuelVolumeUnits = {
         static_cast<int32_t>(VehicleUnit::LITER), static_cast<int32_t>(VehicleUnit::US_GALLON),
         static_cast<int32_t>(VehicleUnit::IMPERIAL_GALLON)};
 
-static int readIntFileNoExcept(const std::string& path) {
-    std::ifstream f(path);
-    if (!f) return -1;
-    long v = -1;
-    if (!(f >> v)) return -1;
-    return static_cast<int>(v);
-}
-
 SchuurmanVehicleHardware::SchuurmanVehicleHardware()
     : mCurrentGear(static_cast<int32_t>(VehicleGear::GEAR_PARK)),
       mCurrentBrightness(50),
@@ -135,45 +152,37 @@ SchuurmanVehicleHardware::SchuurmanVehicleHardware()
       mScreenOn(true),
       mIgnitionState(static_cast<int32_t>(VehicleIgnitionState::ON)),
       mParkingBrakeOn(1),
+      mNightMode(0),
+      mSpeed(0.0f),
+      mLux(-1),
+      mHandbrakeRaw(false),
+      mHandbrakeSeen(android::base::GetBoolProperty(kHandbrakeSeenProp, false)),
+      mGnssStationary(true),
       mDistanceUnits(android::base::GetIntProperty(kDistanceUnitsProp,
               static_cast<int32_t>(VehicleUnit::KILOMETER))),
       mTemperatureUnits(android::base::GetIntProperty(kTemperatureUnitsProp,
               static_cast<int32_t>(VehicleUnit::CELSIUS))),
       mFuelVolumeUnits(android::base::GetIntProperty(kFuelVolumeUnitsProp,
               static_cast<int32_t>(VehicleUnit::LITER))),
-      mGearGpioOffset(51),
-      mBacklightEnableGpioOffset(53),
-      mBacklightEnableFd(-1),
-      mGearFd(-1),
       mShuttingDown(false),
-      mSensorThreadRunning(false),
-      mLightSensorPath("/data/vendor/sensors/bh1750_lux"),
-      mSensorRawMax(100000),
       mAutoBrightnessEnabled(false),
       mAutoTargetBrightness(-1),
       mDisplayThreadRunning(false),
       mTouchWakeThreadRunning(false),
-      mAccKeyThreadRunning(false),
       mTapToWakeSuppressed(false),
+      mPausedForPower(false),
       mLastApPowerStateReq(static_cast<int32_t>(VehicleApPowerStateReq::ON)),
       mLastApPowerStateReqParam(0),
       mLastApPowerStateReport(static_cast<int32_t>(VehicleApPowerStateReport::ON)),
       mLastApPowerStateReportParam(0),
+      mReportPending(false),
+      mFallbackOnAtNs(0),
       mCurrentPolicyGroup("default_group"),
       mCurrentPolicyReq("") {
-    LOG(INFO) << "Initializing SchuurmanVehicleHardware";
+    LOG(INFO) << "Initializing SchuurmanVehicleHardware (MCU link, protocol "
+              << MCU_PROTO_VERSION << ")";
 
-    mPwmChipBase = findPwmChipPath();
-    mPathPwmDuty = mPwmChipBase + "/pwm1/duty_cycle";
-    mPathPwmEnable = mPwmChipBase + "/pwm1/enable";
-    mPathPwmPeriod = mPwmChipBase + "/pwm1/period";
-
-    initPwm();
-    initGpios();
-
-    mSensorThreadRunning.store(true);
-    mSensorThread = std::thread(&SchuurmanVehicleHardware::sensorLoop, this);
-    mPollThread = std::thread(&SchuurmanVehicleHardware::pollInputs, this);
+    mHousekeepingThread = std::thread(&SchuurmanVehicleHardware::housekeepingLoop, this);
 
     mDisplayDpmsPath = findDisplayDpmsPath();
     if (!mDisplayDpmsPath.empty()) {
@@ -186,31 +195,21 @@ SchuurmanVehicleHardware::SchuurmanVehicleHardware()
     mTouchWakeThreadRunning.store(true);
     mTouchWakeThread = std::thread(&SchuurmanVehicleHardware::touchWakeLoop, this);
 
-    mAccKeyThreadRunning.store(true);
-    mAccKeyThread = std::thread(&SchuurmanVehicleHardware::accKeyLoop, this);
-
-    LOG(INFO) << "Initial gear forced to PARK";
-    LOG(INFO) << "Ignition forced ON; parking brake ON";
+    mMcu.start([this](const std::vector<mcu_prop_t>& p, bool s) { onMcuProps(p, s); },
+               [this](const mcu_info_msg_t& info) { onMcuInfo(info); },
+               [this](bool c) { onMcuConnect(c); });
 }
 
 SchuurmanVehicleHardware::~SchuurmanVehicleHardware() {
     mShuttingDown.store(true);
-    if (mPollThread.joinable()) mPollThread.join();
-
-    mSensorThreadRunning.store(false);
-    if (mSensorThread.joinable()) mSensorThread.join();
+    mMcu.stop();
+    if (mHousekeepingThread.joinable()) mHousekeepingThread.join();
 
     mDisplayThreadRunning.store(false);
     if (mDisplayThread.joinable()) mDisplayThread.join();
 
     mTouchWakeThreadRunning.store(false);
     if (mTouchWakeThread.joinable()) mTouchWakeThread.join();
-
-    mAccKeyThreadRunning.store(false);
-    if (mAccKeyThread.joinable()) mAccKeyThread.join();
-
-    if (mBacklightEnableFd >= 0) close(mBacklightEnableFd);
-    if (mGearFd >= 0) close(mGearFd);
 }
 
 void SchuurmanVehicleHardware::emitPropChange(const VehiclePropValue& v) {
@@ -219,6 +218,19 @@ void SchuurmanVehicleHardware::emitPropChange(const VehiclePropValue& v) {
     std::vector<VehiclePropValue> events;
     events.push_back(v);
     (*mOnPropChange)(events);
+}
+
+void SchuurmanVehicleHardware::emitInts(int32_t propId, const std::vector<int32_t>& values) {
+    VehiclePropValue v;
+    v.prop = propId;
+    v.areaId = GLOBAL_AREA_ID;
+    v.timestamp = elapsedRealtimeNano();
+    v.value.int32Values = values;
+    emitPropChange(v);
+}
+
+void SchuurmanVehicleHardware::emitInt(int32_t propId, int32_t value) {
+    emitInts(propId, {value});
 }
 
 void SchuurmanVehicleHardware::emitInitialStatesLocked() {
@@ -243,7 +255,7 @@ void SchuurmanVehicleHardware::emitInitialStatesLocked() {
         v.prop = static_cast<int32_t>(VehicleProperty::PERF_VEHICLE_SPEED);
         v.areaId = GLOBAL_AREA_ID;
         v.timestamp = elapsedRealtimeNano();
-        v.value.floatValues = {0.0f};
+        v.value.floatValues = {mSpeed.load()};
         events.push_back(v);
     }
 
@@ -251,6 +263,8 @@ void SchuurmanVehicleHardware::emitInitialStatesLocked() {
                 GLOBAL_AREA_ID, mIgnitionState.load());
     addIntEvent(static_cast<int32_t>(VehicleProperty::PARKING_BRAKE_ON),
                 GLOBAL_AREA_ID, mParkingBrakeOn.load());
+    addIntEvent(static_cast<int32_t>(VehicleProperty::NIGHT_MODE),
+                GLOBAL_AREA_ID, mNightMode.load());
     addIntEvent(static_cast<int32_t>(VehicleProperty::DISPLAY_BRIGHTNESS),
                 GLOBAL_AREA_ID, mCurrentBrightness.load());
     addIntEvent(VENDOR_AUTO_BRIGHTNESS, GLOBAL_AREA_ID,
@@ -271,7 +285,7 @@ void SchuurmanVehicleHardware::emitInitialStatesLocked() {
         events.push_back(v);
     }
 
-    // Since there is no external VMCU in your setup, expose a sane default AP request.
+    // Last request from the MCU (ON until it says otherwise).
     {
         VehiclePropValue v;
         v.prop = static_cast<int32_t>(VehicleProperty::AP_POWER_STATE_REQ);
@@ -286,208 +300,236 @@ void SchuurmanVehicleHardware::emitInitialStatesLocked() {
     (*mOnPropChange)(events);
 }
 
-void SchuurmanVehicleHardware::initGpios() {
-    if (mBacklightGpioChipName.empty()) {
-        mBacklightGpioChipName = "/dev/" +
-                android::base::GetProperty(
-                        "ro.vendor.vehicle.backlight.enable.gpio.chip",
-                        "gpiochip0");
-    }
+// ---------------------------------------------------------------- MCU link
 
-    if (mGearGpioChipName.empty()) {
-        mGearGpioChipName = "/dev/" +
-                android::base::GetProperty(
-                        "ro.vendor.vehicle.gear.gpio.chip",
-                        "gpiochip0");
-    }
-
-    mBacklightEnableGpioOffset = android::base::GetIntProperty(
-            "ro.vendor.vehicle.backlight.enable.gpio.offset", 53);
-    mGearGpioOffset = android::base::GetIntProperty(
-            "ro.vendor.vehicle.gear.gpio.offset", 51);
-
-    LOG(INFO) << "Backlight GPIO config: chip=" << mBacklightGpioChipName
-              << " offset=" << mBacklightEnableGpioOffset;
-    LOG(INFO) << "Gear GPIO config: chip=" << mGearGpioChipName
-              << " offset=" << mGearGpioOffset;
-
-    if (mBacklightEnableFd < 0) {
-        int chipFd = open(mBacklightGpioChipName.c_str(), O_RDWR);
-        if (chipFd < 0) {
-            LOG(ERROR) << "Failed to open backlight GPIO chip "
-                       << mBacklightGpioChipName << ": " << strerror(errno);
-        } else {
-            struct gpiohandle_request reqBl;
-            memset(&reqBl, 0, sizeof(reqBl));
-            reqBl.lineoffsets[0] = mBacklightEnableGpioOffset;
-            reqBl.lines = 1;
-            reqBl.flags = GPIOHANDLE_REQUEST_OUTPUT;
-            reqBl.default_values[0] = 1;
-            strncpy(reqBl.consumer_label, "vhal_backlight",
-                    sizeof(reqBl.consumer_label) - 1);
-
-            if (ioctl(chipFd, GPIO_GET_LINEHANDLE_IOCTL, &reqBl) >= 0) {
-                mBacklightEnableFd = reqBl.fd;
-                LOG(INFO) << "Backlight GPIO initialized";
-            } else {
-                LOG(ERROR) << "Failed to request backlight GPIO line "
-                           << mBacklightEnableGpioOffset << ": "
-                           << strerror(errno);
-            }
-            close(chipFd);
-        }
-    }
-
-    if (mGearFd < 0) {
-        int chipFd = open(mGearGpioChipName.c_str(), O_RDWR);
-        if (chipFd < 0) {
-            LOG(ERROR) << "Failed to open gear GPIO chip "
-                       << mGearGpioChipName << ": " << strerror(errno);
-        } else {
-            struct gpiohandle_request reqGear;
-            memset(&reqGear, 0, sizeof(reqGear));
-            reqGear.lineoffsets[0] = mGearGpioOffset;
-            reqGear.lines = 1;
-            reqGear.flags = GPIOHANDLE_REQUEST_INPUT;
-            strncpy(reqGear.consumer_label, "vhal_gear",
-                    sizeof(reqGear.consumer_label) - 1);
-
-            if (ioctl(chipFd, GPIO_GET_LINEHANDLE_IOCTL, &reqGear) >= 0) {
-                mGearFd = reqGear.fd;
-                LOG(INFO) << "Gear GPIO initialized";
-            } else {
-                LOG(ERROR) << "Failed to request gear GPIO line "
-                           << mGearGpioOffset << ": " << strerror(errno);
-            }
-            close(chipFd);
-        }
-    }
-}
-
-void SchuurmanVehicleHardware::setBacklightEnable(bool on) {
-    if (mBacklightEnableFd < 0) return;
-
-    struct gpiohandle_data data;
-    memset(&data, 0, sizeof(data));
-    data.values[0] = on ? 1 : 0;
-
-    if (ioctl(mBacklightEnableFd, GPIOHANDLE_SET_LINE_VALUES_IOCTL, &data) < 0) {
-        LOG(ERROR) << "Failed to set backlight GPIO: " << strerror(errno);
-    } else {
-        LOG(INFO) << "Backlight GPIO set to " << (on ? "ON" : "OFF");
-    }
-}
-
-int SchuurmanVehicleHardware::readGearGpio() {
-    if (mGearFd < 0) return -1;
-
-    struct gpiohandle_data data;
-    memset(&data, 0, sizeof(data));
-
-    if (ioctl(mGearFd, GPIOHANDLE_GET_LINE_VALUES_IOCTL, &data) < 0) {
-        LOG(ERROR) << "Failed reading gear GPIO: " << strerror(errno);
-        return -1;
-    }
-    return data.values[0];
-}
-
-void SchuurmanVehicleHardware::initPwm() {
-    LOG(INFO) << "Initializing PWM";
-    ensurePwmExported(mPwmChipBase);
-
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
-    writeSysFs(mPathPwmEnable, "0");
-    std::this_thread::sleep_for(std::chrono::milliseconds(20));
-    writeSysFs(mPathPwmPeriod, std::to_string(PWM_PERIOD_NS));
-    std::this_thread::sleep_for(std::chrono::milliseconds(20));
-    writeSysFs(mPathPwmDuty, std::to_string(PWM_PERIOD_NS / 2));
-    std::this_thread::sleep_for(std::chrono::milliseconds(20));
-    writeSysFs(mPathPwmEnable, "1");
-}
-
-void SchuurmanVehicleHardware::writePwm(int percentage) {
-    if (percentage < 0) percentage = 0;
-    if (percentage > 100) percentage = 100;
-
-    int inverted = 100 - percentage;
-    long long dutyCalc =
-            (static_cast<long long>(inverted) *
-             static_cast<long long>(PWM_PERIOD_NS)) /
-            100;
-    writeSysFs(mPathPwmDuty, std::to_string(dutyCalc));
-}
-
-void SchuurmanVehicleHardware::ensurePwmExported(const std::string& base) {
-    const std::string pwmEnablePath = base + "/pwm1/enable";
-    const std::string exportPath = base + "/export";
-
-    if (access(pwmEnablePath.c_str(), W_OK) == 0) return;
-
-    if (!std::filesystem::exists(base + "/pwm1")) {
-        writeSysFs(exportPath, "1");
-    }
-}
-
-void SchuurmanVehicleHardware::writeSysFs(const std::string& path,
-                                          const std::string& val) {
-    int fd = open(path.c_str(), O_WRONLY | O_TRUNC);
-    if (fd < 0) {
-        LOG(ERROR) << "Failed to open " << path << ": " << strerror(errno);
+void SchuurmanVehicleHardware::onMcuConnect(bool connected) {
+    if (!connected) {
+        LOG(INFO) << "MCU disconnected (VIM3 suspend, MCU restart or unplugged)";
         return;
     }
-    if (write(fd, val.c_str(), val.size()) < 0) {
-        LOG(ERROR) << "Failed to write " << path << ": " << strerror(errno);
+    pushSettingsToMcu();
+    if (mReportPending.exchange(false)) {
+        // Android reported while the link was down (typically DEEP_SLEEP_EXIT or
+        // WAIT_FOR_VHAL right after resume): the MCU answers with AP_POWER_STATE_REQ.
+        mMcu.set(MCU_PROP_AP_POWER_STATE_REPORT, mLastApPowerStateReport.load(),
+                 mLastApPowerStateReportParam.load());
     }
-    fsync(fd);
-    close(fd);
 }
 
-int SchuurmanVehicleHardware::readSysFsInt(const std::string& path) {
-    std::string s = readSysFsString(path);
-    if (s.empty()) return -1;
-    return std::stoi(s);
+void SchuurmanVehicleHardware::pushSettingsToMcu() {
+    int brightness = mLastNonZeroBrightness.load();
+    if (brightness <= 0) brightness = 50;
+    std::vector<mcu_prop_t> props = {
+            {MCU_PROP_DISPLAY_BRIGHTNESS, brightness, 0},
+            {MCU_PROP_AMP_MODE, android::base::GetIntProperty(kAmpModeProp, 2, 0, 2), 0},
+            {MCU_PROP_OFF_DELAY_S, android::base::GetIntProperty(kOffDelayProp, 15 * 60, 0,
+                                                                 7 * 24 * 3600), 0},
+    };
+    mMcu.set(props);
+}
+
+void SchuurmanVehicleHardware::onMcuInfo(const mcu_info_msg_t& info) {
+    std::string v = android::base::StringPrintf("%u.%u.%u (%s) board rev 0.%u proto %u%s",
+                                                info.fw_major, info.fw_minor, info.fw_patch,
+                                                info.build, info.board_rev, info.proto_version,
+                                                (info.flags & MCU_INFO_FLAG_EN_PULLUP)
+                                                        ? ""
+                                                        : ", R72 pull-down");
+    LOG(INFO) << "MCU firmware " << v << ", reset reason " << int(info.reset_reason)
+              << ", up " << info.uptime_s << " s";
+    if (info.proto_version != MCU_PROTO_VERSION) {
+        LOG(ERROR) << "MCU protocol " << int(info.proto_version) << " != VHAL protocol "
+                   << MCU_PROTO_VERSION << "; update the MCU firmware or the VHAL";
+    }
+    std::lock_guard<std::mutex> lk(mMcuMutex);
+    mMcuVersion = v;
+    mMcuEnPullup = info.flags & MCU_INFO_FLAG_EN_PULLUP;
+}
+
+void SchuurmanVehicleHardware::onMcuProps(const std::vector<mcu_prop_t>& props, bool snapshot) {
+    for (const auto& p : props) {
+        const int32_t prop = static_cast<int32_t>(p.prop);
+        switch (p.prop) {
+            case MCU_PROP_GEAR_SELECTION:
+                if (mCurrentGear.exchange(p.v0) != p.v0 || snapshot) {
+                    LOG(INFO) << "Gear " << p.v0;
+                    emitInt(prop, p.v0);
+                }
+                break;
+            case MCU_PROP_IGNITION_STATE:
+                if (mIgnitionState.exchange(p.v0) != p.v0 || snapshot) emitInt(prop, p.v0);
+                break;
+            case MCU_PROP_NIGHT_MODE:
+                if (mNightMode.exchange(p.v0 ? 1 : 0) != (p.v0 ? 1 : 0) || snapshot)
+                    emitInt(prop, p.v0 ? 1 : 0);
+                break;
+            case MCU_PROP_PERF_VEHICLE_SPEED: {
+                float speed;
+                memcpy(&speed, &p.v0, sizeof(speed));
+                mSpeed.store(speed);
+                VehiclePropValue v;
+                v.prop = prop;
+                v.areaId = GLOBAL_AREA_ID;
+                v.timestamp = elapsedRealtimeNano();
+                v.value.floatValues = {speed};
+                emitPropChange(v);
+                updateParkingBrake(false);
+                break;
+            }
+            case MCU_PROP_AP_POWER_STATE_REQ:
+                mFallbackOnAtNs.store(0);
+                if (p.v0 == static_cast<int32_t>(VehicleApPowerStateReq::SHUTDOWN_PREPARE)) {
+                    // ACC off: pause media and keep stray touches from waking the screen.
+                    mTapToWakeSuppressed.store(true);
+                    if (!mPausedForPower.exchange(true)) injectMediaKey(KEY_PAUSECD);
+                } else if (p.v0 == static_cast<int32_t>(VehicleApPowerStateReq::ON) ||
+                           p.v0 == static_cast<int32_t>(VehicleApPowerStateReq::CANCEL_SHUTDOWN)) {
+                    if (mPausedForPower.exchange(false)) injectMediaKey(KEY_PLAYCD);
+                }
+                publishApPowerStateReq(p.v0, p.v1);
+                break;
+            case MCU_PROP_SCREEN_POWER: {
+                // The display button toggles the backlight on the MCU. Mirror it without
+                // writing back (the MCU echoes our own writes too, which are no-ops here).
+                bool on = p.v0 != 0;
+                if (mScreenOn.load() != on) {
+                    LOG(INFO) << "Screen " << (on ? "on" : "off") << " (MCU)";
+                    mScreenOn.store(on);
+                    if (on) {
+                        mTapToWakeSuppressed.store(false);
+                        mCurrentBrightness.store(mLastNonZeroBrightness.load());
+                        publishCurrentBrightness();
+                    } else {
+                        if (mCurrentBrightness.load() > 0)
+                            mLastNonZeroBrightness.store(mCurrentBrightness.load());
+                        mCurrentBrightness.store(0);
+                    }
+                    publishVendorScreenPower();
+                }
+                break;
+            }
+            case MCU_PROP_DISPLAY_BRIGHTNESS:
+                break;  // echo of our own write
+            case MCU_PROP_LUX:
+                mLux.store(p.v0);
+                break;
+            case MCU_PROP_INPUTS: {
+                bool raw = p.v0 & MCU_IN_HANDBRAKE;
+                mHandbrakeRaw.store(raw);
+                if (raw && !mHandbrakeSeen.exchange(true)) {
+                    LOG(INFO) << "Handbrake wire seen engaged: using it from now on";
+                    android::base::SetProperty(kHandbrakeSeenProp, "1");
+                }
+                updateParkingBrake(snapshot);
+                break;
+            }
+            default:
+                break;
+        }
+
+        if (isMcuVendorProp(prop)) {
+            bool changed;
+            {
+                std::lock_guard<std::mutex> lk(mMcuMutex);
+                auto it = mMcuValues.find(prop);
+                changed = it == mMcuValues.end() || it->second != std::make_pair(p.v0, p.v1);
+                mMcuValues[prop] = {p.v0, p.v1};
+            }
+            if (changed || snapshot) {
+                if (isVecProp(prop)) emitInts(prop, {p.v0, p.v1});
+                else emitInt(prop, p.v0);
+            }
+        }
+    }
+}
+
+void SchuurmanVehicleHardware::updateParkingBrake(bool force) {
+    const std::string mode = android::base::GetProperty(kHandbrakeModeProp, "auto");
+    bool wired = mode == "wired" || (mode == "auto" && mHandbrakeSeen.load());
+
+    // GNSS speed with hysteresis, see kParkedBelowMps.
+    const float speed = mSpeed.load();
+    const int64_t now = elapsedRealtimeNano();
+    if (speed > kMovingAboveMps) {
+        mGnssStationary.store(false);
+        mSlowSinceNs = 0;
+    } else if (speed < kParkedBelowMps) {
+        int64_t expected = 0;
+        mSlowSinceNs.compare_exchange_strong(expected, now);
+        if (now - mSlowSinceNs.load() >= kParkedAfterNs) mGnssStationary.store(true);
+    } else {
+        mSlowSinceNs = 0;
+    }
+
+    int32_t on = (wired ? mHandbrakeRaw.load() : mGnssStationary.load()) ? 1 : 0;
+    if (mParkingBrakeOn.exchange(on) != on || force) {
+        LOG(INFO) << "Parking brake " << on << " (" << (wired ? "wire" : "GNSS speed") << ")";
+        emitInt(static_cast<int32_t>(VehicleProperty::PARKING_BRAKE_ON), on);
+    }
+}
+
+void SchuurmanVehicleHardware::housekeepingLoop() {
+    double ema = -1.0;
+    const double alpha = 0.25;
+    const int maxLux = android::base::GetIntProperty(kLuxMaxProp, 100000);
+
+    while (!mShuttingDown.load()) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(250));
+
+        // Fallback: Android waits for an AP_POWER_STATE_REQ but the MCU does not answer.
+        int64_t at = mFallbackOnAtNs.load();
+        if (at != 0 && elapsedRealtimeNano() >= at) {
+            mFallbackOnAtNs.store(0);
+            LOG(WARNING) << "No answer from the MCU, publishing AP_POWER_STATE_REQ ON";
+            publishApPowerStateReq(static_cast<int32_t>(VehicleApPowerStateReq::ON));
+        }
+
+        updateParkingBrake(false);
+
+        // Auto brightness from the MCU's light sensor.
+        int raw = mLux.load();
+        if (raw < 0) continue;
+        ema = ema < 0 ? raw : alpha * raw + (1.0 - alpha) * ema;
+        double percent = (log(1.0 + ema) / log(1.0 + std::max(1, maxLux))) * 100.0;
+        int intPercent = static_cast<int>(std::clamp(percent, 0.0, 100.0) + 0.5);
+        if (intPercent < 1) intPercent = 1;  // 0 % on this panel is still lit, keep it usable
+
+        if (mAutoBrightnessEnabled.load()) {
+            int last = mAutoTargetBrightness.load();
+            if (last < 0 || std::abs(intPercent - last) >= 2) {
+                mAutoTargetBrightness.store(intPercent);
+                if (mScreenOn.load()) {
+                    mLastNonZeroBrightness.store(intPercent);
+                    sendBrightness(intPercent);
+                    mCurrentBrightness.store(intPercent);
+                    publishCurrentBrightness();
+                }
+            }
+        }
+    }
+}
+
+// ---------------------------------------------------------------- display
+
+void SchuurmanVehicleHardware::sendBrightness(int percentage) {
+    percentage = std::clamp(percentage, 0, 100);
+    mMcu.set(MCU_PROP_DISPLAY_BRIGHTNESS, percentage);
 }
 
 void SchuurmanVehicleHardware::publishCurrentBrightness() {
-    VehiclePropValue v;
-    v.prop = static_cast<int32_t>(VehicleProperty::DISPLAY_BRIGHTNESS);
-    v.areaId = GLOBAL_AREA_ID;
-    v.timestamp = elapsedRealtimeNano();
-    v.value.int32Values = {mCurrentBrightness.load()};
-    emitPropChange(v);
+    emitInt(static_cast<int32_t>(VehicleProperty::DISPLAY_BRIGHTNESS), mCurrentBrightness.load());
 }
 
 void SchuurmanVehicleHardware::publishVendorScreenPower() {
-    VehiclePropValue v;
-    v.prop = VENDOR_SCREEN_POWER;
-    v.areaId = GLOBAL_AREA_ID;
-    v.timestamp = elapsedRealtimeNano();
-    v.value.int32Values = {mScreenOn.load() ? 1 : 0};
-    emitPropChange(v);
+    emitInt(VENDOR_SCREEN_POWER, mScreenOn.load() ? 1 : 0);
 }
 
 void SchuurmanVehicleHardware::publishApPowerStateReq(int32_t reqState,
                                                       int32_t param) {
     mLastApPowerStateReq.store(reqState);
     mLastApPowerStateReqParam.store(param);
-
-    VehiclePropValue v;
-    v.prop = static_cast<int32_t>(VehicleProperty::AP_POWER_STATE_REQ);
-    v.areaId = GLOBAL_AREA_ID;
-    v.timestamp = elapsedRealtimeNano();
-    v.value.int32Values = {reqState, param};
-    emitPropChange(v);
-}
-
-void SchuurmanVehicleHardware::publishIgnitionState(int32_t state) {
-    mIgnitionState.store(state);
-
-    VehiclePropValue v;
-    v.prop = static_cast<int32_t>(VehicleProperty::IGNITION_STATE);
-    v.areaId = GLOBAL_AREA_ID;
-    v.timestamp = elapsedRealtimeNano();
-    v.value.int32Values = {state};
-    emitPropChange(v);
+    LOG(INFO) << "AP_POWER_STATE_REQ " << reqState << " param " << param;
+    emitInts(static_cast<int32_t>(VehicleProperty::AP_POWER_STATE_REQ), {reqState, param});
 }
 
 void SchuurmanVehicleHardware::applyScreenPower(bool on, bool restoreBrightness) {
@@ -495,18 +537,11 @@ void SchuurmanVehicleHardware::applyScreenPower(bool on, bool restoreBrightness)
         int restore = mLastNonZeroBrightness.load();
         if (restore <= 0) restore = 50;
 
-        setBacklightEnable(true);
-
-        if (restoreBrightness) {
-            writePwm(restore);
+        if (restoreBrightness || mCurrentBrightness.load() <= 0) {
             mCurrentBrightness.store(restore);
         }
-
-        // Ensure PWM is non-zero even if current brightness was 0.
-        if (mCurrentBrightness.load() <= 0) {
-            mCurrentBrightness.store(restore);
-            writePwm(restore);
-        }
+        sendBrightness(mCurrentBrightness.load());
+        mMcu.set(MCU_PROP_SCREEN_POWER, 1);
 
         mScreenOn.store(true);
         // Any legitimate screen-on (ACC back on, manual wake, etc.) re-arms
@@ -517,16 +552,16 @@ void SchuurmanVehicleHardware::applyScreenPower(bool on, bool restoreBrightness)
         if (current > 0) {
             mLastNonZeroBrightness.store(current);
         }
-
-        writePwm(0);
-        setBacklightEnable(false);
+        // Only the enable goes off; the MCU keeps the brightness for the next screen-on
+        // (also when the display button turns it back on).
+        mMcu.set(MCU_PROP_SCREEN_POWER, 0);
         mCurrentBrightness.store(0);
         mScreenOn.store(false);
     }
 
     // Only publish brightness to Android when turning on. Publishing brightness=0
     // on screen-off causes Android to cache 0; it then sends DISPLAY_BRIGHTNESS=0
-    // back after wake-up, which overwrites the restored PWM value.
+    // back after wake-up, which overwrites the restored value.
     if (on) {
         publishCurrentBrightness();
     }
@@ -549,16 +584,26 @@ void SchuurmanVehicleHardware::handleApPowerStateReport(
 
     LOG(INFO) << "AP_POWER_STATE_REPORT state=" << state << " param=" << param;
 
+    // The MCU owns the power decisions: it answers with AP_POWER_STATE_REQ.
+    if (mMcu.set(MCU_PROP_AP_POWER_STATE_REPORT, state, param)) {
+        mReportPending.store(false);
+    } else {
+        mReportPending.store(true);
+    }
+
     switch (static_cast<VehicleApPowerStateReport>(state)) {
-        case VehicleApPowerStateReport::ON:
+        case VehicleApPowerStateReport::WAIT_FOR_VHAL:
         case VehicleApPowerStateReport::DEEP_SLEEP_EXIT:
         case VehicleApPowerStateReport::HIBERNATION_EXIT:
-        case VehicleApPowerStateReport::SHUTDOWN_CANCELLED:
-        case VehicleApPowerStateReport::WAIT_FOR_VHAL:
+            // Android waits for AP_POWER_STATE_REQ. If the MCU does not answer
+            // (not connected yet after resume, or missing) publish ON ourselves.
+            mFallbackOnAtNs.store(elapsedRealtimeNano() + kFallbackOnNs);
             applyScreenPower(true, true);
-            // Android is ready and waiting — tell it to go to ON so the
-            // policyGroup transitions from WaitForVHAL → On.
-            publishApPowerStateReq(static_cast<int32_t>(VehicleApPowerStateReq::ON));
+            break;
+
+        case VehicleApPowerStateReport::ON:
+        case VehicleApPowerStateReport::SHUTDOWN_CANCELLED:
+            applyScreenPower(true, true);
             break;
 
         case VehicleApPowerStateReport::DEEP_SLEEP_ENTRY:
@@ -577,6 +622,8 @@ void SchuurmanVehicleHardware::handleApPowerStateReport(
             break;
     }
 }
+
+// ---------------------------------------------------------------- set / get
 
 StatusCode SchuurmanVehicleHardware::setDisplayUnits(const VehiclePropValue& request,
                                                      const std::vector<int32_t>& supported,
@@ -602,13 +649,25 @@ StatusCode SchuurmanVehicleHardware::setDisplayUnits(const VehiclePropValue& req
     return StatusCode::OK;
 }
 
+StatusCode SchuurmanVehicleHardware::setMcuSetting(const VehiclePropValue& request,
+                                                   int32_t minValue, int32_t maxValue,
+                                                   const char* persistProp) {
+    if (request.value.int32Values.empty()) return StatusCode::INVALID_ARG;
+    const int32_t value = request.value.int32Values[0];
+    if (value < minValue || value > maxValue) return StatusCode::INVALID_ARG;
+    if (persistProp) android::base::SetProperty(persistProp, std::to_string(value));
+    if (!mMcu.set(static_cast<uint32_t>(request.prop), value)) {
+        // Persisted settings reach the MCU when it connects; commands do not.
+        return persistProp ? StatusCode::OK : StatusCode::TRY_AGAIN;
+    }
+    return StatusCode::OK;  // the MCU echoes the new value as a property change
+}
+
 StatusCode SchuurmanVehicleHardware::setValueInternal(
         const VehiclePropValue& request, VehiclePropValue* updatedValue) {
     if (request.prop == static_cast<int32_t>(VehicleProperty::DISPLAY_BRIGHTNESS)) {
         if (!request.value.int32Values.empty()) {
-            int brightness = request.value.int32Values[0];
-            if (brightness < 0) brightness = 0;
-            if (brightness > 100) brightness = 100;
+            int brightness = std::clamp(request.value.int32Values[0], 0, 100);
 
             if (!mAutoBrightnessEnabled.load()) {
                 if (brightness > 0) {
@@ -617,7 +676,7 @@ StatusCode SchuurmanVehicleHardware::setValueInternal(
                 mCurrentBrightness.store(brightness);
 
                 if (mScreenOn.load()) {
-                    writePwm(brightness);
+                    sendBrightness(brightness);
                 }
 
                 publishCurrentBrightness();
@@ -634,6 +693,7 @@ StatusCode SchuurmanVehicleHardware::setValueInternal(
         if (!request.value.int32Values.empty()) {
             const bool enable = request.value.int32Values[0] == 1;
             mAutoBrightnessEnabled.store(enable);
+            mAutoTargetBrightness.store(-1);
 
             VehiclePropValue v = request;
             v.areaId = GLOBAL_AREA_ID;
@@ -653,6 +713,14 @@ StatusCode SchuurmanVehicleHardware::setValueInternal(
     } else if (request.prop == static_cast<int32_t>(VehicleProperty::FUEL_VOLUME_DISPLAY_UNITS)) {
         return setDisplayUnits(request, kFuelVolumeUnits, kFuelVolumeUnitsProp, &mFuelVolumeUnits,
                                updatedValue);
+    } else if (request.prop == static_cast<int32_t>(MCU_PROP_AMP_MODE)) {
+        return setMcuSetting(request, 0, 2, kAmpModeProp);
+    } else if (request.prop == static_cast<int32_t>(MCU_PROP_OFF_DELAY_S)) {
+        return setMcuSetting(request, 0, 7 * 24 * 3600, kOffDelayProp);
+    } else if (request.prop == static_cast<int32_t>(MCU_PROP_AUDIO_MUTE)) {
+        return setMcuSetting(request, 0, 1, nullptr);
+    } else if (request.prop == static_cast<int32_t>(MCU_PROP_GNSS_CMD)) {
+        return setMcuSetting(request, MCU_GNSS_CMD_RESET, MCU_GNSS_CMD_NORMAL, nullptr);
     } else {
         return StatusCode::INVALID_ARG;
     }
@@ -702,13 +770,16 @@ StatusCode SchuurmanVehicleHardware::getValueInternal(
             response->value.int32Values = {mCurrentGear.load()};
             return StatusCode::OK;
         case VehicleProperty::PERF_VEHICLE_SPEED:
-            response->value.floatValues = {0.0f};
+            response->value.floatValues = {mSpeed.load()};
             return StatusCode::OK;
         case VehicleProperty::IGNITION_STATE:
             response->value.int32Values = {mIgnitionState.load()};
             return StatusCode::OK;
         case VehicleProperty::PARKING_BRAKE_ON:
             response->value.int32Values = {mParkingBrakeOn.load()};
+            return StatusCode::OK;
+        case VehicleProperty::NIGHT_MODE:
+            response->value.int32Values = {mNightMode.load()};
             return StatusCode::OK;
         case VehicleProperty::DISTANCE_DISPLAY_UNITS:
             response->value.int32Values = {mDistanceUnits.load()};
@@ -730,25 +801,47 @@ StatusCode SchuurmanVehicleHardware::getValueInternal(
                     mLastApPowerStateReportParam.load()};
             return StatusCode::OK;
         default:
-            if (request.prop == VENDOR_AUTO_BRIGHTNESS) {
-                response->value.int32Values = {
-                        mAutoBrightnessEnabled.load() ? 1 : 0};
-                return StatusCode::OK;
-            }
-            if (request.prop == VENDOR_SCREEN_POWER) {
-                response->value.int32Values = {mScreenOn.load() ? 1 : 0};
-                return StatusCode::OK;
-            }
-            if (request.prop == POWER_POLICY_GROUP_REQ) {
-                response->value.stringValue = mCurrentPolicyGroup;
-                return StatusCode::OK;
-            }
-            if (request.prop == POWER_POLICY_REQ) {
-                response->value.stringValue = mCurrentPolicyReq;
-                return StatusCode::OK;
-            }
-            return StatusCode::INVALID_ARG;
+            break;
     }
+
+    if (request.prop == VENDOR_AUTO_BRIGHTNESS) {
+        response->value.int32Values = {mAutoBrightnessEnabled.load() ? 1 : 0};
+        return StatusCode::OK;
+    }
+    if (request.prop == VENDOR_SCREEN_POWER) {
+        response->value.int32Values = {mScreenOn.load() ? 1 : 0};
+        return StatusCode::OK;
+    }
+    if (request.prop == POWER_POLICY_GROUP_REQ) {
+        response->value.stringValue = mCurrentPolicyGroup;
+        return StatusCode::OK;
+    }
+    if (request.prop == POWER_POLICY_REQ) {
+        response->value.stringValue = mCurrentPolicyReq;
+        return StatusCode::OK;
+    }
+    if (request.prop == VENDOR_MCU_FW_VERSION) {
+        std::lock_guard<std::mutex> lk(mMcuMutex);
+        if (mMcuVersion.empty()) return StatusCode::NOT_AVAILABLE;
+        response->value.stringValue = mMcuVersion;
+        return StatusCode::OK;
+    }
+    if (isMcuVendorProp(request.prop)) {
+        if (request.prop == static_cast<int32_t>(MCU_PROP_GNSS_CMD)) {
+            response->value.int32Values = {0};
+            return StatusCode::OK;
+        }
+        std::lock_guard<std::mutex> lk(mMcuMutex);
+        auto it = mMcuValues.find(request.prop);
+        if (it == mMcuValues.end()) return StatusCode::NOT_AVAILABLE;
+        if (isVecProp(request.prop)) {
+            response->value.int32Values = {it->second.first, it->second.second};
+        } else {
+            response->value.int32Values = {it->second.first};
+        }
+        return StatusCode::OK;
+    }
+    return StatusCode::INVALID_ARG;
 }
 
 std::vector<VehiclePropConfig> SchuurmanVehicleHardware::getAllPropertyConfigs() const {
@@ -762,6 +855,20 @@ std::vector<VehiclePropConfig> SchuurmanVehicleHardware::getAllPropertyConfigs()
         c.access = VehiclePropertyAccess::READ;
         c.changeMode = static_cast<VehiclePropertyChangeMode>(changeMode);
         c.areaConfigs = {{.areaId = GLOBAL_AREA_ID}};
+        configs.push_back(c);
+    };
+
+    auto addOnChange = [&](int32_t propId, VehiclePropertyAccess access, int32_t minValue,
+                           int32_t maxValue) {
+        VehiclePropConfig c;
+        c.prop = propId;
+        c.access = access;
+        c.changeMode = VehiclePropertyChangeMode::ON_CHANGE;
+        c.areaConfigs = {{
+                .areaId = GLOBAL_AREA_ID,
+                .minInt32Value = minValue,
+                .maxInt32Value = maxValue,
+        }};
         configs.push_back(c);
     };
 
@@ -785,18 +892,9 @@ std::vector<VehiclePropConfig> SchuurmanVehicleHardware::getAllPropertyConfigs()
         configs.push_back(c);
     }
 
-    {
-        VehiclePropConfig c;
-        c.prop = static_cast<int32_t>(VehicleProperty::GEAR_SELECTION);
-        c.access = VehiclePropertyAccess::READ;
-        c.changeMode = VehiclePropertyChangeMode::ON_CHANGE;
-        c.areaConfigs = {{
-                .areaId = GLOBAL_AREA_ID,
-                .minInt32Value = static_cast<int32_t>(VehicleGear::GEAR_PARK),
-                .maxInt32Value = static_cast<int32_t>(VehicleGear::GEAR_REVERSE),
-        }};
-        configs.push_back(c);
-    }
+    addOnChange(static_cast<int32_t>(VehicleProperty::GEAR_SELECTION),
+                VehiclePropertyAccess::READ, static_cast<int32_t>(VehicleGear::GEAR_PARK),
+                static_cast<int32_t>(VehicleGear::GEAR_REVERSE));
 
     {
         VehiclePropConfig c;
@@ -804,7 +902,7 @@ std::vector<VehiclePropConfig> SchuurmanVehicleHardware::getAllPropertyConfigs()
         c.access = VehiclePropertyAccess::READ;
         c.changeMode = VehiclePropertyChangeMode::CONTINUOUS;
         c.minSampleRate = 1.0f;
-        c.maxSampleRate = 100.0f;
+        c.maxSampleRate = 10.0f;
         c.areaConfigs = {{
                 .areaId = GLOBAL_AREA_ID,
                 .minFloatValue = 0.0f,
@@ -813,70 +911,16 @@ std::vector<VehiclePropConfig> SchuurmanVehicleHardware::getAllPropertyConfigs()
         configs.push_back(c);
     }
 
-    {
-        VehiclePropConfig c;
-        c.prop = static_cast<int32_t>(VehicleProperty::IGNITION_STATE);
-        c.access = VehiclePropertyAccess::READ;
-        c.changeMode = VehiclePropertyChangeMode::ON_CHANGE;
-        c.areaConfigs = {{
-                .areaId = GLOBAL_AREA_ID,
-                .minInt32Value = 0,
-                .maxInt32Value = 7,
-        }};
-        configs.push_back(c);
-    }
-
-    {
-        VehiclePropConfig c;
-        c.prop = static_cast<int32_t>(VehicleProperty::PARKING_BRAKE_ON);
-        c.access = VehiclePropertyAccess::READ;
-        c.changeMode = VehiclePropertyChangeMode::ON_CHANGE;
-        c.areaConfigs = {{
-                .areaId = GLOBAL_AREA_ID,
-                .minInt32Value = 0,
-                .maxInt32Value = 1,
-        }};
-        configs.push_back(c);
-    }
-
-    {
-        VehiclePropConfig c;
-        c.prop = static_cast<int32_t>(VehicleProperty::DISPLAY_BRIGHTNESS);
-        c.access = VehiclePropertyAccess::READ_WRITE;
-        c.changeMode = VehiclePropertyChangeMode::ON_CHANGE;
-        c.areaConfigs = {{
-                .areaId = GLOBAL_AREA_ID,
-                .minInt32Value = 0,
-                .maxInt32Value = 100,
-        }};
-        configs.push_back(c);
-    }
-
-    {
-        VehiclePropConfig c;
-        c.prop = VENDOR_AUTO_BRIGHTNESS;
-        c.access = VehiclePropertyAccess::READ_WRITE;
-        c.changeMode = VehiclePropertyChangeMode::ON_CHANGE;
-        c.areaConfigs = {{
-                .areaId = GLOBAL_AREA_ID,
-                .minInt32Value = 0,
-                .maxInt32Value = 1,
-        }};
-        configs.push_back(c);
-    }
-
-    {
-        VehiclePropConfig c;
-        c.prop = VENDOR_SCREEN_POWER;
-        c.access = VehiclePropertyAccess::READ_WRITE;
-        c.changeMode = VehiclePropertyChangeMode::ON_CHANGE;
-        c.areaConfigs = {{
-                .areaId = GLOBAL_AREA_ID,
-                .minInt32Value = 0,
-                .maxInt32Value = 1,
-        }};
-        configs.push_back(c);
-    }
+    addOnChange(static_cast<int32_t>(VehicleProperty::IGNITION_STATE),
+                VehiclePropertyAccess::READ, 0, 7);
+    addOnChange(static_cast<int32_t>(VehicleProperty::PARKING_BRAKE_ON),
+                VehiclePropertyAccess::READ, 0, 1);
+    addOnChange(static_cast<int32_t>(VehicleProperty::NIGHT_MODE),
+                VehiclePropertyAccess::READ, 0, 1);
+    addOnChange(static_cast<int32_t>(VehicleProperty::DISPLAY_BRIGHTNESS),
+                VehiclePropertyAccess::READ_WRITE, 0, 100);
+    addOnChange(VENDOR_AUTO_BRIGHTNESS, VehiclePropertyAccess::READ_WRITE, 0, 1);
+    addOnChange(VENDOR_SCREEN_POWER, VehiclePropertyAccess::READ_WRITE, 0, 1);
 
     // POWER_POLICY_GROUP_REQ and POWER_POLICY_REQ are VHAL → CarPowerPolicyService.
     {
@@ -911,25 +955,23 @@ std::vector<VehiclePropConfig> SchuurmanVehicleHardware::getAllPropertyConfigs()
     addDisplayUnits(VehicleProperty::HVAC_TEMPERATURE_DISPLAY_UNITS, kTemperatureUnits);
     addDisplayUnits(VehicleProperty::FUEL_VOLUME_DISPLAY_UNITS, kFuelVolumeUnits);
 
-    // Correct AAOS direction:
-    // AP_POWER_STATE_REQ is VHAL -> Android
+    // AP_POWER_STATE_REQ is VHAL -> Android; the MCU decides it.
     {
         VehiclePropConfig c;
         c.prop = static_cast<int32_t>(VehicleProperty::AP_POWER_STATE_REQ);
         c.access = VehiclePropertyAccess::READ;
         c.changeMode = VehiclePropertyChangeMode::ON_CHANGE;
         c.areaConfigs = {{.areaId = GLOBAL_AREA_ID}};
-        // ENABLE_DEEP_SLEEP_FLAG: the power button (KEY_POWER, driven by the
-        // Pico relaying ACC) is a real interrupt-capable wakeup-source GPIO
-        // (see meson-khadas-vim3.dtsi), so requesting SHUTDOWN_PREPARE with
-        // CAN_SLEEP on ACC-off is a real, resumable suspend-to-RAM, not a
-        // capability we don't actually have.
+        // ENABLE_DEEP_SLEEP_FLAG: the MCU wakes the VIM3 by pressing its power key
+        // (GPIOAO_7, an interrupt-capable wakeup source in meson-khadas-vim3.dtsi) and keeps
+        // its supply on while suspended, so SHUTDOWN_PREPARE with CAN_SLEEP is a real,
+        // resumable suspend-to-RAM.
         c.configArray = {
                 static_cast<int32_t>(VehicleApPowerStateConfigFlag::ENABLE_DEEP_SLEEP_FLAG)};
         configs.push_back(c);
     }
 
-    // AP_POWER_STATE_REPORT is Android -> VHAL
+    // AP_POWER_STATE_REPORT is Android -> VHAL -> MCU
     {
         VehiclePropConfig c;
         c.prop = static_cast<int32_t>(VehicleProperty::AP_POWER_STATE_REPORT);
@@ -939,115 +981,21 @@ std::vector<VehiclePropConfig> SchuurmanVehicleHardware::getAllPropertyConfigs()
         configs.push_back(c);
     }
 
+    // Peripheral board values (mcu_protocol.h).
+    for (const auto& p : kMcuVendorProps) {
+        VehiclePropConfig c;
+        c.prop = p.prop;
+        c.access = p.writable ? VehiclePropertyAccess::READ_WRITE : VehiclePropertyAccess::READ;
+        c.changeMode = VehiclePropertyChangeMode::ON_CHANGE;
+        c.areaConfigs = {{.areaId = GLOBAL_AREA_ID}};
+        configs.push_back(c);
+    }
+    addGlobalRO(VENDOR_MCU_FW_VERSION, static_cast<int32_t>(VehiclePropertyChangeMode::ON_CHANGE));
+
     return configs;
 }
 
-void SchuurmanVehicleHardware::pollInputs() {
-    int lastGearState = -2;
-
-    while (!mShuttingDown.load()) {
-        if (mGearFd < 0 || mBacklightEnableFd < 0) {
-            static int retryCounter = 0;
-            if (retryCounter++ % 10 == 0) {
-                LOG(INFO) << "Retrying GPIO initialization";
-                initGpios();
-            }
-        }
-
-        if (mGearFd >= 0) {
-            int gearState = readGearGpio();
-
-            if (gearState < 0) {
-                LOG(ERROR) << "Failed to read gear GPIO, resetting FD";
-                close(mGearFd);
-                mGearFd = -1;
-            } else if (gearState != lastGearState) {
-                LOG(INFO) << "Gear GPIO changed: " << lastGearState
-                          << " -> " << gearState;
-
-                int32_t newGear = (gearState == 1)
-                        ? static_cast<int32_t>(VehicleGear::GEAR_REVERSE)
-                        : static_cast<int32_t>(VehicleGear::GEAR_PARK);
-
-                if (newGear != mCurrentGear.load()) {
-                    mCurrentGear.store(newGear);
-
-                    VehiclePropValue v;
-                    v.prop = static_cast<int32_t>(VehicleProperty::GEAR_SELECTION);
-                    v.areaId = GLOBAL_AREA_ID;
-                    v.timestamp = elapsedRealtimeNano();
-                    v.value.int32Values = {newGear};
-                    emitPropChange(v);
-
-                    LOG(INFO) << "Published gear state " << newGear;
-                }
-                lastGearState = gearState;
-            }
-        } else {
-            static bool forcedOnce = false;
-            if (!forcedOnce) {
-                forcedOnce = true;
-                mCurrentGear.store(static_cast<int32_t>(VehicleGear::GEAR_PARK));
-
-                VehiclePropValue v;
-                v.prop = static_cast<int32_t>(VehicleProperty::GEAR_SELECTION);
-                v.areaId = GLOBAL_AREA_ID;
-                v.timestamp = elapsedRealtimeNano();
-                v.value.int32Values = {mCurrentGear.load()};
-                emitPropChange(v);
-
-                LOG(WARNING) << "GPIO unavailable, forcing gear=PARK";
-            }
-        }
-
-        std::this_thread::sleep_for(std::chrono::milliseconds(200));
-    }
-}
-
-void SchuurmanVehicleHardware::sensorLoop() {
-    double ema = -1.0;
-    const double alpha = 0.25;
-    const int pollMs = 250;
-
-    while (mSensorThreadRunning.load()) {
-        int raw = readIntFileNoExcept(mLightSensorPath);
-        if (raw >= 0) {
-            if (ema < 0) {
-                ema = static_cast<double>(raw);
-            } else {
-                ema = alpha * static_cast<double>(raw) + (1.0 - alpha) * ema;
-            }
-
-            double maxLux = static_cast<double>(mSensorRawMax);
-            if (maxLux < 1.0) maxLux = 1.0;
-
-            double percent =
-                    (log(1.0 + ema) / log(1.0 + maxLux)) * 100.0;
-            if (percent < 0.0) percent = 0.0;
-            if (percent > 100.0) percent = 100.0;
-
-            int intPercent = static_cast<int>(percent + 0.5);
-
-            if (mAutoBrightnessEnabled.load()) {
-                int last = mAutoTargetBrightness.load();
-                if (last < 0 || std::abs(intPercent - last) >= 2) {
-                    mAutoTargetBrightness.store(intPercent);
-
-                    if (mScreenOn.load()) {
-                        if (intPercent > 0) {
-                            mLastNonZeroBrightness.store(intPercent);
-                        }
-                        writePwm(intPercent);
-                        mCurrentBrightness.store(intPercent);
-                        publishCurrentBrightness();
-                    }
-                }
-            }
-        }
-
-        std::this_thread::sleep_for(std::chrono::milliseconds(pollMs));
-    }
-}
+// ---------------------------------------------------------------- display power (DPMS)
 
 std::string SchuurmanVehicleHardware::findDisplayDpmsPath() {
     std::string prop = android::base::GetProperty(
@@ -1091,6 +1039,8 @@ void SchuurmanVehicleHardware::displayStateLoop() {
     }
 }
 
+// ---------------------------------------------------------------- IVehicleHardware
+
 StatusCode SchuurmanVehicleHardware::checkHealth() {
     return StatusCode::OK;
 }
@@ -1121,7 +1071,31 @@ StatusCode SchuurmanVehicleHardware::updateSampleRate(int32_t, int32_t, float) {
 }
 
 DumpResult SchuurmanVehicleHardware::dump(const std::vector<std::string>&) {
-    return {};
+    std::string out = "Schuurman VHAL\n";
+    out += "  MCU: " + std::string(mMcu.connected() ? "connected on " + mMcu.devicePath()
+                                                     : "not connected") + "\n";
+    {
+        std::lock_guard<std::mutex> lk(mMcuMutex);
+        out += "  MCU firmware: " + (mMcuVersion.empty() ? std::string("?") : mMcuVersion) + "\n";
+        for (const auto& [prop, v] : mMcuValues) {
+            out += android::base::StringPrintf("  0x%08x = %d, %d\n", prop, v.first, v.second);
+        }
+    }
+    out += android::base::StringPrintf(
+            "  gear %d, ignition %d, parking brake %d (handbrake wire %s, seen %d), night %d, "
+            "speed %.2f m/s, lux %d\n",
+            mCurrentGear.load(), mIgnitionState.load(), mParkingBrakeOn.load(),
+            mHandbrakeRaw.load() ? "on" : "off", mHandbrakeSeen.load() ? 1 : 0, mNightMode.load(),
+            mSpeed.load(), mLux.load());
+    out += android::base::StringPrintf("  AP_POWER_STATE_REQ %d/%d, REPORT %d/%d\n",
+                                       mLastApPowerStateReq.load(),
+                                       mLastApPowerStateReqParam.load(),
+                                       mLastApPowerStateReport.load(),
+                                       mLastApPowerStateReportParam.load());
+    DumpResult result;
+    result.callerShouldDumpState = true;
+    result.buffer = out;
+    return result;
 }
 
 StatusCode SchuurmanVehicleHardware::getValues(
@@ -1162,6 +1136,8 @@ StatusCode SchuurmanVehicleHardware::setValues(
     return StatusCode::OK;
 }
 
+// ---------------------------------------------------------------- input devices
+
 // Scan /dev/input/event* for a device matching the given USB vendor/product ID.
 // Returns an open O_RDONLY fd, or -1 if not found.
 int SchuurmanVehicleHardware::findInputDeviceByVidPid(uint16_t vendor, uint16_t product) {
@@ -1182,7 +1158,7 @@ int SchuurmanVehicleHardware::findInputDeviceByVidPid(uint16_t vendor, uint16_t 
 // Scan /dev/input/event* for a device that reports the given EV_KEY keyCode.
 // Returns an open O_RDWR fd (needed to write events), or -1 if not found.
 int SchuurmanVehicleHardware::findInputDeviceWithKey(uint16_t keyCode) {
-    // 32 bytes covers key codes 0-255; KEY_WAKEUP = 143 fits comfortably.
+    // 32 bytes covers key codes 0-255.
     constexpr size_t kBufBytes = 32;
     for (int i = 0; i < 32; i++) {
         std::string path = "/dev/input/event" + std::to_string(i);
@@ -1196,6 +1172,32 @@ int SchuurmanVehicleHardware::findInputDeviceWithKey(uint16_t keyCode) {
         close(fd);
     }
     return -1;
+}
+
+static void writeKeyPress(int fd, uint16_t keyCode) {
+    auto writeEvent = [&](uint16_t type, uint16_t code, int32_t value) {
+        struct input_event out = {};
+        out.type  = type;
+        out.code  = code;
+        out.value = value;
+        write(fd, &out, sizeof(out));
+    };
+    writeEvent(EV_KEY, keyCode, 1);
+    writeEvent(EV_SYN, SYN_REPORT, 0);
+    writeEvent(EV_KEY, keyCode, 0);
+    writeEvent(EV_SYN, SYN_REPORT, 0);
+}
+
+// Inject a media key (KEY_PAUSECD -> KEYCODE_MEDIA_PAUSE, KEY_PLAYCD -> KEYCODE_MEDIA_PLAY
+// per Generic.kl) through the CEC-backed injectable device, as touchWakeLoop does.
+void SchuurmanVehicleHardware::injectMediaKey(uint16_t keyCode) {
+    int fd = findInputDeviceWithKey(keyCode);
+    if (fd < 0) {
+        LOG(WARNING) << "No input device can inject key " << keyCode;
+        return;
+    }
+    writeKeyPress(fd, keyCode);
+    close(fd);
 }
 
 // Monitor the WaveShare touch device. When a finger-down event arrives while
@@ -1248,147 +1250,19 @@ void SchuurmanVehicleHardware::touchWakeLoop() {
         }
 
         // BTN_TOUCH DOWN while screen is off → inject KEY_WAKEUP, unless the
-        // screen went off because of an ACC-off short press (see accKeyLoop).
+        // screen went off because the car was switched off (ACC low).
         if (ev.type == EV_KEY && ev.code == BTN_TOUCH && ev.value == 1 &&
             !mScreenOn.load() && !mTapToWakeSuppressed.load()) {
             LOG(INFO) << "touchWakeLoop: touch while screen off, injecting KEY_WAKEUP";
-
-            auto writeEvent = [&](uint16_t type, uint16_t code, int32_t value) {
-                struct input_event out = {};
-                out.type  = type;
-                out.code  = code;
-                out.value = value;
-                write(wakeFd, &out, sizeof(out));
-            };
-            writeEvent(EV_KEY, kKeyWakeup, 1);
-            writeEvent(EV_SYN, SYN_REPORT, 0);
-            writeEvent(EV_KEY, kKeyWakeup, 0);
-            writeEvent(EV_SYN, SYN_REPORT, 0);
+            writeKeyPress(wakeFd, kKeyWakeup);
+            // The display button turns off only the backlight (Android's display stays on,
+            // so no DPMS change follows): switch it back on here as well.
+            applyScreenPower(true, true);
         }
     }
 
     if (touchFd >= 0) close(touchFd);
     if (wakeFd  >= 0) close(wakeFd);
-}
-
-// Inject a press+release of the given key code into an already-open
-// injectable evdev fd (same technique touchWakeLoop uses for KEY_WAKEUP).
-static void injectKeyPress(int fd, uint16_t keyCode) {
-    auto writeEvent = [&](uint16_t type, uint16_t code, int32_t value) {
-        struct input_event out = {};
-        out.type  = type;
-        out.code  = code;
-        out.value = value;
-        write(fd, &out, sizeof(out));
-    };
-    writeEvent(EV_KEY, keyCode, 1);
-    writeEvent(EV_SYN, SYN_REPORT, 0);
-    writeEvent(EV_KEY, keyCode, 0);
-    writeEvent(EV_SYN, SYN_REPORT, 0);
-}
-
-// Watch KEY_POWER directly. On this board that key is never pressed by a
-// human — it's driven by an external MCU that relays the car's ACC line: a
-// short press means ACC just went low, a long press (handled entirely by
-// the standard Android long-press-power → shutdown flow, independent of
-// this loop) means force a real shutdown. A short press while the screen is
-// on means ACC just went low: injects KEY_PAUSECD (→ Android
-// KEYCODE_MEDIA_PAUSE per Generic.kl) and suppresses touch-to-wake so the
-// screen doesn't pop back on from a stray touch while parked. A short press
-// while the screen is off means ACC just came back: injects KEY_PLAYCD (→
-// KEYCODE_MEDIA_PLAY) to resume. Both go through the same CEC-backed
-// injectable device touchWakeLoop already uses for KEY_WAKEUP.
-void SchuurmanVehicleHardware::accKeyLoop() {
-    constexpr uint16_t kKeyPower = KEY_POWER;
-    constexpr uint16_t kKeyPause = KEY_PAUSECD;  // 201 -> KEYCODE_MEDIA_PAUSE
-    constexpr uint16_t kKeyPlay  = KEY_PLAYCD;   // 200 -> KEYCODE_MEDIA_PLAY
-    constexpr auto kShortPressMax = std::chrono::milliseconds(1500);
-
-    int fd = -1;
-    int injectFd = -1;
-    bool keyDown = false;
-    bool screenWasOnAtPress = false;
-    std::chrono::steady_clock::time_point downTime;
-
-    while (mAccKeyThreadRunning.load()) {
-        if (fd < 0) {
-            fd = findInputDeviceWithKey(kKeyPower);
-            if (fd < 0) {
-                std::this_thread::sleep_for(std::chrono::seconds(2));
-                continue;
-            }
-            int flags = fcntl(fd, F_GETFL, 0);
-            fcntl(fd, F_SETFL, flags & ~O_NONBLOCK);
-            LOG(INFO) << "accKeyLoop: opened KEY_POWER device";
-        }
-        if (injectFd < 0) {
-            injectFd = findInputDeviceWithKey(kKeyPause);
-            if (injectFd < 0) {
-                LOG(WARNING) << "accKeyLoop: no KEY_PAUSECD-capable device found, "
-                                 "media won't be paused/resumed on ACC changes";
-            } else {
-                LOG(INFO) << "accKeyLoop: opened media-pause/play injection device";
-            }
-        }
-
-        struct pollfd pfd = {fd, POLLIN, 0};
-        int ret = poll(&pfd, 1, 500);  // 500 ms so we can check mAccKeyThreadRunning
-        if (ret <= 0) continue;
-        if (!(pfd.revents & POLLIN)) continue;
-
-        struct input_event ev = {};
-        ssize_t n = read(fd, &ev, sizeof(ev));
-        if (n != sizeof(ev)) {
-            if (n == 0 || (n < 0 && errno != EAGAIN)) {
-                LOG(WARNING) << "accKeyLoop: KEY_POWER device read error, reopening";
-                close(fd);
-                fd = -1;
-            }
-            continue;
-        }
-
-        if (ev.type != EV_KEY || ev.code != kKeyPower) continue;
-
-        if (ev.value == 1) {  // DOWN
-            keyDown = true;
-            screenWasOnAtPress = mScreenOn.load();
-            downTime = std::chrono::steady_clock::now();
-        } else if (ev.value == 0 && keyDown) {  // UP
-            keyDown = false;
-            auto heldFor = std::chrono::steady_clock::now() - downTime;
-            if (heldFor < kShortPressMax) {
-                if (screenWasOnAtPress) {
-                    LOG(INFO) << "accKeyLoop: short press (ACC off) - pausing media, "
-                                 "suppressing touch-to-wake, requesting suspend";
-                    mTapToWakeSuppressed.store(true);
-                    if (injectFd >= 0) {
-                        injectKeyPress(injectFd, kKeyPause);
-                    }
-                    publishIgnitionState(static_cast<int32_t>(VehicleIgnitionState::OFF));
-                    // CarPowerManagementService drives the actual screen-off
-                    // (via the existing SHUTDOWN_PREPARE/SHUTDOWN_START and
-                    // DEEP_SLEEP_ENTRY cases in handleApPowerStateReport) and,
-                    // once GPIOAO_7's wakeup-source IRQ resumes the kernel,
-                    // the DEEP_SLEEP_EXIT case there turns it back on.
-                    publishApPowerStateReq(
-                            static_cast<int32_t>(VehicleApPowerStateReq::SHUTDOWN_PREPARE),
-                            static_cast<int32_t>(VehicleApPowerStateShutdownParam::CAN_SLEEP));
-                } else {
-                    LOG(INFO) << "accKeyLoop: short press (ACC on) - resuming media";
-                    if (injectFd >= 0) {
-                        injectKeyPress(injectFd, kKeyPlay);
-                    }
-                    publishIgnitionState(static_cast<int32_t>(VehicleIgnitionState::ON));
-                    publishApPowerStateReq(static_cast<int32_t>(VehicleApPowerStateReq::ON));
-                }
-            } else {
-                LOG(INFO) << "accKeyLoop: long press detected - leaving to shutdown flow";
-            }
-        }
-    }
-
-    if (fd >= 0) close(fd);
-    if (injectFd >= 0) close(injectFd);
 }
 
 }  // namespace vehicle

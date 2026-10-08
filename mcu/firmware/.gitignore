@@ -1,0 +1,4 @@
+test/test_power_sm
+test/test_nmea
+build/
+test/test_usb_link
