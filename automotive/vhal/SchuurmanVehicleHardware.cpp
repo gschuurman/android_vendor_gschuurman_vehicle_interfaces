@@ -409,6 +409,13 @@ void SchuurmanVehicleHardware::writePwm(int percentage) {
     if (percentage < 0) percentage = 0;
     if (percentage > 100) percentage = 100;
 
+    // The channel can lose its configuration after initPwm() (seen 2026-10-12: period 3666 ns, enable 0). A duty
+    // cycle above the period is then rejected by the kernel and the backlight stays off, so re-initialise first.
+    if (readSysFsInt(mPathPwmPeriod) != PWM_PERIOD_NS || readSysFsInt(mPathPwmEnable) != 1) {
+        LOG(WARNING) << "PWM lost its configuration, re-initialising";
+        initPwm();
+    }
+
     int inverted = 100 - percentage;
     long long dutyCalc =
             (static_cast<long long>(inverted) *
