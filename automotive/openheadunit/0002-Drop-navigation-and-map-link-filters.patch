@@ -1,0 +1,55 @@
+diff --git a/app/src/main/AndroidManifest.xml b/app/src/main/AndroidManifest.xml
+index 9d33e25f..0fa1c983 100644
+--- a/app/src/main/AndroidManifest.xml
++++ b/app/src/main/AndroidManifest.xml
+@@ -162,12 +162,6 @@
+                 <category android:name="android.intent.category.DEFAULT" />
+             </intent-filter>
+ 
+-            <!-- Navigation Intent Filter (handles system navigate actions) -->
+-            <intent-filter>
+-                <action android:name="android.intent.action.NAVIGATE" />
+-                <category android:name="android.intent.category.DEFAULT" />
+-            </intent-filter>
+-
+             <meta-data
+                 android:name="android.app.shortcuts"
+                 android:resource="@xml/shortcuts" />
+@@ -183,37 +177,6 @@
+                 <data android:host="selfmode" />
+             </intent-filter>
+ 
+-            <intent-filter>
+-                <action android:name="android.intent.action.VIEW" />
+-
+-                <category android:name="android.intent.category.DEFAULT" />
+-                <category android:name="android.intent.category.BROWSABLE" />
+-
+-                <data android:scheme="geo" />
+-            </intent-filter>
+-
+-            <intent-filter>
+-                <action android:name="android.intent.action.VIEW" />
+-
+-                <category android:name="android.intent.category.DEFAULT" />
+-                <category android:name="android.intent.category.BROWSABLE" />
+-
+-                <data android:scheme="google.navigation" />
+-            </intent-filter>
+-
+-            <intent-filter>
+-                <action android:name="android.intent.action.VIEW" />
+-
+-                <category android:name="android.intent.category.DEFAULT" />
+-                <category android:name="android.intent.category.BROWSABLE" />
+-
+-                <data
+-                    android:host="maps.google.com"
+-                    android:scheme="http" />
+-                <data
+-                    android:host="maps.google.com"
+-                    android:scheme="https" />
+-            </intent-filter>
+         </activity>
+ 
+         <activity-alias

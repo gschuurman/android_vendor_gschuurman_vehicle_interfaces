@@ -144,6 +144,10 @@ class SchuurmanVehicleHardware : public IVehicleHardware {
     std::atomic<bool> mAccKeyThreadRunning;
     std::thread mAccKeyThread;
     std::atomic<bool> mTapToWakeSuppressed;
+    // Set on DEEP_SLEEP_EXIT after an ACC-off sleep: accKeyLoop decides whether
+    // ACC came back (wake by GPIOAO_7) or the wake was spurious (sleep again).
+    std::atomic<bool> mAccResumePending{false};
+    std::atomic<int64_t> mResumeAtMs{0};
 
     // Track AAOS power properties explicitly.
     std::atomic<int32_t> mLastApPowerStateReq;

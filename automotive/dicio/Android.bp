@@ -1,6 +1,6 @@
 // Dicio (org.stypox.dicio 4.0, GPL-3.0): open-source, on-device voice assistant.
-// Google's car Assistant needs a Play-certified device, so Dicio is the ASSISTANT role holder:
-// the system bar's mic button starts its ACTION_ASSIST activity (see CarSystemUI AssistantButton).
+// Without the Google car Assistant, Dicio is the ASSISTANT role holder (DicioAssistantOverlay): the
+// system bar's mic button starts its ACTION_ASSIST activity (see CarSystemUI AssistantButton).
 // The APK is our release build of Dicio v4.0 plus preinstalled-model support (models/, installed to
 // /product/usr/share/dicio): speech recognition (Whisper, or Vosk per language) and the wake word work offline
 // from the first boot. Source: ~/android/dicio-src, branch preinstalled-models. Signed by the build.
@@ -12,13 +12,14 @@ android_app_import {
     dex_preopt: {
         enabled: false,
     },
+    // DicioAssistantOverlay (assistant role) is not required here: the device ships it only when the
+    // Google car Assistant is left out (device/khadas/vim3/nav.mk, VIM3_GOOGLE_ASSISTANT).
     required: [
-        "DicioAssistantOverlay",
         "default-permissions-dicio.xml",
     ],
 }
 
-// Makes Dicio the default assistant. GasPlaystoreOverlay (static, priority 1001) blanks
+// Makes Dicio the default assistant. The gas_*playstore overlays (static, priority 1001) blank
 // config_defaultAssistant, so this one has to be static with a higher priority.
 runtime_resource_overlay {
     name: "DicioAssistantOverlay",

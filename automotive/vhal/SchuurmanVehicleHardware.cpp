@@ -540,6 +540,12 @@ void SchuurmanVehicleHardware::applyScreenPower(bool on, bool restoreBrightness)
     publishVendorScreenPower();
 }
 
+static int64_t steadyMs() {
+    return std::chrono::duration_cast<std::chrono::milliseconds>(
+                   std::chrono::steady_clock::now().time_since_epoch())
+            .count();
+}
+
 void SchuurmanVehicleHardware::handleApPowerStateReport(
         const VehiclePropValue& request) {
     if (request.value.int32Values.empty()) {
@@ -556,12 +562,29 @@ void SchuurmanVehicleHardware::handleApPowerStateReport(
 
     LOG(INFO) << "AP_POWER_STATE_REPORT state=" << state << " param=" << param;
 
-    switch (static_cast<VehicleApPowerStateReport>(state)) {
+    const auto report = static_cast<VehicleApPowerStateReport>(state);
+    if ((report == VehicleApPowerStateReport::DEEP_SLEEP_EXIT ||
+         report == VehicleApPowerStateReport::HIBERNATION_EXIT) &&
+        mIgnitionState.load() == static_cast<int32_t>(VehicleIgnitionState::OFF)) {
+        // Resumed from an ACC-off sleep. Any wake source resumes the kernel, so
+        // don't light up yet: accKeyLoop checks whether GPIOAO_7 (ACC) woke us
+        // and then either requests ON or goes back to sleep.
+        LOG(INFO) << "Resumed while ACC off - waiting for accKeyLoop to check the wake source";
+        mResumeAtMs.store(steadyMs());
+        mAccResumePending.store(true);
+        return;
+    }
+
+    switch (report) {
         case VehicleApPowerStateReport::ON:
         case VehicleApPowerStateReport::DEEP_SLEEP_EXIT:
         case VehicleApPowerStateReport::HIBERNATION_EXIT:
         case VehicleApPowerStateReport::SHUTDOWN_CANCELLED:
         case VehicleApPowerStateReport::WAIT_FOR_VHAL:
+            if (mAccResumePending.load()) {
+                // WAIT_FOR_VHAL right after an ACC-off resume: accKeyLoop answers.
+                break;
+            }
             applyScreenPower(true, true);
             // Android is ready and waiting — tell it to go to ON so the
             // policyGroup transitions from WaitForVHAL → On.
@@ -1189,8 +1212,8 @@ int SchuurmanVehicleHardware::findInputDeviceByVidPid(uint16_t vendor, uint16_t 
 // Scan /dev/input/event* for a device that reports the given EV_KEY keyCode.
 // Returns an open O_RDWR fd (needed to write events), or -1 if not found.
 int SchuurmanVehicleHardware::findInputDeviceWithKey(uint16_t keyCode) {
-    // 32 bytes covers key codes 0-255; KEY_WAKEUP = 143 fits comfortably.
-    constexpr size_t kBufBytes = 32;
+    // Whole key range: the ACC wake key is BTN_TRIGGER_HAPPY1 (704).
+    constexpr size_t kBufBytes = KEY_CNT / 8 + 1;
     for (int i = 0; i < 32; i++) {
         std::string path = "/dev/input/event" + std::to_string(i);
         int fd = open(path.c_str(), O_RDWR | O_NONBLOCK | O_CLOEXEC);
@@ -1241,6 +1264,15 @@ void SchuurmanVehicleHardware::touchWakeLoop() {
         struct pollfd pfd = {touchFd, POLLIN, 0};
         int ret = poll(&pfd, 1, 500);  // 500 ms timeout so we can check mTouchWakeThreadRunning
         if (ret <= 0) continue;
+        if (pfd.revents & (POLLERR | POLLHUP | POLLNVAL)) {
+            // USB touch re-enumerated (hub reset): the old node is gone and poll() would return at once
+            // forever, pinning a core. Reopen by VID/PID.
+            LOG(WARNING) << "touchWakeLoop: touch device gone (revents=" << pfd.revents << "), reopening";
+            close(touchFd);
+            touchFd = -1;
+            std::this_thread::sleep_for(std::chrono::milliseconds(500));
+            continue;
+        }
         if (!(pfd.revents & POLLIN)) continue;
 
         struct input_event ev = {};
@@ -1309,13 +1341,44 @@ void SchuurmanVehicleHardware::accKeyLoop() {
     constexpr uint16_t kKeyPower = KEY_POWER;
     constexpr uint16_t kKeyPause = KEY_PAUSECD;  // 201 -> KEYCODE_MEDIA_PAUSE
     constexpr uint16_t kKeyPlay  = KEY_PLAYCD;   // 200 -> KEYCODE_MEDIA_PLAY
+    // gpio-keys-wake (DTS acc-wake): interrupt-only falling-edge key on the same
+    // pin as KEY_POWER, the kernel's wakeup source. An event from it right after
+    // resume means the ACC pulse is what woke us.
+    constexpr uint16_t kKeyAccWake = BTN_TRIGGER_HAPPY1;
     constexpr auto kShortPressMax = std::chrono::milliseconds(1500);
+    // After resume, how long to wait for the wake event before calling the wake
+    // spurious, and how long to ignore KEY_POWER (the waking pulse may still be
+    // held and must not read as a new ACC-off press).
+    constexpr int64_t kResumeDecideMs = 1500;
+    constexpr int64_t kPostResumeIgnoreMs = 2500;
 
     int fd = -1;
     int injectFd = -1;
+    int wakeFd = -1;
+    bool wakeDevSearched = false;
     bool keyDown = false;
     bool screenWasOnAtPress = false;
+    int64_t ignorePowerUntilMs = 0;
+    // A wake event since the last ACC-off sleep request. The kernel replays the
+    // waking interrupt at resume, often before DEEP_SLEEP_EXIT is reported.
+    bool wakeSinceSleepRequest = false;
     std::chrono::steady_clock::time_point downTime;
+
+    // Read everything queued on the wake device; true if it reported a press.
+    auto drainWake = [&]() {
+        bool pressed = false;
+        if (wakeFd < 0) return pressed;
+        struct input_event wev;
+        while (read(wakeFd, &wev, sizeof(wev)) == sizeof(wev)) {
+            if (wev.type == EV_KEY && wev.code == kKeyAccWake && wev.value == 1) pressed = true;
+        }
+        return pressed;
+    };
+    auto powerKeyHeld = [&]() {
+        uint8_t keys[KEY_CNT / 8 + 1] = {};
+        return fd >= 0 && ioctl(fd, EVIOCGKEY(sizeof(keys)), keys) >= 0 &&
+               (keys[kKeyPower / 8] & (1u << (kKeyPower % 8)));
+    };
 
     while (mAccKeyThreadRunning.load()) {
         if (fd < 0) {
@@ -1337,11 +1400,62 @@ void SchuurmanVehicleHardware::accKeyLoop() {
                 LOG(INFO) << "accKeyLoop: opened media-pause/play injection device";
             }
         }
+        if (wakeFd < 0 && !wakeDevSearched) {
+            wakeDevSearched = true;  // probed once at boot; doesn't come and go
+            wakeFd = findInputDeviceWithKey(kKeyAccWake);  // O_NONBLOCK
+            if (wakeFd < 0) {
+                LOG(WARNING) << "accKeyLoop: no gpio-keys-wake device, every resume "
+                                 "after ACC-off is treated as ACC on";
+            } else {
+                LOG(INFO) << "accKeyLoop: opened ACC wake device";
+            }
+        }
 
-        struct pollfd pfd = {fd, POLLIN, 0};
-        int ret = poll(&pfd, 1, 500);  // 500 ms so we can check mAccKeyThreadRunning
+        // Resumed from an ACC-off sleep (handleApPowerStateReport): ACC on if
+        // GPIOAO_7 woke us (wake event, or the pulse is still held), otherwise
+        // the wake was spurious (RTC, network, ...) -> straight back to sleep.
+        if (mAccResumePending.load()) {
+            const int64_t now = steadyMs();
+            if (drainWake()) wakeSinceSleepRequest = true;
+            const bool accWake = wakeFd < 0 || wakeSinceSleepRequest || powerKeyHeld();
+            if (accWake) {
+                LOG(INFO) << "accKeyLoop: resume caused by ACC - ignition ON, requesting ON";
+                mAccResumePending.store(false);
+                keyDown = false;  // the waking pulse is not a new press
+                ignorePowerUntilMs = now + kPostResumeIgnoreMs;
+                if (injectFd >= 0) {
+                    injectKeyPress(injectFd, kKeyPlay);
+                }
+                publishIgnitionState(static_cast<int32_t>(VehicleIgnitionState::ON));
+                publishApPowerStateReq(static_cast<int32_t>(VehicleApPowerStateReq::ON));
+            } else if (now - mResumeAtMs.load() > kResumeDecideMs) {
+                LOG(INFO) << "accKeyLoop: spurious resume while ACC off - sleeping again";
+                mAccResumePending.store(false);
+                wakeSinceSleepRequest = false;
+                publishApPowerStateReq(
+                        static_cast<int32_t>(VehicleApPowerStateReq::SHUTDOWN_PREPARE),
+                        static_cast<int32_t>(VehicleApPowerStateShutdownParam::CAN_SLEEP));
+            }
+        }
+
+        struct pollfd pfds[2] = {{fd, POLLIN, 0}, {wakeFd, POLLIN, 0}};
+        // Short timeout while a resume decision is pending, else 500 ms so we
+        // can check mAccKeyThreadRunning.
+        int ret = poll(pfds, wakeFd >= 0 ? 2 : 1, mAccResumePending.load() ? 100 : 500);
         if (ret <= 0) continue;
-        if (!(pfd.revents & POLLIN)) continue;
+        if (wakeFd >= 0 && (pfds[1].revents & POLLIN) && !mAccResumePending.load()) {
+            // While awake KEY_POWER below handles the edge; remember it for the
+            // resume check in case we're about to suspend / just resumed.
+            if (drainWake()) wakeSinceSleepRequest = true;
+        }
+        if (pfds[0].revents & (POLLERR | POLLHUP | POLLNVAL)) {
+            LOG(WARNING) << "accKeyLoop: KEY_POWER device gone (revents=" << pfds[0].revents << "), reopening";
+            close(fd);
+            fd = -1;
+            std::this_thread::sleep_for(std::chrono::milliseconds(500));
+            continue;
+        }
+        if (!(pfds[0].revents & POLLIN)) continue;
 
         struct input_event ev = {};
         ssize_t n = read(fd, &ev, sizeof(ev));
@@ -1355,6 +1469,10 @@ void SchuurmanVehicleHardware::accKeyLoop() {
         }
 
         if (ev.type != EV_KEY || ev.code != kKeyPower) continue;
+        if (mAccResumePending.load() || steadyMs() < ignorePowerUntilMs) {
+            keyDown = false;  // waking pulse still held across resume
+            continue;
+        }
 
         if (ev.value == 1) {  // DOWN
             keyDown = true;
@@ -1371,12 +1489,15 @@ void SchuurmanVehicleHardware::accKeyLoop() {
                     if (injectFd >= 0) {
                         injectKeyPress(injectFd, kKeyPause);
                     }
+                    // This press's own falling edge also queued a wake event;
+                    // drop it so it isn't mistaken for the ACC-on wake later.
+                    drainWake();
+                    wakeSinceSleepRequest = false;
                     publishIgnitionState(static_cast<int32_t>(VehicleIgnitionState::OFF));
                     // CarPowerManagementService drives the actual screen-off
                     // (via the existing SHUTDOWN_PREPARE/SHUTDOWN_START and
-                    // DEEP_SLEEP_ENTRY cases in handleApPowerStateReport) and,
-                    // once GPIOAO_7's wakeup-source IRQ resumes the kernel,
-                    // the DEEP_SLEEP_EXIT case there turns it back on.
+                    // DEEP_SLEEP_ENTRY cases in handleApPowerStateReport); on
+                    // resume, the pending-resume check above decides.
                     publishApPowerStateReq(
                             static_cast<int32_t>(VehicleApPowerStateReq::SHUTDOWN_PREPARE),
                             static_cast<int32_t>(VehicleApPowerStateShutdownParam::CAN_SLEEP));
@@ -1396,6 +1517,7 @@ void SchuurmanVehicleHardware::accKeyLoop() {
 
     if (fd >= 0) close(fd);
     if (injectFd >= 0) close(injectFd);
+    if (wakeFd >= 0) close(wakeFd);
 }
 
 }  // namespace vehicle
