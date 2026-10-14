@@ -106,16 +106,7 @@ public final class MusicService extends MediaBrowserServiceCompat implements Pla
     @Override
     public void onSearch(String query, Bundle extras, Result<List<MediaItem>> result) {
         result.detach();
-        mWorker.post(() -> {
-            final List<MediaItem> items = new ArrayList<>();
-            for (MusicLibrary.Song s : mLibrary.search(query)) {
-                items.add(new MediaItem(new MediaDescriptionCompat.Builder()
-                        .setMediaId(MusicLibrary.songId("search:" + query, s.id))
-                        .setTitle(s.title).setSubtitle(s.artist).setDescription(s.album)
-                        .setIconUri(MusicLibrary.artUri(s.albumId)).build(), MediaItem.FLAG_PLAYABLE));
-            }
-            result.sendResult(items);
-        });
+        mWorker.post(() -> result.sendResult(mLibrary.searchItems(query)));
     }
 
     /** Loads a queue on the worker thread and starts it on the main thread. */

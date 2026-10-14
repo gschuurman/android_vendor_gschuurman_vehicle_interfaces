@@ -211,19 +211,126 @@ final class MusicLibrary {
         } else if (RECENT.equals(parentId)) {
             selection += " AND " + Audio.Media.DATE_ADDED + " > ?";
             args = new String[] {String.valueOf(System.currentTimeMillis() / 1000 - RECENT_SECONDS)};
-            order = Audio.Media.DATE_ADDED + " DESC LIMIT " + RECENT_LIMIT;
+            return query(selection, args, Audio.Media.DATE_ADDED + " DESC", RECENT_LIMIT);
         } else if (!SONGS.equals(parentId)) {
             return new ArrayList<>();
         }
         return query(selection, args, order);
     }
 
-    /** Songs whose title, artist or album contains 'query'. */
+    private static final String GROUP_TITLE = "android.media.browse.CONTENT_STYLE_GROUP_TITLE_HINT";
+    private static final int SEARCH_LIMIT = 50;
+
+    /**
+     * Search results for the Media app, grouped: artists, albums and playlists matching the query
+     * (browsable), then the matching songs. Every word of the query has to occur in one of the
+     * searched fields (case-insensitive), so "daft discovery" finds the album.
+     */
+    List<MediaItem> searchItems(String query) {
+        final List<MediaItem> items = new ArrayList<>();
+        final String[] words = words(query);
+        if (words.length == 0) return items;
+
+        final String artistGroup = mContext.getString(R.string.browse_artists);
+        try (Cursor c = query(ARTISTS_URI, new String[] {Audio.Artists._ID,
+                Audio.Artists.ARTIST, Audio.Artists.NUMBER_OF_TRACKS},
+                allWords(words.length, Audio.Artists.ARTIST), likeArgs(words, 1),
+                Audio.Artists.ARTIST, SEARCH_LIMIT)) {
+            while (c != null && c.moveToNext()) {
+                items.add(new MediaItem(new MediaDescriptionCompat.Builder()
+                        .setMediaId(ARTIST + c.getLong(0))
+                        .setTitle(c.getString(1))
+                        .setSubtitle(mContext.getResources().getQuantityString(
+                                R.plurals.song_count, c.getInt(2), c.getInt(2)))
+                        .setExtras(group(artistGroup))
+                        .build(), MediaItem.FLAG_BROWSABLE));
+            }
+        }
+        final String albumGroup = mContext.getString(R.string.browse_albums);
+        try (Cursor c = query(ALBUMS_URI, new String[] {Audio.Albums._ID,
+                Audio.Albums.ALBUM, Audio.Albums.ARTIST},
+                allWords(words.length, Audio.Albums.ALBUM, Audio.Albums.ARTIST), likeArgs(words, 2),
+                Audio.Albums.ALBUM, SEARCH_LIMIT)) {
+            while (c != null && c.moveToNext()) {
+                items.add(new MediaItem(new MediaDescriptionCompat.Builder()
+                        .setMediaId(ALBUM + c.getLong(0))
+                        .setTitle(c.getString(1))
+                        .setSubtitle(c.getString(2))
+                        .setIconUri(artUri(c.getLong(0)))
+                        .setExtras(group(albumGroup))
+                        .build(), MediaItem.FLAG_BROWSABLE));
+            }
+        }
+        final String playlistGroup = mContext.getString(R.string.browse_playlists);
+        try (Cursor c = query(PLAYLISTS_URI, new String[] {Audio.Playlists._ID,
+                Audio.Playlists.NAME}, allWords(words.length, Audio.Playlists.NAME),
+                likeArgs(words, 1), Audio.Playlists.NAME, SEARCH_LIMIT)) {
+            while (c != null && c.moveToNext()) {
+                items.add(new MediaItem(new MediaDescriptionCompat.Builder()
+                        .setMediaId(PLAYLIST + c.getLong(0))
+                        .setTitle(c.getString(1))
+                        .setExtras(group(playlistGroup))
+                        .build(), MediaItem.FLAG_BROWSABLE));
+            }
+        }
+        final String songGroup = mContext.getString(R.string.browse_songs);
+        final String parent = "search:" + query;
+        for (Song song : search(query)) {
+            items.add(new MediaItem(new MediaDescriptionCompat.Builder()
+                    .setMediaId(songId(parent, song.id))
+                    .setTitle(song.title).setSubtitle(song.artist).setDescription(song.album)
+                    .setIconUri(artUri(song.albumId))
+                    .setExtras(group(songGroup))
+                    .build(), MediaItem.FLAG_PLAYABLE));
+        }
+        return items;
+    }
+
+    /**
+     * Songs matching every word of 'query' in title, artist, album or folder (untagged music is
+     * found by its folder names); also the queue of a picked hit.
+     */
     List<Song> search(String query) {
-        final String like = "%" + query.replace("%", "") + "%";
-        return query(MUSIC_ONLY + " AND (" + Audio.Media.TITLE + " LIKE ? OR " + Audio.Media.ARTIST
-                + " LIKE ? OR " + Audio.Media.ALBUM + " LIKE ?)", new String[] {like, like, like},
-                Audio.Media.ARTIST + ", " + Audio.Media.ALBUM + ", " + Audio.Media.TRACK);
+        final String[] words = words(query);
+        if (words.length == 0) return new ArrayList<>();
+        return query(MUSIC_ONLY + " AND " + allWords(words.length, Audio.Media.TITLE,
+                Audio.Media.ARTIST, Audio.Media.ALBUM, Audio.Media.RELATIVE_PATH), likeArgs(words, 4),
+                Audio.Media.ARTIST + ", " + Audio.Media.ALBUM + ", " + Audio.Media.TRACK,
+                SEARCH_LIMIT * 4);
+    }
+
+    private static String[] words(String query) {
+        final String q = query == null ? "" : query.trim().replace("%", "").replace("_", " ");
+        return q.isEmpty() ? new String[0] : q.split("\\s+");
+    }
+
+    /** "(f1 LIKE ? OR f2 LIKE ?) AND ..." with one group per word. */
+    private static String allWords(int words, String... fields) {
+        final StringBuilder sb = new StringBuilder();
+        for (int w = 0; w < words; ++w) {
+            if (w > 0) sb.append(" AND ");
+            sb.append('(');
+            for (int f = 0; f < fields.length; ++f) {
+                if (f > 0) sb.append(" OR ");
+                sb.append(fields[f]).append(" LIKE ?");
+            }
+            sb.append(')');
+        }
+        return sb.toString();
+    }
+
+    private static String[] likeArgs(String[] words, int fields) {
+        final String[] args = new String[words.length * fields];
+        for (int w = 0; w < words.length; ++w) {
+            for (int f = 0; f < fields; ++f) args[w * fields + f] = "%" + words[w] + "%";
+        }
+        return args;
+    }
+
+    private static Bundle group(String title) {
+        final Bundle extras = new Bundle();
+        extras.putString(GROUP_TITLE, title);
+        return extras;
     }
 
     /** Looks up songs by audio id, in the given order; ids no longer in the library are dropped. */
@@ -266,11 +373,26 @@ final class MusicLibrary {
     }
 
     private List<Song> query(String selection, String[] args, String order) {
+        return query(selection, args, order, 0);
+    }
+
+    private List<Song> query(String selection, String[] args, String order, int limit) {
         final List<Song> songs = new ArrayList<>();
-        try (Cursor c = mResolver.query(AUDIO, SONG_COLUMNS, selection, args, order)) {
+        try (Cursor c = query(AUDIO, SONG_COLUMNS, selection, args, order, limit)) {
             while (c != null && c.moveToNext()) songs.add(new Song(c));
         }
         return songs;
+    }
+
+    /** ContentResolver query with an optional row limit (MediaProvider rejects "LIMIT" in the order). */
+    private Cursor query(Uri uri, String[] projection, String selection, String[] args, String order,
+            int limit) {
+        final Bundle q = new Bundle();
+        if (selection != null) q.putString(ContentResolver.QUERY_ARG_SQL_SELECTION, selection);
+        if (args != null) q.putStringArray(ContentResolver.QUERY_ARG_SQL_SELECTION_ARGS, args);
+        if (order != null) q.putString(ContentResolver.QUERY_ARG_SQL_SORT_ORDER, order);
+        if (limit > 0) q.putInt(ContentResolver.QUERY_ARG_LIMIT, limit);
+        return mResolver.query(uri, projection, q, null);
     }
 
     /** Direct subfolders of 'path' (e.g. "Music/") that contain audio, as relative paths. */
