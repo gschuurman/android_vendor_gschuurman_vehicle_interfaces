@@ -2,12 +2,25 @@
 <resources>
     <string name="app_name">Music</string>
 
+    <string name="browse_playlists">Playlists</string>
     <string name="browse_songs">Songs</string>
     <string name="browse_albums">Albums</string>
     <string name="browse_artists">Artists</string>
     <string name="browse_folders">Folders</string>
     <string name="browse_recent">Recently added</string>
     <string name="shuffle_all">Shuffle all</string>
+    <string name="shuffle">Shuffle</string>
+    <string name="playlist_favorites">Favorites</string>
+    <string name="playlist_played">Recently played</string>
+
+    <!-- Now Playing buttons (custom actions); the label describes the current state -->
+    <string name="action_shuffle_on">Shuffle on</string>
+    <string name="action_shuffle_off">Shuffle off</string>
+    <string name="action_repeat_off">Repeat off</string>
+    <string name="action_repeat_all">Repeat all</string>
+    <string name="action_repeat_one">Repeat one</string>
+    <string name="action_favorite">Add to favorites</string>
+    <string name="action_unfavorite">Remove from favorites</string>
     <string name="queue_title">Up next</string>
     <plurals name="song_count">
         <item quantity="one">%d song</item>

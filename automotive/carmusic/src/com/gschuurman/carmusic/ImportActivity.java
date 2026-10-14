@@ -87,7 +87,7 @@ public final class ImportActivity extends FragmentActivity implements ImportServ
             button.setOnClickListener(v -> ImportService.start(this, volume));
             mVolumes.addView(row);
             mWorker.post(() -> {
-                final int n = UsbMusic.scan(volume.root).size();
+                final int n = UsbMusic.audioCount(UsbMusic.scan(volume.root));
                 runOnUiThread(() -> {
                     count.setText(getResources().getQuantityString(R.plurals.song_count, n, n));
                     button.setEnabled(n > 0 && !ImportService.state().running);

@@ -20,19 +20,25 @@ import java.util.TreeSet;
  * The music library: audio files in the Driver user's Music folder (primary external volume),
  * read through MediaStore. USB volumes are not part of the library; their music is imported.
  *
- * <p>Media ids: browsable nodes are ROOT, SONGS, ALBUMS, ARTISTS, FOLDERS, RECENT, "album:<id>",
- * "artist:<id>" and "folder:<relative path>". A playable song is "<parent id>|<audio id>", so
- * playing it queues the songs of the node it was picked from.
+ * <p>Media ids: browsable nodes are ROOT, PLAYLISTS, SONGS, ALBUMS, ARTISTS, FOLDERS, the app
+ * playlists FAVORITES, PLAYED and RECENT, "album:<id>", "artist:<id>", "playlist:<MediaStore
+ * playlist id>" and "folder:<relative path>". A playable song is "<parent id>|<audio id>", so
+ * playing it queues the songs of the node it was picked from; "shuffle:<parent id>" plays that
+ * node shuffled.
  */
 final class MusicLibrary {
     static final String ROOT = "root";
+    static final String PLAYLISTS = "playlists";
+    static final String FAVORITES = "favorites";
+    static final String PLAYED = "played";
     static final String SONGS = "songs";
     static final String ALBUMS = "albums";
     static final String ARTISTS = "artists";
     static final String FOLDERS = "folders";
     static final String RECENT = "recent";
-    static final String SHUFFLE_ALL = "shuffle_all";
+    static final String SHUFFLE = "shuffle:";
     private static final String ALBUM = "album:";
+    private static final String PLAYLIST = "playlist:";
     private static final String ARTIST = "artist:";
     private static final String FOLDER = "folder:";
     private static final String SEPARATOR = "|";
@@ -51,6 +57,8 @@ final class MusicLibrary {
     private static final Uri AUDIO = Audio.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY);
     private static final Uri ALBUMS_URI = Audio.Albums.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY);
     private static final Uri ARTISTS_URI = Audio.Artists.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY);
+    private static final Uri PLAYLISTS_URI =
+            Audio.Playlists.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY);
     private static final String[] SONG_COLUMNS = {
             Audio.Media._ID, Audio.Media.TITLE, Audio.Media.ARTIST, Audio.Media.ALBUM,
             Audio.Media.ALBUM_ID, Audio.Media.DURATION, Audio.Media.RELATIVE_PATH};
@@ -90,10 +98,12 @@ final class MusicLibrary {
 
     private final Context mContext;
     private final ContentResolver mResolver;
+    private final PlaylistStore mStore;
 
-    MusicLibrary(Context context) {
+    MusicLibrary(Context context, PlaylistStore store) {
         mContext = context;
         mResolver = context.getContentResolver();
+        mStore = store;
     }
 
     static Uri artUri(long albumId) {
@@ -124,22 +134,21 @@ final class MusicLibrary {
     List<MediaItem> children(String parentId) {
         final List<MediaItem> items = new ArrayList<>();
         if (ROOT.equals(parentId)) {
+            items.add(browsable(PLAYLISTS, mContext.getString(R.string.browse_playlists), STYLE_LIST));
             items.add(browsable(SONGS, mContext.getString(R.string.browse_songs), STYLE_LIST));
             items.add(browsable(ALBUMS, mContext.getString(R.string.browse_albums), STYLE_GRID));
             items.add(browsable(ARTISTS, mContext.getString(R.string.browse_artists), STYLE_LIST));
             items.add(browsable(FOLDERS, mContext.getString(R.string.browse_folders), STYLE_LIST));
+        } else if (PLAYLISTS.equals(parentId)) {
+            items.add(browsable(FAVORITES, mContext.getString(R.string.playlist_favorites), STYLE_LIST));
+            items.add(browsable(PLAYED, mContext.getString(R.string.playlist_played), STYLE_LIST));
             items.add(browsable(RECENT, mContext.getString(R.string.browse_recent), STYLE_LIST));
-        } else if (SONGS.equals(parentId)) {
-            final List<Song> songs = songs(SONGS);
-            if (!songs.isEmpty()) {
-                items.add(new MediaItem(new MediaDescriptionCompat.Builder()
-                        .setMediaId(SHUFFLE_ALL)
-                        .setTitle(mContext.getString(R.string.shuffle_all))
-                        .setSubtitle(mContext.getResources().getQuantityString(
-                                R.plurals.song_count, songs.size(), songs.size()))
-                        .build(), MediaItem.FLAG_PLAYABLE));
+            try (Cursor c = mResolver.query(PLAYLISTS_URI, new String[] {Audio.Playlists._ID,
+                    Audio.Playlists.NAME}, null, null, Audio.Playlists.NAME)) {
+                while (c != null && c.moveToNext()) {
+                    items.add(browsable(PLAYLIST + c.getLong(0), c.getString(1), STYLE_LIST));
+                }
             }
-            addSongs(items, parentId, songs);
         } else if (ALBUMS.equals(parentId)) {
             try (Cursor c = mResolver.query(ALBUMS_URI, new String[] {Audio.Albums._ID,
                     Audio.Albums.ALBUM, Audio.Albums.ARTIST}, null, null, Audio.Albums.ALBUM)) {
@@ -180,6 +189,9 @@ final class MusicLibrary {
 
     /** Songs of a browsable node (also the play queue for a song picked from it). */
     List<Song> songs(String parentId) {
+        if (FAVORITES.equals(parentId)) return songsById(mStore.favorites());
+        if (PLAYED.equals(parentId)) return songsById(mStore.recentlyPlayed());
+        if (parentId.startsWith(PLAYLIST)) return playlist(parentId.substring(PLAYLIST.length()));
         String selection = MUSIC_ONLY;
         String[] args = null;
         String order = Audio.Media.TITLE;
@@ -214,14 +226,43 @@ final class MusicLibrary {
                 Audio.Media.ARTIST + ", " + Audio.Media.ALBUM + ", " + Audio.Media.TRACK);
     }
 
-    /** Looks up songs by audio id, in the given order (for restoring the last queue). */
+    /** Looks up songs by audio id, in the given order; ids no longer in the library are dropped. */
     List<Song> songsById(List<Long> ids) {
         final List<Song> songs = new ArrayList<>();
+        if (ids.isEmpty()) return songs;
+        final java.util.Map<Long, Song> found = new java.util.HashMap<>();
+        // In chunks, to stay below SQLite's bound-parameter limit.
+        for (int from = 0; from < ids.size(); from += 500) {
+            final List<Long> chunk = ids.subList(from, Math.min(ids.size(), from + 500));
+            final StringBuilder in = new StringBuilder();
+            final String[] args = new String[chunk.size()];
+            for (int i = 0; i < chunk.size(); ++i) {
+                in.append(i == 0 ? "?" : ",?");
+                args[i] = String.valueOf(chunk.get(i));
+            }
+            for (Song s : query(Audio.Media._ID + " IN (" + in + ")", args, null)) found.put(s.id, s);
+        }
         for (long id : ids) {
-            final List<Song> s = query(Audio.Media._ID + " = ?", new String[] {String.valueOf(id)}, null);
-            songs.addAll(s);
+            final Song s = found.get(id);
+            if (s != null) songs.add(s);
         }
         return songs;
+    }
+
+    /** Members of a MediaStore playlist (M3U/PLS file in the Music folder), in play order. */
+    private List<Song> playlist(String playlistId) {
+        final List<Long> ids = new ArrayList<>();
+        try {
+            final Uri members = Audio.Playlists.Members.getContentUri(
+                    MediaStore.VOLUME_EXTERNAL_PRIMARY, Long.parseLong(playlistId));
+            try (Cursor c = mResolver.query(members, new String[] {Audio.Playlists.Members.AUDIO_ID},
+                    null, null, Audio.Playlists.Members.PLAY_ORDER)) {
+                while (c != null && c.moveToNext()) ids.add(c.getLong(0));
+            }
+        } catch (NumberFormatException e) {
+            // Not a playlist id.
+        }
+        return songsById(ids);
     }
 
     private List<Song> query(String selection, String[] args, String order) {
@@ -248,6 +289,19 @@ final class MusicLibrary {
     }
 
     private void addSongs(List<MediaItem> items, String parentId, List<Song> songs) {
+        // "Shuffle" plays the whole node in random order; "Shuffle all" for the library.
+        if (songs.size() > 1) {
+            items.add(new MediaItem(new MediaDescriptionCompat.Builder()
+                    .setMediaId(SHUFFLE + parentId)
+                    .setTitle(mContext.getString(SONGS.equals(parentId) ? R.string.shuffle_all
+                            : R.string.shuffle))
+                    .setSubtitle(mContext.getResources().getQuantityString(
+                            R.plurals.song_count, songs.size(), songs.size()))
+                    // By name: the Media app's UriUtils can't resolve numeric resource ids.
+                    .setIconUri(Uri.parse("android.resource://" + mContext.getPackageName()
+                            + "/drawable/ic_shuffle_on"))
+                    .build(), MediaItem.FLAG_PLAYABLE));
+        }
         for (Song s : songs) {
             items.add(new MediaItem(new MediaDescriptionCompat.Builder()
                     .setMediaId(songId(parentId, s.id))

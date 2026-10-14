@@ -46,7 +46,13 @@ public final class MusicService extends MediaBrowserServiceCompat implements Pla
             | PlaybackStateCompat.ACTION_SET_SHUFFLE_MODE
             | PlaybackStateCompat.ACTION_SET_REPEAT_MODE;
 
+    // Custom actions in Now Playing (shown in this order).
+    private static final String ACTION_SHUFFLE = "shuffle";
+    private static final String ACTION_REPEAT = "repeat";
+    private static final String ACTION_FAVORITE = "favorite";
+
     private MusicLibrary mLibrary;
+    private PlaylistStore mStore;
     private Playback mPlayback;
     private MediaSessionCompat mSession;
     private Handler mWorker;
@@ -56,7 +62,8 @@ public final class MusicService extends MediaBrowserServiceCompat implements Pla
     @Override
     public void onCreate() {
         super.onCreate();
-        mLibrary = new MusicLibrary(this);
+        mStore = new PlaylistStore(this);
+        mLibrary = new MusicLibrary(this, mStore);
         mPlayback = new Playback(this, this);
         final HandlerThread thread = new HandlerThread("CarMusicLibrary");
         thread.start();
@@ -185,9 +192,11 @@ public final class MusicService extends MediaBrowserServiceCompat implements Pla
 
         @Override
         public void onPlayFromMediaId(String mediaId, Bundle extras) {
-            if (MusicLibrary.SHUFFLE_ALL.equals(mediaId)) {
+            if (mediaId.startsWith(MusicLibrary.SHUFFLE)) {
+                // Shuffle a whole node, starting at a random song.
+                final String node = mediaId.substring(MusicLibrary.SHUFFLE.length());
                 playQueue(songs -> {
-                    songs.addAll(mLibrary.songs(MusicLibrary.SONGS));
+                    songs.addAll(mLibrary.songs(node));
                     return (int) (Math.random() * songs.size());
                 }, true);
                 return;
@@ -204,6 +213,26 @@ public final class MusicService extends MediaBrowserServiceCompat implements Pla
                 }
                 return 0;
             }, false);
+        }
+
+        @Override
+        public void onCustomAction(String action, Bundle extras) {
+            if (ACTION_SHUFFLE.equals(action)) {
+                mPlayback.setShuffle(!mPlayback.shuffle());
+            } else if (ACTION_REPEAT.equals(action)) {
+                mPlayback.setRepeat(Playback.Repeat.values()[
+                        (mPlayback.repeat().ordinal() + 1) % Playback.Repeat.values().length]);
+            } else if (ACTION_FAVORITE.equals(action)) {
+                final MusicLibrary.Song song = mPlayback.current();
+                if (song == null) return;
+                mWorker.post(() -> {
+                    mStore.toggleFavorite(song.id);
+                    mMain.post(() -> {
+                        updateState();
+                        notifyChildrenChanged(MusicLibrary.FAVORITES);
+                    });
+                });
+            }
         }
 
         @Override
@@ -224,6 +253,12 @@ public final class MusicService extends MediaBrowserServiceCompat implements Pla
         mSession.setMetadata(song.metadata());
         publishQueue();
         save();
+        if (mPlayback.isPlaying()) {
+            mWorker.post(() -> {
+                mStore.played(song.id);
+                mMain.post(() -> notifyChildrenChanged(MusicLibrary.PLAYED));
+            });
+        }
     }
 
     @Override
@@ -249,8 +284,22 @@ public final class MusicService extends MediaBrowserServiceCompat implements Pla
     private void updateState() {
         final boolean playing = mPlayback.isPlaying();
         final MusicLibrary.Song song = mPlayback.current();
+        final boolean favorite = song != null && mStore.isFavorite(song.id);
+        final Playback.Repeat repeat = mPlayback.repeat();
         mSession.setPlaybackState(new PlaybackStateCompat.Builder()
                 .setActions(ACTIONS)
+                .addCustomAction(ACTION_SHUFFLE, getString(mPlayback.shuffle()
+                                ? R.string.action_shuffle_on : R.string.action_shuffle_off),
+                        mPlayback.shuffle() ? R.drawable.ic_shuffle_on : R.drawable.ic_shuffle_off)
+                .addCustomAction(ACTION_REPEAT, getString(repeat == Playback.Repeat.ONE
+                                ? R.string.action_repeat_one : repeat == Playback.Repeat.ALL
+                                ? R.string.action_repeat_all : R.string.action_repeat_off),
+                        repeat == Playback.Repeat.ONE ? R.drawable.ic_repeat_one
+                                : repeat == Playback.Repeat.ALL ? R.drawable.ic_repeat_on
+                                : R.drawable.ic_repeat_off)
+                .addCustomAction(ACTION_FAVORITE, getString(favorite
+                                ? R.string.action_unfavorite : R.string.action_favorite),
+                        favorite ? R.drawable.ic_favorite_on : R.drawable.ic_favorite_off)
                 .setState(song == null ? PlaybackStateCompat.STATE_NONE
                         : playing ? PlaybackStateCompat.STATE_PLAYING : PlaybackStateCompat.STATE_PAUSED,
                         mPlayback.positionMs(), playing ? 1f : 0f)

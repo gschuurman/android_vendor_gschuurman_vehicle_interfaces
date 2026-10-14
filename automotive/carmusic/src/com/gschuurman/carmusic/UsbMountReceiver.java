@@ -23,7 +23,7 @@ public final class UsbMountReceiver extends BroadcastReceiver {
             try {
                 for (UsbMusic.Volume volume : UsbMusic.volumes(context)) {
                     if (!volume.root.equals(root)) continue;
-                    final int n = UsbMusic.scan(root).size();
+                    final int n = UsbMusic.audioCount(UsbMusic.scan(root));
                     if (n == 0) return;
                     ImportService.createChannel(context);
                     final PendingIntent open = PendingIntent.getActivity(context, 0,

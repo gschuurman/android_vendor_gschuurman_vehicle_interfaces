@@ -24,9 +24,11 @@ import java.util.Locale;
 import java.util.Map;
 
 /**
- * Music on USB storage: finds mounted removable volumes, lists their audio files and copies them
- * into the Music folder (MediaStore, primary volume), keeping the folder structure and skipping
- * files that are already there. Files are read through the media FUSE view (READ_MEDIA_AUDIO).
+ * Music on USB storage: finds mounted removable volumes, lists their audio files and playlists and
+ * copies them into the Music folder (MediaStore, primary volume), keeping the folder structure and
+ * skipping files that are already there. Playlists (M3U/M3U8/PLS) are written as UTF-8 M3U with their
+ * entries rewritten to the imported files, so MediaProvider can resolve them. Files are read
+ * through the media FUSE view (READ_MEDIA_AUDIO).
  */
 final class UsbMusic {
     private static final String TAG = "CarMusic";
@@ -36,6 +38,9 @@ final class UsbMusic {
             "mp3", "audio/mpeg", "flac", "audio/flac", "m4a", "audio/mp4", "aac", "audio/aac",
             "ogg", "audio/ogg", "oga", "audio/ogg", "opus", "audio/ogg", "wav", "audio/wav",
             "wma", "audio/x-ms-wma");
+    private static final List<String> PLAYLIST_EXTENSIONS = Arrays.asList("m3u", "m3u8", "pls");
+    private static final String PLAYLIST_MIME = "audio/x-mpegurl";
+
     /** Folders that never hold the user's music. */
     private static final List<String> SKIP_DIRS = Arrays.asList(
             "android", "lost.dir", "system volume information", "$recycle.bin", ".trashes");
@@ -51,14 +56,23 @@ final class UsbMusic {
         }
     }
 
-    /** An audio file on a USB volume; 'relativeDir' is its folder below the volume root. */
+    /**
+     * An audio file or playlist on a USB volume; 'relativeDir' is its folder below the volume root.
+     */
     static final class Track {
         final File file;
         final String relativeDir;
+        final boolean playlist;
 
-        Track(File file, String relativeDir) {
+        Track(File file, String relativeDir, boolean playlist) {
             this.file = file;
             this.relativeDir = relativeDir;
+            this.playlist = playlist;
+        }
+
+        /** Path below the volume root, lower case, for matching playlist entries. */
+        String key() {
+            return (relativeDir + file.getName()).toLowerCase(Locale.ROOT);
         }
     }
 
@@ -89,7 +103,14 @@ final class UsbMusic {
         return result;
     }
 
-    /** Audio files on a volume, sorted by path. */
+    /** Number of audio files (not playlists) in a scan. */
+    static int audioCount(List<Track> tracks) {
+        int n = 0;
+        for (Track t : tracks) if (!t.playlist) n++;
+        return n;
+    }
+
+    /** Audio files and playlists on a volume, sorted by path. */
     static List<Track> scan(File root) {
         final List<Track> tracks = new ArrayList<>();
         scan(root, "", tracks);
@@ -107,14 +128,20 @@ final class UsbMusic {
                 if (relative.isEmpty() && SKIP_DIRS.contains(name.toLowerCase(Locale.ROOT))) continue;
                 scan(f, relative + name + "/", tracks);
             } else if (mimeType(name) != null) {
-                tracks.add(new Track(f, relative));
+                tracks.add(new Track(f, relative, false));
+            } else if (PLAYLIST_EXTENSIONS.contains(extension(name))) {
+                tracks.add(new Track(f, relative, true));
             }
         }
     }
 
     static String mimeType(String fileName) {
+        return MIME_TYPES.get(extension(fileName));
+    }
+
+    private static String extension(String fileName) {
         final int dot = fileName.lastIndexOf('.');
-        return dot < 0 ? null : MIME_TYPES.get(fileName.substring(dot + 1).toLowerCase(Locale.ROOT));
+        return dot < 0 ? "" : fileName.substring(dot + 1).toLowerCase(Locale.ROOT);
     }
 
     /** Folder below Music/ for a track: the USB folder, without a leading "Music/" of its own. */
@@ -126,15 +153,23 @@ final class UsbMusic {
         return MusicLibrary.MUSIC_DIR + dir;
     }
 
-    /** Copies 'tracks' into the Music folder. */
+    /** Copies 'tracks' into the Music folder: the audio first, then the playlists. */
     static Result copy(Context context, List<Track> tracks, Progress progress) {
         final ContentResolver resolver = context.getContentResolver();
         final Uri audio = Audio.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY);
         final Result result = new Result();
         final byte[] buffer = new byte[BUFFER];
+        final List<Track> playlists = new ArrayList<>();
+        // Source path (lower case) -> imported path below the primary volume, for playlists.
+        final Map<String, String> imported = new java.util.HashMap<>();
+        for (Track t : tracks) {
+            if (t.playlist) playlists.add(t);
+            else imported.put(t.key(), destination(t) + t.file.getName());
+        }
         for (int i = 0; i < tracks.size(); ++i) {
             if (progress.isCancelled()) break;
             final Track t = tracks.get(i);
+            if (t.playlist) continue;
             progress.onProgress(i, tracks.size(), t);
             final String relativePath = destination(t);
             final String name = t.file.getName();
@@ -169,8 +204,141 @@ final class UsbMusic {
                 if (!progress.isCancelled()) result.failed++;
             }
         }
+        for (Track t : playlists) {
+            if (progress.isCancelled()) break;
+            try {
+                if (copyPlaylist(resolver, t, imported)) result.copied++; else result.skipped++;
+            } catch (IOException | RuntimeException e) {
+                Log.w(TAG, "Import of playlist " + t.file + " failed: " + e.getMessage());
+                result.failed++;
+            }
+        }
         progress.onProgress(tracks.size(), tracks.size(), null);
         return result;
+    }
+
+    /** Writes a playlist as UTF-8 M3U next to its songs; false if it is already there. */
+    private static boolean copyPlaylist(ContentResolver resolver, Track t,
+            Map<String, String> imported) throws IOException {
+        final Uri playlists = Audio.Playlists.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY);
+        final String dir = destination(t);
+        String base = t.file.getName();
+        base = base.substring(0, base.lastIndexOf('.'));
+        // ".m3u": MediaProvider names files after the MIME type (audio/x-mpegurl); UTF-8 content.
+        final String name = base + ".m3u";
+        try (Cursor c = resolver.query(playlists, new String[] {Audio.Playlists._ID},
+                Audio.Playlists.RELATIVE_PATH + " = ? AND " + Audio.Playlists.DISPLAY_NAME + " = ?",
+                new String[] {dir, name}, null)) {
+            if (c != null && c.moveToFirst()) return false;
+        }
+        final StringBuilder out = new StringBuilder("#EXTM3U\n");
+        int entries = 0;
+        for (String entry : playlistEntries(t.file)) {
+            final String target = resolveEntry(entry, t.relativeDir, imported);
+            if (target == null) continue;
+            out.append(relativize(dir, target)).append('\n');
+            entries++;
+        }
+        if (entries == 0) throw new IOException("no entries match the imported music");
+
+        final ContentValues values = new ContentValues();
+        values.put(Audio.Playlists.DISPLAY_NAME, name);
+        values.put(Audio.Playlists.RELATIVE_PATH, dir);
+        values.put(Audio.Playlists.MIME_TYPE, PLAYLIST_MIME);
+        values.put(Audio.Playlists.IS_PENDING, 1);
+        final Uri item = resolver.insert(playlists, values);
+        if (item == null) throw new IOException("insert failed");
+        try (OutputStream os = resolver.openOutputStream(item)) {
+            os.write(out.toString().getBytes(java.nio.charset.StandardCharsets.UTF_8));
+        } catch (IOException | RuntimeException e) {
+            resolver.delete(item, null, null);
+            throw e;
+        }
+        values.clear();
+        values.put(Audio.Playlists.IS_PENDING, 0);
+        resolver.update(item, values, null, null);
+        return true;
+    }
+
+    /** The file entries of an M3U/M3U8 (one per line, # = comment) or PLS (FileN=) playlist. */
+    static List<String> playlistEntries(File file) throws IOException {
+        final List<String> entries = new ArrayList<>();
+        final boolean pls = "pls".equals(extension(file.getName()));
+        final String text;
+        try (InputStream in = new FileInputStream(file)) {
+            text = new String(in.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+        }
+        for (String line : text.split("\r?\n")) {
+            line = line.trim();
+            if (line.startsWith("\uFEFF")) line = line.substring(1);
+            if (line.isEmpty()) continue;
+            if (pls) {
+                final int eq = line.indexOf('=');
+                if (eq > 0 && line.regionMatches(true, 0, "File", 0, 4)) entries.add(line.substring(eq + 1).trim());
+            } else if (!line.startsWith("#")) {
+                entries.add(line);
+            }
+        }
+        return entries;
+    }
+
+    /**
+     * Maps a playlist entry to an imported file (path below the primary volume), or null. Relative
+     * entries are resolved against the playlist's folder; absolute ones ("E:\\Music\\a.mp3",
+     * "/media/usb/a.mp3") match by their longest path suffix that is a file on the stick.
+     */
+    static String resolveEntry(String entry, String playlistDir, Map<String, String> imported) {
+        String e = entry;
+        if (e.regionMatches(true, 0, "http://", 0, 7) || e.regionMatches(true, 0, "https://", 0, 8)) {
+            return null;
+        }
+        if (e.regionMatches(true, 0, "file://", 0, 7)) {
+            e = Uri.decode(e.substring(7));
+        }
+        e = e.replace('\\', '/');
+        final boolean absolute = e.startsWith("/") || e.matches("^[A-Za-z]:/.*");
+        if (!absolute) {
+            final String direct = imported.get(normalize(playlistDir + e));
+            if (direct != null) return direct;
+        }
+        final String[] parts = normalize(e.replaceFirst("^[A-Za-z]:", "")).split("/");
+        for (int i = 0; i < parts.length; ++i) {
+            final String suffix = String.join("/", Arrays.copyOfRange(parts, i, parts.length));
+            final String hit = imported.get(suffix);
+            if (hit != null) return hit;
+        }
+        return null;
+    }
+
+    /** Lower case, '/' separated, without empty, "." and ".." segments. */
+    private static String normalize(String path) {
+        final List<String> out = new ArrayList<>();
+        for (String seg : path.split("/")) {
+            if (seg.isEmpty() || seg.equals(".")) continue;
+            if (seg.equals("..")) {
+                if (!out.isEmpty()) out.remove(out.size() - 1);
+                continue;
+            }
+            out.add(seg.toLowerCase(Locale.ROOT));
+        }
+        return String.join("/", out);
+    }
+
+    /** Path of 'target' relative to directory 'fromDir' (both below the same root). */
+    static String relativize(String fromDir, String target) {
+        final String[] from = fromDir.split("/");
+        final String[] to = target.split("/");
+        int common = 0;
+        while (common < from.length && common < to.length - 1 && from[common].equals(to[common])) {
+            common++;
+        }
+        final StringBuilder sb = new StringBuilder();
+        for (int i = common; i < from.length; ++i) if (!from[i].isEmpty()) sb.append("../");
+        for (int i = common; i < to.length; ++i) {
+            sb.append(to[i]);
+            if (i < to.length - 1) sb.append('/');
+        }
+        return sb.toString();
     }
 
     /** True if Music already has this file (same folder, name and size). */
