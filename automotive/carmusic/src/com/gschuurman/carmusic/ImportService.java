@@ -122,6 +122,7 @@ public final class ImportService extends Service {
         sState.running = false;
         sState.result = result;
         publish();
+        if (result.copied > 0) CoverFetchJob.schedule(this, true);
         nm.notify(RESULT_NOTIFICATION_ID, new NotificationCompat.Builder(this, CHANNEL)
                 .setSmallIcon(R.drawable.ic_music)
                 .setContentTitle(getString(mCancelled ? R.string.import_cancelled : R.string.import_done))

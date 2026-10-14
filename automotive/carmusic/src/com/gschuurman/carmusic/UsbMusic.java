@@ -63,11 +63,18 @@ final class UsbMusic {
         final File file;
         final String relativeDir;
         final boolean playlist;
+        /** True for the cover image of its folder (see Covers). */
+        final boolean cover;
 
         Track(File file, String relativeDir, boolean playlist) {
+            this(file, relativeDir, playlist, false);
+        }
+
+        Track(File file, String relativeDir, boolean playlist, boolean cover) {
             this.file = file;
             this.relativeDir = relativeDir;
             this.playlist = playlist;
+            this.cover = cover;
         }
 
         /** Path below the volume root, lower case, for matching playlist entries. */
@@ -103,10 +110,10 @@ final class UsbMusic {
         return result;
     }
 
-    /** Number of audio files (not playlists) in a scan. */
+    /** Number of audio files (not playlists or covers) in a scan. */
     static int audioCount(List<Track> tracks) {
         int n = 0;
-        for (Track t : tracks) if (!t.playlist) n++;
+        for (Track t : tracks) if (!t.playlist && !t.cover) n++;
         return n;
     }
 
@@ -121,6 +128,8 @@ final class UsbMusic {
         final File[] entries = dir.listFiles();
         if (entries == null) return;
         Arrays.sort(entries, (a, b) -> a.getName().compareToIgnoreCase(b.getName()));
+        File cover = null;
+        boolean hasAudio = false;
         for (File f : entries) {
             final String name = f.getName();
             if (name.startsWith(".")) continue;
@@ -129,10 +138,16 @@ final class UsbMusic {
                 scan(f, relative + name + "/", tracks);
             } else if (mimeType(name) != null) {
                 tracks.add(new Track(f, relative, false));
+                hasAudio = true;
             } else if (PLAYLIST_EXTENSIONS.contains(extension(name))) {
                 tracks.add(new Track(f, relative, true));
+            } else {
+                final int rank = Covers.rank(name);
+                if (rank >= 0 && (cover == null || rank < Covers.rank(cover.getName()))) cover = f;
             }
         }
+        // One cover per folder with music.
+        if (cover != null && hasAudio) tracks.add(new Track(cover, relative, false, true));
     }
 
     static String mimeType(String fileName) {
@@ -164,12 +179,16 @@ final class UsbMusic {
         final Map<String, String> imported = new java.util.HashMap<>();
         for (Track t : tracks) {
             if (t.playlist) playlists.add(t);
-            else imported.put(t.key(), destination(t) + t.file.getName());
+            else if (!t.cover) imported.put(t.key(), destination(t) + t.file.getName());
         }
         for (int i = 0; i < tracks.size(); ++i) {
             if (progress.isCancelled()) break;
             final Track t = tracks.get(i);
             if (t.playlist) continue;
+            if (t.cover) {
+                copyCover(context, t);
+                continue;
+            }
             progress.onProgress(i, tracks.size(), t);
             final String relativePath = destination(t);
             final String name = t.file.getName();
@@ -215,6 +234,24 @@ final class UsbMusic {
         }
         progress.onProgress(tracks.size(), tracks.size(), null);
         return result;
+    }
+
+    /** Stores a folder cover for ArtProvider (replacing an older one of that folder). */
+    private static void copyCover(Context context, Track t) {
+        final File target = Covers.file(context, destination(t));
+        final File tmp = new File(target.getPath() + ".tmp");
+        final byte[] buffer = new byte[BUFFER];
+        try (InputStream in = new FileInputStream(t.file);
+                OutputStream out = new java.io.FileOutputStream(tmp)) {
+            int n;
+            while ((n = in.read(buffer)) > 0) out.write(buffer, 0, n);
+        } catch (IOException e) {
+            Log.w(TAG, "Cover " + t.file + " not imported: " + e.getMessage());
+            tmp.delete();
+            return;
+        }
+        if (!tmp.renameTo(target)) tmp.delete();
+        ArtProvider.invalidate(context);
     }
 
     /** Writes a playlist as UTF-8 M3U next to its songs; false if it is already there. */

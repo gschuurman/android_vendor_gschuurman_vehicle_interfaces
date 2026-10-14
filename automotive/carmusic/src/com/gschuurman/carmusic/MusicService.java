@@ -78,6 +78,7 @@ public final class MusicService extends MediaBrowserServiceCompat implements Pla
                 CHANNEL, getString(R.string.channel_playback), NotificationManager.IMPORTANCE_LOW));
         updateState();
         restore();
+        CoverFetchJob.schedule(this, false);
     }
 
     @Override

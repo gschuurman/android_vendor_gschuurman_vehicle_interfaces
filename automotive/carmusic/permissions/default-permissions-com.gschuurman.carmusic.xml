@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- CarMusic reads the music library and USB audio through MediaStore / the media FUSE view, and
+<!-- CarMusic reads the music library, USB audio and album covers through MediaStore / the media
+     FUSE view, and
      posts the "music found on USB" and import progress notifications. -->
 <exceptions>
     <exception package="com.gschuurman.carmusic">
         <permission name="android.permission.READ_MEDIA_AUDIO" fixed="false" />
+        <permission name="android.permission.READ_MEDIA_IMAGES" fixed="false" />
         <permission name="android.permission.POST_NOTIFICATIONS" fixed="false" />
     </exception>
 </exceptions>
