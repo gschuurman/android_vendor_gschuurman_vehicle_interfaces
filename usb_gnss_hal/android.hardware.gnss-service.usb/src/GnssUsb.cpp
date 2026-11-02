@@ -1,8 +1,12 @@
-// Drop-in replacement for GnssUsb.cpp
+// GNSS HAL for a u-blox receiver on a serial port.
 //
 // Goals:
-//  - HARD-CODE UART GNSS: /dev/ttyAML6 @ 9600 (Amlogic)
-//  - Robustly read/parse NMEA from UART and emit debug logs even without fixes
+//  - u-blox on USB (CDC-ACM, /dev/ttyACM*; M9N on the car radio). persist.vendor.gnss.device or
+//    ro.vendor.gnss.device override the port; /dev/ttyAML6 @ 9600 (old UART wiring) is the fallback.
+//    The port disappears on USB resets and while the GNSS supply is off (VIM3 asleep): reopen it.
+//  - Fixes from UBX-NAV-PVT (real accuracies), satellites from UBX-NAV-SAT, enabled on the USB port
+//    only (UART1 also feeds the peripheral board MCU at 9600 baud). NMEA RMC/GGA is the fallback.
+//  - Robustly read/parse NMEA and emit debug logs even without fixes
 //  - Speed up TTFF using u-blox UBX (no paid AssistNow):
 //      * UBX-MGA-INI-TIME_UTC
 //      * UBX-MGA-INI-POS_LLH
@@ -13,10 +17,16 @@
 
 #include <android-base/logging.h>
 
+#include <android-base/properties.h>
+#include <dirent.h>
 #include <fcntl.h>
+#include <poll.h>
 #include <termios.h>
 #include <unistd.h>
+#include <utils/SystemClock.h>
 
+#include <aidl/android/hardware/gnss/ElapsedRealtime.h>
+#include <aidl/android/hardware/gnss/GnssConstellationType.h>
 #include <aidl/android/hardware/gnss/GnssLocation.h>
 
 #include <chrono>
@@ -24,6 +34,7 @@
 #include <cstdint>
 #include <cstring>
 #include <ctime>
+#include <functional>
 #include <iomanip>
 #include <mutex>
 #include <optional>
@@ -39,15 +50,37 @@
 
 namespace aidl::android::hardware::gnss::usb {
 
+using ::aidl::android::hardware::gnss::ElapsedRealtime;
+using ::aidl::android::hardware::gnss::GnssConstellationType;
 using ::aidl::android::hardware::gnss::GnssLocation;
 using ::aidl::android::hardware::gnss::IGnssCallback;
 using ndk::ScopedAStatus;
 
 // -----------------------------------------------------------------------------
-// Hardcoded device
+// Device
 // -----------------------------------------------------------------------------
-static constexpr const char* kDevicePath = "/dev/ttyAML6";
-static constexpr int kBaudrate = 9600;
+static constexpr const char* kUartFallback = "/dev/ttyAML6";
+static constexpr int kBaudrate = 9600;  // UART only; CDC-ACM ignores it
+static constexpr int kReopenIntervalMs = 1000;
+static constexpr int64_t kPvtStaleMs = 3000;
+
+// The serial port to use: the property override, else the first /dev/ttyACM* (the peripheral board
+// has no CDC interface of its own, so on this car radio that is the u-blox), else the UART.
+static std::string FindGnssPort() {
+    std::string forced = ::android::base::GetProperty("persist.vendor.gnss.device", "");
+    if (forced.empty()) forced = ::android::base::GetProperty("ro.vendor.gnss.device", "");
+    if (!forced.empty()) return forced;
+
+    std::string best;
+    if (DIR* dir = opendir("/dev")) {
+        while (dirent* ent = readdir(dir)) {
+            std::string name = ent->d_name;
+            if (name.rfind("ttyACM", 0) == 0 && (best.empty() || name < best)) best = name;
+        }
+        closedir(dir);
+    }
+    return best.empty() ? kUartFallback : "/dev/" + best;
+}
 
 // -----------------------------------------------------------------------------
 // Helpers
@@ -148,6 +181,20 @@ static bool SendUbx(int fd, uint8_t cls, uint8_t id, const std::vector<uint8_t>&
     frame.push_back(ckA);
     frame.push_back(ckB);
     return WriteAll(fd, frame.data(), frame.size());
+}
+
+// UBX-CFG-VALSET in the RAM layer (M9/M10 configuration interface; older receivers NAK it).
+// Turns on NAV-PVT and NAV-SAT on the USB port and sets the automotive dynamic model.
+static void SendValsetUsbPvtSat(int fd) {
+    std::vector<uint8_t> p = {0x00, 0x01, 0x00, 0x00};  // version 0, layer RAM
+    auto key1 = [&](uint32_t key, uint8_t value) {
+        for (int i = 0; i < 4; i++) p.push_back(static_cast<uint8_t>(key >> (8 * i)));
+        p.push_back(value);
+    };
+    key1(0x20910009, 1);  // CFG-MSGOUT-UBX_NAV_PVT_USB
+    key1(0x20910018, 1);  // CFG-MSGOUT-UBX_NAV_SAT_USB
+    key1(0x20110021, 4);  // CFG-NAVSPG-DYNMODEL = automotive
+    (void)SendUbx(fd, 0x06, 0x8A, p);
 }
 
 static void SendMonVerPoll(int fd) {
@@ -303,6 +350,9 @@ static std::vector<uint8_t> BuildMgaIniPosLlh(const GnssLocation& loc) {
 
 class UbxStreamParser {
 public:
+    // Called for every UBX message with a good checksum.
+    std::function<void(uint8_t cls, uint8_t id, const std::vector<uint8_t>& payload)> onMessage;
+
     void Feed(const uint8_t* data, size_t len) {
         for (size_t i = 0; i < len; i++) FeedByte(data[i]);
     }
@@ -334,6 +384,7 @@ private:
                          << " id=" << static_cast<int>(id_) << std::dec;
             return;
         }
+        if (onMessage) onMessage(cls_, id_, payload_);
 
         if (cls_ == 0x05 && (id_ == 0x01 || id_ == 0x00) && payload_.size() >= 2) {
             uint8_t ackedCls = payload_[0];
@@ -416,8 +467,7 @@ GnssUsb::GnssUsb() {
 }
 
 GnssUsb::~GnssUsb() {
-    std::lock_guard<std::mutex> lk(mutex_);
-    StopReaderLocked();
+    StopReader();
 }
 
 ScopedAStatus GnssUsb::setCallback(const std::shared_ptr<IGnssCallback>& callback) {
@@ -432,9 +482,11 @@ ScopedAStatus GnssUsb::setCallback(const std::shared_ptr<IGnssCallback>& callbac
 }
 
 ScopedAStatus GnssUsb::close() {
-    std::lock_guard<std::mutex> lk(mutex_);
-    callback_.reset();
-    StopReaderLocked();
+    {
+        std::lock_guard<std::mutex> lk(mutex_);
+        callback_.reset();
+    }
+    StopReader();
     return ScopedAStatus::ok();
 }
 
@@ -446,50 +498,199 @@ ScopedAStatus GnssUsb::start() {
     }
     if (running_) return ScopedAStatus::ok();
 
-    devicePath_ = kDevicePath;
-    baudrate_ = kBaudrate;
-
-    serialFd_ = ::open(devicePath_.c_str(), O_RDWR | O_NOCTTY | O_NONBLOCK);
-    if (serialFd_ < 0) {
-        PLOG(ERROR) << "open failed for " << devicePath_;
-        return ScopedAStatus::fromServiceSpecificError(IGnss::ERROR_GENERIC);
-    }
-
-    if (!ConfigureSerialRaw(serialFd_, baudrate_)) {
-        LOG(ERROR) << "Serial configure failed for " << devicePath_;
-        ::close(serialFd_);
-        serialFd_ = -1;
-        return ScopedAStatus::fromServiceSpecificError(IGnss::ERROR_GENERIC);
-    }
-
-    // Best-effort receiver configuration (ACK/NAK logged from UBX stream).
-    SendMonVerPoll(serialFd_);
-    SendCfgNav5Automotive(serialFd_);
-    SendCfgRate(serialFd_, 1000);
-    SendCfgSbasEnable(serialFd_);
-    SendCfgGnssMulti(serialFd_);
+    // A missing receiver is not an error: the reader thread keeps looking for it.
+    OpenPortLocked(/*logFailure=*/true);
 
     running_ = true;
     readerThread_ = std::thread(&GnssUsb::ReaderThreadMain, this);
-
-    LOG(INFO) << "GNSS started " << devicePath_ << " @ " << baudrate_;
     return ScopedAStatus::ok();
 }
 
 ScopedAStatus GnssUsb::stop() {
-    std::lock_guard<std::mutex> lk(mutex_);
-    StopReaderLocked();
+    StopReader();
     return ScopedAStatus::ok();
 }
 
-void GnssUsb::StopReaderLocked() {
-    if (!running_) return;
-    running_ = false;
+bool GnssUsb::OpenPortLocked(bool logFailure) {
+    const std::string path = FindGnssPort();
+    int fd = ::open(path.c_str(), O_RDWR | O_NOCTTY | O_NONBLOCK | O_CLOEXEC);
+    if (fd < 0) {
+        if (logFailure) PLOG(ERROR) << "open failed for " << path << ", waiting for the receiver";
+        return false;
+    }
+    if (!ConfigureSerialRaw(fd, kBaudrate)) {
+        LOG(ERROR) << "Serial configure failed for " << path;
+        ::close(fd);
+        return false;
+    }
+
+    // Best-effort receiver configuration (ACK/NAK logged from UBX stream). The receiver loses RAM
+    // settings when its supply is switched, so this runs on every (re)open.
+    SendMonVerPoll(fd);
+    SendCfgNav5Automotive(fd);
+    SendCfgRate(fd, 1000);
+    SendCfgSbasEnable(fd);
+    SendCfgGnssMulti(fd);
+    SendValsetUsbPvtSat(fd);
+
+    serialFd_ = fd;
+    devicePath_ = path;
+    baudrate_ = kBaudrate;
+    LOG(INFO) << "GNSS port " << path << " open";
+    return true;
+}
+
+void GnssUsb::ClosePortLocked() {
     if (serialFd_ >= 0) {
         ::close(serialFd_);
         serialFd_ = -1;
     }
-    if (readerThread_.joinable()) readerThread_.join();
+}
+
+// Not under mutex_ while joining: the reader thread takes it to reopen the port and to fetch the
+// callback.
+void GnssUsb::StopReader() {
+    std::thread reader;
+    {
+        std::lock_guard<std::mutex> lk(mutex_);
+        running_ = false;
+        reader = std::move(readerThread_);
+    }
+    if (reader.joinable()) reader.join();
+    std::lock_guard<std::mutex> lk(mutex_);
+    ClosePortLocked();
+}
+
+std::shared_ptr<IGnssCallback> GnssUsb::Callback() {
+    std::lock_guard<std::mutex> lk(mutex_);
+    return callback_;
+}
+
+void GnssUsb::PublishLocation(const GnssLocation& location) {
+    if (auto cb = Callback()) cb->gnssLocationCb(location);
+}
+
+static int32_t I4(const std::vector<uint8_t>& p, size_t off) {
+    return static_cast<int32_t>(p[off] | (p[off + 1] << 8) | (p[off + 2] << 16) |
+                                (static_cast<uint32_t>(p[off + 3]) << 24));
+}
+static uint32_t U4(const std::vector<uint8_t>& p, size_t off) { return static_cast<uint32_t>(I4(p, off)); }
+static int16_t I2(const std::vector<uint8_t>& p, size_t off) {
+    return static_cast<int16_t>(p[off] | (p[off + 1] << 8));
+}
+
+void GnssUsb::HandleUbx(uint8_t cls, uint8_t id, const std::vector<uint8_t>& p) {
+    if (cls == 0x01 && id == 0x07 && p.size() >= 92) {  // NAV-PVT
+        lastPvtMs_ = NowMillis();
+        const uint8_t valid = p[11];
+        const uint8_t fixType = p[20];
+        const bool gnssFixOk = p[21] & 0x01;
+        const uint8_t numSv = p[23];
+        if (!gnssFixOk || fixType < 2 || fixType > 4) return;  // no fix / dead reckoning only / time only
+
+        GnssLocation loc{};
+        loc.longitudeDegrees = I4(p, 24) * 1e-7;
+        loc.latitudeDegrees = I4(p, 28) * 1e-7;
+        loc.altitudeMeters = I4(p, 36) / 1000.0;  // above mean sea level
+        loc.horizontalAccuracyMeters = U4(p, 40) / 1000.0;
+        loc.verticalAccuracyMeters = U4(p, 44) / 1000.0;
+        loc.speedMetersPerSec = I4(p, 60) / 1000.0;
+        loc.speedAccuracyMetersPerSecond = U4(p, 68) / 1000.0;
+        loc.bearingDegrees = I4(p, 64) * 1e-5;
+        loc.bearingAccuracyDegrees = U4(p, 72) * 1e-5;
+        loc.gnssLocationFlags = GnssLocation::HAS_LAT_LONG | GnssLocation::HAS_HORIZONTAL_ACCURACY |
+                                GnssLocation::HAS_SPEED | GnssLocation::HAS_SPEED_ACCURACY;
+        if (fixType != 2) {
+            loc.gnssLocationFlags |= GnssLocation::HAS_ALTITUDE | GnssLocation::HAS_VERTICAL_ACCURACY;
+        }
+        // Heading of motion is only meaningful while moving.
+        if (loc.speedMetersPerSec > 0.5) {
+            loc.gnssLocationFlags |= GnssLocation::HAS_BEARING | GnssLocation::HAS_BEARING_ACCURACY;
+        }
+
+        // UTC from the receiver when date and time are valid and fully resolved.
+        if ((valid & 0x07) == 0x07) {
+            std::tm t{};
+            t.tm_year = (p[4] | (p[5] << 8)) - 1900;
+            t.tm_mon = p[6] - 1;
+            t.tm_mday = p[7];
+            t.tm_hour = p[8];
+            t.tm_min = p[9];
+            t.tm_sec = p[10];
+            loc.timestampMillis = static_cast<int64_t>(timegm(&t)) * 1000 + I4(p, 16) / 1000000;
+        } else {
+            loc.timestampMillis = NowMillis();
+        }
+        loc.elapsedRealtime.flags = ElapsedRealtime::HAS_TIMESTAMP_NS;
+        loc.elapsedRealtime.timestampNs = ::android::elapsedRealtimeNano();
+
+        PublishLocation(loc);
+
+        static int64_t lastLogMs = 0;
+        if (lastPvtMs_ - lastLogMs > 10000) {
+            lastLogMs = lastPvtMs_;
+            LOG(INFO) << "NAV-PVT fix " << int(fixType) << "D, " << int(numSv) << " SV, lat="
+                      << loc.latitudeDegrees << " lon=" << loc.longitudeDegrees
+                      << " hAcc=" << loc.horizontalAccuracyMeters << " m";
+        }
+        return;
+    }
+
+    if (cls == 0x01 && id == 0x35 && p.size() >= 8) {  // NAV-SAT
+        auto cb = Callback();
+        if (!cb) return;
+        const size_t numSvs = p[5];
+        std::vector<IGnssCallback::GnssSvInfo> svs;
+        for (size_t i = 0; i < numSvs && 8 + 12 * (i + 1) <= p.size(); i++) {
+            const size_t o = 8 + 12 * i;
+            const uint8_t gnssId = p[o];
+            int svid = p[o + 1];
+            const uint32_t flags = U4(p, o + 8);
+            IGnssCallback::GnssSvInfo sv{};
+            switch (gnssId) {
+                case 0: sv.constellation = GnssConstellationType::GPS;
+                        sv.carrierFrequencyHz = 1575420000; break;
+                case 1: sv.constellation = GnssConstellationType::SBAS;
+                        sv.carrierFrequencyHz = 1575420000; break;
+                case 2: sv.constellation = GnssConstellationType::GALILEO;
+                        sv.carrierFrequencyHz = 1575420000; break;
+                case 3: sv.constellation = GnssConstellationType::BEIDOU;
+                        sv.carrierFrequencyHz = 1561098000; break;
+                case 5: sv.constellation = GnssConstellationType::QZSS;
+                        sv.carrierFrequencyHz = 1575420000;
+                        svid += 192; break;  // Android numbers QZSS 193-200
+                case 6: sv.constellation = GnssConstellationType::GLONASS;
+                        sv.carrierFrequencyHz = 1602000000; break;
+                default: continue;
+            }
+            sv.svid = svid;
+            sv.cN0Dbhz = p[o + 2];
+            sv.basebandCN0DbHz = p[o + 2];
+            sv.elevationDegrees = static_cast<int8_t>(p[o + 3]);
+            sv.azimuthDegrees = I2(p, o + 4);
+            sv.svFlag = static_cast<int>(IGnssCallback::GnssSvFlags::HAS_CARRIER_FREQUENCY);
+            if (flags & (1u << 3)) sv.svFlag |= static_cast<int>(IGnssCallback::GnssSvFlags::USED_IN_FIX);
+            if (flags & (1u << 11)) sv.svFlag |= static_cast<int>(IGnssCallback::GnssSvFlags::HAS_EPHEMERIS_DATA);
+            if (flags & (1u << 12)) sv.svFlag |= static_cast<int>(IGnssCallback::GnssSvFlags::HAS_ALMANAC_DATA);
+            svs.push_back(sv);
+        }
+        cb->gnssSvStatusCb(svs);
+
+        static int64_t lastSatLogMs = 0;
+        const int64_t now = NowMillis();
+        if (now - lastSatLogMs > 10000) {
+            lastSatLogMs = now;
+            int used = 0, tracked = 0;
+            float best = 0;
+            for (const auto& sv : svs) {
+                if (sv.cN0Dbhz > 0) tracked++;
+                if (sv.svFlag & static_cast<int>(IGnssCallback::GnssSvFlags::USED_IN_FIX)) used++;
+                best = std::max(best, sv.cN0Dbhz);
+            }
+            LOG(INFO) << "NAV-SAT " << svs.size() << " SV known, " << tracked << " tracked, " << used
+                      << " used, best C/N0 " << best << " dBHz";
+        }
+    }
 }
 
 ScopedAStatus GnssUsb::injectTime(int64_t timeMs, int64_t /*timeReferenceMs*/, int32_t uncertaintyMs) {
@@ -635,16 +836,47 @@ void GnssUsb::ReaderThreadMain() {
     uint64_t totalValidFixes = 0;
 
     uint8_t buf[512];
+    ubx.onMessage = [this](uint8_t cls, uint8_t id, const std::vector<uint8_t>& p) {
+        HandleUbx(cls, id, p);
+    };
+    int64_t nextOpenMs = 0;
 
     while (running_) {
-        int fd = serialFd_;
-        if (fd < 0) break;
-
-        ssize_t n = ::read(fd, buf, sizeof(buf));
-        if (n <= 0) {
-            ::usleep(10 * 1000);
+        int fd;
+        {
+            std::lock_guard<std::mutex> lk(mutex_);
+            fd = serialFd_;
+        }
+        if (fd < 0) {
+            if (NowMillis() < nextOpenMs) {
+                ::usleep(100 * 1000);
+                continue;
+            }
+            std::lock_guard<std::mutex> lk(mutex_);
+            if (!running_) break;
+            if (!OpenPortLocked(/*logFailure=*/false)) nextOpenMs = NowMillis() + kReopenIntervalMs;
+            line.clear();
             continue;
         }
+
+        struct pollfd pfd = {fd, POLLIN, 0};
+        int ret = ::poll(&pfd, 1, 500);  // 500 ms so stop() is noticed
+        if (ret <= 0) continue;
+        bool lost = pfd.revents & (POLLERR | POLLHUP | POLLNVAL);
+        ssize_t n = 0;
+        if (!lost) {
+            n = ::read(fd, buf, sizeof(buf));
+            // POLLIN with nothing to read is a hangup on a tty.
+            if (n == 0 || (n < 0 && errno != EAGAIN && errno != EINTR)) lost = true;
+        }
+        if (lost) {
+            LOG(WARNING) << "GNSS port gone (revents=" << pfd.revents << "), reopening";
+            std::lock_guard<std::mutex> lk(mutex_);
+            ClosePortLocked();
+            nextOpenMs = NowMillis() + kReopenIntervalMs;
+            continue;
+        }
+        if (n <= 0) continue;
 
         totalBytes += static_cast<uint64_t>(n);
         ubx.Feed(buf, static_cast<size_t>(n));
@@ -664,7 +896,7 @@ void GnssUsb::ReaderThreadMain() {
             if (c == '\n') {
                 totalLines++;
 
-                if (!line.empty()) {
+                if (!line.empty() && line[0] == '$') {
                     // Log a sample NMEA line once per second to validate UART parsing.
                     if (now - lastNmeaLogMs > 1000) {
                         lastNmeaLogMs = now;
@@ -672,16 +904,23 @@ void GnssUsb::ReaderThreadMain() {
                         LOG(INFO) << "NMEA(" << (ok ? "ck_ok" : "ck_bad") << "): " << line;
                     }
 
+                    if (nmeaEnabled_ && line[0] == '$') {
+                        if (auto cb = Callback()) cb->gnssNmeaCb(now, line);
+                    }
+
                     auto fix = nmea.ConsumeSentence(line);
                     if (fix && fix->valid) {
                         totalValidFixes++;
-                        std::shared_ptr<IGnssCallback> cb;
-                        {
-                            std::lock_guard<std::mutex> lk(mutex_);
-                            cb = callback_;
-                        }
+                        std::shared_ptr<IGnssCallback> cb = Callback();
+                        // NAV-PVT carries the same fix with real accuracies.
+                        if (now - lastPvtMs_ < kPvtStaleMs) cb.reset();
                         if (cb) {
                             GnssLocation loc{};
+                            loc.gnssLocationFlags = GnssLocation::HAS_LAT_LONG |
+                                    GnssLocation::HAS_ALTITUDE | GnssLocation::HAS_SPEED |
+                                    GnssLocation::HAS_BEARING | GnssLocation::HAS_HORIZONTAL_ACCURACY;
+                            loc.elapsedRealtime.flags = ElapsedRealtime::HAS_TIMESTAMP_NS;
+                            loc.elapsedRealtime.timestampNs = ::android::elapsedRealtimeNano();
                             loc.latitudeDegrees = fix->latDeg;
                             loc.longitudeDegrees = fix->lonDeg;
                             loc.altitudeMeters = fix->altMeters;
@@ -700,6 +939,9 @@ void GnssUsb::ReaderThreadMain() {
                 }
 
                 line.clear();
+            } else if (c == '$') {
+                // NMEA sentences start at '$'; anything before it is UBX binary sharing the stream.
+                line.assign(1, c);
             } else if (c != '\r') {
                 if (line.size() < 300) {
                     line.push_back(c);

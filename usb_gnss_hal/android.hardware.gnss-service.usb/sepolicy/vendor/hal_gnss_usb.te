@@ -17,3 +17,9 @@ allow hal_gnss_usb gnss_device:chr_file rw_file_perms;
 
 # 6. Allow access to /dev nodes (needed if the HAL scans for ports).
 allow hal_gnss_usb device:dir { open read search getattr };
+
+# 7. u-blox on USB: /dev/ttyACM* (CDC-ACM) keeps the platform label usb_serial_device.
+allow hal_gnss_usb usb_serial_device:chr_file rw_file_perms;
+
+# 8. persist.vendor.gnss.device / ro.vendor.gnss.device: optional port override.
+get_prop(hal_gnss_usb, vendor_gnss_prop)

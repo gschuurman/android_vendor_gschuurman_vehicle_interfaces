@@ -1,0 +1,2 @@
+# GNSS port override (persist.vendor.gnss.device / ro.vendor.gnss.device), read by the HAL.
+vendor_internal_prop(vendor_gnss_prop)

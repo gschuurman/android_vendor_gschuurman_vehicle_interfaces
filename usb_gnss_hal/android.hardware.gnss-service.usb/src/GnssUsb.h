@@ -74,13 +74,21 @@ public:
 
 private:
     void ReaderThreadMain();
-    void StopReaderLocked();
+    void StopReader();
+    bool OpenPortLocked(bool logFailure);
+    void ClosePortLocked();
+    void HandleUbx(uint8_t cls, uint8_t id, const std::vector<uint8_t>& payload);
+    void PublishLocation(const ::aidl::android::hardware::gnss::GnssLocation& location);
+    std::shared_ptr<::aidl::android::hardware::gnss::IGnssCallback> Callback();
 
     std::mutex mutex_;
     std::shared_ptr<::aidl::android::hardware::gnss::IGnssCallback> callback_;
 
     std::atomic<bool> running_{false};
     std::atomic<bool> nmeaEnabled_{false};
+    // Last UBX-NAV-PVT (ms since epoch). While it arrives, fixes come from it and the NMEA
+    // RMC/GGA path stays quiet.
+    std::atomic<int64_t> lastPvtMs_{0};
 
     std::string devicePath_;
     int baudrate_ = 9600;

@@ -1,0 +1,2 @@
+persist.vendor.gnss.device    u:object_r:vendor_gnss_prop:s0 exact string
+ro.vendor.gnss.device         u:object_r:vendor_gnss_prop:s0 exact string
