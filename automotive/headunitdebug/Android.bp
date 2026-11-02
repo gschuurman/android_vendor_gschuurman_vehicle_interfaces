@@ -1,0 +1,23 @@
+package {
+    default_applicable_licenses: ["Android-Apache-2.0"],
+}
+
+// Live status of the peripheral board MCU (through the VHAL) and the GNSS receiver, for debugging
+// on the head unit. Read-only.
+android_app {
+    name: "HeadUnitDebug",
+    srcs: ["src/**/*.java"],
+    resource_dirs: ["res"],
+
+    platform_apis: true,
+    // CAR_VENDOR_EXTENSION (the MCU's vendor properties) is a signature permission.
+    certificate: "platform",
+
+    libs: [
+        "android.car",
+    ],
+
+    static_libs: [
+        "car-ui-lib",
+    ],
+}

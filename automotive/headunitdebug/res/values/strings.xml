@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Head Unit Debug</string>
+    <string name="section_board">Peripheral board</string>
+    <string name="section_flags">Board status</string>
+    <string name="section_inputs">Car inputs</string>
+    <string name="section_android">Android sees</string>
+    <string name="section_display_audio">Display and audio</string>
+    <string name="section_gnss_mcu">GNSS (MCU, NMEA on UART)</string>
+    <string name="section_gnss_android">GNSS (Android, USB)</string>
+    <string name="section_satellites">Satellites (C/N0, green = used in fix)</string>
+    <string name="no_value">—</string>
+    <string name="no_permission">No location permission</string>
+</resources>
