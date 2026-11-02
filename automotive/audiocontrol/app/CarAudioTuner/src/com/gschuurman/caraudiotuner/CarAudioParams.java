@@ -16,7 +16,13 @@ final class CarAudioParams {
     static final String BALANCE = "car.balance";
     static final String FADER = "car.fader";
     static final String EQ_ENABLED = "car.eq.enabled";
-    static final int EQ_BANDS = 5;
+    static final String EQ_PREAMP = "car.eq.preamp";
+    /** Octave bands of the HAL's graphic equalizer (PrimaryMixer::kEqFrequenciesHz). */
+    static final float[] EQ_FREQUENCIES_HZ = {
+            31.25f, 62.5f, 125f, 250f, 500f, 1000f, 2000f, 4000f, 8000f, 16000f};
+    static final int EQ_BANDS = EQ_FREQUENCIES_HZ.length;
+    /** Band and preamp gains are whole dB in -EQ_MAX_GAIN_DB..EQ_MAX_GAIN_DB. */
+    static final int EQ_MAX_GAIN_DB = 12;
 
     /** Balance and fader run from -1 to 1; the sliders use -STEPS..STEPS. */
     static final int BALANCE_FADER_STEPS = 10;

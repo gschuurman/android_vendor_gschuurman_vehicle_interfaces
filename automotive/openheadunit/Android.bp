@@ -1,5 +1,10 @@
-// Open Headunit (github.com/andreknieriem/open-headunit), github flavor,
-// built from source and imported as a prebuilt system app so it gets
+// Open Headunit (github.com/andreknieriem/open-headunit), tag v.3.5.0-beta4, github flavor
+// (`./gradlew assembleGithubRelease`, unsigned) with 0001-Drop-APP_MAPS-APP_NAVIGATION-filter.patch and
+// 0002-Drop-navigation-and-map-link-filters.patch (NAVIGATE/geo:/google.navigation:/maps links go to the
+// nav app, never a HUR-vs-Maps chooser; HUR's link forwarding to the phone is unused)
+// applied: a MAIN + APP_MAPS filter without DEFAULT shows up in every non-MATCH_DEFAULT_ONLY
+// query and makes the package manager drop the map card's "Always" choice (handoff D4).
+// Built from source and imported as a prebuilt system app so it gets
 // FLAG_SYSTEM. Per UsbProfileGroupSettingsManager#getDefaultActivityLocked,
 // a system app that's the sole match for a USB_DEVICE_ATTACHED intent
 // auto-launches with no resolver dialog and no persisted preference

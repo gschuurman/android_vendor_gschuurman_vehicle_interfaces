@@ -3,19 +3,12 @@
     <string name="app_name">Car audio</string>
 
     <string name="equalizer_title">Equalizer</string>
-    <string name="equalizer_summary">Bass, mids and treble</string>
+    <string name="equalizer_summary">10-band graphic equalizer</string>
     <string name="eq_enabled_title">Use equalizer</string>
-    <string name="eq_enabled_summary">Applies to all audio</string>
     <string name="eq_preset_title">Preset</string>
-    <string name="eq_preset_summary">Fill in the bands from a preset</string>
-    <string name="eq_band0">60 Hz (bass)</string>
-    <string name="eq_band1">250 Hz (low mids)</string>
-    <string name="eq_band2">1 kHz (mids)</string>
-    <string name="eq_band3">4 kHz (high mids)</string>
-    <string name="eq_band4">12 kHz (treble)</string>
+    <!-- Label under the preamp slider of the graphic equalizer -->
+    <string name="eq_preamp_label">Pre</string>
     <string name="eq_reset_title">Reset to flat</string>
-    <!-- Band gain, e.g. "+3 dB" -->
-    <string name="eq_gain">%1$+d dB</string>
 
     <string name="balance_fader_title">Balance &amp; fader</string>
     <string name="balance_fader_summary">Left/right and front/rear speakers</string>
@@ -34,20 +27,16 @@
         <item>Loudness</item>
         <item>Vocal</item>
         <item>Treble boost</item>
+        <item>Rock</item>
     </string-array>
-    <string-array name="eq_preset_indexes" translatable="false">
-        <item>0</item>
-        <item>1</item>
-        <item>2</item>
-        <item>3</item>
-        <item>4</item>
-    </string-array>
-    <!-- Gains in dB for 60 Hz, 250 Hz, 1 kHz, 4 kHz, 12 kHz, in the order of eq_preset_names. -->
+    <!-- Gains in dB for 31, 62, 125, 250, 500 Hz, 1, 2, 4, 8, 16 kHz, in the order of
+         eq_preset_names. -->
     <string-array name="eq_preset_gains" translatable="false">
-        <item>0,0,0,0,0</item>
-        <item>6,3,0,0,0</item>
-        <item>6,2,0,1,4</item>
-        <item>-2,0,3,3,0</item>
-        <item>0,0,0,3,6</item>
+        <item>0,0,0,0,0,0,0,0,0,0</item>
+        <item>6,6,4,2,0,0,0,0,0,0</item>
+        <item>6,5,3,0,-1,0,0,1,3,4</item>
+        <item>-3,-2,-1,1,3,4,3,1,0,-1</item>
+        <item>0,0,0,0,0,0,1,3,5,6</item>
+        <item>5,4,2,-1,-2,-1,1,3,4,5</item>
     </string-array>
 </resources>

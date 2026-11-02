@@ -1236,6 +1236,15 @@ void SchuurmanVehicleHardware::touchWakeLoop() {
         struct pollfd pfd = {touchFd, POLLIN, 0};
         int ret = poll(&pfd, 1, 500);  // 500 ms timeout so we can check mTouchWakeThreadRunning
         if (ret <= 0) continue;
+        if (pfd.revents & (POLLERR | POLLHUP | POLLNVAL)) {
+            // USB touch re-enumerated (hub reset): the old node is gone and poll() would return at once
+            // forever, pinning a core. Reopen by VID/PID.
+            LOG(WARNING) << "touchWakeLoop: touch device gone (revents=" << pfd.revents << "), reopening";
+            close(touchFd);
+            touchFd = -1;
+            std::this_thread::sleep_for(std::chrono::milliseconds(500));
+            continue;
+        }
         if (!(pfd.revents & POLLIN)) continue;
 
         struct input_event ev = {};

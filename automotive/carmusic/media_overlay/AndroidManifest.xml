@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Car Media app: 5 browse tabs (CarMusic: Playlists, Songs, Albums, Artists, Folders) and the
+     first 3 custom actions (shuffle, repeat, favorite) visible in Now Playing. -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.gschuurman.carmusic.mediaoverlay">
+    <overlay android:targetPackage="com.android.car.media"
+        android:targetName="CarMediaApp"
+        android:isStatic="true"
+        android:priority="10" />
+    <application android:hasCode="false" />
+</manifest>

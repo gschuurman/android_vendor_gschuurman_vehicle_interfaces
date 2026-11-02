@@ -1,0 +1,44 @@
+package {
+    default_applicable_licenses: ["Android-Apache-2.0"],
+}
+
+// Local music player: a car media source (Media app, media card) for the Driver user's Music folder,
+// with import of music from USB storage. Replaces AOSP's LocalMediaPlayer, which still relies on
+// READ_EXTERNAL_STORAGE and can't read media on Android 13+.
+android_app {
+    name: "CarMusic",
+    srcs: ["src/**/*.java"],
+    resource_dirs: ["res"],
+    manifest: "AndroidManifest.xml",
+    platform_apis: true,
+    certificate: "platform",
+    overrides: ["LocalMediaPlayer"],
+
+    libs: ["android.car"],
+    static_libs: [
+        "androidx.core_core",
+        "androidx.media_media",
+        "car-ui-lib",
+    ],
+
+    // READ_MEDIA_AUDIO and POST_NOTIFICATIONS granted by default.
+    required: [
+        "CarMusicMediaOverlay",
+        "default_permissions_com.gschuurman.carmusic",
+    ],
+}
+
+prebuilt_etc {
+    name: "default_permissions_com.gschuurman.carmusic",
+    src: "permissions/default-permissions-com.gschuurman.carmusic.xml",
+    sub_dir: "default-permissions",
+    filename_from_src: true,
+}
+
+// Car Media app limits for CarMusic: 5 tabs, 3 visible Now Playing actions.
+runtime_resource_overlay {
+    name: "CarMusicMediaOverlay",
+    manifest: "media_overlay/AndroidManifest.xml",
+    resource_dirs: ["media_overlay/res"],
+    product_specific: true,
+}

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Music</string>
+
+    <string name="browse_playlists">Playlists</string>
+    <string name="browse_songs">Songs</string>
+    <string name="browse_albums">Albums</string>
+    <string name="browse_artists">Artists</string>
+    <string name="browse_folders">Folders</string>
+    <string name="browse_recent">Recently added</string>
+    <string name="shuffle_all">Shuffle all</string>
+    <string name="shuffle">Shuffle</string>
+    <string name="playlist_favorites">Favorites</string>
+    <string name="playlist_played">Recently played</string>
+
+    <!-- Now Playing buttons (custom actions); the label describes the current state -->
+    <string name="action_shuffle_on">Shuffle on</string>
+    <string name="action_shuffle_off">Shuffle off</string>
+    <string name="action_repeat_off">Repeat off</string>
+    <string name="action_repeat_all">Repeat all</string>
+    <string name="action_repeat_one">Repeat one</string>
+    <string name="action_favorite">Add to favorites</string>
+    <string name="action_unfavorite">Remove from favorites</string>
+    <string name="queue_title">Up next</string>
+    <plurals name="song_count">
+        <item quantity="one">%d song</item>
+        <item quantity="other">%d songs</item>
+    </plurals>
+
+    <string name="channel_playback">Playback</string>
+    <string name="channel_import">Music import</string>
+
+    <string name="import_title">Import music</string>
+    <string name="import_action">Import</string>
+    <string name="import_no_usb">Connect a USB stick or drive with music.</string>
+    <string name="import_pick">Music is copied into the Music folder; songs already there are skipped.</string>
+    <string name="import_scanning">Looking for music…</string>
+    <!-- e.g. "Importing from SanDisk" -->
+    <string name="import_running">Importing from %1$s</string>
+    <!-- e.g. "12 of 340 songs" -->
+    <string name="import_progress">%1$d of %2$d songs</string>
+    <string name="import_done">Music imported</string>
+    <string name="import_cancelled">Import cancelled</string>
+    <!-- copied, skipped (already there), failed -->
+    <string name="import_result">%1$d imported, %2$d already there, %3$d failed</string>
+    <!-- Notification when USB storage with music is plugged in; %1$s = volume name -->
+    <string name="usb_found_title">Music on %1$s</string>
+    <plurals name="usb_found_text">
+        <item quantity="one">%d song found. Import it into your music?</item>
+        <item quantity="other">%d songs found. Import them into your music?</item>
+    </plurals>
+</resources>
