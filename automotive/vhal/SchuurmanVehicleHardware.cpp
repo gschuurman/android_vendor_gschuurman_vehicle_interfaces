@@ -136,6 +136,7 @@ static constexpr char kHandbrakeSeenProp[] = "persist.vendor.vehicle.handbrake_s
 static constexpr char kAmpModeProp[] = "persist.vendor.vehicle.amp_mode";
 static constexpr char kOffDelayProp[] = "persist.vendor.vehicle.off_delay_s";
 static constexpr char kLuxMaxProp[] = "ro.vendor.vehicle.lux_max";
+static constexpr char kAutoBrightnessProp[] = "persist.vendor.vehicle.auto_brightness";
 
 static const std::vector<int32_t> kDistanceUnits = {
         static_cast<int32_t>(VehicleUnit::KILOMETER), static_cast<int32_t>(VehicleUnit::MILE)};
@@ -165,8 +166,9 @@ SchuurmanVehicleHardware::SchuurmanVehicleHardware()
       mFuelVolumeUnits(android::base::GetIntProperty(kFuelVolumeUnitsProp,
               static_cast<int32_t>(VehicleUnit::LITER))),
       mShuttingDown(false),
-      mAutoBrightnessEnabled(false),
+      mAutoBrightnessEnabled(android::base::GetBoolProperty(kAutoBrightnessProp, true)),
       mAutoTargetBrightness(-1),
+      mManualBrightness(50),
       mDisplayThreadRunning(false),
       mTouchWakeThreadRunning(false),
       mTapToWakeSuppressed(false),
@@ -493,9 +495,17 @@ void SchuurmanVehicleHardware::housekeepingLoop() {
 
         updateParkingBrake(false);
 
-        // Auto brightness from the MCU's light sensor.
+        // Auto brightness from the MCU's light sensor (it probes for a BH1750 every 5 s, so a sensor
+        // connected later takes over by itself).
         int raw = mLux.load();
-        if (raw < 0) continue;
+        if (raw < 0) {
+            if (mAutoTargetBrightness.load() >= 0) {
+                LOG(INFO) << "Light sensor gone, back to the manual brightness";
+                restoreManualBrightness();
+            }
+            ema = -1.0;
+            continue;
+        }
         ema = ema < 0 ? raw : alpha * raw + (1.0 - alpha) * ema;
         double percent = (log(1.0 + ema) / log(1.0 + std::max(1, maxLux))) * 100.0;
         int intPercent = static_cast<int>(std::clamp(percent, 0.0, 100.0) + 0.5);
@@ -504,6 +514,7 @@ void SchuurmanVehicleHardware::housekeepingLoop() {
         if (mAutoBrightnessEnabled.load()) {
             int last = mAutoTargetBrightness.load();
             if (last < 0 || std::abs(intPercent - last) >= 2) {
+                if (last < 0) LOG(INFO) << "Auto brightness from the light sensor: " << raw << " lux";
                 mAutoTargetBrightness.store(intPercent);
                 if (mScreenOn.load()) {
                     mLastNonZeroBrightness.store(intPercent);
@@ -517,6 +528,17 @@ void SchuurmanVehicleHardware::housekeepingLoop() {
 }
 
 // ---------------------------------------------------------------- display
+
+void SchuurmanVehicleHardware::restoreManualBrightness() {
+    mAutoTargetBrightness.store(-1);
+    const int manual = mManualBrightness.load();
+    mLastNonZeroBrightness.store(manual);
+    if (mScreenOn.load()) {
+        sendBrightness(manual);
+        mCurrentBrightness.store(manual);
+        publishCurrentBrightness();
+    }
+}
 
 void SchuurmanVehicleHardware::sendBrightness(int percentage) {
     percentage = std::clamp(percentage, 0, 100);
@@ -680,8 +702,9 @@ StatusCode SchuurmanVehicleHardware::setValueInternal(
     if (request.prop == static_cast<int32_t>(VehicleProperty::DISPLAY_BRIGHTNESS)) {
         if (!request.value.int32Values.empty()) {
             int brightness = std::clamp(request.value.int32Values[0], 0, 100);
+            if (brightness > 0) mManualBrightness.store(brightness);
 
-            if (!mAutoBrightnessEnabled.load()) {
+            if (!autoBrightnessActive()) {
                 if (brightness > 0) {
                     mLastNonZeroBrightness.store(brightness);
                 }
@@ -693,7 +716,7 @@ StatusCode SchuurmanVehicleHardware::setValueInternal(
 
                 publishCurrentBrightness();
             } else {
-                LOG(INFO) << "Ignoring manual brightness update because auto brightness is enabled";
+                LOG(INFO) << "Brightness " << brightness << " kept for later: auto brightness is active";
             }
         }
     } else if (request.prop == VENDOR_SCREEN_POWER) {
@@ -705,7 +728,8 @@ StatusCode SchuurmanVehicleHardware::setValueInternal(
         if (!request.value.int32Values.empty()) {
             const bool enable = request.value.int32Values[0] == 1;
             mAutoBrightnessEnabled.store(enable);
-            mAutoTargetBrightness.store(-1);
+            android::base::SetProperty(kAutoBrightnessProp, enable ? "1" : "0");
+            if (mAutoTargetBrightness.load() >= 0 || !enable) restoreManualBrightness();
 
             VehiclePropValue v = request;
             v.areaId = GLOBAL_AREA_ID;
@@ -1099,6 +1123,11 @@ DumpResult SchuurmanVehicleHardware::dump(const std::vector<std::string>&) {
             mCurrentGear.load(), mIgnitionState.load(), mParkingBrakeOn.load(),
             mHandbrakeRaw.load() ? "on" : "off", mHandbrakeSeen.load() ? 1 : 0, mNightMode.load(),
             mSpeed.load(), mLux.load());
+    out += android::base::StringPrintf("  auto brightness %s (%s), target %d, manual %d, current %d\n",
+                                       mAutoBrightnessEnabled.load() ? "on" : "off",
+                                       autoBrightnessActive() ? "active" : "no light sensor",
+                                       mAutoTargetBrightness.load(), mManualBrightness.load(),
+                                       mCurrentBrightness.load());
     out += android::base::StringPrintf("  AP_POWER_STATE_REQ %d/%d, REPORT %d/%d\n",
                                        mLastApPowerStateReq.load(),
                                        mLastApPowerStateReqParam.load(),

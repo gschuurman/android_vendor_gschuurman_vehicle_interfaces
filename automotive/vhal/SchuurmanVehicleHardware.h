@@ -133,8 +133,14 @@ class SchuurmanVehicleHardware : public IVehicleHardware {
 
     std::atomic<bool> mShuttingDown;
 
+    // Auto brightness from the MCU's BH1750 (MCU_PROP_LUX). Enabled by default and kept in
+    // persist.vendor.vehicle.auto_brightness, but only active while the sensor reports a value; without
+    // it (lux -1) the brightness Android sets applies. mManualBrightness is that last Android value.
     std::atomic<bool> mAutoBrightnessEnabled;
-    std::atomic<int> mAutoTargetBrightness;
+    std::atomic<int> mAutoTargetBrightness;  // -1 = auto not driving the backlight
+    std::atomic<int32_t> mManualBrightness;
+    bool autoBrightnessActive() const { return mAutoBrightnessEnabled.load() && mLux.load() >= 0; }
+    void restoreManualBrightness();
 
     std::thread mHousekeepingThread;
 
