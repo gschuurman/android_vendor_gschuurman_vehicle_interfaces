@@ -305,6 +305,13 @@ void SchuurmanVehicleHardware::emitInitialStatesLocked() {
 void SchuurmanVehicleHardware::onMcuConnect(bool connected) {
     if (!connected) {
         LOG(INFO) << "MCU disconnected (VIM3 suspend, MCU restart or unplugged)";
+        // Don't hold a stale reverse (rear view camera stuck on) while the MCU is away; its
+        // snapshot on reconnect brings the real gear back.
+        const int32_t park = static_cast<int32_t>(VehicleGear::GEAR_PARK);
+        if (mCurrentGear.exchange(park) != park) {
+            LOG(INFO) << "Gear " << park << " (MCU gone)";
+            emitInt(static_cast<int32_t>(VehicleProperty::GEAR_SELECTION), park);
+        }
         return;
     }
     pushSettingsToMcu();
@@ -598,7 +605,12 @@ void SchuurmanVehicleHardware::handleApPowerStateReport(
             // Android waits for AP_POWER_STATE_REQ. If the MCU does not answer
             // (not connected yet after resume, or missing) publish ON ourselves.
             mFallbackOnAtNs.store(elapsedRealtimeNano() + kFallbackOnNs);
-            applyScreenPower(true, true);
+            // After an ACC-off sleep any wake source (RTC, network) resumes the kernel. Stay dark
+            // until the MCU answers: REQ ON brings an ON report (screen on below), otherwise it
+            // sends Android back to sleep.
+            if (mIgnitionState.load() != static_cast<int32_t>(VehicleIgnitionState::OFF)) {
+                applyScreenPower(true, true);
+            }
             break;
 
         case VehicleApPowerStateReport::ON:
