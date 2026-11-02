@@ -94,6 +94,9 @@ public class MainActivity extends Activity {
             line.addView(name, new LinearLayout.LayoutParams(0, -2, 1f));
             value = text(getString(R.string.no_value), 18, 0xFFFFFFFF);
             value.setGravity(Gravity.END);
+            value.setSingleLine(true);
+            value.setEllipsize(android.text.TextUtils.TruncateAt.END);
+            value.setMaxWidth(dp(260));
             line.addView(value, new LinearLayout.LayoutParams(-2, -2));
             parent.addView(line);
             set(null, Dot.OFF);
@@ -358,7 +361,12 @@ public class MainActivity extends Activity {
     private void render() {
         // Board
         Object fw = mValues.get(MCU_FW_VERSION);
-        mFirmware.set(fw instanceof String ? (String) fw : "MCU not seen", Dot.NONE);
+        // "0.1.0 (Oct  8 2026 07:37:25) board rev 0.6 proto 1, R72 pull-down" -> version and build;
+        // the board revision and R72 show elsewhere.
+        String fwText = fw instanceof String ? ((String) fw).replaceAll("\\s+", " ") : "MCU not seen";
+        int end = fwText.indexOf(')');
+        if (end > 0) fwText = fwText.substring(0, end + 1);
+        mFirmware.set(fwText, Dot.NONE);
         Integer ps = intValue(POWER_STATE);
         mPowerState.set(ps == null ? null : ps >= 0 && ps < POWER_STATES.length
                 ? POWER_STATES[ps] : String.valueOf(ps), ps == null ? Dot.OFF : ps == 2 ? Dot.OK : Dot.WARN);

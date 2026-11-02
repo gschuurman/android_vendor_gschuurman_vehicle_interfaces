@@ -26,6 +26,7 @@ public class SatelliteView extends View {
     private final Paint mTracked = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint mText = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint mGrid = new Paint();
+    private final float mLabelSize;
 
     public SatelliteView(Context context) {
         this(context, null);
@@ -37,8 +38,9 @@ public class SatelliteView extends View {
         mTracked.setColor(context.getColor(R.color.dot_off));
         mText.setColor(0xB3FFFFFF);
         mText.setTextAlign(Paint.Align.CENTER);
-        mText.setTextSize(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 11,
+        mText.setTextSize(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 15,
                 getResources().getDisplayMetrics()));
+        mLabelSize = mText.getTextSize();
         mGrid.setColor(0x33FFFFFF);
         mGrid.setStrokeWidth(1f);
     }
@@ -80,7 +82,9 @@ public class SatelliteView extends View {
             canvas.drawLine(0, y, getWidth(), y, mGrid);
         }
         if (mSats.isEmpty()) {
+            mText.setTextSize(mLabelSize * 1.3f);
             canvas.drawText("no satellites tracked", getWidth() / 2f, chartH / 2f, mText);
+            mText.setTextSize(mLabelSize);
             return;
         }
         final int n = Math.min(mSats.size(), 24);
