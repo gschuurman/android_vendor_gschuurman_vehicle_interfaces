@@ -1,0 +1,7939 @@
+(export
+	(version "E")
+	(design
+		(source "/w/carradio_capture_rev07.kicad_sch")
+		(date "2026-10-10T11:31:34")
+		(tool "Eeschema 10.0.6")
+		(sheet
+			(number "1")
+			(name "/")
+			(tstamps "/")
+			(title_block
+				(title "Car radio capture module, 2 cameras (2x MS2107 CVBS to USB UVC)")
+				(company)
+				(rev "0.7")
+				(date "2026-10-10")
+				(source "carradio_capture_rev07.kicad_sch")
+				(comment
+					(number "1")
+					(value "")
+				)
+				(comment
+					(number "2")
+					(value "")
+				)
+				(comment
+					(number "3")
+					(value "")
+				)
+				(comment
+					(number "4")
+					(value "")
+				)
+				(comment
+					(number "5")
+					(value "")
+				)
+				(comment
+					(number "6")
+					(value "")
+				)
+				(comment
+					(number "7")
+					(value "")
+				)
+				(comment
+					(number "8")
+					(value "")
+				)
+				(comment
+					(number "9")
+					(value "")
+				)
+			)
+		)
+	)
+	(components
+		(comp
+			(ref "C1")
+			(value "10uF")
+			(footprint "Capacitor_SMD:C_0805_2012Metric")
+			(fields
+				(field
+					(name "LCSC") "C15850")
+				(field
+					(name "MPN") "Samsung CL21A106KAYNNNE 0805 10uF 25V X5R")
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0805_2012Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "LCSC")
+				(value "C15850")
+			)
+			(property
+				(name "MPN")
+				(value "Samsung CL21A106KAYNNNE 0805 10uF 25V X5R")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_capture_rev07")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_capture_rev07.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "6e73e5c4-6a22-532e-a0d5-44e8f2e103f9")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C2")
+			(value "100nF")
+			(footprint "Capacitor_SMD:C_0603_1608Metric")
+			(fields
+				(field
+					(name "LCSC") "C14663")
+				(field
+					(name "MPN") "YAGEO CC0603KRX7R9BB104 0603 100nF 50V X7R")
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0603_1608Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "LCSC")
+				(value "C14663")
+			)
+			(property
+				(name "MPN")
+				(value "YAGEO CC0603KRX7R9BB104 0603 100nF 50V X7R")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_capture_rev07")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_capture_rev07.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "b1dd984a-9bfe-5bea-8cb5-28fbf4432ee6")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C3")
+			(value "4.7uF")
+			(footprint "Capacitor_SMD:C_0603_1608Metric")
+			(fields
+				(field
+					(name "LCSC") "C19666")
+				(field
+					(name "MPN") "Samsung CL10A475KO8NNNC 0603 4.7uF 16V X5R")
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0603_1608Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "LCSC")
+				(value "C19666")
+			)
+			(property
+				(name "MPN")
+				(value "Samsung CL10A475KO8NNNC 0603 4.7uF 16V X5R")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_capture_rev07")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_capture_rev07.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "f7101d54-d70d-5f2c-b579-33dad820b322")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C4")
+			(value "100nF")
+			(footprint "Capacitor_SMD:C_0603_1608Metric")
+			(fields
+				(field
+					(name "LCSC") "C14663")
+				(field
+					(name "MPN") "YAGEO CC0603KRX7R9BB104 0603 100nF 50V X7R")
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0603_1608Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "LCSC")
+				(value "C14663")
+			)
+			(property
+				(name "MPN")
+				(value "YAGEO CC0603KRX7R9BB104 0603 100nF 50V X7R")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_capture_rev07")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_capture_rev07.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "138d66c0-1594-5cb4-ba93-f3fb7cd5ec09")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C5")
+			(value "100nF")
+			(footprint "Capacitor_SMD:C_0603_1608Metric")
+			(fields
+				(field
+					(name "LCSC") "C14663")
+				(field
+					(name "MPN") "YAGEO CC0603KRX7R9BB104 0603 100nF 50V X7R")
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0603_1608Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "LCSC")
+				(value "C14663")
+			)
+			(property
+				(name "MPN")
+				(value "YAGEO CC0603KRX7R9BB104 0603 100nF 50V X7R")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_capture_rev07")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_capture_rev07.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "1d8462c0-4519-5517-a2c7-e0e1dde4cfe0")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C6")
+			(value "100nF")
+			(footprint "Capacitor_SMD:C_0603_1608Metric")
+			(fields
+				(field
+					(name "LCSC") "C14663")
+				(field
+					(name "MPN") "YAGEO CC0603KRX7R9BB104 0603 100nF 50V X7R")
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0603_1608Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "LCSC")
+				(value "C14663")
+			)
+			(property
+				(name "MPN")
+				(value "YAGEO CC0603KRX7R9BB104 0603 100nF 50V X7R")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_capture_rev07")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_capture_rev07.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "642f5fc9-f3e6-585f-baa2-76bc446431a2")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C7")
+			(value "4.7uF")
+			(footprint "Capacitor_SMD:C_0603_1608Metric")
+			(fields
+				(field
+					(name "LCSC") "C19666")
+				(field
+					(name "MPN") "Samsung CL10A475KO8NNNC 0603 4.7uF 16V X5R")
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0603_1608Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "LCSC")
+				(value "C19666")
+			)
+			(property
+				(name "MPN")
+				(value "Samsung CL10A475KO8NNNC 0603 4.7uF 16V X5R")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_capture_rev07")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_capture_rev07.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "2f2f0e32-fc02-5e79-bd20-75632c7ece1e")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C8")
+			(value "100nF")
+			(footprint "Capacitor_SMD:C_0603_1608Metric")
+			(fields
+				(field
+					(name "LCSC") "C14663")
+				(field
+					(name "MPN") "YAGEO CC0603KRX7R9BB104 0603 100nF 50V X7R")
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0603_1608Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "LCSC")
+				(value "C14663")
+			)
+			(property
+				(name "MPN")
+				(value "YAGEO CC0603KRX7R9BB104 0603 100nF 50V X7R")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_capture_rev07")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_capture_rev07.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "1e77d241-b4c9-51fc-9e5d-74632919d8bc")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C9")
+			(value "100nF")
+			(footprint "Capacitor_SMD:C_0603_1608Metric")
+			(fields
+				(field
+					(name "LCSC") "C14663")
+				(field
+					(name "MPN") "YAGEO CC0603KRX7R9BB104 0603 100nF 50V X7R")
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0603_1608Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "LCSC")
+				(value "C14663")
+			)
+			(property
+				(name "MPN")
+				(value "YAGEO CC0603KRX7R9BB104 0603 100nF 50V X7R")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_capture_rev07")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_capture_rev07.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "c6ba710e-3580-5921-b2b6-a10c476e9afa")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C10")
+			(value "100nF")
+			(footprint "Capacitor_SMD:C_0603_1608Metric")
+			(fields
+				(field
+					(name "LCSC") "C14663")
+				(field
+					(name "MPN") "YAGEO CC0603KRX7R9BB104 0603 100nF 50V X7R")
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0603_1608Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "LCSC")
+				(value "C14663")
+			)
+			(property
+				(name "MPN")
+				(value "YAGEO CC0603KRX7R9BB104 0603 100nF 50V X7R")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_capture_rev07")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_capture_rev07.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "e7a8169a-80af-579e-8374-e3aeb3e65999")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C11")
+			(value "4.7uF")
+			(footprint "Capacitor_SMD:C_0603_1608Metric")
+			(fields
+				(field
+					(name "LCSC") "C19666")
+				(field
+					(name "MPN") "Samsung CL10A475KO8NNNC 0603 4.7uF 16V X5R")
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0603_1608Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "LCSC")
+				(value "C19666")
+			)
+			(property
+				(name "MPN")
+				(value "Samsung CL10A475KO8NNNC 0603 4.7uF 16V X5R")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_capture_rev07")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_capture_rev07.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "9d415dae-21bd-538c-afca-2586180e70b4")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C12")
+			(value "100nF")
+			(footprint "Capacitor_SMD:C_0603_1608Metric")
+			(fields
+				(field
+					(name "LCSC") "C14663")
+				(field
+					(name "MPN") "YAGEO CC0603KRX7R9BB104 0603 100nF 50V X7R")
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0603_1608Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "LCSC")
+				(value "C14663")
+			)
+			(property
+				(name "MPN")
+				(value "YAGEO CC0603KRX7R9BB104 0603 100nF 50V X7R")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_capture_rev07")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_capture_rev07.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "8a039a7f-bef0-5535-87a3-92c25ac18d2b")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C13")
+			(value "100nF")
+			(footprint "Capacitor_SMD:C_0603_1608Metric")
+			(fields
+				(field
+					(name "LCSC") "C14663")
+				(field
+					(name "MPN") "YAGEO CC0603KRX7R9BB104 0603 100nF 50V X7R")
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0603_1608Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "LCSC")
+				(value "C14663")
+			)
+			(property
+				(name "MPN")
+				(value "YAGEO CC0603KRX7R9BB104 0603 100nF 50V X7R")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_capture_rev07")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_capture_rev07.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "f4782265-30f2-53c9-8cb0-fc3a36670700")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C14")
+			(value "22pF")
+			(footprint "Capacitor_SMD:C_0603_1608Metric")
+			(fields
+				(field
+					(name "LCSC") "C1653")
+				(field
+					(name "MPN") "0603 22pF 50V C0G")
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0603_1608Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "LCSC")
+				(value "C1653")
+			)
+			(property
+				(name "MPN")
+				(value "0603 22pF 50V C0G")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_capture_rev07")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_capture_rev07.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "6e951e10-c733-5e48-8b21-ba083d94c41f")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C15")
+			(value "22pF")
+			(footprint "Capacitor_SMD:C_0603_1608Metric")
+			(fields
+				(field
+					(name "LCSC") "C1653")
+				(field
+					(name "MPN") "0603 22pF 50V C0G")
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0603_1608Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "LCSC")
+				(value "C1653")
+			)
+			(property
+				(name "MPN")
+				(value "0603 22pF 50V C0G")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_capture_rev07")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_capture_rev07.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "e3cb4df3-dc49-5cc8-9f3b-1d5a1d64c41a")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C16")
+			(value "1uF")
+			(footprint "Capacitor_SMD:C_0603_1608Metric")
+			(fields
+				(field
+					(name "LCSC") "C77386")
+				(field
+					(name "MPN") "Murata GRM188R61H105KAALD 0603 1uF 50V X5R")
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0603_1608Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "LCSC")
+				(value "C77386")
+			)
+			(property
+				(name "MPN")
+				(value "Murata GRM188R61H105KAALD 0603 1uF 50V X5R")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_capture_rev07")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_capture_rev07.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "f512861a-5d0f-5fea-9eab-5ac3d9b20ecf")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C17")
+			(value "1uF")
+			(footprint "Capacitor_SMD:C_0603_1608Metric")
+			(fields
+				(field
+					(name "LCSC") "C77386")
+				(field
+					(name "MPN") "Murata GRM188R61H105KAALD 0603 1uF 50V X5R")
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0603_1608Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "LCSC")
+				(value "C77386")
+			)
+			(property
+				(name "MPN")
+				(value "Murata GRM188R61H105KAALD 0603 1uF 50V X5R")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_capture_rev07")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_capture_rev07.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "217e4a9f-1850-53e7-8457-eee8d7dfda64")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C18")
+			(value "47nF")
+			(footprint "Capacitor_SMD:C_0603_1608Metric")
+			(fields
+				(field
+					(name "LCSC") "C1622")
+				(field
+					(name "MPN") "Samsung CL10B473KB8NNNC 0603 47nF 50V X7R")
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0603_1608Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "LCSC")
+				(value "C1622")
+			)
+			(property
+				(name "MPN")
+				(value "Samsung CL10B473KB8NNNC 0603 47nF 50V X7R")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_capture_rev07")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_capture_rev07.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "f5fa5cbd-13a0-5597-a9c1-306d758b9cc5")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C19")
+			(value "100nF")
+			(footprint "Capacitor_SMD:C_0603_1608Metric")
+			(fields
+				(field
+					(name "LCSC") "C14663")
+				(field
+					(name "MPN") "YAGEO CC0603KRX7R9BB104 0603 100nF 50V X7R")
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0603_1608Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "LCSC")
+				(value "C14663")
+			)
+			(property
+				(name "MPN")
+				(value "YAGEO CC0603KRX7R9BB104 0603 100nF 50V X7R")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_capture_rev07")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_capture_rev07.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "62fea651-4d1f-50ad-b427-cf5efd83afae")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C30")
+			(value "10uF")
+			(footprint "Capacitor_SMD:C_0805_2012Metric")
+			(fields
+				(field
+					(name "LCSC") "C15850")
+				(field
+					(name "MPN") "Samsung CL21A106KAYNNNE 0805 10uF 25V X5R")
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0805_2012Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "LCSC")
+				(value "C15850")
+			)
+			(property
+				(name "MPN")
+				(value "Samsung CL21A106KAYNNNE 0805 10uF 25V X5R")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_capture_rev07")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_capture_rev07.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "d005c337-7c48-5f8f-8e88-0e600b973262")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C31")
+			(value "10uF")
+			(footprint "Capacitor_SMD:C_0805_2012Metric")
+			(fields
+				(field
+					(name "LCSC") "C15850")
+				(field
+					(name "MPN") "Samsung CL21A106KAYNNNE 0805 10uF 25V X5R")
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0805_2012Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "LCSC")
+				(value "C15850")
+			)
+			(property
+				(name "MPN")
+				(value "Samsung CL21A106KAYNNNE 0805 10uF 25V X5R")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_capture_rev07")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_capture_rev07.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "3869d3f2-333b-50bc-8c20-f72dc730725d")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C32")
+			(value "100nF")
+			(footprint "Capacitor_SMD:C_0603_1608Metric")
+			(fields
+				(field
+					(name "LCSC") "C14663")
+				(field
+					(name "MPN") "YAGEO CC0603KRX7R9BB104 0603 100nF 50V X7R")
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0603_1608Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "LCSC")
+				(value "C14663")
+			)
+			(property
+				(name "MPN")
+				(value "YAGEO CC0603KRX7R9BB104 0603 100nF 50V X7R")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_capture_rev07")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_capture_rev07.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "c873c9bc-aac4-5349-8993-cf1785bf93df")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C101")
+			(value "10uF")
+			(footprint "Capacitor_SMD:C_0805_2012Metric")
+			(fields
+				(field
+					(name "LCSC") "C15850")
+				(field
+					(name "MPN") "Samsung CL21A106KAYNNNE 0805 10uF 25V X5R")
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0805_2012Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "LCSC")
+				(value "C15850")
+			)
+			(property
+				(name "MPN")
+				(value "Samsung CL21A106KAYNNNE 0805 10uF 25V X5R")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_capture_rev07")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_capture_rev07.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "742538ec-55e5-51fb-87a0-fa8d1d398413")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C102")
+			(value "100nF")
+			(footprint "Capacitor_SMD:C_0603_1608Metric")
+			(fields
+				(field
+					(name "LCSC") "C14663")
+				(field
+					(name "MPN") "YAGEO CC0603KRX7R9BB104 0603 100nF 50V X7R")
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0603_1608Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "LCSC")
+				(value "C14663")
+			)
+			(property
+				(name "MPN")
+				(value "YAGEO CC0603KRX7R9BB104 0603 100nF 50V X7R")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_capture_rev07")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_capture_rev07.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "3fe81003-08cc-5b30-8a6f-ce11dc8608fc")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C103")
+			(value "4.7uF")
+			(footprint "Capacitor_SMD:C_0603_1608Metric")
+			(fields
+				(field
+					(name "LCSC") "C19666")
+				(field
+					(name "MPN") "Samsung CL10A475KO8NNNC 0603 4.7uF 16V X5R")
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0603_1608Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "LCSC")
+				(value "C19666")
+			)
+			(property
+				(name "MPN")
+				(value "Samsung CL10A475KO8NNNC 0603 4.7uF 16V X5R")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_capture_rev07")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_capture_rev07.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "0855bad2-8474-5421-921e-35cdcad6949c")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C104")
+			(value "100nF")
+			(footprint "Capacitor_SMD:C_0603_1608Metric")
+			(fields
+				(field
+					(name "LCSC") "C14663")
+				(field
+					(name "MPN") "YAGEO CC0603KRX7R9BB104 0603 100nF 50V X7R")
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0603_1608Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "LCSC")
+				(value "C14663")
+			)
+			(property
+				(name "MPN")
+				(value "YAGEO CC0603KRX7R9BB104 0603 100nF 50V X7R")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_capture_rev07")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_capture_rev07.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "af10e22c-4acc-5063-8dcc-4379b7ebff3f")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C105")
+			(value "100nF")
+			(footprint "Capacitor_SMD:C_0603_1608Metric")
+			(fields
+				(field
+					(name "LCSC") "C14663")
+				(field
+					(name "MPN") "YAGEO CC0603KRX7R9BB104 0603 100nF 50V X7R")
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0603_1608Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "LCSC")
+				(value "C14663")
+			)
+			(property
+				(name "MPN")
+				(value "YAGEO CC0603KRX7R9BB104 0603 100nF 50V X7R")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_capture_rev07")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_capture_rev07.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "ddaa3451-d2a5-5c24-975d-6d53f35128af")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C106")
+			(value "100nF")
+			(footprint "Capacitor_SMD:C_0603_1608Metric")
+			(fields
+				(field
+					(name "LCSC") "C14663")
+				(field
+					(name "MPN") "YAGEO CC0603KRX7R9BB104 0603 100nF 50V X7R")
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0603_1608Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "LCSC")
+				(value "C14663")
+			)
+			(property
+				(name "MPN")
+				(value "YAGEO CC0603KRX7R9BB104 0603 100nF 50V X7R")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_capture_rev07")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_capture_rev07.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "f55ab135-77fb-5249-9af9-fec5cf06ead3")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C107")
+			(value "4.7uF")
+			(footprint "Capacitor_SMD:C_0603_1608Metric")
+			(fields
+				(field
+					(name "LCSC") "C19666")
+				(field
+					(name "MPN") "Samsung CL10A475KO8NNNC 0603 4.7uF 16V X5R")
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0603_1608Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "LCSC")
+				(value "C19666")
+			)
+			(property
+				(name "MPN")
+				(value "Samsung CL10A475KO8NNNC 0603 4.7uF 16V X5R")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_capture_rev07")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_capture_rev07.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "87b84706-24cf-5ed2-839d-390324cadffd")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C108")
+			(value "100nF")
+			(footprint "Capacitor_SMD:C_0603_1608Metric")
+			(fields
+				(field
+					(name "LCSC") "C14663")
+				(field
+					(name "MPN") "YAGEO CC0603KRX7R9BB104 0603 100nF 50V X7R")
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0603_1608Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "LCSC")
+				(value "C14663")
+			)
+			(property
+				(name "MPN")
+				(value "YAGEO CC0603KRX7R9BB104 0603 100nF 50V X7R")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_capture_rev07")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_capture_rev07.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "1206ae92-1e12-543a-a1cd-9aae4f8612ed")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C109")
+			(value "100nF")
+			(footprint "Capacitor_SMD:C_0603_1608Metric")
+			(fields
+				(field
+					(name "LCSC") "C14663")
+				(field
+					(name "MPN") "YAGEO CC0603KRX7R9BB104 0603 100nF 50V X7R")
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0603_1608Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "LCSC")
+				(value "C14663")
+			)
+			(property
+				(name "MPN")
+				(value "YAGEO CC0603KRX7R9BB104 0603 100nF 50V X7R")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_capture_rev07")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_capture_rev07.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "b6d7c429-cc79-5bfd-9952-d18820739870")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C110")
+			(value "100nF")
+			(footprint "Capacitor_SMD:C_0603_1608Metric")
+			(fields
+				(field
+					(name "LCSC") "C14663")
+				(field
+					(name "MPN") "YAGEO CC0603KRX7R9BB104 0603 100nF 50V X7R")
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0603_1608Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "LCSC")
+				(value "C14663")
+			)
+			(property
+				(name "MPN")
+				(value "YAGEO CC0603KRX7R9BB104 0603 100nF 50V X7R")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_capture_rev07")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_capture_rev07.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "245c353b-e92f-59bc-90c9-ea53f6efd30a")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C111")
+			(value "4.7uF")
+			(footprint "Capacitor_SMD:C_0603_1608Metric")
+			(fields
+				(field
+					(name "LCSC") "C19666")
+				(field
+					(name "MPN") "Samsung CL10A475KO8NNNC 0603 4.7uF 16V X5R")
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0603_1608Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "LCSC")
+				(value "C19666")
+			)
+			(property
+				(name "MPN")
+				(value "Samsung CL10A475KO8NNNC 0603 4.7uF 16V X5R")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_capture_rev07")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_capture_rev07.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "a12755e1-072e-5717-a6ee-fd8914d5459f")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C112")
+			(value "100nF")
+			(footprint "Capacitor_SMD:C_0603_1608Metric")
+			(fields
+				(field
+					(name "LCSC") "C14663")
+				(field
+					(name "MPN") "YAGEO CC0603KRX7R9BB104 0603 100nF 50V X7R")
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0603_1608Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "LCSC")
+				(value "C14663")
+			)
+			(property
+				(name "MPN")
+				(value "YAGEO CC0603KRX7R9BB104 0603 100nF 50V X7R")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_capture_rev07")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_capture_rev07.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "5a9420ec-9587-5ff6-b98c-5f9161c515c3")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C113")
+			(value "100nF")
+			(footprint "Capacitor_SMD:C_0603_1608Metric")
+			(fields
+				(field
+					(name "LCSC") "C14663")
+				(field
+					(name "MPN") "YAGEO CC0603KRX7R9BB104 0603 100nF 50V X7R")
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0603_1608Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "LCSC")
+				(value "C14663")
+			)
+			(property
+				(name "MPN")
+				(value "YAGEO CC0603KRX7R9BB104 0603 100nF 50V X7R")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_capture_rev07")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_capture_rev07.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "6605162e-5803-518b-86ae-81eaa57efd26")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C114")
+			(value "22pF")
+			(footprint "Capacitor_SMD:C_0603_1608Metric")
+			(fields
+				(field
+					(name "LCSC") "C1653")
+				(field
+					(name "MPN") "0603 22pF 50V C0G")
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0603_1608Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "LCSC")
+				(value "C1653")
+			)
+			(property
+				(name "MPN")
+				(value "0603 22pF 50V C0G")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_capture_rev07")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_capture_rev07.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "6cf342a7-2a6c-555d-8b21-b7e82578750f")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C115")
+			(value "22pF")
+			(footprint "Capacitor_SMD:C_0603_1608Metric")
+			(fields
+				(field
+					(name "LCSC") "C1653")
+				(field
+					(name "MPN") "0603 22pF 50V C0G")
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0603_1608Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "LCSC")
+				(value "C1653")
+			)
+			(property
+				(name "MPN")
+				(value "0603 22pF 50V C0G")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_capture_rev07")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_capture_rev07.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "d57600f3-6cfe-5def-9d2a-47a79c89d4c6")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C116")
+			(value "1uF")
+			(footprint "Capacitor_SMD:C_0603_1608Metric")
+			(fields
+				(field
+					(name "LCSC") "C77386")
+				(field
+					(name "MPN") "Murata GRM188R61H105KAALD 0603 1uF 50V X5R")
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0603_1608Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "LCSC")
+				(value "C77386")
+			)
+			(property
+				(name "MPN")
+				(value "Murata GRM188R61H105KAALD 0603 1uF 50V X5R")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_capture_rev07")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_capture_rev07.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "6930019f-c3d9-545e-bdd0-c68b1607b6c1")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C117")
+			(value "1uF")
+			(footprint "Capacitor_SMD:C_0603_1608Metric")
+			(fields
+				(field
+					(name "LCSC") "C77386")
+				(field
+					(name "MPN") "Murata GRM188R61H105KAALD 0603 1uF 50V X5R")
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0603_1608Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "LCSC")
+				(value "C77386")
+			)
+			(property
+				(name "MPN")
+				(value "Murata GRM188R61H105KAALD 0603 1uF 50V X5R")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_capture_rev07")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_capture_rev07.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "308f943e-83d2-5cb7-a308-f114a1d00a3b")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C118")
+			(value "47nF")
+			(footprint "Capacitor_SMD:C_0603_1608Metric")
+			(fields
+				(field
+					(name "LCSC") "C1622")
+				(field
+					(name "MPN") "Samsung CL10B473KB8NNNC 0603 47nF 50V X7R")
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0603_1608Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "LCSC")
+				(value "C1622")
+			)
+			(property
+				(name "MPN")
+				(value "Samsung CL10B473KB8NNNC 0603 47nF 50V X7R")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_capture_rev07")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_capture_rev07.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "7cec20b5-874d-57d0-a53a-57fd0cc52370")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C119")
+			(value "100nF")
+			(footprint "Capacitor_SMD:C_0603_1608Metric")
+			(fields
+				(field
+					(name "LCSC") "C14663")
+				(field
+					(name "MPN") "YAGEO CC0603KRX7R9BB104 0603 100nF 50V X7R")
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0603_1608Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "LCSC")
+				(value "C14663")
+			)
+			(property
+				(name "MPN")
+				(value "YAGEO CC0603KRX7R9BB104 0603 100nF 50V X7R")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_capture_rev07")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_capture_rev07.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "24ec98d5-251e-5a5f-9f14-12dbe6811679")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "D1")
+			(value "LED green")
+			(footprint "LED_SMD:LED_0805_2012Metric")
+			(fields
+				(field
+					(name "LCSC") "C2297")
+				(field
+					(name "MPN") "KT-0805G green LED")
+				(field
+					(name "Footprint") "LED_SMD:LED_0805_2012Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "LED")
+				(description "Light emitting diode")
+			)
+			(property
+				(name "LCSC")
+				(value "C2297")
+			)
+			(property
+				(name "MPN")
+				(value "KT-0805G green LED")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_capture_rev07")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_capture_rev07.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "LED diode")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "LED* LED_SMD:* LED_THT:*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "597e6cb6-cb61-5d72-8670-70fc184bf562")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "D101")
+			(value "LED green")
+			(footprint "LED_SMD:LED_0805_2012Metric")
+			(fields
+				(field
+					(name "LCSC") "C2297")
+				(field
+					(name "MPN") "KT-0805G green LED")
+				(field
+					(name "Footprint") "LED_SMD:LED_0805_2012Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "LED")
+				(description "Light emitting diode")
+			)
+			(property
+				(name "LCSC")
+				(value "C2297")
+			)
+			(property
+				(name "MPN")
+				(value "KT-0805G green LED")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_capture_rev07")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_capture_rev07.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "LED diode")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "LED* LED_SMD:* LED_THT:*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "97cf8c36-18b5-5e3e-8dd9-db0e9791fcbf")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "FB1")
+			(value "220Ω@100MHz")
+			(footprint "Inductor_SMD:L_0603_1608Metric")
+			(fields
+				(field
+					(name "LCSC") "C80165")
+				(field
+					(name "MPN") "Murata BLM18PG221SN1D 0603 ferrite 1.4A")
+				(field
+					(name "Footprint") "Inductor_SMD:L_0603_1608Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "FerriteBead")
+				(description "Ferrite bead")
+			)
+			(property
+				(name "LCSC")
+				(value "C80165")
+			)
+			(property
+				(name "MPN")
+				(value "Murata BLM18PG221SN1D 0603 ferrite 1.4A")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_capture_rev07")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_capture_rev07.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "L ferrite bead inductor filter")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "Inductor_* L_* *Ferrite*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "f2c440f3-c76c-531d-b688-b2b4aac2bd17")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "FB101")
+			(value "220Ω@100MHz")
+			(footprint "Inductor_SMD:L_0603_1608Metric")
+			(fields
+				(field
+					(name "LCSC") "C80165")
+				(field
+					(name "MPN") "Murata BLM18PG221SN1D 0603 ferrite 1.4A")
+				(field
+					(name "Footprint") "Inductor_SMD:L_0603_1608Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "FerriteBead")
+				(description "Ferrite bead")
+			)
+			(property
+				(name "LCSC")
+				(value "C80165")
+			)
+			(property
+				(name "MPN")
+				(value "Murata BLM18PG221SN1D 0603 ferrite 1.4A")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_capture_rev07")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_capture_rev07.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "L ferrite bead inductor filter")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "Inductor_* L_* *Ferrite*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "b8f57996-a6ff-55df-b680-4df3d9308f04")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "J1")
+			(value "Camera video in")
+			(footprint "Connector_JST:JST_PH_B2B-PH-K_1x02_P2.00mm_Vertical")
+			(fields
+				(field
+					(name "LCSC") "C131337")
+				(field
+					(name "MPN") "JST B2B-PH-K-S")
+				(field
+					(name "Footprint") "Connector_JST:JST_PH_B2B-PH-K_1x02_P2.00mm_Vertical")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Connector_Generic")
+				(part "Conn_01x02")
+				(description "Generic connector, single row, 01x02, script generated (kicad-library-utils/schlib/autogen/connector/)")
+			)
+			(property
+				(name "LCSC")
+				(value "C131337")
+			)
+			(property
+				(name "MPN")
+				(value "JST B2B-PH-K-S")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_capture_rev07")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_capture_rev07.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "connector")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "Connector*:*_1x??_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "6d47a6c4-c93a-5715-a953-907d5e975661")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "J2")
+			(value "USB module plug")
+			(footprint "Connector_PinHeader_2.54mm:PinHeader_2x03_P2.54mm_Vertical")
+			(fields
+				(field
+					(name "LCSC") "C492420")
+				(field
+					(name "MPN") "XFCN PZ254V-12-6P 2x3 2.54mm male header (underside)")
+				(field
+					(name "Footprint") "Connector_PinHeader_2.54mm:PinHeader_2x03_P2.54mm_Vertical")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Connector_Generic")
+				(part "Conn_02x03_Odd_Even")
+				(description "Generic connector, double row, 02x03, odd/even pin numbering scheme (row 1 odd numbers, row 2 even numbers), script generated (kicad-library-utils/schlib/autogen/connector/)")
+			)
+			(property
+				(name "LCSC")
+				(value "C492420")
+			)
+			(property
+				(name "MPN")
+				(value "XFCN PZ254V-12-6P 2x3 2.54mm male header (underside)")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_capture_rev07")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_capture_rev07.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "connector")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "Connector*:*_2x??_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "3a098f0a-9cc5-591e-b84e-dd79c626988c")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "3")
+						)
+						(pin
+							(num "5")
+						)
+						(pin
+							(num "2")
+						)
+						(pin
+							(num "4")
+						)
+						(pin
+							(num "6")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "J3")
+			(value "Camera 3 USB")
+			(footprint "Connector_PinHeader_2.54mm:PinHeader_1x04_P2.54mm_Vertical")
+			(fields
+				(field
+					(name "LCSC")
+				)
+				(field
+					(name "MPN") "1x4 2.54mm header, not fitted")
+				(field
+					(name "Footprint") "Connector_PinHeader_2.54mm:PinHeader_1x04_P2.54mm_Vertical")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Connector_Generic")
+				(part "Conn_01x04")
+				(description "Generic connector, single row, 01x04, script generated (kicad-library-utils/schlib/autogen/connector/)")
+			)
+			(property
+				(name "LCSC")
+				(value "")
+			)
+			(property
+				(name "MPN")
+				(value "1x4 2.54mm header, not fitted")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_capture_rev07")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_capture_rev07.kicad_sch")
+			)
+			(property
+				(name "dnp")
+			)
+			(property
+				(name "ki_keywords")
+				(value "connector")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "Connector*:*_1x??_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "d5d1cb55-3634-5524-adf5-c366ce3c8e4a")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+						(pin
+							(num "3")
+						)
+						(pin
+							(num "4")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "J101")
+			(value "Camera video in")
+			(footprint "Connector_JST:JST_PH_B2B-PH-K_1x02_P2.00mm_Vertical")
+			(fields
+				(field
+					(name "LCSC") "C131337")
+				(field
+					(name "MPN") "JST B2B-PH-K-S")
+				(field
+					(name "Footprint") "Connector_JST:JST_PH_B2B-PH-K_1x02_P2.00mm_Vertical")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Connector_Generic")
+				(part "Conn_01x02")
+				(description "Generic connector, single row, 01x02, script generated (kicad-library-utils/schlib/autogen/connector/)")
+			)
+			(property
+				(name "LCSC")
+				(value "C131337")
+			)
+			(property
+				(name "MPN")
+				(value "JST B2B-PH-K-S")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_capture_rev07")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_capture_rev07.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "connector")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "Connector*:*_1x??_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "583f2394-9570-5e21-8328-a162329ab0b2")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "R1")
+			(value "4.7kΩ")
+			(footprint "Resistor_SMD:R_0603_1608Metric")
+			(fields
+				(field
+					(name "LCSC") "C23162")
+				(field
+					(name "MPN") "UNI-ROYAL 0603WAF4701T5E 4.7k 1%")
+				(field
+					(name "Footprint") "Resistor_SMD:R_0603_1608Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "R")
+				(description "Resistor")
+			)
+			(property
+				(name "LCSC")
+				(value "C23162")
+			)
+			(property
+				(name "MPN")
+				(value "UNI-ROYAL 0603WAF4701T5E 4.7k 1%")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_capture_rev07")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_capture_rev07.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "R res resistor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "R_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "861cd899-d847-5872-ac39-e8cfb3bc4037")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "R2")
+			(value "75Ω")
+			(footprint "Resistor_SMD:R_0603_1608Metric")
+			(fields
+				(field
+					(name "LCSC") "C4275")
+				(field
+					(name "MPN") "UNI-ROYAL 0603WAF750JT5E 75R 1%")
+				(field
+					(name "Footprint") "Resistor_SMD:R_0603_1608Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "R")
+				(description "Resistor")
+			)
+			(property
+				(name "LCSC")
+				(value "C4275")
+			)
+			(property
+				(name "MPN")
+				(value "UNI-ROYAL 0603WAF750JT5E 75R 1%")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_capture_rev07")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_capture_rev07.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "R res resistor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "R_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "00b8f494-e975-5622-a6f3-e82317961e2b")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "R3")
+			(value "4.7kΩ")
+			(footprint "Resistor_SMD:R_0603_1608Metric")
+			(fields
+				(field
+					(name "LCSC") "C23162")
+				(field
+					(name "MPN") "UNI-ROYAL 0603WAF4701T5E 4.7k 1%")
+				(field
+					(name "Footprint") "Resistor_SMD:R_0603_1608Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "R")
+				(description "Resistor")
+			)
+			(property
+				(name "LCSC")
+				(value "C23162")
+			)
+			(property
+				(name "MPN")
+				(value "UNI-ROYAL 0603WAF4701T5E 4.7k 1%")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_capture_rev07")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_capture_rev07.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "R res resistor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "R_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "f70eadeb-3332-5a9f-9969-403e3af96ad2")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "R4")
+			(value "4.7kΩ")
+			(footprint "Resistor_SMD:R_0603_1608Metric")
+			(fields
+				(field
+					(name "LCSC") "C23162")
+				(field
+					(name "MPN") "UNI-ROYAL 0603WAF4701T5E 4.7k 1%")
+				(field
+					(name "Footprint") "Resistor_SMD:R_0603_1608Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "R")
+				(description "Resistor")
+			)
+			(property
+				(name "LCSC")
+				(value "C23162")
+			)
+			(property
+				(name "MPN")
+				(value "UNI-ROYAL 0603WAF4701T5E 4.7k 1%")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_capture_rev07")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_capture_rev07.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "R res resistor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "R_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "2883d0ef-13ec-5fef-b838-be5181f8925e")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "R5")
+			(value "0Ω")
+			(footprint "Resistor_SMD:R_0603_1608Metric")
+			(fields
+				(field
+					(name "LCSC") "C21189")
+				(field
+					(name "MPN") "UNI-ROYAL 0603WAF0000T5E 0R")
+				(field
+					(name "Footprint") "Resistor_SMD:R_0603_1608Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "R")
+				(description "Resistor")
+			)
+			(property
+				(name "LCSC")
+				(value "C21189")
+			)
+			(property
+				(name "MPN")
+				(value "UNI-ROYAL 0603WAF0000T5E 0R")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_capture_rev07")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_capture_rev07.kicad_sch")
+			)
+			(property
+				(name "dnp")
+			)
+			(property
+				(name "ki_keywords")
+				(value "R res resistor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "R_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "8cca2cd1-027f-507a-bc3b-0738eab3bb74")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "R6")
+			(value "1kΩ")
+			(footprint "Resistor_SMD:R_0603_1608Metric")
+			(fields
+				(field
+					(name "LCSC") "C21190")
+				(field
+					(name "MPN") "UNI-ROYAL 0603WAF1001T5E 1k 1%")
+				(field
+					(name "Footprint") "Resistor_SMD:R_0603_1608Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "R")
+				(description "Resistor")
+			)
+			(property
+				(name "LCSC")
+				(value "C21190")
+			)
+			(property
+				(name "MPN")
+				(value "UNI-ROYAL 0603WAF1001T5E 1k 1%")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_capture_rev07")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_capture_rev07.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "R res resistor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "R_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "a909b273-9e67-5b66-8596-6ac103ebf775")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "R101")
+			(value "4.7kΩ")
+			(footprint "Resistor_SMD:R_0603_1608Metric")
+			(fields
+				(field
+					(name "LCSC") "C23162")
+				(field
+					(name "MPN") "UNI-ROYAL 0603WAF4701T5E 4.7k 1%")
+				(field
+					(name "Footprint") "Resistor_SMD:R_0603_1608Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "R")
+				(description "Resistor")
+			)
+			(property
+				(name "LCSC")
+				(value "C23162")
+			)
+			(property
+				(name "MPN")
+				(value "UNI-ROYAL 0603WAF4701T5E 4.7k 1%")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_capture_rev07")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_capture_rev07.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "R res resistor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "R_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "f9841c07-ed11-5926-96e7-6c5093ef6c3a")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "R102")
+			(value "75Ω")
+			(footprint "Resistor_SMD:R_0603_1608Metric")
+			(fields
+				(field
+					(name "LCSC") "C4275")
+				(field
+					(name "MPN") "UNI-ROYAL 0603WAF750JT5E 75R 1%")
+				(field
+					(name "Footprint") "Resistor_SMD:R_0603_1608Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "R")
+				(description "Resistor")
+			)
+			(property
+				(name "LCSC")
+				(value "C4275")
+			)
+			(property
+				(name "MPN")
+				(value "UNI-ROYAL 0603WAF750JT5E 75R 1%")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_capture_rev07")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_capture_rev07.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "R res resistor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "R_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "e6135319-df92-5871-bd75-0de7a754f34d")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "R103")
+			(value "4.7kΩ")
+			(footprint "Resistor_SMD:R_0603_1608Metric")
+			(fields
+				(field
+					(name "LCSC") "C23162")
+				(field
+					(name "MPN") "UNI-ROYAL 0603WAF4701T5E 4.7k 1%")
+				(field
+					(name "Footprint") "Resistor_SMD:R_0603_1608Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "R")
+				(description "Resistor")
+			)
+			(property
+				(name "LCSC")
+				(value "C23162")
+			)
+			(property
+				(name "MPN")
+				(value "UNI-ROYAL 0603WAF4701T5E 4.7k 1%")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_capture_rev07")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_capture_rev07.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "R res resistor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "R_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "32e5dbe7-f54a-5319-9881-9fdc6005d106")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "R104")
+			(value "4.7kΩ")
+			(footprint "Resistor_SMD:R_0603_1608Metric")
+			(fields
+				(field
+					(name "LCSC") "C23162")
+				(field
+					(name "MPN") "UNI-ROYAL 0603WAF4701T5E 4.7k 1%")
+				(field
+					(name "Footprint") "Resistor_SMD:R_0603_1608Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "R")
+				(description "Resistor")
+			)
+			(property
+				(name "LCSC")
+				(value "C23162")
+			)
+			(property
+				(name "MPN")
+				(value "UNI-ROYAL 0603WAF4701T5E 4.7k 1%")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_capture_rev07")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_capture_rev07.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "R res resistor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "R_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "b5ed9d8e-b953-597e-bbe6-290452033a4d")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "R105")
+			(value "0Ω")
+			(footprint "Resistor_SMD:R_0603_1608Metric")
+			(fields
+				(field
+					(name "LCSC") "C21189")
+				(field
+					(name "MPN") "UNI-ROYAL 0603WAF0000T5E 0R")
+				(field
+					(name "Footprint") "Resistor_SMD:R_0603_1608Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "R")
+				(description "Resistor")
+			)
+			(property
+				(name "LCSC")
+				(value "C21189")
+			)
+			(property
+				(name "MPN")
+				(value "UNI-ROYAL 0603WAF0000T5E 0R")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_capture_rev07")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_capture_rev07.kicad_sch")
+			)
+			(property
+				(name "dnp")
+			)
+			(property
+				(name "ki_keywords")
+				(value "R res resistor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "R_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "a91a555d-8a18-544d-b127-bdef102264f5")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "R106")
+			(value "1kΩ")
+			(footprint "Resistor_SMD:R_0603_1608Metric")
+			(fields
+				(field
+					(name "LCSC") "C21190")
+				(field
+					(name "MPN") "UNI-ROYAL 0603WAF1001T5E 1k 1%")
+				(field
+					(name "Footprint") "Resistor_SMD:R_0603_1608Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "R")
+				(description "Resistor")
+			)
+			(property
+				(name "LCSC")
+				(value "C21190")
+			)
+			(property
+				(name "MPN")
+				(value "UNI-ROYAL 0603WAF1001T5E 1k 1%")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_capture_rev07")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_capture_rev07.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "R res resistor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "R_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "db30de3c-70b0-5621-aca0-a3b521a11419")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "U1")
+			(value "MS2107")
+			(footprint "Package_QFP:LQFP-48_7x7mm_P0.5mm")
+			(fields
+				(field
+					(name "LCSC") "C42374499")
+				(field
+					(name "MPN") "MacroSilicon MS2107 CVBS/S-Video to USB 2.0 UVC capture, LQFP-48 7x7 0.5mm")
+				(field
+					(name "Footprint") "Package_QFP:LQFP-48_7x7mm_P0.5mm")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "carradio")
+				(part "MS2107")
+				(description "")
+			)
+			(property
+				(name "LCSC")
+				(value "C42374499")
+			)
+			(property
+				(name "MPN")
+				(value "MacroSilicon MS2107 CVBS/S-Video to USB 2.0 UVC capture, LQFP-48 7x7 0.5mm")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_capture_rev07")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_capture_rev07.kicad_sch")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "515c179c-ecb9-5431-be10-595fbabbb728")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "16")
+						)
+						(pin
+							(num "17")
+						)
+						(pin
+							(num "18")
+						)
+						(pin
+							(num "10")
+						)
+						(pin
+							(num "14")
+						)
+						(pin
+							(num "20")
+						)
+						(pin
+							(num "34")
+						)
+						(pin
+							(num "46")
+						)
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "4")
+						)
+						(pin
+							(num "7")
+						)
+						(pin
+							(num "40")
+						)
+						(pin
+							(num "30")
+						)
+						(pin
+							(num "24")
+						)
+						(pin
+							(num "48")
+						)
+						(pin
+							(num "2")
+						)
+						(pin
+							(num "9")
+						)
+						(pin
+							(num "15")
+						)
+						(pin
+							(num "28")
+						)
+						(pin
+							(num "29")
+						)
+						(pin
+							(num "45")
+						)
+						(pin
+							(num "11")
+						)
+						(pin
+							(num "21")
+						)
+						(pin
+							(num "47")
+						)
+						(pin
+							(num "8")
+						)
+						(pin
+							(num "6")
+						)
+						(pin
+							(num "3")
+						)
+						(pin
+							(num "5")
+						)
+						(pin
+							(num "32")
+						)
+						(pin
+							(num "33")
+						)
+						(pin
+							(num "31")
+						)
+						(pin
+							(num "27")
+						)
+						(pin
+							(num "26")
+						)
+						(pin
+							(num "13")
+						)
+						(pin
+							(num "12")
+						)
+						(pin
+							(num "19")
+						)
+						(pin
+							(num "35")
+						)
+						(pin
+							(num "36")
+						)
+						(pin
+							(num "37")
+						)
+						(pin
+							(num "38")
+						)
+						(pin
+							(num "39")
+						)
+						(pin
+							(num "41")
+						)
+						(pin
+							(num "42")
+						)
+						(pin
+							(num "43")
+						)
+						(pin
+							(num "44")
+						)
+						(pin
+							(num "22")
+						)
+						(pin
+							(num "23")
+						)
+						(pin
+							(num "25")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "U2")
+			(value "USBLC6-2SC6")
+			(footprint "Package_TO_SOT_SMD:SOT-23-6")
+			(fields
+				(field
+					(name "LCSC") "C7519")
+				(field
+					(name "MPN") "ST USBLC6-2SC6")
+				(field
+					(name "Footprint") "Package_TO_SOT_SMD:SOT-23-6")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Power_Protection")
+				(part "USBLC6-2SC6")
+				(description "Very low capacitance ESD protection diode, 2 data-line, SOT-23-6")
+			)
+			(property
+				(name "LCSC")
+				(value "C7519")
+			)
+			(property
+				(name "MPN")
+				(value "ST USBLC6-2SC6")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_capture_rev07")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_capture_rev07.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "usb ethernet video")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "SOT?23*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "24c1f810-4ea8-5e39-94cb-5d54ff89397b")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "3")
+						)
+						(pin
+							(num "5")
+						)
+						(pin
+							(num "2")
+						)
+						(pin
+							(num "6")
+						)
+						(pin
+							(num "4")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "U3")
+			(value "24LC16B")
+			(footprint "Package_SO:SOIC-8_3.9x4.9mm_P1.27mm")
+			(fields
+				(field
+					(name "LCSC") "C1349383")
+				(field
+					(name "MPN") "Microchip 24LC16B-I/SN")
+				(field
+					(name "Footprint") "Package_SO:SOIC-8_3.9x4.9mm_P1.27mm")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Memory_EEPROM")
+				(part "24LC16")
+				(description "I2C Serial EEPROM, 16Kb, DIP-8/SOIC-8/TSSOP-8/DFN-8")
+			)
+			(property
+				(name "LCSC")
+				(value "C1349383")
+			)
+			(property
+				(name "MPN")
+				(value "Microchip 24LC16B-I/SN")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_capture_rev07")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_capture_rev07.kicad_sch")
+			)
+			(property
+				(name "dnp")
+			)
+			(property
+				(name "ki_keywords")
+				(value "I2C Serial EEPROM")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "DIP*W7.62mm* SOIC*3.9x4.9mm* TSSOP*4.4x3mm*P0.65mm* DFN*3x2mm*P0.5mm*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "94be34f0-d59c-5fe9-b7c8-d78753837916")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+						(pin
+							(num "3")
+						)
+						(pin
+							(num "8")
+						)
+						(pin
+							(num "4")
+						)
+						(pin
+							(num "5")
+						)
+						(pin
+							(num "6")
+						)
+						(pin
+							(num "7")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "U10")
+			(value "CH334R")
+			(footprint "Package_SO:QSOP-16_3.9x4.9mm_P0.635mm")
+			(fields
+				(field
+					(name "LCSC") "C4154405")
+				(field
+					(name "MPN") "WCH CH334R 4-port USB 2.0 hub, QSOP-16")
+				(field
+					(name "Footprint") "Package_SO:QSOP-16_3.9x4.9mm_P0.635mm")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Interface_USB")
+				(part "CH334R")
+				(description "USB HUB controller, UART, QSOP-16")
+			)
+			(property
+				(name "LCSC")
+				(value "C4154405")
+			)
+			(property
+				(name "MPN")
+				(value "WCH CH334R 4-port USB 2.0 hub, QSOP-16")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_capture_rev07")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_capture_rev07.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "USB HUB Controller Interface")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "QSOP*3.9x4.9mm*P0.635mm*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "9994e796-815c-5856-876c-5c64913e5306")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "13")
+						)
+						(pin
+							(num "11")
+						)
+						(pin
+							(num "10")
+						)
+						(pin
+							(num "9")
+						)
+						(pin
+							(num "15")
+						)
+						(pin
+							(num "16")
+						)
+						(pin
+							(num "12")
+						)
+						(pin
+							(num "14")
+						)
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+						(pin
+							(num "3")
+						)
+						(pin
+							(num "4")
+						)
+						(pin
+							(num "5")
+						)
+						(pin
+							(num "6")
+						)
+						(pin
+							(num "7")
+						)
+						(pin
+							(num "8")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "U101")
+			(value "MS2107")
+			(footprint "Package_QFP:LQFP-48_7x7mm_P0.5mm")
+			(fields
+				(field
+					(name "LCSC") "C42374499")
+				(field
+					(name "MPN") "MacroSilicon MS2107 CVBS/S-Video to USB 2.0 UVC capture, LQFP-48 7x7 0.5mm")
+				(field
+					(name "Footprint") "Package_QFP:LQFP-48_7x7mm_P0.5mm")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "carradio")
+				(part "MS2107")
+				(description "")
+			)
+			(property
+				(name "LCSC")
+				(value "C42374499")
+			)
+			(property
+				(name "MPN")
+				(value "MacroSilicon MS2107 CVBS/S-Video to USB 2.0 UVC capture, LQFP-48 7x7 0.5mm")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_capture_rev07")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_capture_rev07.kicad_sch")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "af56aefd-a9be-59b9-803d-6bf5613b0394")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "16")
+						)
+						(pin
+							(num "17")
+						)
+						(pin
+							(num "18")
+						)
+						(pin
+							(num "10")
+						)
+						(pin
+							(num "14")
+						)
+						(pin
+							(num "20")
+						)
+						(pin
+							(num "34")
+						)
+						(pin
+							(num "46")
+						)
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "4")
+						)
+						(pin
+							(num "7")
+						)
+						(pin
+							(num "40")
+						)
+						(pin
+							(num "30")
+						)
+						(pin
+							(num "24")
+						)
+						(pin
+							(num "48")
+						)
+						(pin
+							(num "2")
+						)
+						(pin
+							(num "9")
+						)
+						(pin
+							(num "15")
+						)
+						(pin
+							(num "28")
+						)
+						(pin
+							(num "29")
+						)
+						(pin
+							(num "45")
+						)
+						(pin
+							(num "11")
+						)
+						(pin
+							(num "21")
+						)
+						(pin
+							(num "47")
+						)
+						(pin
+							(num "8")
+						)
+						(pin
+							(num "6")
+						)
+						(pin
+							(num "3")
+						)
+						(pin
+							(num "5")
+						)
+						(pin
+							(num "32")
+						)
+						(pin
+							(num "33")
+						)
+						(pin
+							(num "31")
+						)
+						(pin
+							(num "27")
+						)
+						(pin
+							(num "26")
+						)
+						(pin
+							(num "13")
+						)
+						(pin
+							(num "12")
+						)
+						(pin
+							(num "19")
+						)
+						(pin
+							(num "35")
+						)
+						(pin
+							(num "36")
+						)
+						(pin
+							(num "37")
+						)
+						(pin
+							(num "38")
+						)
+						(pin
+							(num "39")
+						)
+						(pin
+							(num "41")
+						)
+						(pin
+							(num "42")
+						)
+						(pin
+							(num "43")
+						)
+						(pin
+							(num "44")
+						)
+						(pin
+							(num "22")
+						)
+						(pin
+							(num "23")
+						)
+						(pin
+							(num "25")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "U102")
+			(value "USBLC6-2SC6")
+			(footprint "Package_TO_SOT_SMD:SOT-23-6")
+			(fields
+				(field
+					(name "LCSC") "C7519")
+				(field
+					(name "MPN") "ST USBLC6-2SC6")
+				(field
+					(name "Footprint") "Package_TO_SOT_SMD:SOT-23-6")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Power_Protection")
+				(part "USBLC6-2SC6")
+				(description "Very low capacitance ESD protection diode, 2 data-line, SOT-23-6")
+			)
+			(property
+				(name "LCSC")
+				(value "C7519")
+			)
+			(property
+				(name "MPN")
+				(value "ST USBLC6-2SC6")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_capture_rev07")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_capture_rev07.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "usb ethernet video")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "SOT?23*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "2c1e016f-16d5-5ade-9385-b076817b1b01")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "3")
+						)
+						(pin
+							(num "5")
+						)
+						(pin
+							(num "2")
+						)
+						(pin
+							(num "6")
+						)
+						(pin
+							(num "4")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "U103")
+			(value "24LC16B")
+			(footprint "Package_SO:SOIC-8_3.9x4.9mm_P1.27mm")
+			(fields
+				(field
+					(name "LCSC") "C1349383")
+				(field
+					(name "MPN") "Microchip 24LC16B-I/SN")
+				(field
+					(name "Footprint") "Package_SO:SOIC-8_3.9x4.9mm_P1.27mm")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Memory_EEPROM")
+				(part "24LC16")
+				(description "I2C Serial EEPROM, 16Kb, DIP-8/SOIC-8/TSSOP-8/DFN-8")
+			)
+			(property
+				(name "LCSC")
+				(value "C1349383")
+			)
+			(property
+				(name "MPN")
+				(value "Microchip 24LC16B-I/SN")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_capture_rev07")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_capture_rev07.kicad_sch")
+			)
+			(property
+				(name "dnp")
+			)
+			(property
+				(name "ki_keywords")
+				(value "I2C Serial EEPROM")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "DIP*W7.62mm* SOIC*3.9x4.9mm* TSSOP*4.4x3mm*P0.65mm* DFN*3x2mm*P0.5mm*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "7736c77c-a2f7-5e61-8d04-c40d1a83c0b5")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+						(pin
+							(num "3")
+						)
+						(pin
+							(num "8")
+						)
+						(pin
+							(num "4")
+						)
+						(pin
+							(num "5")
+						)
+						(pin
+							(num "6")
+						)
+						(pin
+							(num "7")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "Y1")
+			(value "12MHz")
+			(footprint "Crystal:Crystal_SMD_3225-4Pin_3.2x2.5mm")
+			(fields
+				(field
+					(name "LCSC") "C9002")
+				(field
+					(name "MPN") "YXC X322512MSB4SI 12MHz 3225")
+				(field
+					(name "Footprint") "Crystal:Crystal_SMD_3225-4Pin_3.2x2.5mm")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "Crystal_GND24")
+				(description "Four pin crystal, GND on pins 2 and 4")
+			)
+			(property
+				(name "LCSC")
+				(value "C9002")
+			)
+			(property
+				(name "MPN")
+				(value "YXC X322512MSB4SI 12MHz 3225")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_capture_rev07")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_capture_rev07.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "quartz ceramic resonator oscillator")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "Crystal*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "242f0247-7ce2-54a6-94b5-9abee5226942")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+						(pin
+							(num "4")
+						)
+						(pin
+							(num "3")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "Y10")
+			(value "12MHz")
+			(footprint "Crystal:Crystal_SMD_3225-4Pin_3.2x2.5mm")
+			(fields
+				(field
+					(name "LCSC") "C9002")
+				(field
+					(name "MPN") "YXC X322512MSB4SI 12MHz 3225")
+				(field
+					(name "Footprint") "Crystal:Crystal_SMD_3225-4Pin_3.2x2.5mm")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "Crystal_GND24")
+				(description "Four pin crystal, GND on pins 2 and 4")
+			)
+			(property
+				(name "LCSC")
+				(value "C9002")
+			)
+			(property
+				(name "MPN")
+				(value "YXC X322512MSB4SI 12MHz 3225")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_capture_rev07")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_capture_rev07.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "quartz ceramic resonator oscillator")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "Crystal*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "ea5da63d-c385-5b28-8eb2-c5aa6e276694")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+						(pin
+							(num "4")
+						)
+						(pin
+							(num "3")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "Y101")
+			(value "12MHz")
+			(footprint "Crystal:Crystal_SMD_3225-4Pin_3.2x2.5mm")
+			(fields
+				(field
+					(name "LCSC") "C9002")
+				(field
+					(name "MPN") "YXC X322512MSB4SI 12MHz 3225")
+				(field
+					(name "Footprint") "Crystal:Crystal_SMD_3225-4Pin_3.2x2.5mm")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "Crystal_GND24")
+				(description "Four pin crystal, GND on pins 2 and 4")
+			)
+			(property
+				(name "LCSC")
+				(value "C9002")
+			)
+			(property
+				(name "MPN")
+				(value "YXC X322512MSB4SI 12MHz 3225")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_capture_rev07")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_capture_rev07.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "quartz ceramic resonator oscillator")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "Crystal*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "307091b3-b0e5-5c10-9feb-8aaa38bc7a80")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+						(pin
+							(num "4")
+						)
+						(pin
+							(num "3")
+						)
+					)
+				)
+			)
+		)
+	)
+	(groups)
+	(variants)
+	(libparts
+		(libpart
+			(lib "Connector_Generic")
+			(part "Conn_01x02")
+			(description "Generic connector, single row, 01x02, script generated (kicad-library-utils/schlib/autogen/connector/)")
+			(footprints
+				(fp "Connector*:*_1x??_*")
+			)
+			(fields
+				(field
+					(name "Reference") "J")
+				(field
+					(name "Value") "Conn_01x02")
+				(field
+					(name "Footprint")
+				)
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Generic connector, single row, 01x02, script generated (kicad-library-utils/schlib/autogen/connector/)")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "Pin_1")
+					(type "passive")
+				)
+				(pin
+					(num "2")
+					(name "Pin_2")
+					(type "passive")
+				)
+			)
+		)
+		(libpart
+			(lib "Connector_Generic")
+			(part "Conn_01x04")
+			(description "Generic connector, single row, 01x04, script generated (kicad-library-utils/schlib/autogen/connector/)")
+			(footprints
+				(fp "Connector*:*_1x??_*")
+			)
+			(fields
+				(field
+					(name "Reference") "J")
+				(field
+					(name "Value") "Conn_01x04")
+				(field
+					(name "Footprint")
+				)
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Generic connector, single row, 01x04, script generated (kicad-library-utils/schlib/autogen/connector/)")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "Pin_1")
+					(type "passive")
+				)
+				(pin
+					(num "2")
+					(name "Pin_2")
+					(type "passive")
+				)
+				(pin
+					(num "3")
+					(name "Pin_3")
+					(type "passive")
+				)
+				(pin
+					(num "4")
+					(name "Pin_4")
+					(type "passive")
+				)
+			)
+		)
+		(libpart
+			(lib "Connector_Generic")
+			(part "Conn_02x03_Odd_Even")
+			(description "Generic connector, double row, 02x03, odd/even pin numbering scheme (row 1 odd numbers, row 2 even numbers), script generated (kicad-library-utils/schlib/autogen/connector/)")
+			(footprints
+				(fp "Connector*:*_2x??_*")
+			)
+			(fields
+				(field
+					(name "Reference") "J")
+				(field
+					(name "Value") "Conn_02x03_Odd_Even")
+				(field
+					(name "Footprint")
+				)
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Generic connector, double row, 02x03, odd/even pin numbering scheme (row 1 odd numbers, row 2 even numbers), script generated (kicad-library-utils/schlib/autogen/connector/)")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "Pin_1")
+					(type "passive")
+				)
+				(pin
+					(num "2")
+					(name "Pin_2")
+					(type "passive")
+				)
+				(pin
+					(num "3")
+					(name "Pin_3")
+					(type "passive")
+				)
+				(pin
+					(num "4")
+					(name "Pin_4")
+					(type "passive")
+				)
+				(pin
+					(num "5")
+					(name "Pin_5")
+					(type "passive")
+				)
+				(pin
+					(num "6")
+					(name "Pin_6")
+					(type "passive")
+				)
+			)
+		)
+		(libpart
+			(lib "Device")
+			(part "C")
+			(description "Unpolarized capacitor")
+			(footprints
+				(fp "C_*")
+			)
+			(fields
+				(field
+					(name "Reference") "C")
+				(field
+					(name "Value") "C")
+				(field
+					(name "Footprint")
+				)
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Unpolarized capacitor")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "")
+					(type "passive")
+				)
+				(pin
+					(num "2")
+					(name "")
+					(type "passive")
+				)
+			)
+		)
+		(libpart
+			(lib "Device")
+			(part "Crystal_GND24")
+			(description "Four pin crystal, GND on pins 2 and 4")
+			(footprints
+				(fp "Crystal*")
+			)
+			(fields
+				(field
+					(name "Reference") "Y")
+				(field
+					(name "Value") "Crystal_GND24")
+				(field
+					(name "Footprint")
+				)
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Four pin crystal, GND on pins 2 and 4")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "1")
+					(type "passive")
+				)
+				(pin
+					(num "2")
+					(name "2")
+					(type "passive")
+				)
+				(pin
+					(num "3")
+					(name "3")
+					(type "passive")
+				)
+				(pin
+					(num "4")
+					(name "4")
+					(type "passive")
+				)
+			)
+		)
+		(libpart
+			(lib "Device")
+			(part "FerriteBead")
+			(description "Ferrite bead")
+			(footprints
+				(fp "Inductor_*")
+				(fp "L_*")
+				(fp "*Ferrite*")
+			)
+			(fields
+				(field
+					(name "Reference") "FB")
+				(field
+					(name "Value") "FerriteBead")
+				(field
+					(name "Footprint")
+				)
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Ferrite bead")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "")
+					(type "passive")
+				)
+				(pin
+					(num "2")
+					(name "")
+					(type "passive")
+				)
+			)
+		)
+		(libpart
+			(lib "Device")
+			(part "LED")
+			(description "Light emitting diode")
+			(footprints
+				(fp "LED*")
+				(fp "LED_SMD:*")
+				(fp "LED_THT:*")
+			)
+			(fields
+				(field
+					(name "Reference") "D")
+				(field
+					(name "Value") "LED")
+				(field
+					(name "Footprint")
+				)
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Light emitting diode")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "K")
+					(type "passive")
+				)
+				(pin
+					(num "2")
+					(name "A")
+					(type "passive")
+				)
+			)
+		)
+		(libpart
+			(lib "Device")
+			(part "R")
+			(description "Resistor")
+			(footprints
+				(fp "R_*")
+			)
+			(fields
+				(field
+					(name "Reference") "R")
+				(field
+					(name "Value") "R")
+				(field
+					(name "Footprint")
+				)
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Resistor")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "")
+					(type "passive")
+				)
+				(pin
+					(num "2")
+					(name "")
+					(type "passive")
+				)
+			)
+		)
+		(libpart
+			(lib "Interface_USB")
+			(part "CH334R")
+			(description "USB HUB controller, UART, QSOP-16")
+			(docs "https://www.wch-ic.com/downloads/file/327.html")
+			(footprints
+				(fp "QSOP*3.9x4.9mm*P0.635mm*")
+			)
+			(fields
+				(field
+					(name "Reference") "U")
+				(field
+					(name "Value") "CH334R")
+				(field
+					(name "Footprint") "Package_SO:QSOP-16_3.9x4.9mm_P0.635mm")
+				(field
+					(name "Datasheet") "https://www.wch-ic.com/downloads/file/327.html")
+				(field
+					(name "Description") "USB HUB controller, UART, QSOP-16")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "DM4-")
+					(type "bidirectional")
+				)
+				(pin
+					(num "2")
+					(name "DP4+")
+					(type "bidirectional")
+				)
+				(pin
+					(num "3")
+					(name "DM3-")
+					(type "bidirectional")
+				)
+				(pin
+					(num "4")
+					(name "DP3+")
+					(type "bidirectional")
+				)
+				(pin
+					(num "5")
+					(name "DM2-")
+					(type "bidirectional")
+				)
+				(pin
+					(num "6")
+					(name "DP2+")
+					(type "bidirectional")
+				)
+				(pin
+					(num "7")
+					(name "DM1-")
+					(type "bidirectional")
+				)
+				(pin
+					(num "8")
+					(name "DP1+")
+					(type "bidirectional")
+				)
+				(pin
+					(num "9")
+					(name "~{RESET}/CDP")
+					(type "input")
+				)
+				(pin
+					(num "10")
+					(name "DMU-")
+					(type "bidirectional")
+				)
+				(pin
+					(num "11")
+					(name "DPU+")
+					(type "bidirectional")
+				)
+				(pin
+					(num "12")
+					(name "V5")
+					(type "power_in")
+				)
+				(pin
+					(num "13")
+					(name "VDD33")
+					(type "passive")
+				)
+				(pin
+					(num "14")
+					(name "GND")
+					(type "power_in")
+				)
+				(pin
+					(num "15")
+					(name "XO")
+					(type "passive")
+				)
+				(pin
+					(num "16")
+					(name "XI")
+					(type "passive")
+				)
+			)
+		)
+		(libpart
+			(lib "Memory_EEPROM")
+			(part "24LC16")
+			(description "I2C Serial EEPROM, 16Kb, DIP-8/SOIC-8/TSSOP-8/DFN-8")
+			(docs "http://ww1.microchip.com/downloads/en/DeviceDoc/21703d.pdf")
+			(footprints
+				(fp "DIP*W7.62mm*")
+				(fp "SOIC*3.9x4.9mm*")
+				(fp "TSSOP*4.4x3mm*P0.65mm*")
+				(fp "DFN*3x2mm*P0.5mm*")
+			)
+			(fields
+				(field
+					(name "Reference") "U")
+				(field
+					(name "Value") "24LC16")
+				(field
+					(name "Footprint")
+				)
+				(field
+					(name "Datasheet") "http://ww1.microchip.com/downloads/en/DeviceDoc/21703d.pdf")
+				(field
+					(name "Description") "I2C Serial EEPROM, 16Kb, DIP-8/SOIC-8/TSSOP-8/DFN-8")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "A0")
+					(type "input")
+				)
+				(pin
+					(num "2")
+					(name "A1")
+					(type "input")
+				)
+				(pin
+					(num "3")
+					(name "A2")
+					(type "input")
+				)
+				(pin
+					(num "4")
+					(name "GND")
+					(type "power_in")
+				)
+				(pin
+					(num "5")
+					(name "SDA")
+					(type "bidirectional")
+				)
+				(pin
+					(num "6")
+					(name "SCL")
+					(type "input")
+				)
+				(pin
+					(num "7")
+					(name "WP")
+					(type "input")
+				)
+				(pin
+					(num "8")
+					(name "VCC")
+					(type "power_in")
+				)
+			)
+		)
+		(libpart
+			(lib "Power_Protection")
+			(part "USBLC6-2SC6")
+			(description "Very low capacitance ESD protection diode, 2 data-line, SOT-23-6")
+			(docs "https://www.st.com/resource/en/datasheet/usblc6-2.pdf")
+			(footprints
+				(fp "SOT?23*")
+			)
+			(fields
+				(field
+					(name "Reference") "U")
+				(field
+					(name "Value") "USBLC6-2SC6")
+				(field
+					(name "Footprint") "Package_TO_SOT_SMD:SOT-23-6")
+				(field
+					(name "Datasheet") "https://www.st.com/resource/en/datasheet/usblc6-2.pdf")
+				(field
+					(name "Description") "Very low capacitance ESD protection diode, 2 data-line, SOT-23-6")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "I/O1")
+					(type "passive")
+				)
+				(pin
+					(num "2")
+					(name "GND")
+					(type "passive")
+				)
+				(pin
+					(num "3")
+					(name "I/O2")
+					(type "passive")
+				)
+				(pin
+					(num "4")
+					(name "I/O2")
+					(type "passive")
+				)
+				(pin
+					(num "5")
+					(name "VBUS")
+					(type "passive")
+				)
+				(pin
+					(num "6")
+					(name "I/O1")
+					(type "passive")
+				)
+			)
+		)
+		(libpart
+			(lib "carradio")
+			(part "MS2107")
+			(fields
+				(field
+					(name "Reference") "U")
+				(field
+					(name "Value") "MS2107")
+				(field
+					(name "Footprint") "Package_QFP:LQFP-48_7x7mm_P0.5mm")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "AVDD33")
+					(type "passive")
+				)
+				(pin
+					(num "2")
+					(name "AVSS")
+					(type "passive")
+				)
+				(pin
+					(num "3")
+					(name "SVCIN")
+					(type "passive")
+				)
+				(pin
+					(num "4")
+					(name "AVDD33")
+					(type "passive")
+				)
+				(pin
+					(num "5")
+					(name "G1IN")
+					(type "passive")
+				)
+				(pin
+					(num "6")
+					(name "SVYIN")
+					(type "passive")
+				)
+				(pin
+					(num "7")
+					(name "AVDD33")
+					(type "passive")
+				)
+				(pin
+					(num "8")
+					(name "AVIN")
+					(type "passive")
+				)
+				(pin
+					(num "9")
+					(name "AVSS")
+					(type "passive")
+				)
+				(pin
+					(num "10")
+					(name "DVDD33")
+					(type "passive")
+				)
+				(pin
+					(num "11")
+					(name "DVSS")
+					(type "passive")
+				)
+				(pin
+					(num "12")
+					(name "GPIO3/SDA")
+					(type "passive")
+				)
+				(pin
+					(num "13")
+					(name "GPIO2/SCL")
+					(type "passive")
+				)
+				(pin
+					(num "14")
+					(name "DVDD33")
+					(type "passive")
+				)
+				(pin
+					(num "15")
+					(name "AVSS")
+					(type "passive")
+				)
+				(pin
+					(num "16")
+					(name "VDD5V")
+					(type "passive")
+				)
+				(pin
+					(num "17")
+					(name "VLDO33")
+					(type "passive")
+				)
+				(pin
+					(num "18")
+					(name "VLDO12")
+					(type "passive")
+				)
+				(pin
+					(num "19")
+					(name "GPIO4/WP")
+					(type "passive")
+				)
+				(pin
+					(num "20")
+					(name "DVDD33")
+					(type "passive")
+				)
+				(pin
+					(num "21")
+					(name "DVSS")
+					(type "passive")
+				)
+				(pin
+					(num "22")
+					(name "NC")
+					(type "passive")
+				)
+				(pin
+					(num "23")
+					(name "NC")
+					(type "passive")
+				)
+				(pin
+					(num "24")
+					(name "DVDD12")
+					(type "passive")
+				)
+				(pin
+					(num "25")
+					(name "NC")
+					(type "passive")
+				)
+				(pin
+					(num "26")
+					(name "XTALO")
+					(type "passive")
+				)
+				(pin
+					(num "27")
+					(name "XTALI")
+					(type "passive")
+				)
+				(pin
+					(num "28")
+					(name "AVSS")
+					(type "passive")
+				)
+				(pin
+					(num "29")
+					(name "AVSS")
+					(type "passive")
+				)
+				(pin
+					(num "30")
+					(name "AVDD33_USB")
+					(type "passive")
+				)
+				(pin
+					(num "31")
+					(name "REXT")
+					(type "passive")
+				)
+				(pin
+					(num "32")
+					(name "USBDP")
+					(type "passive")
+				)
+				(pin
+					(num "33")
+					(name "USBDM")
+					(type "passive")
+				)
+				(pin
+					(num "34")
+					(name "DVDD33")
+					(type "passive")
+				)
+				(pin
+					(num "35")
+					(name "GPIO0/I2S_SEL")
+					(type "passive")
+				)
+				(pin
+					(num "36")
+					(name "I2S_SCLK")
+					(type "passive")
+				)
+				(pin
+					(num "37")
+					(name "I2S_MCLK")
+					(type "passive")
+				)
+				(pin
+					(num "38")
+					(name "I2S_SD0")
+					(type "passive")
+				)
+				(pin
+					(num "39")
+					(name "I2S_LRCLK")
+					(type "passive")
+				)
+				(pin
+					(num "40")
+					(name "AVDD33_AU")
+					(type "passive")
+				)
+				(pin
+					(num "41")
+					(name "VCOML")
+					(type "passive")
+				)
+				(pin
+					(num "42")
+					(name "ALIN")
+					(type "passive")
+				)
+				(pin
+					(num "43")
+					(name "ARIN")
+					(type "passive")
+				)
+				(pin
+					(num "44")
+					(name "VCOMR")
+					(type "passive")
+				)
+				(pin
+					(num "45")
+					(name "AVSS")
+					(type "passive")
+				)
+				(pin
+					(num "46")
+					(name "DVDD33")
+					(type "passive")
+				)
+				(pin
+					(num "47")
+					(name "DVSS")
+					(type "passive")
+				)
+				(pin
+					(num "48")
+					(name "AVDD12")
+					(type "passive")
+				)
+			)
+		)
+	)
+	(libraries)
+	(nets
+		(net
+			(code "1")
+			(name "/+5V_CAP")
+			(class "Power")
+			(node
+				(ref "C1")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C101")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C102")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C2")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C30")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "J2")
+				(pin "1")
+				(pinfunction "Pin_1_1")
+				(pintype "passive")
+			)
+			(node
+				(ref "J2")
+				(pin "2")
+				(pinfunction "Pin_2_2")
+				(pintype "passive")
+			)
+			(node
+				(ref "J3")
+				(pin "1")
+				(pinfunction "Pin_1_1")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "16")
+				(pinfunction "VDD5V_16")
+				(pintype "passive")
+			)
+			(node
+				(ref "U10")
+				(pin "12")
+				(pinfunction "V5_12")
+				(pintype "power_in")
+			)
+			(node
+				(ref "U101")
+				(pin "16")
+				(pinfunction "VDD5V_16")
+				(pintype "passive")
+			)
+			(node
+				(ref "U102")
+				(pin "5")
+				(pinfunction "VBUS_5")
+				(pintype "passive")
+			)
+			(node
+				(ref "U2")
+				(pin "5")
+				(pinfunction "VBUS_5")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "2")
+			(name "/CAM1_1V2")
+			(class "Default")
+			(node
+				(ref "C11")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C12")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C13")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "18")
+				(pinfunction "VLDO12_18")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "24")
+				(pinfunction "DVDD12_24")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "48")
+				(pinfunction "AVDD12_48")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "3")
+			(name "/CAM1_3V3")
+			(class "Default")
+			(node
+				(ref "C19")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C3")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C4")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C5")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C6")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "FB1")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "R3")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "R4")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "R6")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "10")
+				(pinfunction "DVDD33_10")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "14")
+				(pinfunction "DVDD33_14")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "17")
+				(pinfunction "VLDO33_17")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "20")
+				(pinfunction "DVDD33_20")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "34")
+				(pinfunction "DVDD33_34")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "46")
+				(pinfunction "DVDD33_46")
+				(pintype "passive")
+			)
+			(node
+				(ref "U3")
+				(pin "8")
+				(pinfunction "VCC_8")
+				(pintype "power_in")
+			)
+		)
+		(net
+			(code "4")
+			(name "/CAM1_3V3A")
+			(class "Default")
+			(node
+				(ref "C10")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C7")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C8")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C9")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "FB1")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "1")
+				(pinfunction "AVDD33_1")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "30")
+				(pinfunction "AVDD33_USB_30")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "4")
+				(pinfunction "AVDD33_4")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "40")
+				(pinfunction "AVDD33_AU_40")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "7")
+				(pinfunction "AVDD33_7")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "5")
+			(name "/CAM1_AVIN")
+			(class "Default")
+			(node
+				(ref "C18")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "8")
+				(pinfunction "AVIN_8")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "6")
+			(name "/CAM1_CVBS")
+			(class "Default")
+			(node
+				(ref "C18")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "J1")
+				(pin "1")
+				(pinfunction "Pin_1_1")
+				(pintype "passive")
+			)
+			(node
+				(ref "R2")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "U2")
+				(pin "1")
+				(pinfunction "I/O1_1")
+				(pintype "passive")
+			)
+			(node
+				(ref "U2")
+				(pin "6")
+				(pinfunction "I/O1_6")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "7")
+			(name "/CAM1_DM")
+			(class "USB")
+			(node
+				(ref "U1")
+				(pin "33")
+				(pinfunction "USBDM_33")
+				(pintype "passive")
+			)
+			(node
+				(ref "U10")
+				(pin "7")
+				(pinfunction "DM1-_7")
+				(pintype "bidirectional")
+			)
+		)
+		(net
+			(code "8")
+			(name "/CAM1_DP")
+			(class "USB")
+			(node
+				(ref "U1")
+				(pin "32")
+				(pinfunction "USBDP_32")
+				(pintype "passive")
+			)
+			(node
+				(ref "U10")
+				(pin "8")
+				(pinfunction "DP1+_8")
+				(pintype "bidirectional")
+			)
+		)
+		(net
+			(code "9")
+			(name "/CAM1_GPIO4")
+			(class "Default")
+			(node
+				(ref "D1")
+				(pin "1")
+				(pinfunction "K_1")
+				(pintype "passive")
+			)
+			(node
+				(ref "R5")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "19")
+				(pinfunction "GPIO4/WP_19")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "10")
+			(name "/CAM1_LED_A")
+			(class "Default")
+			(node
+				(ref "D1")
+				(pin "2")
+				(pinfunction "A_2")
+				(pintype "passive")
+			)
+			(node
+				(ref "R6")
+				(pin "2")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "11")
+			(name "/CAM1_REXT")
+			(class "Default")
+			(node
+				(ref "R1")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "31")
+				(pinfunction "REXT_31")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "12")
+			(name "/CAM1_SCL")
+			(class "Default")
+			(node
+				(ref "R3")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "13")
+				(pinfunction "GPIO2/SCL_13")
+				(pintype "passive")
+			)
+			(node
+				(ref "U3")
+				(pin "6")
+				(pinfunction "SCL_6")
+				(pintype "input")
+			)
+		)
+		(net
+			(code "13")
+			(name "/CAM1_SDA")
+			(class "Default")
+			(node
+				(ref "R4")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "12")
+				(pinfunction "GPIO3/SDA_12")
+				(pintype "passive")
+			)
+			(node
+				(ref "U3")
+				(pin "5")
+				(pinfunction "SDA_5")
+				(pintype "bidirectional")
+			)
+		)
+		(net
+			(code "14")
+			(name "/CAM1_VCOML")
+			(class "Default")
+			(node
+				(ref "C16")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "41")
+				(pinfunction "VCOML_41")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "15")
+			(name "/CAM1_VCOMR")
+			(class "Default")
+			(node
+				(ref "C17")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "44")
+				(pinfunction "VCOMR_44")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "16")
+			(name "/CAM1_WP")
+			(class "Default")
+			(node
+				(ref "R5")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "U3")
+				(pin "7")
+				(pinfunction "WP_7")
+				(pintype "input")
+			)
+		)
+		(net
+			(code "17")
+			(name "/CAM1_XI")
+			(class "Default")
+			(node
+				(ref "C14")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "27")
+				(pinfunction "XTALI_27")
+				(pintype "passive")
+			)
+			(node
+				(ref "Y1")
+				(pin "1")
+				(pinfunction "1_1")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "18")
+			(name "/CAM1_XO")
+			(class "Default")
+			(node
+				(ref "C15")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "26")
+				(pinfunction "XTALO_26")
+				(pintype "passive")
+			)
+			(node
+				(ref "Y1")
+				(pin "3")
+				(pinfunction "3_3")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "19")
+			(name "/CAM2_1V2")
+			(class "Default")
+			(node
+				(ref "C111")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C112")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C113")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "U101")
+				(pin "18")
+				(pinfunction "VLDO12_18")
+				(pintype "passive")
+			)
+			(node
+				(ref "U101")
+				(pin "24")
+				(pinfunction "DVDD12_24")
+				(pintype "passive")
+			)
+			(node
+				(ref "U101")
+				(pin "48")
+				(pinfunction "AVDD12_48")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "20")
+			(name "/CAM2_3V3")
+			(class "Default")
+			(node
+				(ref "C103")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C104")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C105")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C106")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C119")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "FB101")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "R103")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "R104")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "R106")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "U101")
+				(pin "10")
+				(pinfunction "DVDD33_10")
+				(pintype "passive")
+			)
+			(node
+				(ref "U101")
+				(pin "14")
+				(pinfunction "DVDD33_14")
+				(pintype "passive")
+			)
+			(node
+				(ref "U101")
+				(pin "17")
+				(pinfunction "VLDO33_17")
+				(pintype "passive")
+			)
+			(node
+				(ref "U101")
+				(pin "20")
+				(pinfunction "DVDD33_20")
+				(pintype "passive")
+			)
+			(node
+				(ref "U101")
+				(pin "34")
+				(pinfunction "DVDD33_34")
+				(pintype "passive")
+			)
+			(node
+				(ref "U101")
+				(pin "46")
+				(pinfunction "DVDD33_46")
+				(pintype "passive")
+			)
+			(node
+				(ref "U103")
+				(pin "8")
+				(pinfunction "VCC_8")
+				(pintype "power_in")
+			)
+		)
+		(net
+			(code "21")
+			(name "/CAM2_3V3A")
+			(class "Default")
+			(node
+				(ref "C107")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C108")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C109")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C110")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "FB101")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "U101")
+				(pin "1")
+				(pinfunction "AVDD33_1")
+				(pintype "passive")
+			)
+			(node
+				(ref "U101")
+				(pin "30")
+				(pinfunction "AVDD33_USB_30")
+				(pintype "passive")
+			)
+			(node
+				(ref "U101")
+				(pin "4")
+				(pinfunction "AVDD33_4")
+				(pintype "passive")
+			)
+			(node
+				(ref "U101")
+				(pin "40")
+				(pinfunction "AVDD33_AU_40")
+				(pintype "passive")
+			)
+			(node
+				(ref "U101")
+				(pin "7")
+				(pinfunction "AVDD33_7")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "22")
+			(name "/CAM2_AVIN")
+			(class "Default")
+			(node
+				(ref "C118")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "U101")
+				(pin "8")
+				(pinfunction "AVIN_8")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "23")
+			(name "/CAM2_CVBS")
+			(class "Default")
+			(node
+				(ref "C118")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "J101")
+				(pin "1")
+				(pinfunction "Pin_1_1")
+				(pintype "passive")
+			)
+			(node
+				(ref "R102")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "U102")
+				(pin "1")
+				(pinfunction "I/O1_1")
+				(pintype "passive")
+			)
+			(node
+				(ref "U102")
+				(pin "6")
+				(pinfunction "I/O1_6")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "24")
+			(name "/CAM2_DM")
+			(class "USB")
+			(node
+				(ref "U10")
+				(pin "5")
+				(pinfunction "DM2-_5")
+				(pintype "bidirectional")
+			)
+			(node
+				(ref "U101")
+				(pin "33")
+				(pinfunction "USBDM_33")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "25")
+			(name "/CAM2_DP")
+			(class "USB")
+			(node
+				(ref "U10")
+				(pin "6")
+				(pinfunction "DP2+_6")
+				(pintype "bidirectional")
+			)
+			(node
+				(ref "U101")
+				(pin "32")
+				(pinfunction "USBDP_32")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "26")
+			(name "/CAM2_GPIO4")
+			(class "Default")
+			(node
+				(ref "D101")
+				(pin "1")
+				(pinfunction "K_1")
+				(pintype "passive")
+			)
+			(node
+				(ref "R105")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "U101")
+				(pin "19")
+				(pinfunction "GPIO4/WP_19")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "27")
+			(name "/CAM2_LED_A")
+			(class "Default")
+			(node
+				(ref "D101")
+				(pin "2")
+				(pinfunction "A_2")
+				(pintype "passive")
+			)
+			(node
+				(ref "R106")
+				(pin "2")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "28")
+			(name "/CAM2_REXT")
+			(class "Default")
+			(node
+				(ref "R101")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "U101")
+				(pin "31")
+				(pinfunction "REXT_31")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "29")
+			(name "/CAM2_SCL")
+			(class "Default")
+			(node
+				(ref "R103")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "U101")
+				(pin "13")
+				(pinfunction "GPIO2/SCL_13")
+				(pintype "passive")
+			)
+			(node
+				(ref "U103")
+				(pin "6")
+				(pinfunction "SCL_6")
+				(pintype "input")
+			)
+		)
+		(net
+			(code "30")
+			(name "/CAM2_SDA")
+			(class "Default")
+			(node
+				(ref "R104")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "U101")
+				(pin "12")
+				(pinfunction "GPIO3/SDA_12")
+				(pintype "passive")
+			)
+			(node
+				(ref "U103")
+				(pin "5")
+				(pinfunction "SDA_5")
+				(pintype "bidirectional")
+			)
+		)
+		(net
+			(code "31")
+			(name "/CAM2_VCOML")
+			(class "Default")
+			(node
+				(ref "C116")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "U101")
+				(pin "41")
+				(pinfunction "VCOML_41")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "32")
+			(name "/CAM2_VCOMR")
+			(class "Default")
+			(node
+				(ref "C117")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "U101")
+				(pin "44")
+				(pinfunction "VCOMR_44")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "33")
+			(name "/CAM2_WP")
+			(class "Default")
+			(node
+				(ref "R105")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "U103")
+				(pin "7")
+				(pinfunction "WP_7")
+				(pintype "input")
+			)
+		)
+		(net
+			(code "34")
+			(name "/CAM2_XI")
+			(class "Default")
+			(node
+				(ref "C114")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "U101")
+				(pin "27")
+				(pinfunction "XTALI_27")
+				(pintype "passive")
+			)
+			(node
+				(ref "Y101")
+				(pin "1")
+				(pinfunction "1_1")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "35")
+			(name "/CAM2_XO")
+			(class "Default")
+			(node
+				(ref "C115")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "U101")
+				(pin "26")
+				(pinfunction "XTALO_26")
+				(pintype "passive")
+			)
+			(node
+				(ref "Y101")
+				(pin "3")
+				(pinfunction "3_3")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "36")
+			(name "/CAPH_3V3")
+			(class "Default")
+			(node
+				(ref "C31")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C32")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "U10")
+				(pin "13")
+				(pinfunction "VDD33_13")
+				(pintype "passive")
+			)
+			(node
+				(ref "U10")
+				(pin "9")
+				(pinfunction "~{RESET}/CDP_9")
+				(pintype "input")
+			)
+		)
+		(net
+			(code "37")
+			(name "/CAPH_P3_DM")
+			(class "USB")
+			(node
+				(ref "J3")
+				(pin "2")
+				(pinfunction "Pin_2_2")
+				(pintype "passive")
+			)
+			(node
+				(ref "U10")
+				(pin "3")
+				(pinfunction "DM3-_3")
+				(pintype "bidirectional")
+			)
+		)
+		(net
+			(code "38")
+			(name "/CAPH_P3_DP")
+			(class "USB")
+			(node
+				(ref "J3")
+				(pin "3")
+				(pinfunction "Pin_3_3")
+				(pintype "passive")
+			)
+			(node
+				(ref "U10")
+				(pin "4")
+				(pinfunction "DP3+_4")
+				(pintype "bidirectional")
+			)
+		)
+		(net
+			(code "39")
+			(name "/CAPH_XI")
+			(class "Default")
+			(node
+				(ref "U10")
+				(pin "16")
+				(pinfunction "XI_16")
+				(pintype "passive")
+			)
+			(node
+				(ref "Y10")
+				(pin "1")
+				(pinfunction "1_1")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "40")
+			(name "/CAPH_XO")
+			(class "Default")
+			(node
+				(ref "U10")
+				(pin "15")
+				(pinfunction "XO_15")
+				(pintype "passive")
+			)
+			(node
+				(ref "Y10")
+				(pin "3")
+				(pinfunction "3_3")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "41")
+			(name "/CAP_DM")
+			(class "USB")
+			(node
+				(ref "J2")
+				(pin "4")
+				(pinfunction "Pin_4_4")
+				(pintype "passive")
+			)
+			(node
+				(ref "U10")
+				(pin "10")
+				(pinfunction "DMU-_10")
+				(pintype "bidirectional")
+			)
+		)
+		(net
+			(code "42")
+			(name "/CAP_DP")
+			(class "USB")
+			(node
+				(ref "J2")
+				(pin "3")
+				(pinfunction "Pin_3_3")
+				(pintype "passive")
+			)
+			(node
+				(ref "U10")
+				(pin "11")
+				(pinfunction "DPU+_11")
+				(pintype "bidirectional")
+			)
+		)
+		(net
+			(code "43")
+			(name "GND")
+			(class "Default")
+			(node
+				(ref "C1")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C10")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C101")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C102")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C103")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C104")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C105")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C106")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C107")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C108")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C109")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C11")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C110")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C111")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C112")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C113")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C114")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C115")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C116")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C117")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C119")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C12")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C13")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C14")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C15")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C16")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C17")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C19")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C2")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C3")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C30")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C31")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C32")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C4")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C5")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C6")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C7")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C8")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C9")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "J1")
+				(pin "2")
+				(pinfunction "Pin_2_2")
+				(pintype "passive")
+			)
+			(node
+				(ref "J101")
+				(pin "2")
+				(pinfunction "Pin_2_2")
+				(pintype "passive")
+			)
+			(node
+				(ref "J2")
+				(pin "5")
+				(pinfunction "Pin_5_5")
+				(pintype "passive")
+			)
+			(node
+				(ref "J2")
+				(pin "6")
+				(pinfunction "Pin_6_6")
+				(pintype "passive")
+			)
+			(node
+				(ref "J3")
+				(pin "4")
+				(pinfunction "Pin_4_4")
+				(pintype "passive")
+			)
+			(node
+				(ref "R1")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "R101")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "R102")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "R2")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "11")
+				(pinfunction "DVSS_11")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "15")
+				(pinfunction "AVSS_15")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "2")
+				(pinfunction "AVSS_2")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "21")
+				(pinfunction "DVSS_21")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "28")
+				(pinfunction "AVSS_28")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "29")
+				(pinfunction "AVSS_29")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "45")
+				(pinfunction "AVSS_45")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "47")
+				(pinfunction "DVSS_47")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "9")
+				(pinfunction "AVSS_9")
+				(pintype "passive")
+			)
+			(node
+				(ref "U10")
+				(pin "14")
+				(pinfunction "GND_14")
+				(pintype "power_in")
+			)
+			(node
+				(ref "U101")
+				(pin "11")
+				(pinfunction "DVSS_11")
+				(pintype "passive")
+			)
+			(node
+				(ref "U101")
+				(pin "15")
+				(pinfunction "AVSS_15")
+				(pintype "passive")
+			)
+			(node
+				(ref "U101")
+				(pin "2")
+				(pinfunction "AVSS_2")
+				(pintype "passive")
+			)
+			(node
+				(ref "U101")
+				(pin "21")
+				(pinfunction "DVSS_21")
+				(pintype "passive")
+			)
+			(node
+				(ref "U101")
+				(pin "28")
+				(pinfunction "AVSS_28")
+				(pintype "passive")
+			)
+			(node
+				(ref "U101")
+				(pin "29")
+				(pinfunction "AVSS_29")
+				(pintype "passive")
+			)
+			(node
+				(ref "U101")
+				(pin "45")
+				(pinfunction "AVSS_45")
+				(pintype "passive")
+			)
+			(node
+				(ref "U101")
+				(pin "47")
+				(pinfunction "DVSS_47")
+				(pintype "passive")
+			)
+			(node
+				(ref "U101")
+				(pin "9")
+				(pinfunction "AVSS_9")
+				(pintype "passive")
+			)
+			(node
+				(ref "U102")
+				(pin "2")
+				(pinfunction "GND_2")
+				(pintype "passive")
+			)
+			(node
+				(ref "U103")
+				(pin "4")
+				(pinfunction "GND_4")
+				(pintype "power_in")
+			)
+			(node
+				(ref "U2")
+				(pin "2")
+				(pinfunction "GND_2")
+				(pintype "passive")
+			)
+			(node
+				(ref "U3")
+				(pin "4")
+				(pinfunction "GND_4")
+				(pintype "power_in")
+			)
+			(node
+				(ref "Y1")
+				(pin "2")
+				(pinfunction "2_2")
+				(pintype "passive")
+			)
+			(node
+				(ref "Y1")
+				(pin "4")
+				(pinfunction "4_4")
+				(pintype "passive")
+			)
+			(node
+				(ref "Y10")
+				(pin "2")
+				(pinfunction "2_2")
+				(pintype "passive")
+			)
+			(node
+				(ref "Y10")
+				(pin "4")
+				(pinfunction "4_4")
+				(pintype "passive")
+			)
+			(node
+				(ref "Y101")
+				(pin "2")
+				(pinfunction "2_2")
+				(pintype "passive")
+			)
+			(node
+				(ref "Y101")
+				(pin "4")
+				(pinfunction "4_4")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "44")
+			(name "unconnected-(U1-ALIN-Pad42)")
+			(class "Default")
+			(node
+				(ref "U1")
+				(pin "42")
+				(pinfunction "ALIN_42")
+				(pintype "passive+no_connect")
+			)
+		)
+		(net
+			(code "45")
+			(name "unconnected-(U1-ARIN-Pad43)")
+			(class "Default")
+			(node
+				(ref "U1")
+				(pin "43")
+				(pinfunction "ARIN_43")
+				(pintype "passive+no_connect")
+			)
+		)
+		(net
+			(code "46")
+			(name "unconnected-(U1-G1IN-Pad5)")
+			(class "Default")
+			(node
+				(ref "U1")
+				(pin "5")
+				(pinfunction "G1IN_5")
+				(pintype "passive+no_connect")
+			)
+		)
+		(net
+			(code "47")
+			(name "unconnected-(U1-GPIO0{slash}I2S_SEL-Pad35)")
+			(class "Default")
+			(node
+				(ref "U1")
+				(pin "35")
+				(pinfunction "GPIO0/I2S_SEL_35")
+				(pintype "passive+no_connect")
+			)
+		)
+		(net
+			(code "48")
+			(name "unconnected-(U1-I2S_LRCLK-Pad39)")
+			(class "Default")
+			(node
+				(ref "U1")
+				(pin "39")
+				(pinfunction "I2S_LRCLK_39")
+				(pintype "passive+no_connect")
+			)
+		)
+		(net
+			(code "49")
+			(name "unconnected-(U1-I2S_MCLK-Pad37)")
+			(class "Default")
+			(node
+				(ref "U1")
+				(pin "37")
+				(pinfunction "I2S_MCLK_37")
+				(pintype "passive+no_connect")
+			)
+		)
+		(net
+			(code "50")
+			(name "unconnected-(U1-I2S_SCLK-Pad36)")
+			(class "Default")
+			(node
+				(ref "U1")
+				(pin "36")
+				(pinfunction "I2S_SCLK_36")
+				(pintype "passive+no_connect")
+			)
+		)
+		(net
+			(code "51")
+			(name "unconnected-(U1-I2S_SD0-Pad38)")
+			(class "Default")
+			(node
+				(ref "U1")
+				(pin "38")
+				(pinfunction "I2S_SD0_38")
+				(pintype "passive+no_connect")
+			)
+		)
+		(net
+			(code "52")
+			(name "unconnected-(U1-NC-Pad22)")
+			(class "Default")
+			(node
+				(ref "U1")
+				(pin "22")
+				(pinfunction "NC_22")
+				(pintype "passive+no_connect")
+			)
+		)
+		(net
+			(code "53")
+			(name "unconnected-(U1-NC-Pad23)")
+			(class "Default")
+			(node
+				(ref "U1")
+				(pin "23")
+				(pinfunction "NC_23")
+				(pintype "passive+no_connect")
+			)
+		)
+		(net
+			(code "54")
+			(name "unconnected-(U1-NC-Pad25)")
+			(class "Default")
+			(node
+				(ref "U1")
+				(pin "25")
+				(pinfunction "NC_25")
+				(pintype "passive+no_connect")
+			)
+		)
+		(net
+			(code "55")
+			(name "unconnected-(U1-SVCIN-Pad3)")
+			(class "Default")
+			(node
+				(ref "U1")
+				(pin "3")
+				(pinfunction "SVCIN_3")
+				(pintype "passive+no_connect")
+			)
+		)
+		(net
+			(code "56")
+			(name "unconnected-(U1-SVYIN-Pad6)")
+			(class "Default")
+			(node
+				(ref "U1")
+				(pin "6")
+				(pinfunction "SVYIN_6")
+				(pintype "passive+no_connect")
+			)
+		)
+		(net
+			(code "57")
+			(name "unconnected-(U2-I{slash}O2-Pad3)")
+			(class "Default")
+			(node
+				(ref "U2")
+				(pin "3")
+				(pinfunction "I/O2_3")
+				(pintype "passive+no_connect")
+			)
+		)
+		(net
+			(code "58")
+			(name "unconnected-(U2-I{slash}O2-Pad4)")
+			(class "Default")
+			(node
+				(ref "U2")
+				(pin "4")
+				(pinfunction "I/O2_4")
+				(pintype "passive+no_connect")
+			)
+		)
+		(net
+			(code "59")
+			(name "unconnected-(U3-A0-Pad1)")
+			(class "Default")
+			(node
+				(ref "U3")
+				(pin "1")
+				(pinfunction "A0_1")
+				(pintype "input+no_connect")
+			)
+		)
+		(net
+			(code "60")
+			(name "unconnected-(U3-A1-Pad2)")
+			(class "Default")
+			(node
+				(ref "U3")
+				(pin "2")
+				(pinfunction "A1_2")
+				(pintype "input+no_connect")
+			)
+		)
+		(net
+			(code "61")
+			(name "unconnected-(U3-A2-Pad3)")
+			(class "Default")
+			(node
+				(ref "U3")
+				(pin "3")
+				(pinfunction "A2_3")
+				(pintype "input+no_connect")
+			)
+		)
+		(net
+			(code "62")
+			(name "unconnected-(U10-DM4--Pad1)")
+			(class "Default")
+			(node
+				(ref "U10")
+				(pin "1")
+				(pinfunction "DM4-_1")
+				(pintype "bidirectional+no_connect")
+			)
+		)
+		(net
+			(code "63")
+			(name "unconnected-(U10-DP4+-Pad2)")
+			(class "Default")
+			(node
+				(ref "U10")
+				(pin "2")
+				(pinfunction "DP4+_2")
+				(pintype "bidirectional+no_connect")
+			)
+		)
+		(net
+			(code "64")
+			(name "unconnected-(U101-ALIN-Pad42)")
+			(class "Default")
+			(node
+				(ref "U101")
+				(pin "42")
+				(pinfunction "ALIN_42")
+				(pintype "passive+no_connect")
+			)
+		)
+		(net
+			(code "65")
+			(name "unconnected-(U101-ARIN-Pad43)")
+			(class "Default")
+			(node
+				(ref "U101")
+				(pin "43")
+				(pinfunction "ARIN_43")
+				(pintype "passive+no_connect")
+			)
+		)
+		(net
+			(code "66")
+			(name "unconnected-(U101-G1IN-Pad5)")
+			(class "Default")
+			(node
+				(ref "U101")
+				(pin "5")
+				(pinfunction "G1IN_5")
+				(pintype "passive+no_connect")
+			)
+		)
+		(net
+			(code "67")
+			(name "unconnected-(U101-GPIO0{slash}I2S_SEL-Pad35)")
+			(class "Default")
+			(node
+				(ref "U101")
+				(pin "35")
+				(pinfunction "GPIO0/I2S_SEL_35")
+				(pintype "passive+no_connect")
+			)
+		)
+		(net
+			(code "68")
+			(name "unconnected-(U101-I2S_LRCLK-Pad39)")
+			(class "Default")
+			(node
+				(ref "U101")
+				(pin "39")
+				(pinfunction "I2S_LRCLK_39")
+				(pintype "passive+no_connect")
+			)
+		)
+		(net
+			(code "69")
+			(name "unconnected-(U101-I2S_MCLK-Pad37)")
+			(class "Default")
+			(node
+				(ref "U101")
+				(pin "37")
+				(pinfunction "I2S_MCLK_37")
+				(pintype "passive+no_connect")
+			)
+		)
+		(net
+			(code "70")
+			(name "unconnected-(U101-I2S_SCLK-Pad36)")
+			(class "Default")
+			(node
+				(ref "U101")
+				(pin "36")
+				(pinfunction "I2S_SCLK_36")
+				(pintype "passive+no_connect")
+			)
+		)
+		(net
+			(code "71")
+			(name "unconnected-(U101-I2S_SD0-Pad38)")
+			(class "Default")
+			(node
+				(ref "U101")
+				(pin "38")
+				(pinfunction "I2S_SD0_38")
+				(pintype "passive+no_connect")
+			)
+		)
+		(net
+			(code "72")
+			(name "unconnected-(U101-NC-Pad22)")
+			(class "Default")
+			(node
+				(ref "U101")
+				(pin "22")
+				(pinfunction "NC_22")
+				(pintype "passive+no_connect")
+			)
+		)
+		(net
+			(code "73")
+			(name "unconnected-(U101-NC-Pad23)")
+			(class "Default")
+			(node
+				(ref "U101")
+				(pin "23")
+				(pinfunction "NC_23")
+				(pintype "passive+no_connect")
+			)
+		)
+		(net
+			(code "74")
+			(name "unconnected-(U101-NC-Pad25)")
+			(class "Default")
+			(node
+				(ref "U101")
+				(pin "25")
+				(pinfunction "NC_25")
+				(pintype "passive+no_connect")
+			)
+		)
+		(net
+			(code "75")
+			(name "unconnected-(U101-SVCIN-Pad3)")
+			(class "Default")
+			(node
+				(ref "U101")
+				(pin "3")
+				(pinfunction "SVCIN_3")
+				(pintype "passive+no_connect")
+			)
+		)
+		(net
+			(code "76")
+			(name "unconnected-(U101-SVYIN-Pad6)")
+			(class "Default")
+			(node
+				(ref "U101")
+				(pin "6")
+				(pinfunction "SVYIN_6")
+				(pintype "passive+no_connect")
+			)
+		)
+		(net
+			(code "77")
+			(name "unconnected-(U102-I{slash}O2-Pad3)")
+			(class "Default")
+			(node
+				(ref "U102")
+				(pin "3")
+				(pinfunction "I/O2_3")
+				(pintype "passive+no_connect")
+			)
+		)
+		(net
+			(code "78")
+			(name "unconnected-(U102-I{slash}O2-Pad4)")
+			(class "Default")
+			(node
+				(ref "U102")
+				(pin "4")
+				(pinfunction "I/O2_4")
+				(pintype "passive+no_connect")
+			)
+		)
+		(net
+			(code "79")
+			(name "unconnected-(U103-A0-Pad1)")
+			(class "Default")
+			(node
+				(ref "U103")
+				(pin "1")
+				(pinfunction "A0_1")
+				(pintype "input+no_connect")
+			)
+		)
+		(net
+			(code "80")
+			(name "unconnected-(U103-A1-Pad2)")
+			(class "Default")
+			(node
+				(ref "U103")
+				(pin "2")
+				(pinfunction "A1_2")
+				(pintype "input+no_connect")
+			)
+		)
+		(net
+			(code "81")
+			(name "unconnected-(U103-A2-Pad3)")
+			(class "Default")
+			(node
+				(ref "U103")
+				(pin "3")
+				(pinfunction "A2_3")
+				(pintype "input+no_connect")
+			)
+		)
+	)
+)

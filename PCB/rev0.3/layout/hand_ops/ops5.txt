@@ -1,0 +1,3 @@
+# VSYS_IN: tie the D15/U15 branch to the input caps on B
+segL /VSYS_IN B 39.11 61.87 18.45 61.87 0.6
+viaL /VSYS_IN 18.45 61.87 0.6 0.3

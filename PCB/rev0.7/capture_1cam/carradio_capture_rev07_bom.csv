@@ -1,0 +1,34 @@
+Designator,Value,Description / MPN,LCSC,Footprint (KiCad name),Fit,Note
+U1,MS2107,"MacroSilicon MS2107 CVBS/S-Video to USB 2.0 UVC capture, LQFP-48 7x7 0.5mm",C42374499,Package_QFP:LQFP-48_7x7mm_P0.5mm,yes,"UVC 1.0 / UAC 1.0, no driver needed; YUV422 720x576/480 or MJPEG; 0-70 C rated. SVYIN/SVCIN/G1IN, I2S and line-in unused (open). GPIO0 open = internal audio ADC (default)"
+C1,10uF,Samsung CL21A106KAYNNNE 0805 10uF 25V X5R,C15850,Capacitor_SMD:C_0805_2012Metric,yes,bulk at the module plug
+C2,100nF,YAGEO CC0603KRX7R9BB104 0603 100nF 50V X7R,C14663,Capacitor_SMD:C_0603_1608Metric,yes,at pin 16
+C3,4.7uF,Samsung CL10A475KO8NNNC 0603 4.7uF 16V X5R,C19666,Capacitor_SMD:C_0603_1608Metric,yes,VLDO33 output cap at pin 17
+C4,100nF,YAGEO CC0603KRX7R9BB104 0603 100nF 50V X7R,C14663,Capacitor_SMD:C_0603_1608Metric,yes,DVDD33 pins 10/14
+C5,100nF,YAGEO CC0603KRX7R9BB104 0603 100nF 50V X7R,C14663,Capacitor_SMD:C_0603_1608Metric,yes,DVDD33 pins 20/34
+C6,100nF,YAGEO CC0603KRX7R9BB104 0603 100nF 50V X7R,C14663,Capacitor_SMD:C_0603_1608Metric,yes,DVDD33 pin 46
+FB1,220Ω@100MHz,Murata BLM18PG221SN1D 0603 ferrite 1.4A,C80165,Inductor_SMD:L_0603_1608Metric,yes,"separates the analog 3.3 V (video/audio ADC, USB PHY) from the digital 3.3 V"
+C7,4.7uF,Samsung CL10A475KO8NNNC 0603 4.7uF 16V X5R,C19666,Capacitor_SMD:C_0603_1608Metric,yes,
+C8,100nF,YAGEO CC0603KRX7R9BB104 0603 100nF 50V X7R,C14663,Capacitor_SMD:C_0603_1608Metric,yes,AVDD33 pins 1/4
+C9,100nF,YAGEO CC0603KRX7R9BB104 0603 100nF 50V X7R,C14663,Capacitor_SMD:C_0603_1608Metric,yes,AVDD33 pin 7 / AVDD33_AU pin 40
+C10,100nF,YAGEO CC0603KRX7R9BB104 0603 100nF 50V X7R,C14663,Capacitor_SMD:C_0603_1608Metric,yes,AVDD33_USB pin 30
+C11,4.7uF,Samsung CL10A475KO8NNNC 0603 4.7uF 16V X5R,C19666,Capacitor_SMD:C_0603_1608Metric,yes,VLDO12 output cap at pin 18
+C12,100nF,YAGEO CC0603KRX7R9BB104 0603 100nF 50V X7R,C14663,Capacitor_SMD:C_0603_1608Metric,yes,DVDD12 pin 24
+C13,100nF,YAGEO CC0603KRX7R9BB104 0603 100nF 50V X7R,C14663,Capacitor_SMD:C_0603_1608Metric,yes,AVDD12 pin 48
+Y1,12MHz,YXC X322512MSB4SI 12MHz 3225,C9002,Crystal:Crystal_SMD_3225-4Pin_3.2x2.5mm,yes,same crystal as the hubs
+C14,22pF,0603 22pF 50V C0G,C1653,Capacitor_SMD:C_0603_1608Metric,yes,load cap (eval board: 10 pF with its crystal; 22 pF suits the 20 pF-load X322512MSB4SI)
+C15,22pF,0603 22pF 50V C0G,C1653,Capacitor_SMD:C_0603_1608Metric,yes,
+R1,4.7kΩ,UNI-ROYAL 0603WAF4701T5E 4.7k 1%,C23162,Resistor_SMD:R_0603_1608Metric,yes,REXT 4.7k 1% to GND (datasheet)
+C16,1uF,Murata GRM188R61H105KAALD 0603 1uF 50V X5R,C77386,Capacitor_SMD:C_0603_1608Metric,yes,audio ADC reference decoupling (eval board); line-in itself unused
+C17,1uF,Murata GRM188R61H105KAALD 0603 1uF 50V X5R,C77386,Capacitor_SMD:C_0603_1608Metric,yes,
+J1,Camera video in,JST B2B-PH-K-S,C131337,Connector_JST:JST_PH_B2B-PH-K_1x02_P2.00mm_Vertical,yes,"pin 1 camera video (RCA centre), pin 2 camera video ground (RCA shell); lead to an RCA socket. Camera 12 V comes from the reverse lamp as usual"
+R2,75Ω,UNI-ROYAL 0603WAF750JT5E 75R 1%,C4275,Resistor_SMD:R_0603_1608Metric,yes,75 ohm line termination
+C18,47nF,Samsung CL10B473KB8NNNC 0603 47nF 50V X7R,C1622,Capacitor_SMD:C_0603_1608Metric,yes,AC coupling into AVIN (pin 8)
+U2,USBLC6-2SC6,ST USBLC6-2SC6,C7519,Package_TO_SOT_SMD:SOT-23-6,yes,"ESD on the camera line (car wiring); one channel, pass the trace straight through pins 1-6"
+J2,USB module plug,XFCN PZ254V-12-6P 2x3 2.54mm male header (underside),C492420,Connector_PinHeader_2.54mm:PinHeader_2x03_P2.54mm_Vertical,yes,plugs into the 2x3 socket on the USB module: hub 2 port 4 and its own 0.5 A PTC from +5V_SYS
+U3,24LC16B,Microchip 24LC16B-I/SN,C1349383,Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,DNP,"optional, not fitted: without it the MS2107 enumerates as 534d:0021 'USB Video' with the default modes. Fit to customise via ms-tools"
+C19,100nF,YAGEO CC0603KRX7R9BB104 0603 100nF 50V X7R,C14663,Capacitor_SMD:C_0603_1608Metric,yes,EEPROM decoupling
+R3,4.7kΩ,UNI-ROYAL 0603WAF4701T5E 4.7k 1%,C23162,Resistor_SMD:R_0603_1608Metric,yes,I2C pull-ups keep GPIO2/3 defined with or without the EEPROM
+R4,4.7kΩ,UNI-ROYAL 0603WAF4701T5E 4.7k 1%,C23162,Resistor_SMD:R_0603_1608Metric,yes,
+R5,0Ω,UNI-ROYAL 0603WAF0000T5E 0R,C21189,Resistor_SMD:R_0603_1608Metric,DNP,eval board option: WP from GPIO4; open = WP held low inside the 24LC16B (writable)
+R6,1kΩ,UNI-ROYAL 0603WAF1001T5E 1k 1%,C21190,Resistor_SMD:R_0603_1608Metric,yes,
+D1,LED green,KT-0805G green LED,C2297,LED_SMD:LED_0805_2012Metric,yes,GPIO4 sinks: on while the capture streams (MS2106 eval board behaviour)

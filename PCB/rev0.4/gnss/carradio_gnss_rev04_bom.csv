@@ -1,0 +1,12 @@
+Designator,Value,Description / MPN,LCSC,Footprint (KiCad name),Fit,Note
+C14,10uF,0805 10uF 25V X5R,C15850,Capacitor_SMD:C_0805_2012Metric,yes,
+C15,100nF,0603 100nF 50V X7R,C14663,Capacitor_SMD:C_0603_1608Metric,yes,
+C16,100nF,0603 100nF 50V X7R,C14663,Capacitor_SMD:C_0603_1608Metric,yes,at V_BCKP
+U7,NEO-M9N-00B,u-blox NEO-M9N-00B,C5119087,RF_GPS:ublox_NEO,yes,"V_BCKP from the main board's always-on 3V3 for hot starts. USB enumerates as CDC-ACM (/dev/ttyACM*, VID 1546). SAFEBOOT_N driven by MCU GPIO29 through R79 (recovery only)."
+R102,27Ω,0603 27 1%,,Resistor_SMD:R_0603_1608Metric,yes,USB series resistor per the u-blox integration manual reference design
+R103,27Ω,0603 27 1%,,Resistor_SMD:R_0603_1608Metric,yes,
+C17,10nF,0603 10nF 50V X7R (Samsung CL10B103KB8NNNC),C1589,Capacitor_SMD:C_0603_1608Metric,yes,
+R41,10Ω,0603 10 1%,C22859,Resistor_SMD:R_0603_1608Metric,yes,"antenna supply, limits short-circuit current"
+L2,27nH RF,Murata LQG15HS27NJ02D,C12669,Inductor_SMD:L_0402_1005Metric,yes,"RF choke: feeds DC to the antenna, blocks GNSS signal"
+J11,U.FL GNSS antenna,Hirose U.FL-R-SMT-1(80) U.FL receptacle; antenna via U.FL-to-SMA pigtail,C88374,Connector_Coaxial:U.FL_Hirose_U.FL-R-SMT-1_Vertical,yes,"U.FL to SMA pigtail to the antenna; 50 ohm coplanar trace to RF_IN, as short as possible"
+J28,Main board plug,2x8 2.54mm male pin header,,Connector_PinHeader_2.54mm:PinHeader_2x08_P2.54mm_Vertical,yes,mates with J27 on the main board; fit on the bottom side

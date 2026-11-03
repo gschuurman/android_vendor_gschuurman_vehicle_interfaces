@@ -1,0 +1,3738 @@
+(export
+	(version "E")
+	(design
+		(source "/w/pcb4/carradio_usb_rev04.kicad_sch")
+		(date "2026-10-02T05:28:21")
+		(tool "Eeschema 10.0.6")
+		(sheet
+			(number "1")
+			(name "/")
+			(tstamps "/")
+			(title_block
+				(title "Car radio USB module")
+				(company)
+				(rev "0.4")
+				(date "2026-10-01")
+				(source "carradio_usb_rev04.kicad_sch")
+				(comment
+					(number "1")
+					(value "")
+				)
+				(comment
+					(number "2")
+					(value "")
+				)
+				(comment
+					(number "3")
+					(value "")
+				)
+				(comment
+					(number "4")
+					(value "")
+				)
+				(comment
+					(number "5")
+					(value "")
+				)
+				(comment
+					(number "6")
+					(value "")
+				)
+				(comment
+					(number "7")
+					(value "")
+				)
+				(comment
+					(number "8")
+					(value "")
+				)
+				(comment
+					(number "9")
+					(value "")
+				)
+			)
+		)
+	)
+	(components
+		(comp
+			(ref "C64")
+			(value "10uF 50V")
+			(footprint "Capacitor_SMD:C_1206_3216Metric")
+			(fields
+				(field
+					(name "LCSC") "C77092")
+				(field
+					(name "MPN") "1206 10uF 50V X5R (Murata GRM31CR61H106KA12L)")
+				(field
+					(name "Footprint") "Capacitor_SMD:C_1206_3216Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "LCSC")
+				(value "C77092")
+			)
+			(property
+				(name "MPN")
+				(value "1206 10uF 50V X5R (Murata GRM31CR61H106KA12L)")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_usb_rev04")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_usb_rev04.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "a45bc84a-b6df-5681-901f-516f31cc3049")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C65")
+			(value "100nF")
+			(footprint "Capacitor_SMD:C_0603_1608Metric")
+			(fields
+				(field
+					(name "LCSC") "C14663")
+				(field
+					(name "MPN") "0603 100nF 50V X7R")
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0603_1608Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "LCSC")
+				(value "C14663")
+			)
+			(property
+				(name "MPN")
+				(value "0603 100nF 50V X7R")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_usb_rev04")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_usb_rev04.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "ad81f2fb-2574-59d9-ac16-04fe3755a1b1")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C66")
+			(value "1uF")
+			(footprint "Capacitor_SMD:C_0603_1608Metric")
+			(fields
+				(field
+					(name "LCSC") "C77386")
+				(field
+					(name "MPN") "0603 1uF 50V X5R (Murata GRM188R61H105KAALD)")
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0603_1608Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "LCSC")
+				(value "C77386")
+			)
+			(property
+				(name "MPN")
+				(value "0603 1uF 50V X5R (Murata GRM188R61H105KAALD)")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_usb_rev04")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_usb_rev04.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "b345b540-23b9-59b0-a1da-90129aaed096")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C67")
+			(value "100nF")
+			(footprint "Capacitor_SMD:C_0603_1608Metric")
+			(fields
+				(field
+					(name "LCSC") "C14663")
+				(field
+					(name "MPN") "0603 100nF 50V X7R")
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0603_1608Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "LCSC")
+				(value "C14663")
+			)
+			(property
+				(name "MPN")
+				(value "0603 100nF 50V X7R")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_usb_rev04")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_usb_rev04.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "e21e1053-4748-5956-af6d-389f80e8235d")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C68")
+			(value "22uF")
+			(footprint "Capacitor_SMD:C_0805_2012Metric")
+			(fields
+				(field
+					(name "LCSC") "C45783")
+				(field
+					(name "MPN") "0805 22uF 25V X5R")
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0805_2012Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "LCSC")
+				(value "C45783")
+			)
+			(property
+				(name "MPN")
+				(value "0805 22uF 25V X5R")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_usb_rev04")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_usb_rev04.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "c61c0ee4-b91b-5908-8c9e-dacbc456233c")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C69")
+			(value "22uF")
+			(footprint "Capacitor_SMD:C_0805_2012Metric")
+			(fields
+				(field
+					(name "LCSC") "C45783")
+				(field
+					(name "MPN") "0805 22uF 25V X5R")
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0805_2012Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "LCSC")
+				(value "C45783")
+			)
+			(property
+				(name "MPN")
+				(value "0805 22uF 25V X5R")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_usb_rev04")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_usb_rev04.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "409f856e-fe80-5967-99ca-62dcc5c73bb8")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C70")
+			(value "22uF")
+			(footprint "Capacitor_SMD:C_0805_2012Metric")
+			(fields
+				(field
+					(name "LCSC") "C45783")
+				(field
+					(name "MPN") "0805 22uF 25V X5R")
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0805_2012Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "LCSC")
+				(value "C45783")
+			)
+			(property
+				(name "MPN")
+				(value "0805 22uF 25V X5R")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_usb_rev04")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_usb_rev04.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "4576820c-4ec3-5ac6-8204-40fd749f8117")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C71")
+			(value "22uF")
+			(footprint "Capacitor_SMD:C_0805_2012Metric")
+			(fields
+				(field
+					(name "LCSC") "C45783")
+				(field
+					(name "MPN") "0805 22uF 25V X5R")
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0805_2012Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "LCSC")
+				(value "C45783")
+			)
+			(property
+				(name "MPN")
+				(value "0805 22uF 25V X5R")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_usb_rev04")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_usb_rev04.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "3fe492a5-5ebc-50df-84f9-6c388f24c4b6")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C72")
+			(value "100nF")
+			(footprint "Capacitor_SMD:C_0603_1608Metric")
+			(fields
+				(field
+					(name "LCSC") "C14663")
+				(field
+					(name "MPN") "0603 100nF 50V X7R")
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0603_1608Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "LCSC")
+				(value "C14663")
+			)
+			(property
+				(name "MPN")
+				(value "0603 100nF 50V X7R")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_usb_rev04")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_usb_rev04.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "1856ee4e-6fdd-5bd6-b27d-8133b6791119")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C73")
+			(value "100uF 6.3V")
+			(footprint "Capacitor_SMD:C_1206_3216Metric")
+			(fields
+				(field
+					(name "LCSC") "C15008")
+				(field
+					(name "MPN") "1206 100uF 6.3V X5R")
+				(field
+					(name "Footprint") "Capacitor_SMD:C_1206_3216Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "LCSC")
+				(value "C15008")
+			)
+			(property
+				(name "MPN")
+				(value "1206 100uF 6.3V X5R")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_usb_rev04")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_usb_rev04.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "9d17360b-942c-53cc-9b83-7856f4da4ae0")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C74")
+			(value "100uF 6.3V")
+			(footprint "Capacitor_SMD:C_1206_3216Metric")
+			(fields
+				(field
+					(name "LCSC") "C15008")
+				(field
+					(name "MPN") "1206 100uF 6.3V X5R")
+				(field
+					(name "Footprint") "Capacitor_SMD:C_1206_3216Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "LCSC")
+				(value "C15008")
+			)
+			(property
+				(name "MPN")
+				(value "1206 100uF 6.3V X5R")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_usb_rev04")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_usb_rev04.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "1d1728e7-2203-58f5-af27-5cc357a9b220")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C75")
+			(value "1uF")
+			(footprint "Capacitor_SMD:C_0603_1608Metric")
+			(fields
+				(field
+					(name "LCSC") "C77386")
+				(field
+					(name "MPN") "0603 1uF 50V X5R (Murata GRM188R61H105KAALD)")
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0603_1608Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "LCSC")
+				(value "C77386")
+			)
+			(property
+				(name "MPN")
+				(value "0603 1uF 50V X5R (Murata GRM188R61H105KAALD)")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_usb_rev04")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_usb_rev04.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "d8db46de-0c94-578a-823f-33f0627258ea")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C76")
+			(value "10uF")
+			(footprint "Capacitor_SMD:C_0805_2012Metric")
+			(fields
+				(field
+					(name "LCSC") "C15850")
+				(field
+					(name "MPN") "0805 10uF 25V X5R")
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0805_2012Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "LCSC")
+				(value "C15850")
+			)
+			(property
+				(name "MPN")
+				(value "0805 10uF 25V X5R")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_usb_rev04")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_usb_rev04.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "af703639-5e1d-56e9-b72c-90304f54198c")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C77")
+			(value "100nF")
+			(footprint "Capacitor_SMD:C_0603_1608Metric")
+			(fields
+				(field
+					(name "LCSC") "C14663")
+				(field
+					(name "MPN") "0603 100nF 50V X7R")
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0603_1608Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "LCSC")
+				(value "C14663")
+			)
+			(property
+				(name "MPN")
+				(value "0603 100nF 50V X7R")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_usb_rev04")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_usb_rev04.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "b44f2a40-d6a7-504b-ac5a-f66aa5b99dbc")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "F5")
+			(value "PTC 0.5A")
+			(footprint "Fuse:Fuse_1206_3216Metric")
+			(fields
+				(field
+					(name "LCSC") "C75464")
+				(field
+					(name "MPN") "Bourns MF-NSMF050-2")
+				(field
+					(name "Footprint") "Fuse:Fuse_1206_3216Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "Polyfuse")
+				(description "Resettable fuse, polymeric positive temperature coefficient")
+			)
+			(property
+				(name "LCSC")
+				(value "C75464")
+			)
+			(property
+				(name "MPN")
+				(value "Bourns MF-NSMF050-2")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_usb_rev04")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_usb_rev04.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "resettable fuse PTC PPTC polyfuse polyswitch")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "*polyfuse* *PTC*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "c18aa597-4bab-5888-9435-ad28862d2300")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "J17")
+			(value "RTL-SDR (internal)")
+			(footprint "Connector_USB:USB_A_Molex_67643_Horizontal")
+			(fields
+				(field
+					(name "LCSC") "C2798029")
+				(field
+					(name "MPN") "Molex 67643-0910 USB-A")
+				(field
+					(name "Footprint") "Connector_USB:USB_A_Molex_67643_Horizontal")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Connector")
+				(part "USB_A")
+				(description "USB Type A connector")
+			)
+			(property
+				(name "LCSC")
+				(value "C2798029")
+			)
+			(property
+				(name "MPN")
+				(value "Molex 67643-0910 USB-A")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_usb_rev04")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_usb_rev04.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "connector USB")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "USB*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "1cf6c3b0-8036-5140-add9-a816e1f02ba7")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "SH")
+						)
+						(pin
+							(num "4")
+						)
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "3")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "J19")
+			(value "External USB 1")
+			(footprint "Connector_USB:USB_A_Molex_67643_Horizontal")
+			(fields
+				(field
+					(name "LCSC") "C2798029")
+				(field
+					(name "MPN") "Molex 67643-0910 USB-A")
+				(field
+					(name "Footprint") "Connector_USB:USB_A_Molex_67643_Horizontal")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Connector")
+				(part "USB_A")
+				(description "USB Type A connector")
+			)
+			(property
+				(name "LCSC")
+				(value "C2798029")
+			)
+			(property
+				(name "MPN")
+				(value "Molex 67643-0910 USB-A")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_usb_rev04")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_usb_rev04.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "connector USB")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "USB*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "beff51a2-483f-58a6-a4fc-c95a7bdab703")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "SH")
+						)
+						(pin
+							(num "4")
+						)
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "3")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "J20")
+			(value "External USB 2")
+			(footprint "Connector_USB:USB_A_Molex_67643_Horizontal")
+			(fields
+				(field
+					(name "LCSC") "C2798029")
+				(field
+					(name "MPN") "Molex 67643-0910 USB-A")
+				(field
+					(name "Footprint") "Connector_USB:USB_A_Molex_67643_Horizontal")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Connector")
+				(part "USB_A")
+				(description "USB Type A connector")
+			)
+			(property
+				(name "LCSC")
+				(value "C2798029")
+			)
+			(property
+				(name "MPN")
+				(value "Molex 67643-0910 USB-A")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_usb_rev04")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_usb_rev04.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "connector USB")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "USB*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "8f8f25f2-2116-5f23-8b42-516a9aca0ff3")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "SH")
+						)
+						(pin
+							(num "4")
+						)
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "3")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "J26")
+			(value "Main board plug")
+			(footprint "Connector_PinHeader_2.54mm:PinHeader_2x10_P2.54mm_Vertical")
+			(fields
+				(field
+					(name "LCSC") "C5116480")
+				(field
+					(name "MPN") "ZHOURI 2.54-2*10 male pin header")
+				(field
+					(name "Footprint") "Connector_PinHeader_2.54mm:PinHeader_2x10_P2.54mm_Vertical")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Connector_Generic")
+				(part "Conn_02x10_Odd_Even")
+				(description "Generic connector, double row, 02x10, odd/even pin numbering scheme (row 1 odd numbers, row 2 even numbers), script generated (kicad-library-utils/schlib/autogen/connector/)")
+			)
+			(property
+				(name "LCSC")
+				(value "C5116480")
+			)
+			(property
+				(name "MPN")
+				(value "ZHOURI 2.54-2*10 male pin header")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_usb_rev04")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_usb_rev04.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "connector")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "Connector*:*_2x??_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "9cf65a93-84d1-57ee-8adc-b211ff1f5a0b")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "3")
+						)
+						(pin
+							(num "5")
+						)
+						(pin
+							(num "7")
+						)
+						(pin
+							(num "9")
+						)
+						(pin
+							(num "11")
+						)
+						(pin
+							(num "13")
+						)
+						(pin
+							(num "15")
+						)
+						(pin
+							(num "17")
+						)
+						(pin
+							(num "19")
+						)
+						(pin
+							(num "2")
+						)
+						(pin
+							(num "4")
+						)
+						(pin
+							(num "6")
+						)
+						(pin
+							(num "8")
+						)
+						(pin
+							(num "10")
+						)
+						(pin
+							(num "12")
+						)
+						(pin
+							(num "14")
+						)
+						(pin
+							(num "16")
+						)
+						(pin
+							(num "18")
+						)
+						(pin
+							(num "20")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "L4")
+			(value "8.2uH 5A")
+			(footprint "Inductor_SMD:L_Coilcraft_XAL6060-XXX")
+			(fields
+				(field
+					(name "LCSC") "C19191627")
+				(field
+					(name "MPN") "Coilcraft XAL6060-822MEC 8.2uH Isat 8.4A 24 mOhm (expensive; any 8.2-10uH shielded, Isat >= 5A works)")
+				(field
+					(name "Footprint") "Inductor_SMD:L_Coilcraft_XAL6060-XXX")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "L")
+				(description "Inductor")
+			)
+			(property
+				(name "LCSC")
+				(value "C19191627")
+			)
+			(property
+				(name "MPN")
+				(value "Coilcraft XAL6060-822MEC 8.2uH Isat 8.4A 24 mOhm (expensive; any 8.2-10uH shielded, Isat >= 5A works)")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_usb_rev04")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_usb_rev04.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "inductor choke coil reactor magnetic")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "Choke_* *Coil* Inductor_* L_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "5e307cd8-b0df-570b-8c56-ff54f3d016db")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "R75")
+			(value "100k")
+			(footprint "Resistor_SMD:R_0603_1608Metric")
+			(fields
+				(field
+					(name "LCSC") "C25803")
+				(field
+					(name "MPN") "0603 100k 1%")
+				(field
+					(name "Footprint") "Resistor_SMD:R_0603_1608Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "R")
+				(description "Resistor")
+			)
+			(property
+				(name "LCSC")
+				(value "C25803")
+			)
+			(property
+				(name "MPN")
+				(value "0603 100k 1%")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_usb_rev04")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_usb_rev04.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "R res resistor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "R_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "57188363-877a-5bb6-b719-4f35c6b4f6cd")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "R76")
+			(value "24k")
+			(footprint "Resistor_SMD:R_0603_1608Metric")
+			(fields
+				(field
+					(name "LCSC") "C23352")
+				(field
+					(name "MPN") "0603 24k 1%")
+				(field
+					(name "Footprint") "Resistor_SMD:R_0603_1608Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "R")
+				(description "Resistor")
+			)
+			(property
+				(name "LCSC")
+				(value "C23352")
+			)
+			(property
+				(name "MPN")
+				(value "0603 24k 1%")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_usb_rev04")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_usb_rev04.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "R res resistor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "R_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "62df2858-0761-5ee4-8cc8-1d0c565619d4")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "R77")
+			(value "39k")
+			(footprint "Resistor_SMD:R_0603_1608Metric")
+			(fields
+				(field
+					(name "LCSC") "C23153")
+				(field
+					(name "MPN") "0603 39k 1%")
+				(field
+					(name "Footprint") "Resistor_SMD:R_0603_1608Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "R")
+				(description "Resistor")
+			)
+			(property
+				(name "LCSC")
+				(value "C23153")
+			)
+			(property
+				(name "MPN")
+				(value "0603 39k 1%")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_usb_rev04")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_usb_rev04.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "R res resistor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "R_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "1830c218-af7d-5a13-ac96-ef952ce1b844")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "U14")
+			(value "CH334R")
+			(footprint "Package_SO:QSOP-16_3.9x4.9mm_P0.635mm")
+			(fields
+				(field
+					(name "LCSC") "C4154405")
+				(field
+					(name "MPN") "WCH CH334R 4-port USB 2.0 hub, QSOP-16")
+				(field
+					(name "Footprint") "Package_SO:QSOP-16_3.9x4.9mm_P0.635mm")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Interface_USB")
+				(part "CH334R")
+				(description "USB HUB controller, UART, QSOP-16")
+			)
+			(property
+				(name "LCSC")
+				(value "C4154405")
+			)
+			(property
+				(name "MPN")
+				(value "WCH CH334R 4-port USB 2.0 hub, QSOP-16")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_usb_rev04")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_usb_rev04.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "USB HUB Controller Interface")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "QSOP*3.9x4.9mm*P0.635mm*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "8df0bc0b-4e65-5e5f-91ed-484f92535bf7")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "13")
+						)
+						(pin
+							(num "11")
+						)
+						(pin
+							(num "10")
+						)
+						(pin
+							(num "9")
+						)
+						(pin
+							(num "15")
+						)
+						(pin
+							(num "16")
+						)
+						(pin
+							(num "12")
+						)
+						(pin
+							(num "14")
+						)
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+						(pin
+							(num "3")
+						)
+						(pin
+							(num "4")
+						)
+						(pin
+							(num "5")
+						)
+						(pin
+							(num "6")
+						)
+						(pin
+							(num "7")
+						)
+						(pin
+							(num "8")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "U15")
+			(value "LMR33630ADDA")
+			(footprint "Package_SO:TI_SO-PowerPAD-8_ThermalVias")
+			(fields
+				(field
+					(name "LCSC") "C841384")
+				(field
+					(name "MPN") "TI LMR33630ADDAR 36V 3A buck, 400 kHz")
+				(field
+					(name "Footprint") "Package_SO:TI_SO-PowerPAD-8_ThermalVias")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Regulator_Switching")
+				(part "LMR33630ADDA")
+				(description "Simple Switcher Synchronous Buck Regulator, Vin=3.8-36V, Iout=3A, F=400kHz, Adjustable output voltage, HSOP-8")
+			)
+			(property
+				(name "LCSC")
+				(value "C841384")
+			)
+			(property
+				(name "MPN")
+				(value "TI LMR33630ADDAR 36V 3A buck, 400 kHz")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_usb_rev04")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_usb_rev04.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "simple-switcher synchronous buck step-down voltage-regulator")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "Texas*HSOP*1EP*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "b27fcbd8-be16-5e05-8730-c4dfeb5e128c")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "2")
+						)
+						(pin
+							(num "3")
+						)
+						(pin
+							(num "6")
+						)
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "9")
+						)
+						(pin
+							(num "7")
+						)
+						(pin
+							(num "8")
+						)
+						(pin
+							(num "5")
+						)
+						(pin
+							(num "4")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "U16")
+			(value "TPS2561DRCR")
+			(footprint "Package_SON:VSON-10-1EP_3x3mm_P0.5mm_EP1.65x2.4mm")
+			(fields
+				(field
+					(name "LCSC") "C140303")
+				(field
+					(name "MPN") "TI TPS2561DRCR dual 2.8A USB power switch")
+				(field
+					(name "Footprint") "Package_SON:VSON-10-1EP_3x3mm_P0.5mm_EP1.65x2.4mm")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Interface_USB")
+				(part "TPS2561")
+				(description "Dual channel precision adjustable current-limited power switches")
+			)
+			(property
+				(name "LCSC")
+				(value "C140303")
+			)
+			(property
+				(name "MPN")
+				(value "TI TPS2561DRCR dual 2.8A USB power switch")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_usb_rev04")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_usb_rev04.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "power switche current limited usb port")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "VSON*3x3mm*P0.5mm*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "3e1d445a-1173-5a85-a41f-5d8aec8a8c60")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "2")
+						)
+						(pin
+							(num "3")
+						)
+						(pin
+							(num "4")
+						)
+						(pin
+							(num "5")
+						)
+						(pin
+							(num "11")
+						)
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "9")
+						)
+						(pin
+							(num "10")
+						)
+						(pin
+							(num "8")
+						)
+						(pin
+							(num "6")
+						)
+						(pin
+							(num "7")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "U17")
+			(value "USBLC6-2SC6")
+			(footprint "Package_TO_SOT_SMD:SOT-23-6")
+			(fields
+				(field
+					(name "LCSC") "C7519")
+				(field
+					(name "MPN") "ST USBLC6-2SC6")
+				(field
+					(name "Footprint") "Package_TO_SOT_SMD:SOT-23-6")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Power_Protection")
+				(part "USBLC6-2SC6")
+				(description "Very low capacitance ESD protection diode, 2 data-line, SOT-23-6")
+			)
+			(property
+				(name "LCSC")
+				(value "C7519")
+			)
+			(property
+				(name "MPN")
+				(value "ST USBLC6-2SC6")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_usb_rev04")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_usb_rev04.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "usb ethernet video")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "SOT?23*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "76180627-a4fd-5e74-820b-86ad3127f19a")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "3")
+						)
+						(pin
+							(num "5")
+						)
+						(pin
+							(num "2")
+						)
+						(pin
+							(num "6")
+						)
+						(pin
+							(num "4")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "U18")
+			(value "USBLC6-2SC6")
+			(footprint "Package_TO_SOT_SMD:SOT-23-6")
+			(fields
+				(field
+					(name "LCSC") "C7519")
+				(field
+					(name "MPN") "ST USBLC6-2SC6")
+				(field
+					(name "Footprint") "Package_TO_SOT_SMD:SOT-23-6")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Power_Protection")
+				(part "USBLC6-2SC6")
+				(description "Very low capacitance ESD protection diode, 2 data-line, SOT-23-6")
+			)
+			(property
+				(name "LCSC")
+				(value "C7519")
+			)
+			(property
+				(name "MPN")
+				(value "ST USBLC6-2SC6")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_usb_rev04")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_usb_rev04.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "usb ethernet video")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "SOT?23*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "a899eae2-5db6-58e8-80df-5c3713579809")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "3")
+						)
+						(pin
+							(num "5")
+						)
+						(pin
+							(num "2")
+						)
+						(pin
+							(num "6")
+						)
+						(pin
+							(num "4")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "Y2")
+			(value "12MHz")
+			(footprint "Crystal:Crystal_SMD_3225-4Pin_3.2x2.5mm")
+			(fields
+				(field
+					(name "LCSC") "C9002")
+				(field
+					(name "MPN") "YXC X322512MSB4SI 12MHz")
+				(field
+					(name "Footprint") "Crystal:Crystal_SMD_3225-4Pin_3.2x2.5mm")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "Crystal_GND24")
+				(description "Four pin crystal, GND on pins 2 and 4")
+			)
+			(property
+				(name "LCSC")
+				(value "C9002")
+			)
+			(property
+				(name "MPN")
+				(value "YXC X322512MSB4SI 12MHz")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_usb_rev04")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_usb_rev04.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "quartz ceramic resonator oscillator")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "Crystal*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "f5c48b98-b0da-5075-b330-71b7372c249e")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+						(pin
+							(num "4")
+						)
+						(pin
+							(num "3")
+						)
+					)
+				)
+			)
+		)
+	)
+	(groups)
+	(variants)
+	(libparts
+		(libpart
+			(lib "Connector")
+			(part "USB_A")
+			(description "USB Type A connector")
+			(docs "~")
+			(footprints
+				(fp "USB*")
+			)
+			(fields
+				(field
+					(name "Reference") "J")
+				(field
+					(name "Value") "USB_A")
+				(field
+					(name "Footprint")
+				)
+				(field
+					(name "Datasheet") "~")
+				(field
+					(name "Description") "USB Type A connector")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "VBUS")
+					(type "power_in")
+				)
+				(pin
+					(num "2")
+					(name "D-")
+					(type "bidirectional")
+				)
+				(pin
+					(num "3")
+					(name "D+")
+					(type "bidirectional")
+				)
+				(pin
+					(num "4")
+					(name "GND")
+					(type "power_in")
+				)
+				(pin
+					(num "SH")
+					(name "Shield")
+					(type "passive")
+				)
+			)
+		)
+		(libpart
+			(lib "Connector_Generic")
+			(part "Conn_02x10_Odd_Even")
+			(description "Generic connector, double row, 02x10, odd/even pin numbering scheme (row 1 odd numbers, row 2 even numbers), script generated (kicad-library-utils/schlib/autogen/connector/)")
+			(footprints
+				(fp "Connector*:*_2x??_*")
+			)
+			(fields
+				(field
+					(name "Reference") "J")
+				(field
+					(name "Value") "Conn_02x10_Odd_Even")
+				(field
+					(name "Footprint")
+				)
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Generic connector, double row, 02x10, odd/even pin numbering scheme (row 1 odd numbers, row 2 even numbers), script generated (kicad-library-utils/schlib/autogen/connector/)")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "Pin_1")
+					(type "passive")
+				)
+				(pin
+					(num "2")
+					(name "Pin_2")
+					(type "passive")
+				)
+				(pin
+					(num "3")
+					(name "Pin_3")
+					(type "passive")
+				)
+				(pin
+					(num "4")
+					(name "Pin_4")
+					(type "passive")
+				)
+				(pin
+					(num "5")
+					(name "Pin_5")
+					(type "passive")
+				)
+				(pin
+					(num "6")
+					(name "Pin_6")
+					(type "passive")
+				)
+				(pin
+					(num "7")
+					(name "Pin_7")
+					(type "passive")
+				)
+				(pin
+					(num "8")
+					(name "Pin_8")
+					(type "passive")
+				)
+				(pin
+					(num "9")
+					(name "Pin_9")
+					(type "passive")
+				)
+				(pin
+					(num "10")
+					(name "Pin_10")
+					(type "passive")
+				)
+				(pin
+					(num "11")
+					(name "Pin_11")
+					(type "passive")
+				)
+				(pin
+					(num "12")
+					(name "Pin_12")
+					(type "passive")
+				)
+				(pin
+					(num "13")
+					(name "Pin_13")
+					(type "passive")
+				)
+				(pin
+					(num "14")
+					(name "Pin_14")
+					(type "passive")
+				)
+				(pin
+					(num "15")
+					(name "Pin_15")
+					(type "passive")
+				)
+				(pin
+					(num "16")
+					(name "Pin_16")
+					(type "passive")
+				)
+				(pin
+					(num "17")
+					(name "Pin_17")
+					(type "passive")
+				)
+				(pin
+					(num "18")
+					(name "Pin_18")
+					(type "passive")
+				)
+				(pin
+					(num "19")
+					(name "Pin_19")
+					(type "passive")
+				)
+				(pin
+					(num "20")
+					(name "Pin_20")
+					(type "passive")
+				)
+			)
+		)
+		(libpart
+			(lib "Device")
+			(part "C")
+			(description "Unpolarized capacitor")
+			(footprints
+				(fp "C_*")
+			)
+			(fields
+				(field
+					(name "Reference") "C")
+				(field
+					(name "Value") "C")
+				(field
+					(name "Footprint")
+				)
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Unpolarized capacitor")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "")
+					(type "passive")
+				)
+				(pin
+					(num "2")
+					(name "")
+					(type "passive")
+				)
+			)
+		)
+		(libpart
+			(lib "Device")
+			(part "Crystal_GND24")
+			(description "Four pin crystal, GND on pins 2 and 4")
+			(footprints
+				(fp "Crystal*")
+			)
+			(fields
+				(field
+					(name "Reference") "Y")
+				(field
+					(name "Value") "Crystal_GND24")
+				(field
+					(name "Footprint")
+				)
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Four pin crystal, GND on pins 2 and 4")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "1")
+					(type "passive")
+				)
+				(pin
+					(num "2")
+					(name "2")
+					(type "passive")
+				)
+				(pin
+					(num "3")
+					(name "3")
+					(type "passive")
+				)
+				(pin
+					(num "4")
+					(name "4")
+					(type "passive")
+				)
+			)
+		)
+		(libpart
+			(lib "Device")
+			(part "L")
+			(description "Inductor")
+			(footprints
+				(fp "Choke_*")
+				(fp "*Coil*")
+				(fp "Inductor_*")
+				(fp "L_*")
+			)
+			(fields
+				(field
+					(name "Reference") "L")
+				(field
+					(name "Value") "L")
+				(field
+					(name "Footprint")
+				)
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Inductor")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "1")
+					(type "passive")
+				)
+				(pin
+					(num "2")
+					(name "2")
+					(type "passive")
+				)
+			)
+		)
+		(libpart
+			(lib "Device")
+			(part "Polyfuse")
+			(description "Resettable fuse, polymeric positive temperature coefficient")
+			(footprints
+				(fp "*polyfuse*")
+				(fp "*PTC*")
+			)
+			(fields
+				(field
+					(name "Reference") "F")
+				(field
+					(name "Value") "Polyfuse")
+				(field
+					(name "Footprint")
+				)
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Resettable fuse, polymeric positive temperature coefficient")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "")
+					(type "passive")
+				)
+				(pin
+					(num "2")
+					(name "")
+					(type "passive")
+				)
+			)
+		)
+		(libpart
+			(lib "Device")
+			(part "R")
+			(description "Resistor")
+			(footprints
+				(fp "R_*")
+			)
+			(fields
+				(field
+					(name "Reference") "R")
+				(field
+					(name "Value") "R")
+				(field
+					(name "Footprint")
+				)
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Resistor")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "")
+					(type "passive")
+				)
+				(pin
+					(num "2")
+					(name "")
+					(type "passive")
+				)
+			)
+		)
+		(libpart
+			(lib "Interface_USB")
+			(part "CH334R")
+			(description "USB HUB controller, UART, QSOP-16")
+			(docs "https://www.wch-ic.com/downloads/file/327.html")
+			(footprints
+				(fp "QSOP*3.9x4.9mm*P0.635mm*")
+			)
+			(fields
+				(field
+					(name "Reference") "U")
+				(field
+					(name "Value") "CH334R")
+				(field
+					(name "Footprint") "Package_SO:QSOP-16_3.9x4.9mm_P0.635mm")
+				(field
+					(name "Datasheet") "https://www.wch-ic.com/downloads/file/327.html")
+				(field
+					(name "Description") "USB HUB controller, UART, QSOP-16")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "DM4-")
+					(type "bidirectional")
+				)
+				(pin
+					(num "2")
+					(name "DP4+")
+					(type "bidirectional")
+				)
+				(pin
+					(num "3")
+					(name "DM3-")
+					(type "bidirectional")
+				)
+				(pin
+					(num "4")
+					(name "DP3+")
+					(type "bidirectional")
+				)
+				(pin
+					(num "5")
+					(name "DM2-")
+					(type "bidirectional")
+				)
+				(pin
+					(num "6")
+					(name "DP2+")
+					(type "bidirectional")
+				)
+				(pin
+					(num "7")
+					(name "DM1-")
+					(type "bidirectional")
+				)
+				(pin
+					(num "8")
+					(name "DP1+")
+					(type "bidirectional")
+				)
+				(pin
+					(num "9")
+					(name "~{RESET}/CDP")
+					(type "input")
+				)
+				(pin
+					(num "10")
+					(name "DMU-")
+					(type "bidirectional")
+				)
+				(pin
+					(num "11")
+					(name "DPU+")
+					(type "bidirectional")
+				)
+				(pin
+					(num "12")
+					(name "V5")
+					(type "power_in")
+				)
+				(pin
+					(num "13")
+					(name "VDD33")
+					(type "passive")
+				)
+				(pin
+					(num "14")
+					(name "GND")
+					(type "power_in")
+				)
+				(pin
+					(num "15")
+					(name "XO")
+					(type "passive")
+				)
+				(pin
+					(num "16")
+					(name "XI")
+					(type "passive")
+				)
+			)
+		)
+		(libpart
+			(lib "Interface_USB")
+			(part "TPS2561")
+			(description "Dual channel precision adjustable current-limited power switches")
+			(docs "http://www.ti.com/lit/ds/symlink/tps2561.pdf")
+			(footprints
+				(fp "VSON*3x3mm*P0.5mm*")
+			)
+			(fields
+				(field
+					(name "Reference") "U")
+				(field
+					(name "Value") "TPS2561")
+				(field
+					(name "Footprint") "Package_SON:VSON-10-1EP_3x3mm_P0.5mm_EP1.65x2.4mm_ThermalVias")
+				(field
+					(name "Datasheet") "http://www.ti.com/lit/ds/symlink/tps2561.pdf")
+				(field
+					(name "Description") "Dual channel precision adjustable current-limited power switches")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "GND")
+					(type "power_in")
+				)
+				(pin
+					(num "2")
+					(name "IN")
+					(type "power_in")
+				)
+				(pin
+					(num "3")
+					(name "IN")
+					(type "power_in")
+				)
+				(pin
+					(num "4")
+					(name "EN1")
+					(type "input")
+				)
+				(pin
+					(num "5")
+					(name "EN2")
+					(type "input")
+				)
+				(pin
+					(num "6")
+					(name "~{FAULT2}")
+					(type "output")
+				)
+				(pin
+					(num "7")
+					(name "ILM")
+					(type "output")
+				)
+				(pin
+					(num "8")
+					(name "OUT2")
+					(type "output")
+				)
+				(pin
+					(num "9")
+					(name "OUT1")
+					(type "output")
+				)
+				(pin
+					(num "10")
+					(name "~{FAULT1}")
+					(type "output")
+				)
+				(pin
+					(num "11")
+					(name "PAD")
+					(type "power_in")
+				)
+			)
+		)
+		(libpart
+			(lib "Power_Protection")
+			(part "USBLC6-2SC6")
+			(description "Very low capacitance ESD protection diode, 2 data-line, SOT-23-6")
+			(docs "https://www.st.com/resource/en/datasheet/usblc6-2.pdf")
+			(footprints
+				(fp "SOT?23*")
+			)
+			(fields
+				(field
+					(name "Reference") "U")
+				(field
+					(name "Value") "USBLC6-2SC6")
+				(field
+					(name "Footprint") "Package_TO_SOT_SMD:SOT-23-6")
+				(field
+					(name "Datasheet") "https://www.st.com/resource/en/datasheet/usblc6-2.pdf")
+				(field
+					(name "Description") "Very low capacitance ESD protection diode, 2 data-line, SOT-23-6")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "I/O1")
+					(type "passive")
+				)
+				(pin
+					(num "2")
+					(name "GND")
+					(type "passive")
+				)
+				(pin
+					(num "3")
+					(name "I/O2")
+					(type "passive")
+				)
+				(pin
+					(num "4")
+					(name "I/O2")
+					(type "passive")
+				)
+				(pin
+					(num "5")
+					(name "VBUS")
+					(type "passive")
+				)
+				(pin
+					(num "6")
+					(name "I/O1")
+					(type "passive")
+				)
+			)
+		)
+		(libpart
+			(lib "Regulator_Switching")
+			(part "LMR33630ADDA")
+			(description "Simple Switcher Synchronous Buck Regulator, Vin=3.8-36V, Iout=3A, F=400kHz, Adjustable output voltage, HSOP-8")
+			(docs "http://www.ti.com/lit/ds/symlink/lmr33630.pdf")
+			(footprints
+				(fp "Texas*HSOP*1EP*")
+			)
+			(fields
+				(field
+					(name "Reference") "U")
+				(field
+					(name "Value") "LMR33630ADDA")
+				(field
+					(name "Footprint") "Package_SO:Texas_HSOP-8-1EP_3.9x4.9mm_P1.27mm_ThermalVias")
+				(field
+					(name "Datasheet") "http://www.ti.com/lit/ds/symlink/lmr33630.pdf")
+				(field
+					(name "Description") "Simple Switcher Synchronous Buck Regulator, Vin=3.8-36V, Iout=3A, F=400kHz, Adjustable output voltage, HSOP-8")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "GND")
+					(type "power_in")
+				)
+				(pin
+					(num "2")
+					(name "VIN")
+					(type "power_in")
+				)
+				(pin
+					(num "3")
+					(name "EN")
+					(type "input")
+				)
+				(pin
+					(num "4")
+					(name "PG")
+					(type "open_collector")
+				)
+				(pin
+					(num "5")
+					(name "FB")
+					(type "input")
+				)
+				(pin
+					(num "6")
+					(name "VCC")
+					(type "power_out")
+				)
+				(pin
+					(num "7")
+					(name "BOOT")
+					(type "input")
+				)
+				(pin
+					(num "8")
+					(name "SW")
+					(type "output")
+				)
+				(pin
+					(num "9")
+					(name "GND")
+					(type "passive")
+				)
+			)
+		)
+	)
+	(libraries
+		(library
+			(logical "Connector")
+			(uri "${KICAD10_SYMBOL_DIR}/Connector.kicad_sym")
+		)
+		(library
+			(logical "Connector_Generic")
+			(uri "${KICAD10_SYMBOL_DIR}/Connector_Generic.kicad_sym")
+		)
+		(library
+			(logical "Device")
+			(uri "${KICAD10_SYMBOL_DIR}/Device.kicad_sym")
+		)
+		(library
+			(logical "Interface_USB")
+			(uri "${KICAD10_SYMBOL_DIR}/Interface_USB.kicad_sym")
+		)
+		(library
+			(logical "Power_Protection")
+			(uri "${KICAD10_SYMBOL_DIR}/Power_Protection.kicad_sym")
+		)
+		(library
+			(logical "Regulator_Switching")
+			(uri "${KICAD10_SYMBOL_DIR}/Regulator_Switching.kicad_sym")
+		)
+	)
+	(nets
+		(net
+			(code "1")
+			(name "/+5V_SYS")
+			(class "Default")
+			(node
+				(ref "C75")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "F5")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "J26")
+				(pin "5")
+				(pinfunction "Pin_5_5")
+				(pintype "passive")
+			)
+			(node
+				(ref "J26")
+				(pin "6")
+				(pinfunction "Pin_6_6")
+				(pintype "passive")
+			)
+			(node
+				(ref "U14")
+				(pin "12")
+				(pinfunction "V5_12")
+				(pintype "power_in")
+			)
+		)
+		(net
+			(code "2")
+			(name "/+5V_USB")
+			(class "Default")
+			(node
+				(ref "C68")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C69")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C70")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C71")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C72")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "L4")
+				(pin "2")
+				(pinfunction "2_2")
+				(pintype "passive")
+			)
+			(node
+				(ref "R75")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "U16")
+				(pin "2")
+				(pinfunction "IN_2")
+				(pintype "power_in")
+			)
+			(node
+				(ref "U16")
+				(pin "3")
+				(pinfunction "IN_3")
+				(pintype "power_in")
+			)
+			(node
+				(ref "U16")
+				(pin "4")
+				(pinfunction "EN1_4")
+				(pintype "input")
+			)
+			(node
+				(ref "U16")
+				(pin "5")
+				(pinfunction "EN2_5")
+				(pintype "input")
+			)
+		)
+		(net
+			(code "3")
+			(name "/EXT1_DM")
+			(class "Default")
+			(node
+				(ref "J19")
+				(pin "2")
+				(pinfunction "D-_2")
+				(pintype "bidirectional")
+			)
+			(node
+				(ref "U14")
+				(pin "7")
+				(pinfunction "DM1-_7")
+				(pintype "bidirectional")
+			)
+			(node
+				(ref "U17")
+				(pin "3")
+				(pinfunction "I/O2_3")
+				(pintype "passive")
+			)
+			(node
+				(ref "U17")
+				(pin "4")
+				(pinfunction "I/O2_4")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "4")
+			(name "/EXT1_DP")
+			(class "Default")
+			(node
+				(ref "J19")
+				(pin "3")
+				(pinfunction "D+_3")
+				(pintype "bidirectional")
+			)
+			(node
+				(ref "U14")
+				(pin "8")
+				(pinfunction "DP1+_8")
+				(pintype "bidirectional")
+			)
+			(node
+				(ref "U17")
+				(pin "1")
+				(pinfunction "I/O1_1")
+				(pintype "passive")
+			)
+			(node
+				(ref "U17")
+				(pin "6")
+				(pinfunction "I/O1_6")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "5")
+			(name "/EXT1_VBUS")
+			(class "Default")
+			(node
+				(ref "C73")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "J19")
+				(pin "1")
+				(pinfunction "VBUS_1")
+				(pintype "power_in")
+			)
+			(node
+				(ref "U16")
+				(pin "9")
+				(pinfunction "OUT1_9")
+				(pintype "output")
+			)
+			(node
+				(ref "U17")
+				(pin "5")
+				(pinfunction "VBUS_5")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "6")
+			(name "/EXT2_DM")
+			(class "Default")
+			(node
+				(ref "J20")
+				(pin "2")
+				(pinfunction "D-_2")
+				(pintype "bidirectional")
+			)
+			(node
+				(ref "U14")
+				(pin "5")
+				(pinfunction "DM2-_5")
+				(pintype "bidirectional")
+			)
+			(node
+				(ref "U18")
+				(pin "3")
+				(pinfunction "I/O2_3")
+				(pintype "passive")
+			)
+			(node
+				(ref "U18")
+				(pin "4")
+				(pinfunction "I/O2_4")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "7")
+			(name "/EXT2_DP")
+			(class "Default")
+			(node
+				(ref "J20")
+				(pin "3")
+				(pinfunction "D+_3")
+				(pintype "bidirectional")
+			)
+			(node
+				(ref "U14")
+				(pin "6")
+				(pinfunction "DP2+_6")
+				(pintype "bidirectional")
+			)
+			(node
+				(ref "U18")
+				(pin "1")
+				(pinfunction "I/O1_1")
+				(pintype "passive")
+			)
+			(node
+				(ref "U18")
+				(pin "6")
+				(pinfunction "I/O1_6")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "8")
+			(name "/EXT2_VBUS")
+			(class "Default")
+			(node
+				(ref "C74")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "J20")
+				(pin "1")
+				(pinfunction "VBUS_1")
+				(pintype "power_in")
+			)
+			(node
+				(ref "U16")
+				(pin "8")
+				(pinfunction "OUT2_8")
+				(pintype "output")
+			)
+			(node
+				(ref "U18")
+				(pin "5")
+				(pinfunction "VBUS_5")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "9")
+			(name "/HUB2_3V3")
+			(class "Default")
+			(node
+				(ref "C76")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C77")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "U14")
+				(pin "13")
+				(pinfunction "VDD33_13")
+				(pintype "passive")
+			)
+			(node
+				(ref "U14")
+				(pin "9")
+				(pinfunction "~{RESET}/CDP_9")
+				(pintype "input")
+			)
+		)
+		(net
+			(code "10")
+			(name "/HUB2_UP_DM")
+			(class "Default")
+			(node
+				(ref "J26")
+				(pin "12")
+				(pinfunction "Pin_12_12")
+				(pintype "passive")
+			)
+			(node
+				(ref "U14")
+				(pin "10")
+				(pinfunction "DMU-_10")
+				(pintype "bidirectional")
+			)
+		)
+		(net
+			(code "11")
+			(name "/HUB2_UP_DP")
+			(class "Default")
+			(node
+				(ref "J26")
+				(pin "10")
+				(pinfunction "Pin_10_10")
+				(pintype "passive")
+			)
+			(node
+				(ref "U14")
+				(pin "11")
+				(pinfunction "DPU+_11")
+				(pintype "bidirectional")
+			)
+		)
+		(net
+			(code "12")
+			(name "/HUB2_XI")
+			(class "Default")
+			(node
+				(ref "U14")
+				(pin "16")
+				(pinfunction "XI_16")
+				(pintype "passive")
+			)
+			(node
+				(ref "Y2")
+				(pin "1")
+				(pinfunction "1_1")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "13")
+			(name "/HUB2_XO")
+			(class "Default")
+			(node
+				(ref "U14")
+				(pin "15")
+				(pinfunction "XO_15")
+				(pintype "passive")
+			)
+			(node
+				(ref "Y2")
+				(pin "3")
+				(pinfunction "3_3")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "14")
+			(name "/MCU_USBP_FAULT1")
+			(class "Default")
+			(node
+				(ref "J26")
+				(pin "18")
+				(pinfunction "Pin_18_18")
+				(pintype "passive")
+			)
+			(node
+				(ref "U16")
+				(pin "10")
+				(pinfunction "~{FAULT1}_10")
+				(pintype "output")
+			)
+		)
+		(net
+			(code "15")
+			(name "/MCU_USBP_FAULT2")
+			(class "Default")
+			(node
+				(ref "J26")
+				(pin "17")
+				(pinfunction "Pin_17_17")
+				(pintype "passive")
+			)
+			(node
+				(ref "U16")
+				(pin "6")
+				(pinfunction "~{FAULT2}_6")
+				(pintype "output")
+			)
+		)
+		(net
+			(code "16")
+			(name "/MCU_USBP_PG")
+			(class "Default")
+			(node
+				(ref "J26")
+				(pin "15")
+				(pinfunction "Pin_15_15")
+				(pintype "passive")
+			)
+			(node
+				(ref "U15")
+				(pin "4")
+				(pinfunction "PG_4")
+				(pintype "open_collector")
+			)
+		)
+		(net
+			(code "17")
+			(name "/SDR_DM")
+			(class "Default")
+			(node
+				(ref "J17")
+				(pin "2")
+				(pinfunction "D-_2")
+				(pintype "bidirectional")
+			)
+			(node
+				(ref "U14")
+				(pin "3")
+				(pinfunction "DM3-_3")
+				(pintype "bidirectional")
+			)
+		)
+		(net
+			(code "18")
+			(name "/SDR_DP")
+			(class "Default")
+			(node
+				(ref "J17")
+				(pin "3")
+				(pinfunction "D+_3")
+				(pintype "bidirectional")
+			)
+			(node
+				(ref "U14")
+				(pin "4")
+				(pinfunction "DP3+_4")
+				(pintype "bidirectional")
+			)
+		)
+		(net
+			(code "19")
+			(name "/SDR_VBUS")
+			(class "Default")
+			(node
+				(ref "F5")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "J17")
+				(pin "1")
+				(pinfunction "VBUS_1")
+				(pintype "power_in")
+			)
+		)
+		(net
+			(code "20")
+			(name "/USBP_BOOT")
+			(class "Default")
+			(node
+				(ref "C67")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "U15")
+				(pin "7")
+				(pinfunction "BOOT_7")
+				(pintype "input")
+			)
+		)
+		(net
+			(code "21")
+			(name "/USBP_FB")
+			(class "Default")
+			(node
+				(ref "R75")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "R76")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "U15")
+				(pin "5")
+				(pinfunction "FB_5")
+				(pintype "input")
+			)
+		)
+		(net
+			(code "22")
+			(name "/USBP_ILIM")
+			(class "Default")
+			(node
+				(ref "R77")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "U16")
+				(pin "7")
+				(pinfunction "ILM_7")
+				(pintype "output")
+			)
+		)
+		(net
+			(code "23")
+			(name "/USBP_SW")
+			(class "Default")
+			(node
+				(ref "C67")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "L4")
+				(pin "1")
+				(pinfunction "1_1")
+				(pintype "passive")
+			)
+			(node
+				(ref "U15")
+				(pin "8")
+				(pinfunction "SW_8")
+				(pintype "output")
+			)
+		)
+		(net
+			(code "24")
+			(name "/USBP_VCC")
+			(class "Default")
+			(node
+				(ref "C66")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "U15")
+				(pin "6")
+				(pinfunction "VCC_6")
+				(pintype "power_out")
+			)
+		)
+		(net
+			(code "25")
+			(name "/VIM3_PWR_EN")
+			(class "Default")
+			(node
+				(ref "J26")
+				(pin "16")
+				(pinfunction "Pin_16_16")
+				(pintype "passive")
+			)
+			(node
+				(ref "U15")
+				(pin "3")
+				(pinfunction "EN_3")
+				(pintype "input")
+			)
+		)
+		(net
+			(code "26")
+			(name "/VSYS_IN")
+			(class "Default")
+			(node
+				(ref "C64")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C65")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "J26")
+				(pin "1")
+				(pinfunction "Pin_1_1")
+				(pintype "passive")
+			)
+			(node
+				(ref "J26")
+				(pin "2")
+				(pinfunction "Pin_2_2")
+				(pintype "passive")
+			)
+			(node
+				(ref "U15")
+				(pin "2")
+				(pinfunction "VIN_2")
+				(pintype "power_in")
+			)
+		)
+		(net
+			(code "27")
+			(name "GND")
+			(class "Default")
+			(node
+				(ref "C64")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C65")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C66")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C68")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C69")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C70")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C71")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C72")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C73")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C74")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C75")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C76")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C77")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "J17")
+				(pin "4")
+				(pinfunction "GND_4")
+				(pintype "power_in")
+			)
+			(node
+				(ref "J17")
+				(pin "SH")
+				(pinfunction "Shield_SH")
+				(pintype "passive")
+			)
+			(node
+				(ref "J19")
+				(pin "4")
+				(pinfunction "GND_4")
+				(pintype "power_in")
+			)
+			(node
+				(ref "J19")
+				(pin "SH")
+				(pinfunction "Shield_SH")
+				(pintype "passive")
+			)
+			(node
+				(ref "J20")
+				(pin "4")
+				(pinfunction "GND_4")
+				(pintype "power_in")
+			)
+			(node
+				(ref "J20")
+				(pin "SH")
+				(pinfunction "Shield_SH")
+				(pintype "passive")
+			)
+			(node
+				(ref "J26")
+				(pin "13")
+				(pinfunction "Pin_13_13")
+				(pintype "passive")
+			)
+			(node
+				(ref "J26")
+				(pin "14")
+				(pinfunction "Pin_14_14")
+				(pintype "passive")
+			)
+			(node
+				(ref "J26")
+				(pin "20")
+				(pinfunction "Pin_20_20")
+				(pintype "passive")
+			)
+			(node
+				(ref "J26")
+				(pin "3")
+				(pinfunction "Pin_3_3")
+				(pintype "passive")
+			)
+			(node
+				(ref "J26")
+				(pin "4")
+				(pinfunction "Pin_4_4")
+				(pintype "passive")
+			)
+			(node
+				(ref "J26")
+				(pin "7")
+				(pinfunction "Pin_7_7")
+				(pintype "passive")
+			)
+			(node
+				(ref "J26")
+				(pin "8")
+				(pinfunction "Pin_8_8")
+				(pintype "passive")
+			)
+			(node
+				(ref "R76")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "R77")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "U14")
+				(pin "14")
+				(pinfunction "GND_14")
+				(pintype "power_in")
+			)
+			(node
+				(ref "U15")
+				(pin "1")
+				(pinfunction "GND_1")
+				(pintype "power_in")
+			)
+			(node
+				(ref "U15")
+				(pin "9")
+				(pinfunction "GND_9")
+				(pintype "passive")
+			)
+			(node
+				(ref "U16")
+				(pin "1")
+				(pinfunction "GND_1")
+				(pintype "power_in")
+			)
+			(node
+				(ref "U16")
+				(pin "11")
+				(pinfunction "PAD_11")
+				(pintype "power_in")
+			)
+			(node
+				(ref "U17")
+				(pin "2")
+				(pinfunction "GND_2")
+				(pintype "passive")
+			)
+			(node
+				(ref "U18")
+				(pin "2")
+				(pinfunction "GND_2")
+				(pintype "passive")
+			)
+			(node
+				(ref "Y2")
+				(pin "2")
+				(pinfunction "2_2")
+				(pintype "passive")
+			)
+			(node
+				(ref "Y2")
+				(pin "4")
+				(pinfunction "4_4")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "28")
+			(name "unconnected-(J26-Pin_9-Pad9)")
+			(class "Default")
+			(node
+				(ref "J26")
+				(pin "9")
+				(pinfunction "Pin_9_9")
+				(pintype "passive+no_connect")
+			)
+		)
+		(net
+			(code "29")
+			(name "unconnected-(J26-Pin_11-Pad11)")
+			(class "Default")
+			(node
+				(ref "J26")
+				(pin "11")
+				(pinfunction "Pin_11_11")
+				(pintype "passive+no_connect")
+			)
+		)
+		(net
+			(code "30")
+			(name "unconnected-(J26-Pin_19-Pad19)")
+			(class "Default")
+			(node
+				(ref "J26")
+				(pin "19")
+				(pinfunction "Pin_19_19")
+				(pintype "passive+no_connect")
+			)
+		)
+		(net
+			(code "31")
+			(name "unconnected-(U14-DM4--Pad1)")
+			(class "Default")
+			(node
+				(ref "U14")
+				(pin "1")
+				(pinfunction "DM4-_1")
+				(pintype "bidirectional+no_connect")
+			)
+		)
+		(net
+			(code "32")
+			(name "unconnected-(U14-DP4+-Pad2)")
+			(class "Default")
+			(node
+				(ref "U14")
+				(pin "2")
+				(pinfunction "DP4+_2")
+				(pintype "bidirectional+no_connect")
+			)
+		)
+	)
+)

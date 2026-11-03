@@ -1,0 +1,2 @@
+delvia /I2S_DOUT0 43.2 55.4
+seg /I2S_DOUT0 B 43.2 55.55 43.4 55.3

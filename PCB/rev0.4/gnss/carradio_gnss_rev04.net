@@ -1,0 +1,1767 @@
+(export
+	(version "E")
+	(design
+		(source "/w/pcb4/carradio_gnss_rev04.kicad_sch")
+		(date "2026-10-02T08:49:49")
+		(tool "Eeschema 10.0.6")
+		(sheet
+			(number "1")
+			(name "/")
+			(tstamps "/")
+			(title_block
+				(title "Car radio GNSS module (NEO-M9N)")
+				(company)
+				(rev "0.4")
+				(date "2026-10-01")
+				(source "carradio_gnss_rev04.kicad_sch")
+				(comment
+					(number "1")
+					(value "")
+				)
+				(comment
+					(number "2")
+					(value "")
+				)
+				(comment
+					(number "3")
+					(value "")
+				)
+				(comment
+					(number "4")
+					(value "")
+				)
+				(comment
+					(number "5")
+					(value "")
+				)
+				(comment
+					(number "6")
+					(value "")
+				)
+				(comment
+					(number "7")
+					(value "")
+				)
+				(comment
+					(number "8")
+					(value "")
+				)
+				(comment
+					(number "9")
+					(value "")
+				)
+			)
+		)
+	)
+	(components
+		(comp
+			(ref "C14")
+			(value "10uF")
+			(footprint "Capacitor_SMD:C_0805_2012Metric")
+			(fields
+				(field
+					(name "LCSC") "C15850")
+				(field
+					(name "MPN") "0805 10uF 25V X5R")
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0805_2012Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "LCSC")
+				(value "C15850")
+			)
+			(property
+				(name "MPN")
+				(value "0805 10uF 25V X5R")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_gnss_rev04")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_gnss_rev04.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "5ad2c257-20ab-5dc0-b9c6-b6fd514a3187")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C15")
+			(value "100nF")
+			(footprint "Capacitor_SMD:C_0603_1608Metric")
+			(fields
+				(field
+					(name "LCSC") "C14663")
+				(field
+					(name "MPN") "0603 100nF 50V X7R")
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0603_1608Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "LCSC")
+				(value "C14663")
+			)
+			(property
+				(name "MPN")
+				(value "0603 100nF 50V X7R")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_gnss_rev04")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_gnss_rev04.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "b933ffdb-5186-54ca-85de-f1e87e2177b1")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C16")
+			(value "100nF")
+			(footprint "Capacitor_SMD:C_0603_1608Metric")
+			(fields
+				(field
+					(name "LCSC") "C14663")
+				(field
+					(name "MPN") "0603 100nF 50V X7R")
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0603_1608Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "LCSC")
+				(value "C14663")
+			)
+			(property
+				(name "MPN")
+				(value "0603 100nF 50V X7R")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_gnss_rev04")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_gnss_rev04.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "3f3155ad-2a7f-5041-bfe7-7683a8269c52")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C17")
+			(value "10nF")
+			(footprint "Capacitor_SMD:C_0603_1608Metric")
+			(fields
+				(field
+					(name "LCSC") "C1589")
+				(field
+					(name "MPN") "0603 10nF 50V X7R (Samsung CL10B103KB8NNNC)")
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0603_1608Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "LCSC")
+				(value "C1589")
+			)
+			(property
+				(name "MPN")
+				(value "0603 10nF 50V X7R (Samsung CL10B103KB8NNNC)")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_gnss_rev04")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_gnss_rev04.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "4cd10b66-b6ab-5607-bd34-98ab5242da1f")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "J11")
+			(value "U.FL GNSS antenna")
+			(footprint "Connector_Coaxial:U.FL_Hirose_U.FL-R-SMT-1_Vertical")
+			(fields
+				(field
+					(name "LCSC") "C88374")
+				(field
+					(name "MPN") "Hirose U.FL-R-SMT-1(80) U.FL receptacle; antenna via U.FL-to-SMA pigtail")
+				(field
+					(name "Footprint") "Connector_Coaxial:U.FL_Hirose_U.FL-R-SMT-1_Vertical")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Connector")
+				(part "Conn_Coaxial")
+				(description "coaxial connector (BNC, SMA, SMB, SMC, Cinch/RCA, LEMO, ...)")
+			)
+			(property
+				(name "LCSC")
+				(value "C88374")
+			)
+			(property
+				(name "MPN")
+				(value "Hirose U.FL-R-SMT-1(80) U.FL receptacle; antenna via U.FL-to-SMA pigtail")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_gnss_rev04")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_gnss_rev04.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "BNC SMA SMB SMC LEMO coaxial connector CINCH RCA MCX MMCX U.FL UMRF")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "*BNC* *SMA* *SMB* *SMC* *Cinch* *LEMO* *UMRF* *MCX* *U.FL*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "1325e1a4-3e7c-56e4-b3f9-e52d94826e63")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "J28")
+			(value "Main board plug")
+			(footprint "Connector_PinHeader_2.54mm:PinHeader_2x08_P2.54mm_Vertical")
+			(fields
+				(field
+					(name "LCSC")
+				)
+				(field
+					(name "MPN") "2x8 2.54mm male pin header")
+				(field
+					(name "Footprint") "Connector_PinHeader_2.54mm:PinHeader_2x08_P2.54mm_Vertical")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Connector_Generic")
+				(part "Conn_02x08_Odd_Even")
+				(description "Generic connector, double row, 02x08, odd/even pin numbering scheme (row 1 odd numbers, row 2 even numbers), script generated (kicad-library-utils/schlib/autogen/connector/)")
+			)
+			(property
+				(name "LCSC")
+				(value "")
+			)
+			(property
+				(name "MPN")
+				(value "2x8 2.54mm male pin header")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_gnss_rev04")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_gnss_rev04.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "connector")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "Connector*:*_2x??_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "f43b6db7-6a54-59ad-87c1-9c3837c02202")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "3")
+						)
+						(pin
+							(num "5")
+						)
+						(pin
+							(num "7")
+						)
+						(pin
+							(num "9")
+						)
+						(pin
+							(num "11")
+						)
+						(pin
+							(num "13")
+						)
+						(pin
+							(num "15")
+						)
+						(pin
+							(num "2")
+						)
+						(pin
+							(num "4")
+						)
+						(pin
+							(num "6")
+						)
+						(pin
+							(num "8")
+						)
+						(pin
+							(num "10")
+						)
+						(pin
+							(num "12")
+						)
+						(pin
+							(num "14")
+						)
+						(pin
+							(num "16")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "L2")
+			(value "27nH RF")
+			(footprint "Inductor_SMD:L_0402_1005Metric")
+			(fields
+				(field
+					(name "LCSC") "C12669")
+				(field
+					(name "MPN") "Murata LQG15HS27NJ02D")
+				(field
+					(name "Footprint") "Inductor_SMD:L_0402_1005Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "L")
+				(description "Inductor")
+			)
+			(property
+				(name "LCSC")
+				(value "C12669")
+			)
+			(property
+				(name "MPN")
+				(value "Murata LQG15HS27NJ02D")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_gnss_rev04")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_gnss_rev04.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "inductor choke coil reactor magnetic")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "Choke_* *Coil* Inductor_* L_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "20eb80f2-f29a-5995-ad46-c0c52ccc1b9b")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "R41")
+			(value "10Ω")
+			(footprint "Resistor_SMD:R_0603_1608Metric")
+			(fields
+				(field
+					(name "LCSC") "C22859")
+				(field
+					(name "MPN") "0603 10 1%")
+				(field
+					(name "Footprint") "Resistor_SMD:R_0603_1608Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "R")
+				(description "Resistor")
+			)
+			(property
+				(name "LCSC")
+				(value "C22859")
+			)
+			(property
+				(name "MPN")
+				(value "0603 10 1%")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_gnss_rev04")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_gnss_rev04.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "R res resistor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "R_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "21f84964-0d27-583b-a06b-e97323d6e74e")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "R102")
+			(value "27Ω")
+			(footprint "Resistor_SMD:R_0603_1608Metric")
+			(fields
+				(field
+					(name "LCSC")
+				)
+				(field
+					(name "MPN") "0603 27 1%")
+				(field
+					(name "Footprint") "Resistor_SMD:R_0603_1608Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "R")
+				(description "Resistor")
+			)
+			(property
+				(name "LCSC")
+				(value "")
+			)
+			(property
+				(name "MPN")
+				(value "0603 27 1%")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_gnss_rev04")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_gnss_rev04.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "R res resistor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "R_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "8599f18e-e8dd-5dd7-aa84-7ec054638e97")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "R103")
+			(value "27Ω")
+			(footprint "Resistor_SMD:R_0603_1608Metric")
+			(fields
+				(field
+					(name "LCSC")
+				)
+				(field
+					(name "MPN") "0603 27 1%")
+				(field
+					(name "Footprint") "Resistor_SMD:R_0603_1608Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "R")
+				(description "Resistor")
+			)
+			(property
+				(name "LCSC")
+				(value "")
+			)
+			(property
+				(name "MPN")
+				(value "0603 27 1%")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_gnss_rev04")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_gnss_rev04.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "R res resistor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "R_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "8bca298a-fdb1-5b0f-9549-ca95315fb750")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "U7")
+			(value "NEO-M9N-00B")
+			(footprint "RF_GPS:ublox_NEO")
+			(fields
+				(field
+					(name "LCSC") "C5119087")
+				(field
+					(name "MPN") "u-blox NEO-M9N-00B")
+				(field
+					(name "Footprint") "RF_GPS:ublox_NEO")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "RF_GPS")
+				(part "NEO-M9N")
+				(description "GNSS Module NEO M8, VCC 2.7V to 3.6V")
+			)
+			(property
+				(name "LCSC")
+				(value "C5119087")
+			)
+			(property
+				(name "MPN")
+				(value "u-blox NEO-M9N-00B")
+			)
+			(property
+				(name "Sheetname")
+				(value "carradio_gnss_rev04")
+			)
+			(property
+				(name "Sheetfile")
+				(value "carradio_gnss_rev04.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "ublox GPS GNSS module")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "ublox*NEO*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "c6bfbfde-ce04-522b-a3a7-840ae7bf779c")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "5")
+						)
+						(pin
+							(num "6")
+						)
+						(pin
+							(num "20")
+						)
+						(pin
+							(num "21")
+						)
+						(pin
+							(num "18")
+						)
+						(pin
+							(num "19")
+						)
+						(pin
+							(num "4")
+						)
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "8")
+						)
+						(pin
+							(num "2")
+						)
+						(pin
+							(num "23")
+						)
+						(pin
+							(num "22")
+						)
+						(pin
+							(num "7")
+						)
+						(pin
+							(num "24")
+						)
+						(pin
+							(num "13")
+						)
+						(pin
+							(num "12")
+						)
+						(pin
+							(num "10")
+						)
+						(pin
+							(num "9")
+						)
+						(pin
+							(num "15")
+						)
+						(pin
+							(num "16")
+						)
+						(pin
+							(num "17")
+						)
+						(pin
+							(num "14")
+						)
+						(pin
+							(num "11")
+						)
+						(pin
+							(num "3")
+						)
+					)
+				)
+			)
+		)
+	)
+	(groups)
+	(variants)
+	(libparts
+		(libpart
+			(lib "Connector")
+			(part "Conn_Coaxial")
+			(description "coaxial connector (BNC, SMA, SMB, SMC, Cinch/RCA, LEMO, ...)")
+			(docs "~")
+			(footprints
+				(fp "*BNC*")
+				(fp "*SMA*")
+				(fp "*SMB*")
+				(fp "*SMC*")
+				(fp "*Cinch*")
+				(fp "*LEMO*")
+				(fp "*UMRF*")
+				(fp "*MCX*")
+				(fp "*U.FL*")
+			)
+			(fields
+				(field
+					(name "Reference") "J")
+				(field
+					(name "Value") "Conn_Coaxial")
+				(field
+					(name "Footprint")
+				)
+				(field
+					(name "Datasheet") "~")
+				(field
+					(name "Description") "coaxial connector (BNC, SMA, SMB, SMC, Cinch/RCA, LEMO, ...)")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "In")
+					(type "passive")
+				)
+				(pin
+					(num "2")
+					(name "Ext")
+					(type "passive")
+				)
+			)
+		)
+		(libpart
+			(lib "Connector_Generic")
+			(part "Conn_02x08_Odd_Even")
+			(description "Generic connector, double row, 02x08, odd/even pin numbering scheme (row 1 odd numbers, row 2 even numbers), script generated (kicad-library-utils/schlib/autogen/connector/)")
+			(footprints
+				(fp "Connector*:*_2x??_*")
+			)
+			(fields
+				(field
+					(name "Reference") "J")
+				(field
+					(name "Value") "Conn_02x08_Odd_Even")
+				(field
+					(name "Footprint")
+				)
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Generic connector, double row, 02x08, odd/even pin numbering scheme (row 1 odd numbers, row 2 even numbers), script generated (kicad-library-utils/schlib/autogen/connector/)")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "Pin_1")
+					(type "passive")
+				)
+				(pin
+					(num "2")
+					(name "Pin_2")
+					(type "passive")
+				)
+				(pin
+					(num "3")
+					(name "Pin_3")
+					(type "passive")
+				)
+				(pin
+					(num "4")
+					(name "Pin_4")
+					(type "passive")
+				)
+				(pin
+					(num "5")
+					(name "Pin_5")
+					(type "passive")
+				)
+				(pin
+					(num "6")
+					(name "Pin_6")
+					(type "passive")
+				)
+				(pin
+					(num "7")
+					(name "Pin_7")
+					(type "passive")
+				)
+				(pin
+					(num "8")
+					(name "Pin_8")
+					(type "passive")
+				)
+				(pin
+					(num "9")
+					(name "Pin_9")
+					(type "passive")
+				)
+				(pin
+					(num "10")
+					(name "Pin_10")
+					(type "passive")
+				)
+				(pin
+					(num "11")
+					(name "Pin_11")
+					(type "passive")
+				)
+				(pin
+					(num "12")
+					(name "Pin_12")
+					(type "passive")
+				)
+				(pin
+					(num "13")
+					(name "Pin_13")
+					(type "passive")
+				)
+				(pin
+					(num "14")
+					(name "Pin_14")
+					(type "passive")
+				)
+				(pin
+					(num "15")
+					(name "Pin_15")
+					(type "passive")
+				)
+				(pin
+					(num "16")
+					(name "Pin_16")
+					(type "passive")
+				)
+			)
+		)
+		(libpart
+			(lib "Device")
+			(part "C")
+			(description "Unpolarized capacitor")
+			(footprints
+				(fp "C_*")
+			)
+			(fields
+				(field
+					(name "Reference") "C")
+				(field
+					(name "Value") "C")
+				(field
+					(name "Footprint")
+				)
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Unpolarized capacitor")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "")
+					(type "passive")
+				)
+				(pin
+					(num "2")
+					(name "")
+					(type "passive")
+				)
+			)
+		)
+		(libpart
+			(lib "Device")
+			(part "L")
+			(description "Inductor")
+			(footprints
+				(fp "Choke_*")
+				(fp "*Coil*")
+				(fp "Inductor_*")
+				(fp "L_*")
+			)
+			(fields
+				(field
+					(name "Reference") "L")
+				(field
+					(name "Value") "L")
+				(field
+					(name "Footprint")
+				)
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Inductor")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "1")
+					(type "passive")
+				)
+				(pin
+					(num "2")
+					(name "2")
+					(type "passive")
+				)
+			)
+		)
+		(libpart
+			(lib "Device")
+			(part "R")
+			(description "Resistor")
+			(footprints
+				(fp "R_*")
+			)
+			(fields
+				(field
+					(name "Reference") "R")
+				(field
+					(name "Value") "R")
+				(field
+					(name "Footprint")
+				)
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Resistor")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "")
+					(type "passive")
+				)
+				(pin
+					(num "2")
+					(name "")
+					(type "passive")
+				)
+			)
+		)
+		(libpart
+			(lib "RF_GPS")
+			(part "NEO-M9N")
+			(description "GNSS Module NEO M8, VCC 2.7V to 3.6V")
+			(docs "https://www.u-blox.com/sites/default/files/NEO-M9N-00B_DataSheet_UBX-19014285.pdf")
+			(footprints
+				(fp "ublox*NEO*")
+			)
+			(fields
+				(field
+					(name "Reference") "U")
+				(field
+					(name "Value") "NEO-M9N")
+				(field
+					(name "Footprint") "RF_GPS:ublox_NEO")
+				(field
+					(name "Datasheet") "https://www.u-blox.com/sites/default/files/NEO-M9N-00B_DataSheet_UBX-19014285.pdf")
+				(field
+					(name "Description") "GNSS Module NEO M8, VCC 2.7V to 3.6V")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "~{SAFEBOOT}")
+					(type "input")
+				)
+				(pin
+					(num "2")
+					(name "D_SEL")
+					(type "input")
+				)
+				(pin
+					(num "3")
+					(name "TIMEPULSE")
+					(type "output")
+				)
+				(pin
+					(num "4")
+					(name "EXTINT")
+					(type "input")
+				)
+				(pin
+					(num "5")
+					(name "USB_DM")
+					(type "bidirectional")
+				)
+				(pin
+					(num "6")
+					(name "USB_DP")
+					(type "bidirectional")
+				)
+				(pin
+					(num "7")
+					(name "VDD_USB")
+					(type "power_in")
+				)
+				(pin
+					(num "8")
+					(name "~{RESET}")
+					(type "input")
+				)
+				(pin
+					(num "9")
+					(name "VCC_RF")
+					(type "power_out")
+				)
+				(pin
+					(num "10")
+					(name "GND")
+					(type "power_in")
+				)
+				(pin
+					(num "11")
+					(name "RF_IN")
+					(type "input")
+				)
+				(pin
+					(num "12")
+					(name "GND")
+					(type "passive")
+				)
+				(pin
+					(num "13")
+					(name "GND")
+					(type "passive")
+				)
+				(pin
+					(num "14")
+					(name "LNA_EN")
+					(type "output")
+				)
+				(pin
+					(num "15")
+					(name "RESERVED")
+					(type "no_connect")
+				)
+				(pin
+					(num "16")
+					(name "RESERVED")
+					(type "no_connect")
+				)
+				(pin
+					(num "17")
+					(name "RESERVED")
+					(type "no_connect")
+				)
+				(pin
+					(num "18")
+					(name "SDA/~{SPI_CS}")
+					(type "bidirectional")
+				)
+				(pin
+					(num "19")
+					(name "SCL/SPI_CLK")
+					(type "input")
+				)
+				(pin
+					(num "20")
+					(name "TXD/SPI_MISO")
+					(type "output")
+				)
+				(pin
+					(num "21")
+					(name "RXD/SPI_MOSI")
+					(type "input")
+				)
+				(pin
+					(num "22")
+					(name "V_BCKP")
+					(type "power_in")
+				)
+				(pin
+					(num "23")
+					(name "VCC")
+					(type "power_in")
+				)
+				(pin
+					(num "24")
+					(name "GND")
+					(type "passive")
+				)
+			)
+		)
+	)
+	(libraries
+		(library
+			(logical "Connector")
+			(uri "${KICAD10_SYMBOL_DIR}/Connector.kicad_sym")
+		)
+		(library
+			(logical "Connector_Generic")
+			(uri "${KICAD10_SYMBOL_DIR}/Connector_Generic.kicad_sym")
+		)
+		(library
+			(logical "Device")
+			(uri "${KICAD10_SYMBOL_DIR}/Device.kicad_sym")
+		)
+		(library
+			(logical "RF_GPS")
+			(uri "${KICAD10_SYMBOL_DIR}/RF_GPS.kicad_sym")
+		)
+	)
+	(nets
+		(net
+			(code "1")
+			(name "/+3V3_GNSS")
+			(class "Default")
+			(node
+				(ref "C14")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C15")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "J28")
+				(pin "1")
+				(pinfunction "Pin_1_1")
+				(pintype "passive")
+			)
+			(node
+				(ref "J28")
+				(pin "2")
+				(pinfunction "Pin_2_2")
+				(pintype "passive")
+			)
+			(node
+				(ref "U7")
+				(pin "23")
+				(pinfunction "VCC_23")
+				(pintype "power_in")
+			)
+			(node
+				(ref "U7")
+				(pin "7")
+				(pinfunction "VDD_USB_7")
+				(pintype "power_in")
+			)
+		)
+		(net
+			(code "2")
+			(name "/+3V3_MCU")
+			(class "Default")
+			(node
+				(ref "C16")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "J28")
+				(pin "4")
+				(pinfunction "Pin_4_4")
+				(pintype "passive")
+			)
+			(node
+				(ref "U7")
+				(pin "22")
+				(pinfunction "V_BCKP_22")
+				(pintype "power_in")
+			)
+		)
+		(net
+			(code "3")
+			(name "/ANT_FEED")
+			(class "Default")
+			(node
+				(ref "L2")
+				(pin "1")
+				(pinfunction "1_1")
+				(pintype "passive")
+			)
+			(node
+				(ref "R41")
+				(pin "2")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "4")
+			(name "/GNSS_PPS")
+			(class "Default")
+			(node
+				(ref "J28")
+				(pin "14")
+				(pinfunction "Pin_14_14")
+				(pintype "passive")
+			)
+			(node
+				(ref "U7")
+				(pin "3")
+				(pinfunction "TIMEPULSE_3")
+				(pintype "output")
+			)
+		)
+		(net
+			(code "5")
+			(name "/GNSS_RF")
+			(class "Default")
+			(node
+				(ref "J11")
+				(pin "1")
+				(pinfunction "In_1")
+				(pintype "passive")
+			)
+			(node
+				(ref "L2")
+				(pin "2")
+				(pinfunction "2_2")
+				(pintype "passive")
+			)
+			(node
+				(ref "U7")
+				(pin "11")
+				(pinfunction "RF_IN_11")
+				(pintype "input")
+			)
+		)
+		(net
+			(code "6")
+			(name "/GNSS_RST")
+			(class "Default")
+			(node
+				(ref "J28")
+				(pin "13")
+				(pinfunction "Pin_13_13")
+				(pintype "passive")
+			)
+			(node
+				(ref "U7")
+				(pin "8")
+				(pinfunction "~{RESET}_8")
+				(pintype "input")
+			)
+		)
+		(net
+			(code "7")
+			(name "/GNSS_RXD")
+			(class "Default")
+			(node
+				(ref "J28")
+				(pin "10")
+				(pinfunction "Pin_10_10")
+				(pintype "passive")
+			)
+			(node
+				(ref "U7")
+				(pin "21")
+				(pinfunction "RXD/SPI_MOSI_21")
+				(pintype "input")
+			)
+		)
+		(net
+			(code "8")
+			(name "/GNSS_SAFEBOOT")
+			(class "Default")
+			(node
+				(ref "J28")
+				(pin "15")
+				(pinfunction "Pin_15_15")
+				(pintype "passive")
+			)
+			(node
+				(ref "U7")
+				(pin "1")
+				(pinfunction "~{SAFEBOOT}_1")
+				(pintype "input")
+			)
+		)
+		(net
+			(code "9")
+			(name "/GNSS_TXD")
+			(class "Default")
+			(node
+				(ref "J28")
+				(pin "8")
+				(pinfunction "Pin_8_8")
+				(pintype "passive")
+			)
+			(node
+				(ref "U7")
+				(pin "20")
+				(pinfunction "TXD/SPI_MISO_20")
+				(pintype "output")
+			)
+		)
+		(net
+			(code "10")
+			(name "/GNSS_USB_DM")
+			(class "Default")
+			(node
+				(ref "J28")
+				(pin "9")
+				(pinfunction "Pin_9_9")
+				(pintype "passive")
+			)
+			(node
+				(ref "R103")
+				(pin "2")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "11")
+			(name "/GNSS_USB_DM_M")
+			(class "Default")
+			(node
+				(ref "R103")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "U7")
+				(pin "5")
+				(pinfunction "USB_DM_5")
+				(pintype "bidirectional")
+			)
+		)
+		(net
+			(code "12")
+			(name "/GNSS_USB_DP")
+			(class "Default")
+			(node
+				(ref "J28")
+				(pin "7")
+				(pinfunction "Pin_7_7")
+				(pintype "passive")
+			)
+			(node
+				(ref "R102")
+				(pin "2")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "13")
+			(name "/GNSS_USB_DP_M")
+			(class "Default")
+			(node
+				(ref "R102")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "U7")
+				(pin "6")
+				(pinfunction "USB_DP_6")
+				(pintype "bidirectional")
+			)
+		)
+		(net
+			(code "14")
+			(name "/GNSS_VCCRF")
+			(class "Default")
+			(node
+				(ref "C17")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "R41")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "U7")
+				(pin "9")
+				(pinfunction "VCC_RF_9")
+				(pintype "power_out")
+			)
+		)
+		(net
+			(code "15")
+			(name "GND")
+			(class "Default")
+			(node
+				(ref "C14")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C15")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C16")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C17")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "J11")
+				(pin "2")
+				(pinfunction "Ext_2")
+				(pintype "passive")
+			)
+			(node
+				(ref "J28")
+				(pin "11")
+				(pinfunction "Pin_11_11")
+				(pintype "passive")
+			)
+			(node
+				(ref "J28")
+				(pin "12")
+				(pinfunction "Pin_12_12")
+				(pintype "passive")
+			)
+			(node
+				(ref "J28")
+				(pin "16")
+				(pinfunction "Pin_16_16")
+				(pintype "passive")
+			)
+			(node
+				(ref "J28")
+				(pin "3")
+				(pinfunction "Pin_3_3")
+				(pintype "passive")
+			)
+			(node
+				(ref "J28")
+				(pin "6")
+				(pinfunction "Pin_6_6")
+				(pintype "passive")
+			)
+			(node
+				(ref "U7")
+				(pin "10")
+				(pinfunction "GND_10")
+				(pintype "power_in")
+			)
+			(node
+				(ref "U7")
+				(pin "12")
+				(pinfunction "GND_12")
+				(pintype "passive")
+			)
+			(node
+				(ref "U7")
+				(pin "13")
+				(pinfunction "GND_13")
+				(pintype "passive")
+			)
+			(node
+				(ref "U7")
+				(pin "24")
+				(pinfunction "GND_24")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "16")
+			(name "unconnected-(J28-Pin_5-Pad5)")
+			(class "Default")
+			(node
+				(ref "J28")
+				(pin "5")
+				(pinfunction "Pin_5_5")
+				(pintype "passive+no_connect")
+			)
+		)
+		(net
+			(code "17")
+			(name "unconnected-(U7-D_SEL-Pad2)")
+			(class "Default")
+			(node
+				(ref "U7")
+				(pin "2")
+				(pinfunction "D_SEL_2")
+				(pintype "input+no_connect")
+			)
+		)
+		(net
+			(code "18")
+			(name "unconnected-(U7-EXTINT-Pad4)")
+			(class "Default")
+			(node
+				(ref "U7")
+				(pin "4")
+				(pinfunction "EXTINT_4")
+				(pintype "input+no_connect")
+			)
+		)
+		(net
+			(code "19")
+			(name "unconnected-(U7-LNA_EN-Pad14)")
+			(class "Default")
+			(node
+				(ref "U7")
+				(pin "14")
+				(pinfunction "LNA_EN_14")
+				(pintype "output+no_connect")
+			)
+		)
+		(net
+			(code "20")
+			(name "unconnected-(U7-RESERVED-Pad15)")
+			(class "Default")
+			(node
+				(ref "U7")
+				(pin "15")
+				(pinfunction "RESERVED_15")
+				(pintype "no_connect")
+			)
+		)
+		(net
+			(code "21")
+			(name "unconnected-(U7-RESERVED-Pad16)")
+			(class "Default")
+			(node
+				(ref "U7")
+				(pin "16")
+				(pinfunction "RESERVED_16")
+				(pintype "no_connect")
+			)
+		)
+		(net
+			(code "22")
+			(name "unconnected-(U7-RESERVED-Pad17)")
+			(class "Default")
+			(node
+				(ref "U7")
+				(pin "17")
+				(pinfunction "RESERVED_17")
+				(pintype "no_connect")
+			)
+		)
+		(net
+			(code "23")
+			(name "unconnected-(U7-SCL{slash}SPI_CLK-Pad19)")
+			(class "Default")
+			(node
+				(ref "U7")
+				(pin "19")
+				(pinfunction "SCL/SPI_CLK_19")
+				(pintype "input+no_connect")
+			)
+		)
+		(net
+			(code "24")
+			(name "unconnected-(U7-SDA{slash}~{SPI_CS}-Pad18)")
+			(class "Default")
+			(node
+				(ref "U7")
+				(pin "18")
+				(pinfunction "SDA/~{SPI_CS}_18")
+				(pintype "bidirectional+no_connect")
+			)
+		)
+	)
+)

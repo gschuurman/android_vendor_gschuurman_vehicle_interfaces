@@ -1,0 +1,34 @@
+Designator,Value,Description / MPN,LCSC,Footprint (KiCad name),Fit,Note
+U8,LP5907MFX-3.3,TI LP5907MFX-3.3/NOPB 250mA LDO (TECH PUBLIC TPLP5907MFX-3.3 clone; TI part out of stock at LCSC),C5370990,Package_TO_SOT_SMD:SOT-23-5,yes,DAC analog supply (AVDD + CPVDD)
+C18,1uF,0603 1uF 50V X5R (Murata GRM188R61H105KAALD),C77386,Capacitor_SMD:C_0603_1608Metric,yes,
+C19,1uF,0603 1uF 50V X5R (Murata GRM188R61H105KAALD),C77386,Capacitor_SMD:C_0603_1608Metric,yes,
+U9,LP5907MFX-3.3,TI LP5907MFX-3.3/NOPB 250mA LDO (TECH PUBLIC TPLP5907MFX-3.3 clone; TI part out of stock at LCSC),C5370990,Package_TO_SOT_SMD:SOT-23-5,yes,DAC digital supply (DVDD)
+C20,1uF,0603 1uF 50V X5R (Murata GRM188R61H105KAALD),C77386,Capacitor_SMD:C_0603_1608Metric,yes,
+C21,1uF,0603 1uF 50V X5R (Murata GRM188R61H105KAALD),C77386,Capacitor_SMD:C_0603_1608Metric,yes,
+U10,PCM5102APWR,TI PCM5102APWR 32-bit 384kHz stereo DAC,C107671,Package_SO:TSSOP-20_4.4x6.5mm_P0.65mm,yes,"Front L/R, TDM-B lane 0. SCK=GND (PLL from BCK), FMT=GND (I2S), FLT=GND (normal latency), DEMP=GND"
+C22,2.2uF,0603 2.2uF 16V X5R,C23630,Capacitor_SMD:C_0603_1608Metric,yes,charge-pump flying cap
+C23,2.2uF,0603 2.2uF 16V X5R,C23630,Capacitor_SMD:C_0603_1608Metric,yes,
+C24,1uF,0603 1uF 50V X5R (Murata GRM188R61H105KAALD),C77386,Capacitor_SMD:C_0603_1608Metric,yes,
+C25,100nF,0603 100nF 50V X7R,C14663,Capacitor_SMD:C_0603_1608Metric,yes,at CPVDD
+C26,100nF,0603 100nF 50V X7R,C14663,Capacitor_SMD:C_0603_1608Metric,yes,at AVDD
+C27,100nF,0603 100nF 50V X7R,C14663,Capacitor_SMD:C_0603_1608Metric,yes,at DVDD
+C28,10uF,0805 10uF 25V X5R,C15850,Capacitor_SMD:C_0805_2012Metric,yes,
+C29,10uF,0805 10uF 25V X5R,C15850,Capacitor_SMD:C_0805_2012Metric,yes,
+R48,470Ω,0603 470 1%,C23179,Resistor_SMD:R_0603_1608Metric,yes,output RC filter (datasheet)
+R49,470Ω,0603 470 1%,C23179,Resistor_SMD:R_0603_1608Metric,yes,
+C30,2.2nF C0G,0805 2.2nF 50V C0G,C28260,Capacitor_SMD:C_0805_2012Metric,yes,
+C31,2.2nF C0G,0805 2.2nF 50V C0G,C28260,Capacitor_SMD:C_0805_2012Metric,yes,
+U11,PCM5102APWR,TI PCM5102APWR 32-bit 384kHz stereo DAC,C107671,Package_SO:TSSOP-20_4.4x6.5mm_P0.65mm,yes,"Rear L/R, TDM-B lane 1. SCK=GND (PLL from BCK), FMT=GND (I2S), FLT=GND (normal latency), DEMP=GND"
+C32,2.2uF,0603 2.2uF 16V X5R,C23630,Capacitor_SMD:C_0603_1608Metric,yes,charge-pump flying cap
+C33,2.2uF,0603 2.2uF 16V X5R,C23630,Capacitor_SMD:C_0603_1608Metric,yes,
+C34,1uF,0603 1uF 50V X5R (Murata GRM188R61H105KAALD),C77386,Capacitor_SMD:C_0603_1608Metric,yes,
+C35,100nF,0603 100nF 50V X7R,C14663,Capacitor_SMD:C_0603_1608Metric,yes,at CPVDD
+C36,100nF,0603 100nF 50V X7R,C14663,Capacitor_SMD:C_0603_1608Metric,yes,at AVDD
+C37,100nF,0603 100nF 50V X7R,C14663,Capacitor_SMD:C_0603_1608Metric,yes,at DVDD
+C38,10uF,0805 10uF 25V X5R,C15850,Capacitor_SMD:C_0805_2012Metric,yes,
+C39,10uF,0805 10uF 25V X5R,C15850,Capacitor_SMD:C_0805_2012Metric,yes,
+R50,470Ω,0603 470 1%,C23179,Resistor_SMD:R_0603_1608Metric,yes,output RC filter (datasheet)
+R51,470Ω,0603 470 1%,C23179,Resistor_SMD:R_0603_1608Metric,yes,
+C40,2.2nF C0G,0805 2.2nF 50V C0G,C28260,Capacitor_SMD:C_0805_2012Metric,yes,
+C41,2.2nF C0G,0805 2.2nF 50V C0G,C28260,Capacitor_SMD:C_0805_2012Metric,yes,
+J24,Main board plug,ZHOURI 2.54-2*10 male pin header,C5116480,Connector_PinHeader_2.54mm:PinHeader_2x10_P2.54mm_Vertical,yes,mates with J23 on the main board; fit on the bottom side

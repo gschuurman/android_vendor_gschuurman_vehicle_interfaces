@@ -1,0 +1,4 @@
+(fp_lib_table
+  (version 7)
+  (lib (name "carradio")(type "KiCad")(uri "${KIPRJMOD}/carradio.pretty")(options "")(descr "Footprints from the LCSC/EasyEDA library for this board"))
+)

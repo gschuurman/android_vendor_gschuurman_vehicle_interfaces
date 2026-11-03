@@ -1,0 +1,70 @@
+Designator,Value,Description / MPN,LCSC,Footprint (KiCad name),Fit,Note
+U8,LP5907MFX-3.3,TI LP5907MFX-3.3/NOPB 250mA LDO (TECH PUBLIC TPLP5907MFX-3.3 clone; TI part out of stock at LCSC),C5370990,Package_TO_SOT_SMD:SOT-23-5,yes,DAC analog supply (AVDD + CPVDD)
+C18,1uF,0603 1uF 50V X5R (Murata GRM188R61H105KAALD),C77386,Capacitor_SMD:C_0603_1608Metric,yes,
+C19,1uF,0603 1uF 50V X5R (Murata GRM188R61H105KAALD),C77386,Capacitor_SMD:C_0603_1608Metric,yes,
+U9,LP5907MFX-3.3,TI LP5907MFX-3.3/NOPB 250mA LDO (TECH PUBLIC TPLP5907MFX-3.3 clone; TI part out of stock at LCSC),C5370990,Package_TO_SOT_SMD:SOT-23-5,yes,"DAC + mic ADC digital supply (DVDD, PCM1808 VDD)"
+C20,1uF,0603 1uF 50V X5R (Murata GRM188R61H105KAALD),C77386,Capacitor_SMD:C_0603_1608Metric,yes,
+C21,1uF,0603 1uF 50V X5R (Murata GRM188R61H105KAALD),C77386,Capacitor_SMD:C_0603_1608Metric,yes,
+U10,PCM5102APWR,TI PCM5102APWR 32-bit 384kHz stereo DAC,C107671,Package_SO:TSSOP-20_4.4x6.5mm_P0.65mm,yes,"Front L/R, TDM-B lane 0. SCK=GND (PLL from BCK), FMT=GND (I2S), FLT=GND (normal latency), DEMP=GND"
+C22,2.2uF,0603 2.2uF 16V X5R,C23630,Capacitor_SMD:C_0603_1608Metric,yes,charge-pump flying cap
+C23,2.2uF,0603 2.2uF 16V X5R,C23630,Capacitor_SMD:C_0603_1608Metric,yes,
+C24,1uF,0603 1uF 50V X5R (Murata GRM188R61H105KAALD),C77386,Capacitor_SMD:C_0603_1608Metric,yes,"LDOO: pin 18, next to GND pin 19; check for a bridge after soldering"
+C25,100nF,0603 100nF 50V X7R,C14663,Capacitor_SMD:C_0603_1608Metric,yes,at CPVDD
+C26,100nF,0603 100nF 50V X7R,C14663,Capacitor_SMD:C_0603_1608Metric,yes,at AVDD
+C27,100nF,0603 100nF 50V X7R,C14663,Capacitor_SMD:C_0603_1608Metric,yes,at DVDD
+C28,10uF,0805 10uF 25V X5R,C15850,Capacitor_SMD:C_0805_2012Metric,yes,
+C29,10uF,0805 10uF 25V X5R,C15850,Capacitor_SMD:C_0805_2012Metric,yes,
+R48,470Ω,0603 470 1%,C23179,Resistor_SMD:R_0603_1608Metric,yes,output RC filter (datasheet)
+R49,470Ω,0603 470 1%,C23179,Resistor_SMD:R_0603_1608Metric,yes,
+C30,2.2nF C0G,0805 2.2nF 50V C0G,C28260,Capacitor_SMD:C_0805_2012Metric,yes,
+C31,2.2nF C0G,0805 2.2nF 50V C0G,C28260,Capacitor_SMD:C_0805_2012Metric,yes,
+U11,PCM5102APWR,TI PCM5102APWR 32-bit 384kHz stereo DAC,C107671,Package_SO:TSSOP-20_4.4x6.5mm_P0.65mm,yes,"Rear L/R, TDM-B lane 1. SCK=GND (PLL from BCK), FMT=GND (I2S), FLT=GND (normal latency), DEMP=GND"
+C32,2.2uF,0603 2.2uF 16V X5R,C23630,Capacitor_SMD:C_0603_1608Metric,yes,charge-pump flying cap
+C33,2.2uF,0603 2.2uF 16V X5R,C23630,Capacitor_SMD:C_0603_1608Metric,yes,
+C34,1uF,0603 1uF 50V X5R (Murata GRM188R61H105KAALD),C77386,Capacitor_SMD:C_0603_1608Metric,yes,"LDOO: pin 18, next to GND pin 19; check for a bridge after soldering"
+C35,100nF,0603 100nF 50V X7R,C14663,Capacitor_SMD:C_0603_1608Metric,yes,at CPVDD
+C36,100nF,0603 100nF 50V X7R,C14663,Capacitor_SMD:C_0603_1608Metric,yes,at AVDD
+C37,100nF,0603 100nF 50V X7R,C14663,Capacitor_SMD:C_0603_1608Metric,yes,at DVDD
+C38,10uF,0805 10uF 25V X5R,C15850,Capacitor_SMD:C_0805_2012Metric,yes,
+C39,10uF,0805 10uF 25V X5R,C15850,Capacitor_SMD:C_0805_2012Metric,yes,
+R50,470Ω,0603 470 1%,C23179,Resistor_SMD:R_0603_1608Metric,yes,output RC filter (datasheet)
+R51,470Ω,0603 470 1%,C23179,Resistor_SMD:R_0603_1608Metric,yes,
+C40,2.2nF C0G,0805 2.2nF 50V C0G,C28260,Capacitor_SMD:C_0805_2012Metric,yes,
+C41,2.2nF C0G,0805 2.2nF 50V C0G,C28260,Capacitor_SMD:C_0805_2012Metric,yes,
+J24,Main board plug,ZHOURI 2.54-2*10 male pin header,C5116480,Connector_PinHeader_2.54mm:PinHeader_2x10_P2.54mm_Vertical,yes,"mates with J23 on the main board; fit on the bottom side. Pin 8 = VIM3 pin 30 (TDM-B MCLK), pin 11 = VIM3 pin 35 (GPIOH_5, TDM-B lane 3, main-board net VIM3_I2S_DOUT2) now carries the mic ADC data to the VIM3"
+J201,MIC (to 3.5 mm jack),"JST B3B-XH-A(LF)(SN), 3-pin XH header (Mouser 306-B3B-XH-ALFSN)",C144394,Connector_JST:JST_XH_B3B-XH-A_1x03_P2.50mm_Vertical,yes,"cable to a 3.5 mm stereo panel jack: 1 = tip (mic + bias), 2 = ring, 3 = sleeve (GND)"
+JP202,RING=TIP,solder jumper (PCB only),,Jumper:SolderJumper-2_P1.3mm_Open_Pad1.0x1.5mm,yes,"open by default: ring unused, so a mono plug (ring shorted to sleeve) is safe. Bridge only for a mic whose plug wants bias on tip and ring"
+D201,PESD5V0S1BA,PESD5V0S1BA 5V ESD diode SOD-323 (TECH PUBLIC),C2827694,Diode_SMD:D_SOD-323_HandSoldering,yes,ESD clamp on the jack line
+C201,1nF,Samsung CL10B102KB8NNNC 0603 1nF 50V X7R,C1588,Capacitor_SMD:C_0603_1608Metric,yes,RF (GSM buzz) filter at the jack line
+R201,10Ω,0603 10 1%,C22859,Resistor_SMD:R_0603_1608Metric,yes,RC filter with C202/C203: quiet 4.9 V for the preamp and PCM1808 VCC
+C202,10uF,0805 10uF 25V X5R,C15850,Capacitor_SMD:C_0805_2012Metric,yes,
+C203,100nF,0603 100nF 50V X7R,C14663,Capacitor_SMD:C_0603_1608Metric,yes,
+R202,1k,0603 1k 1%,C21190,Resistor_SMD:R_0603_1608Metric,yes,
+C204,10uF,0805 10uF 25V X5R,C15850,Capacitor_SMD:C_0805_2012Metric,yes,"bias filter, 16 Hz"
+R203,2.2k,0603 2.2k 1% (UNI-ROYAL 0603WAF2201T5E),C4190,Resistor_SMD:R_0603_1608Metric,yes,electret bias resistor (standard 2.2k plug-in-power load)
+C205,1uF,0603 1uF 50V X5R (Murata GRM188R61H105KAALD),C77386,Capacitor_SMD:C_0603_1608Metric,yes,input coupling
+R204,100k,0603 100k 1%,C25803,Resistor_SMD:R_0603_1608Metric,yes,
+R205,10k,0603 10k 1%,C25804,Resistor_SMD:R_0603_1608Metric,yes,
+R206,10k,0603 10k 1%,C25804,Resistor_SMD:R_0603_1608Metric,yes,
+C206,10uF,0805 10uF 25V X5R,C15850,Capacitor_SMD:C_0805_2012Metric,yes,mid-rail reference 2.45 V
+U201,TLV9062IDR,"TI TLV9062IDR dual RRIO op-amp, 10 MHz, 1.8-5.5 V (Mouser 595-TLV9062IDR)",C398355,Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,yes,"stage A 21 dB, stage B 21 dB (JP201 bridged: 12.5 dB); 1 Hz-10 kHz voice band"
+C207,100nF,0603 100nF 50V X7R,C14663,Capacitor_SMD:C_0603_1608Metric,yes,at U201 pin 8
+R207,10k,0603 10k 1%,C25804,Resistor_SMD:R_0603_1608Metric,yes,stage A feedback
+C208,1nF,Samsung CL10B102KB8NNNC 0603 1nF 50V X7R,C1588,Capacitor_SMD:C_0603_1608Metric,yes,"stage A low-pass, 16 kHz"
+R208,1k,0603 1k 1%,C21190,Resistor_SMD:R_0603_1608Metric,yes,
+C209,2.2uF,0603 2.2uF 16V X5R,C23630,Capacitor_SMD:C_0603_1608Metric,yes,AC gain only; 72 Hz low cut against road rumble
+R209,10k,0603 10k 1%,C25804,Resistor_SMD:R_0603_1608Metric,yes,stage B feedback
+C210,1nF,Samsung CL10B102KB8NNNC 0603 1nF 50V X7R,C1588,Capacitor_SMD:C_0603_1608Metric,yes,"stage B low-pass, 16 kHz"
+R210,1k,0603 1k 1%,C21190,Resistor_SMD:R_0603_1608Metric,yes,
+C211,2.2uF,0603 2.2uF 16V X5R,C23630,Capacitor_SMD:C_0603_1608Metric,yes,AC gain only; 72 Hz low cut
+JP201,LOW GAIN,solder jumper (PCB only),,Jumper:SolderJumper-2_P1.3mm_Open_Pad1.0x1.5mm,yes,"open = 42 dB total (default), bridged = 33.5 dB (puts R211 across R209) for a hot mic or a loud cabin"
+R211,4.7k,0603 4.7k 1%,C23162,Resistor_SMD:R_0603_1608Metric,yes,
+C212,1uF,0603 1uF 50V X5R (Murata GRM188R61H105KAALD),C77386,Capacitor_SMD:C_0603_1608Metric,yes,"ADC input coupling (60k input, 2.7 Hz)"
+C213,1uF,0603 1uF 50V X5R (Murata GRM188R61H105KAALD),C77386,Capacitor_SMD:C_0603_1608Metric,yes,same signal on the right input; the HAL may use either
+U202,PCM1808PWR,TI PCM1808PWR 24-bit 96 kHz stereo ADC (Mouser 595-PCM1808PWR),C55513,Package_SO:TSSOP-14_4.4x5mm_P0.65mm,yes,"slave mode (MD1/MD0 low), I2S (FMT low), SCKI = 256 fs from VIM3 pin 30, BCK 64 fs; pinout from TI SLES177B"
+C214,10uF,0805 10uF 25V X5R,C15850,Capacitor_SMD:C_0805_2012Metric,yes,VREF decoupling (datasheet: 0.1 uF + 10 uF)
+C215,100nF,0603 100nF 50V X7R,C14663,Capacitor_SMD:C_0603_1608Metric,yes,
+C216,100nF,0603 100nF 50V X7R,C14663,Capacitor_SMD:C_0603_1608Metric,yes,at U202 VCC
+C217,100nF,0603 100nF 50V X7R,C14663,Capacitor_SMD:C_0603_1608Metric,yes,at U202 VDD
+C218,10uF,0805 10uF 25V X5R,C15850,Capacitor_SMD:C_0805_2012Metric,yes,at U202 VDD
+R212,33Ω,0603 33 1%,C23140,Resistor_SMD:R_0603_1608Metric,yes,source termination for the data line to the VIM3

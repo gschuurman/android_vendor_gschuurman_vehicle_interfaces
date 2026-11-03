@@ -1,0 +1,2 @@
+del /BB_AGND F 33.88 71.375 33.88 72.35
+delvia /BB_AGND 33.88 72.35
