@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Audiomodule rev 0.4</title>
+<style>
+/* Layout: one narrow bench card per step, a multimeter-style readout for the expected value, progress rail on top */
+:root{
+  --bg:#eef1ee; --panel:#ffffff; --fg:#1b2420; --muted:#5d6b64; --line:#d3dbd6;
+  --accent:#0f6e5a; --accent-fg:#ffffff;
+  --lcd-bg:#c9d6a8; --lcd-fg:#1f2a12;
+  --ok:#1f7a3d; --bad:#b3261e; --warn:#8a5a00; --skip:#6b7280;
+  --red:#c62828; --black:#222;
+  --sans:system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#121715; --panel:#1b2220; --fg:#e4ebe7; --muted:#9aa9a1; --line:#2e3a35;
+  --accent:#3fbf9c; --accent-fg:#0b1512; --lcd-bg:#2c3a1c; --lcd-fg:#d6f0a0;
+  --ok:#5cc983; --bad:#ff8a80; --warn:#e8b14a; --skip:#9ca3af; --red:#ff6b6b; --black:#cfd6d2; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#121715; --panel:#1b2220; --fg:#e4ebe7; --muted:#9aa9a1; --line:#2e3a35;
+  --accent:#3fbf9c; --accent-fg:#0b1512; --lcd-bg:#2c3a1c; --lcd-fg:#d6f0a0;
+  --ok:#5cc983; --bad:#ff8a80; --warn:#e8b14a; --skip:#9ca3af; --red:#ff6b6b; --black:#cfd6d2; color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font-family:var(--sans);font-size:16px;line-height:1.5}
+.wrap{max-width:720px;margin:0 auto;padding-block:20px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:16px}
+h1{font-size:1.4rem;margin:0;text-wrap:balance}
+h2{font-size:1.2rem;margin:0;text-wrap:balance}
+p{margin:0}
+.sub{color:var(--muted);font-size:.95rem}
+.tabs{display:flex;gap:8px;flex-wrap:wrap}
+.tab{font:inherit;font-weight:600;padding:8px 14px;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--fg);cursor:pointer}
+.tab[aria-pressed="true"]{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+.rail{display:flex;gap:4px;flex-wrap:wrap}
+.dot{width:22px;height:8px;border-radius:4px;background:var(--line);border:0;padding:0;cursor:pointer}
+.dot.ok{background:var(--ok)}.dot.bad{background:var(--bad)}.dot.skip{background:var(--skip)}
+.dot.cur{outline:2px solid var(--accent);outline-offset:2px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:20px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.eyebrow{font-size:.78rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.row{display:grid;grid-template-columns:120px 1fr;gap:6px 12px;align-items:baseline}
+.row dt{color:var(--muted);font-size:.9rem}
+.row dd{margin:0;min-width:0}
+@media (max-width:480px){.row{grid-template-columns:1fr}.row dt{margin-top:6px}}
+.probe{font-family:var(--mono);font-weight:600;padding:1px 6px;border-radius:4px;border:2px solid currentColor;white-space:nowrap}
+.probe.r{color:var(--red)}.probe.b{color:var(--black)}
+code,.mono{font-family:var(--mono);font-size:.92em}
+.lcd{background:var(--lcd-bg);color:var(--lcd-fg);font-family:var(--mono);border-radius:8px;padding:12px 14px;display:flex;flex-direction:column;gap:2px}
+.lcd .big{font-size:1.35rem;font-weight:600;font-variant-numeric:tabular-nums}
+.lcd .small{font-size:.85rem;opacity:.85}
+.fail{border-left:4px solid var(--bad);padding:8px 12px;background:color-mix(in srgb,var(--bad) 8%,var(--panel));border-radius:0 8px 8px 0}
+.note{border-left:4px solid var(--warn);padding:8px 12px;background:color-mix(in srgb,var(--warn) 8%,var(--panel));border-radius:0 8px 8px 0}
+label{font-size:.9rem;color:var(--muted)}
+input[type=text]{font:inherit;font-family:var(--mono);width:100%;box-sizing:border-box;padding:8px 10px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--fg)}
+.btns{display:flex;gap:8px;flex-wrap:wrap}
+.btn{font:inherit;font-weight:600;padding:10px 16px;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--fg);cursor:pointer}
+.btn.ok{background:var(--ok);border-color:var(--ok);color:#fff}
+.btn.bad{background:var(--bad);border-color:var(--bad);color:#fff}
+.btn:disabled{opacity:.45;cursor:default}
+.meta{font-size:.85rem;color:var(--muted)}
+.meta code{font-size:.85rem;overflow-wrap:anywhere}
+code{overflow-wrap:anywhere}
+@media print{.tabs,.rail,.btns,.nav{display:none}}
+.btn:focus-visible,.tab:focus-visible,.dot:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.nav{display:flex;justify-content:space-between;gap:8px}
+table{border-collapse:collapse;width:100%;font-size:.92rem}
+td,th{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}
+.tw{overflow-x:auto}
+.st-ok{color:var(--ok);font-weight:600}.st-bad{color:var(--bad);font-weight:600}.st-skip{color:var(--skip)}
+pre{white-space:pre-wrap;font-family:var(--mono);font-size:.85rem;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px;margin:0;max-height:240px;overflow:auto}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header style="display:flex;flex-direction:column;gap:6px">
+    <h1 id="title"></h1>
+    <p class="sub" id="sub"></p>
+    <p class="meta" id="meta"></p>
+  </header>
+  <div class="tabs" id="tabs" role="group" aria-label="Fase"></div>
+  <div class="rail" id="rail" aria-label="Stappen"></div>
+  <main id="view"></main>
+</div>
+<script>
+/* Generated by PCB/wizard/build.py from PCB/wizard/boards/audio_rev04.js -- edit that file, not this one. */
+const P = (c,t)=>`<span class="probe ${c}">${t}</span>`;
+const R = t=>P('r',t), B = t=>P('b',t);
+// out: rev0.4/audio/WIZARD.html
+// Bring-up wizard data. Rebuild the page with: python3 PCB/wizard/build.py
+const BOARD = {
+  title: 'Audiomodule rev 0.4',
+  key: 'audio-rev04',
+  meta: `Ontwerp: <code>PCB/rev0.4/audio/carradio_audio_rev04.kicad_pcb</code> (gebruikt in de rev 0.6-set). Header J24 zit aan de onderkant. Pin 1 is het vierkante pad.`,
+  tabs: [
+  {id:'audm', name:"Multimeter (zonder voeding)", next:"Ga door met \"Eerste keer voeden\", met stroombegrenzing.", steps:[
+ {t:"Voorbereiding",info:true,body:`
+  <p>Audiomodule los, niets aangesloten. Header J24 zit aan de <b>onderkant</b>; pin 1 is het <b>vierkante</b> pad. GND-pinnen: 3, 4, 6, 15 en 16. Deze wizard gebruikt pin 3.</p>
+  <p>Kijk eerst met de loep naar de pinnen van <b>U10</b> en <b>U11</b> (PCM5102A, TSSOP-20) en of <b>U8</b> en <b>U9</b> (LP5907) goed om zitten.</p>
+  <p>Multimeter op <b>Ω</b>, pennen tegen elkaar: bijna 0 Ω.</p>`},
+ {t:"GND controleren",setting:"piepstand",red:"J24 pin 3",black:"J24 pin 4",exp:"≈ 0 Ω (piept)",small:"",
+  fail:"Pin 3 of 4 slecht gesoldeerd."},
+ {t:"5 V-ingang naar GND",setting:"Ω",red:"J24 pin 1",black:"J24 pin 3",exp:"loopt op → hoog",small:"C18, C20 en de ingangen van U8/U9",
+  fail:"Onder 100 Ω: kijk naar C18, C20 en de pinnen 1–3 van U8 en U9."},
+ {t:"Pin 1 en 2 samen",setting:"piepstand",red:"J24 pin 1",black:"J24 pin 2",exp:"≈ 0 Ω (piept)",small:"",
+  fail:"Pin 1 of 2 slecht gesoldeerd."},
+ {t:"3,3 V analoog",setting:"Ω",red:"hete pad van C28",black:"J24 pin 3",exp:"loopt op → hoger dan ~1 kΩ",small:"uitgang U8, pinnen 1 en 8 van beide DAC's",
+  pre:"C28 is de 10 µF naast U8, bovenaan.",
+  fail:"Onder 100 Ω: brug bij U10/U11 pin 1 of 8, of C25, C26, C35, C36, C38."},
+ {t:"3,3 V digitaal",setting:"Ω",red:"hete pad van C29",black:"J24 pin 3",exp:"loopt op → hoger dan ~1 kΩ",small:"uitgang U9, pin 20 van beide DAC's",
+  fail:"Onder 100 Ω: brug bij U10/U11 pin 20, of C27, C37, C39."},
+ {t:"5 V niet aan 3,3 V",setting:"Ω",red:"J24 pin 1",black:"hete pad van C28, daarna C29",exp:"hoger dan ~1 kΩ",small:"",
+  fail:"Laag: brug tussen in- en uitgang bij U8 of U9, of een LDO zit gedraaid."},
+ {t:"Interne 1,8 V",setting:"Ω",red:"hete pad van C24, daarna C34",black:"J24 pin 3",exp:"hoger dan ~100 Ω",small:"LDOO-pin 18 van U10 en U11",
+  fail:"Laag: brug bij pin 18/19 van die DAC, of een defecte C24/C34. Op het eerste bord was C34 (U11) kortgesloten; til één kant van de condensator op om het verschil te zien. Vervanging: 1 µF 0603 (C77386)."},
+ {t:"Laadpomp",setting:"Ω",red:"hete pad van C23, daarna C33",black:"J24 pin 3",exp:"niet 0 Ω",small:"VNEG, pin 5",
+  fail:"0 Ω: brug bij pin 3–5 van die DAC."},
+ {t:"Pompcondensatoren",setting:"Ω",red:"één pad van C22, daarna C32",black:"ander pad van dezelfde condensator",exp:"niet 0 Ω",small:"CAPP–CAPM, pin 2 en 4",
+  fail:"0 Ω: brug tussen pin 2, 3 en 4 van die DAC."},
+ {t:"Lijnuitgangen",setting:"Ω",red:"J24 pin 17, 18, 19 en 20 om de beurt",black:"J24 pin 3",exp:"niet 0 Ω",small:"FL, FR, RL, RR",
+  fail:"0 Ω: brug bij C30, C31, C40 of C41 (2,2 nF)."},
+ {t:"Serieweerstanden",setting:"Ω",red:"één pad van R48, R49, R50, R51",black:"ander pad",exp:"≈ 470 Ω elk",small:"",
+  fail:"OL: weerstand slecht gesoldeerd. Veel lager: brug."},
+ {t:"I2S-lijnen",setting:"Ω",red:"J24 pin 5, 7, 9 en 10 om de beurt",black:"J24 pin 3",exp:"niet 0 Ω",small:"pin 9 en 10 onderling: hoog",
+  fail:"0 Ω: brug bij pin 13–16 van U10 of U11."},
+ {t:"Mute-lijn",setting:"Ω",red:"J24 pin 12 (XSMT)",black:"J24 pin 3",exp:"niet 0 Ω",small:"de pull-down zit op het main board",
+  fail:"0 Ω: brug bij pin 17 van U10 of U11. De DAC's blijven dan altijd gedempt."},
+]},
+  {id:'audp', name:"Eerste keer voeden", next:"De audiomodule is klaar.", steps:[
+ {t:"Aansluiten op 5 V",info:true,body:`
+  <p>Doe dit pas als alle multimetermetingen van de audiomodule kloppen. Module los, niets aangesloten.</p>
+  <p>Labvoeding <b>uit</b>. Stel in op <b>5,0 V</b> en een stroomgrens van <b>100 mA</b>. Plus op <b>J24 pin 1</b>, min op <b>J24 pin 3</b>.</p>`},
+ {t:"Inschakelen",setting:"display van de labvoeding",exp:"minder dan ~50 mA",small:"zonder I2S-klok staan de DAC's in rust",
+  fail:"Op de stroomgrens: meteen uit, voel of U8, U9, U10 of U11 warm wordt en meld het."},
+ {t:"3,3 V analoog",setting:"V DC",red:"hete pad van C28",black:"J24 pin 3",exp:"3,25 – 3,35 V",small:"U8",
+  fail:"0 V: U8 (pin 3 is EN, hoort aan 5 V). Iets anders: meld de waarde."},
+ {t:"3,3 V digitaal",setting:"V DC",red:"hete pad van C29",black:"J24 pin 3",exp:"3,25 – 3,35 V",small:"U9",
+  fail:"0 V: U9."},
+ {t:"Interne 1,8 V",setting:"V DC",red:"hete pad van C24, daarna C34",black:"J24 pin 3",exp:"≈ 1,8 V",small:"LDOO van U10 en U11",
+  fail:"0 V bij één DAC: die krijgt geen 3,3 V digitaal (pin 20) of zit slecht gesoldeerd."},
+ {t:"Lijnuitgangen in rust",setting:"V DC",red:"J24 pin 17, 18, 19 en 20 om de beurt",black:"J24 pin 3",exp:"≈ 0 V (binnen ±0,05 V)",small:"de uitgangen zijn rond 0 V gecentreerd",
+  fail:"Een vaste spanning op een uitgang: kijk naar de pinnen 6 en 7 van die DAC en meld de waarde."},
+ {t:"Op het main board",info:true,body:`
+  <p>Voeding uit. Steek de module op <b>J23</b> van het main board en zet hem vast op standoff <b>H6</b>. Sluit de VIM3 aan met de lintkabel op J2, zekering in F4 en JP1 erop (service), zodat de VIM3 aan blijft.</p>
+  <p>Start Android. De firmware haalt de mute eraf zodra de VHAL verbinding heeft, of 30 seconden nadat de VIM3 is opgestart.</p>`},
+ {t:"Mute eraf",setting:"V DC",red:"niet-GND-kant van R47 (rechts van de hub U13)",black:"GND",exp:"≈ 3 V",small:"DAC_XSMT; 0 V = gedempt",
+  fail:"0 V na een minuut: de firmware houdt de DAC's gedempt. Meld het; dan kijken we naar de VHAL-verbinding."},
+ {t:"Laadpomp onder klok",setting:"V DC",red:"hete pad van C23",black:"GND",exp:"negatief, ≈ −3 V",small:"speel iets af, zodat er een I2S-klok is",
+  fail:"0 V terwijl er geluid speelt: de DAC krijgt geen klok (BCLK of LRCK, J23 pin 5 en 7)."},
+ {t:"Testtoon voor",setting:"V AC",red:"J8 pin 3 (FL), daarna pin 4 (FR)",black:"J8 pin 5 (LINE_GND)",exp:"≈ 0,5 – 2 V AC",small:"1 kHz-toon, volume hoog; volle schaal is 2,1 V",
+  fail:"0 V: kijk welke kant ontbreekt. Beide weg: I2S-data (J23 pin 9), de audio-uitvoer in Android of de mute-stap."},
+ {t:"Testtoon achter",setting:"V AC",red:"J8 pin 1 (RL), daarna pin 2 (RR)",black:"J8 pin 5",exp:"≈ 0,5 – 2 V AC",small:"alleen als Android 4 kanalen naar de tweede DAC stuurt",
+  fail:"Voor werkt en achter niet: meestal software (audio-HAL stuurt DOUT1 niet). Hardware: J23 pin 10 en U11 pin 14."},
+]},
+  ],
+};
+
+
+const STEPS={}, NAMES={}, NEXT={};
+for(const t of BOARD.tabs){STEPS[t.id]=t.steps;NAMES[t.id]=BOARD.title+' – '+t.name;NEXT[t.id]=t.next||'';}
+document.getElementById('title').textContent=BOARD.title;
+document.getElementById('sub').innerHTML=BOARD.sub||'Per fase één stap per scherm. Eerst de multimeter zonder voeding, daarna pas voeden met stroombegrenzing. Je antwoorden blijven bewaard in deze browser.';
+document.getElementById('meta').innerHTML=BOARD.meta||'';
+document.getElementById('tabs').innerHTML=BOARD.tabs.map(t=>`<button class="tab" data-m="${t.id}">${t.name}</button>`).join('');
+const KEY='wizard-'+BOARD.key;
+let state={m:BOARD.tabs[0].id,i:{},res:{}};
+try{const s=JSON.parse(localStorage.getItem(KEY)||'null');if(s&&s.res)state=Object.assign(state,s);}catch(e){}
+for(const m in STEPS){state.i[m]??=0;state.res[m]??={};}
+if(!STEPS[state.m])state.m=BOARD.tabs[0].id;
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){}};
+
+function rail(){
+  const list=STEPS[state.m], r=state.res[state.m];
+  document.getElementById('rail').innerHTML=list.map((s,k)=>{
+    const st=r[k]?.s||''; return `<button class="dot ${st} ${k===state.i[state.m]?'cur':''}" data-k="${k}" aria-label="Stap ${k+1}: ${s.t}"></button>`}).join('')
+    +`<button class="dot ${state.i[state.m]===list.length?'cur':''}" data-k="${list.length}" aria-label="Overzicht" style="width:34px"></button>`;
+}
+function render(){
+  document.querySelectorAll('.tab').forEach(b=>b.setAttribute('aria-pressed',b.dataset.m===state.m));
+  rail();
+  const list=STEPS[state.m], k=state.i[state.m], v=document.getElementById('view');
+  if(k>=list.length){return summary(v,list)}
+  const s=list[k], r=state.res[state.m][k]||{};
+  const head=`<div class="eyebrow">Stap ${k+1} van ${list.length}</div><h2>${s.t}</h2>`;
+  if(s.info){
+    v.innerHTML=`<section class="card">${head}${s.body}<div class="nav"><button class="btn" id="prev" ${k===0?'disabled':''}>Vorige</button><button class="btn ok" id="next">${k===0?'Begin':'Verder'}</button></div></section>`;
+    document.getElementById('next').onclick=()=>{state.res[state.m][k]={s:'ok'};go(1)};
+    document.getElementById('prev').onclick=()=>go(-1);return;
+  }
+  v.innerHTML=`<section class="card">${head}
+    ${s.pre?`<p class="sub">${s.pre}</p>`:''}
+    <dl class="row">
+      <dt>${s.red?'Meterstand':'Kijk op'}</dt><dd>${s.setting}</dd>
+      ${s.red?`<dt>Rode pen</dt><dd>${R(s.red)}</dd>`:''}
+      ${s.black?`<dt>Zwarte pen</dt><dd>${B(s.black)}</dd>`:''}
+    </dl>
+    <div class="lcd" aria-label="Verwacht"><span class="small">VERWACHT</span><span class="big">${s.exp}</span>${s.small?`<span class="small">${s.small}</span>`:''}</div>
+    <div><label for="val">Gemeten waarde (optioneel)</label><input type="text" id="val" value="${(r.v||'').replace(/"/g,'&quot;')}" placeholder="bijv. 118k of OL"></div>
+    <div class="btns">
+      <button class="btn ok" id="b-ok">Klopt</button>
+      <button class="btn bad" id="b-bad">Wijkt af</button>
+      <button class="btn" id="b-skip">Overslaan</button>
+    </div>
+    <div class="fail" id="failbox" ${r.s==='bad'?'':'hidden'}><b>Wat nu:</b> ${s.fail}<br><span class="sub">Los dit op en meet opnieuw, of ga verder en vermeld het in het overzicht.</span>
+      <div class="btns" style="margin-top:8px"><button class="btn" id="b-cont">Toch verder</button></div></div>
+    <div class="nav"><button class="btn" id="prev" ${k===0?'disabled':''}>Vorige</button><span></span></div>
+  </section>`;
+  const val=document.getElementById('val');
+  const mark=st=>{state.res[state.m][k]={s:st,v:val.value.trim()};save();};
+  val.oninput=()=>{state.res[state.m][k]=Object.assign({},state.res[state.m][k],{v:val.value.trim()});save()};
+  document.getElementById('b-ok').onclick=()=>{mark('ok');go(1)};
+  document.getElementById('b-skip').onclick=()=>{mark('skip');go(1)};
+  document.getElementById('b-bad').onclick=()=>{mark('bad');rail();document.getElementById('failbox').hidden=false};
+  document.getElementById('b-cont').onclick=()=>go(1);
+  document.getElementById('prev').onclick=()=>go(-1);
+}
+function summary(v,list){
+  const r=state.res[state.m], name=NAMES[state.m];
+  const lab={ok:'klopt',bad:'wijkt af',skip:'overgeslagen'};
+  const esc=x=>String(x).replace(/&/g,'&amp;').replace(/</g,'&lt;');
+  const rows=list.map((s,k)=>s.info?'':`<tr><td>${k+1}</td><td>${s.t}</td><td class="st-${r[k]?.s||'skip'}">${lab[r[k]?.s]||'nog niet'}</td><td class="mono">${esc(r[k]?.v||'')}</td></tr>`).join('');
+  const bad=list.filter((s,k)=>!s.info&&r[k]?.s==='bad').length, open=list.filter((s,k)=>!s.info&&!r[k]).length;
+  const txt=`${name}\n`+list.map((s,k)=>s.info?null:`${k+1}. ${s.t}: ${lab[r[k]?.s]||'nog niet'}${r[k]?.v?` (${r[k].v})`:''}`).filter(Boolean).join('\n');
+  const verdict = bad? `${bad} meting(en) wijken af. Los die eerst op voordat je verder gaat.` :
+                 open? `Nog ${open} meting(en) open.` : `Alles klopt. ${NEXT[state.m]}`;
+  v.innerHTML=`<section class="card"><div class="eyebrow">Overzicht</div><h2>${name}</h2><p>${verdict}</p>
+   <div class="tw"><table><thead><tr><th>#</th><th>Meting</th><th>Resultaat</th><th>Waarde</th></tr></thead><tbody>${rows}</tbody></table></div>
+   <p class="sub">Kopieer dit en plak het in de chat, dan kijk ik mee.</p>
+   <pre id="txt">${esc(txt)}</pre>
+   <div class="btns"><button class="btn ok" id="copy">Kopieer resultaten</button><button class="btn" id="reset">Opnieuw beginnen</button><button class="btn" id="back">Vorige</button></div>
+   <p class="sub" id="copied" aria-live="polite"></p></section>`;
+  document.getElementById('copy').onclick=()=>{const t=document.getElementById('txt').textContent;
+    (navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>{document.getElementById('copied').textContent='Gekopieerd.'})
+    .catch(()=>{const rg=document.createRange();rg.selectNodeContents(document.getElementById('txt'));const sel=getSelection();sel.removeAllRanges();sel.addRange(rg);document.getElementById('copied').textContent='Tekst geselecteerd; kopieer met Ctrl+C.'})};
+  document.getElementById('reset').onclick=()=>{state.res[state.m]={};state.i[state.m]=0;save();render()};
+  document.getElementById('back').onclick=()=>go(-1);
+}
+function go(d){const n=STEPS[state.m].length;state.i[state.m]=Math.max(0,Math.min(n,state.i[state.m]+d));save();render();window.scrollTo({top:0})}
+document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{state.m=b.dataset.m;save();render()});
+document.getElementById('rail').onclick=e=>{const k=e.target.dataset?.k;if(k!==undefined){state.i[state.m]=+k;save();render()}};
+render();
+</script>
+</body>
+</html>

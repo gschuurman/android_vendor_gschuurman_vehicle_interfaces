@@ -82,3 +82,8 @@ setup. Up to rev 0.5, Q1 (AO3400A) pulled J5 pin 1 to the board's GND.
 - Main board: DRC 0 unconnected, no errors (warnings: silkscreen, unused fan-out stubs); schematic parity same as rev 0.5.
 - USB module rev 0.6: DRC 0 unconnected, no errors. GNSS module: clean. Audio module: one starved-thermal warning on
   the through-hole header J24 pin 3 (fine for hand soldering).
+
+## Bring-up wizards
+
+Step-by-step bench wizards (multimeter first, then first power): `main/WIZARD.html`, `usb/WIZARD.html`,
+`../rev0.4/gnss/WIZARD.html` and `../rev0.4/audio/WIZARD.html`. See `../wizard/README.md`.

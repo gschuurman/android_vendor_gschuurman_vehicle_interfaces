@@ -1,0 +1,198 @@
+// out: rev0.6/main/WIZARD.html
+// Bring-up wizard data. Rebuild the page with: python3 PCB/wizard/build.py
+const BOARD = {
+  title: 'Main board rev 0.6',
+  key: 'main-rev06',
+  meta: `Ontwerp: <code>PCB/rev0.6/main/carradio_peripheral_rev06.kicad_pcb</code>. Pin 1 van een connector is het vierkante pad.`,
+  tabs: [
+  {id:'mainm', name:"Multimeter (zonder voeding)", next:"Ga door met het tabblad \"Eerste keer voeden\", met stroombegrenzing.", steps:[
+ {t:"Voorbereiding",info:true,body:`
+  <p>Main board los op tafel: geen modules, geen VIM3, geen scherm, geen kabels. <b>Haal de steekzekering uit F4</b> als die er al in zit; die komt pas bij het tweede deel van het voeden.</p>
+  <p>Kijk eerst met de loep naar bruggen tussen pinnen bij <b>U20</b> (RP2350B), <b>U12</b> (TPS55288), <b>U13</b> (hub), <b>U1</b> en de schermconnector <b>J14</b>.</p>
+  <p>GND-punt: het montagegat <b>H3</b> linksonder bij J1, of <b>J18 pin 2</b>. Pin 1 van een connector is het <b>vierkante</b> pad. Multimeter op <b>Ω</b>, pennen tegen elkaar: bijna 0 Ω.</p>
+  <div class="note">Lessen van het eerste bord: <b>U13</b> (CH334R) zat 180° gedraaid, pin 1 hoort linksboven. <b>U2</b> pin 4 was een open las (pad 3,3 V, poot 0 V): kijk ook pin 4 van U3, U4 en U5 na. De LEDs <b>D10</b> en <b>D16</b> gingen dood door hete lucht; soldeer ze met de bout, kathode aan de dichte kant van de silkscreen-haak.</div>
+  <div class="note">"Hete pad" betekent hieronder: het pad van een condensator dat níet 0 Ω naar GND geeft. Een meting die langzaam oploopt is normaal (condensator laadt op).</div>`},
+ {t:"GND controleren",setting:"piepstand",red:"J18 pin 2",black:"montagegat H3",exp:"≈ 0 Ω (piept)",small:"",
+  fail:"Geen verbinding: J18 pin 2 slecht gesoldeerd. Gebruik dan H3 of een ander montagegat als GND."},
+ {t:"Accu-ingang naar GND",setting:"Ω",red:"J1 pin 4 (accu +12 V)",black:"GND",exp:"loopt op → hoog (100 kΩ of meer)",small:"via F1 en D1 naar C1; zonder zekering in F4",
+  fail:"Onder 1 kΩ: kijk of D2 (SMBJ22A, bij J22) goed om zit, naar C1/C2 en naar de pinnen 4 en 5 van U1. Niet voeden."},
+ {t:"Diode D1",setting:"diodestand",red:"J1 pin 4",black:"hete pad van C1",exp:"≈ 0,15 – 0,35 V",small:"Schottky SS34 in geleiding; pennen omgedraaid: OL",
+  fail:"OL in beide richtingen: F1 (PTC) of D1 slecht gesoldeerd. Ongeveer 0 V: D1 kortgesloten of overbrugd. Klein getal alleen als de pennen omgedraaid staan: D1 zit verkeerd om."},
+ {t:"Accuspanning na D1",setting:"Ω",red:"hete pad van C1",black:"GND",exp:"loopt op → 0,3 – 1,2 MΩ",small:"R10 + R11 = 1,22 MΩ, U1 en D2 parallel",
+  fail:"Onder 10 kΩ: kijk naar D2, C1, C2, R11 en U1. Niet voeden."},
+ {t:"TVS D2 richting",setting:"diodestand",red:"GND",black:"hete pad van C1",exp:"≈ 0,6 – 0,8 V",small:"D2 geleidt van GND naar de 12 V",
+  fail:"OL: D2 zit verkeerd om, of is niet gesoldeerd. Verkeerd om sluit hij de 12 V kort zodra je voedt. De streep (kathode) hoort aan de 12 V-kant."},
+ {t:"5 V altijd-aan (+5V_AON)",setting:"Ω",red:"J10 pin 8",black:"GND",exp:"loopt op → tientallen kΩ tot ~124 kΩ",small:"R1 + R2 = 124 kΩ, met de LDO's en de hub parallel",
+  pre:"J10 is de K-line-socket rechtsboven. Je mag ook het hete pad van C4 (22 µF bij L1) nemen.",
+  fail:"Onder 1 kΩ: kijk naar C4, C12, C61, C80, U19, U6 en pin 12 van U13."},
+ {t:"3,3 V voor de MCU",setting:"Ω",red:"J10 pin 1",black:"GND",exp:"loopt op → hoger dan ~1 kΩ",small:"RP2350B, flash U21, optocouplers",
+  fail:"Onder 100 Ω: brug bij de voedingspinnen van U20, bij U21 of U19 pin 5. Kijk ook naar C81, C82 en de 100 nF's rond U20."},
+ {t:"5 V niet aan 3,3 V",setting:"Ω",red:"J10 pin 8 (5 V)",black:"J10 pin 1 (3,3 V)",exp:"hoger dan ~1 kΩ",small:"",
+  fail:"Laag: brug bij U19 (AP2112K) of U6 (LP5907) tussen in- en uitgang."},
+ {t:"1,1 V kern van de MCU",setting:"Ω",red:"hete pad van C83",black:"GND",exp:"hoger dan ~100 Ω",small:"interne regelaar van de RP2350B via L5",
+  pre:"C83 is de 4,7 µF net boven de RP2350B (U20).",
+  fail:"Onder 10 Ω: brug bij de VREG- of DVDD-pinnen van U20, of C93–C95."},
+ {t:"GPS-voeding",setting:"Ω",red:"J27 pin 1",black:"GND",exp:"loopt op → hoog",small:"uitgang van U6, C13",
+  fail:"Laag: kijk naar U6 en C13."},
+ {t:"Hub 3,3 V",setting:"Ω",red:"hete pad van C62",black:"GND",exp:"hoger dan ~1 kΩ",small:"interne regelaar van U13 (CH334R)",
+  fail:"Onder 100 Ω: kijk naar C62, C63 en pin 13 van U13."},
+ {t:"12 V voor de VIM3-voeding",setting:"Ω",red:"J25 pin 1",black:"GND",exp:"loopt op → hoog",small:"C48 100 µF laadt; J25 is de USB-modulesocket",
+  fail:"Onder 10 Ω: kijk naar D14 (richting), C48–C50, Q11 en pin 3 van U12. Niet voeden."},
+ {t:"5 V voor de VIM3 (+5V_SYS)",setting:"Ω",red:"J18 pin 1",black:"GND",exp:"≈ 15 – 20 kΩ",small:"vaste weg via R91 + R92 = 20 kΩ",
+  fail:"Onder 1 kΩ: kijk naar C46, C47 en de pinnen 4–6 van J14 (fijne pitch, brug met pin 7 of 8). OL of MΩ: R91 of R92 niet gesoldeerd."},
+ {t:"12 V niet aan 5 V",setting:"Ω",red:"J25 pin 1",black:"J18 pin 1",exp:"hoog (kΩ of meer)",small:"",
+  fail:"Laag: brug rond U12, Q11 of L3. Zeker niet voeden: de 12 V zou op de VIM3 komen."},
+ {t:"Opto-dioden D6, D7, D11",setting:"diodestand",red:"GND",black:"streepkant van D6, D7 en D11 om de beurt",exp:"≈ 0,5 – 0,7 V elk",small:"pennen omgedraaid: ≈ 1,0 – 1,2 V (LED van de optocoupler)",
+  pre:"D6 zit bij U2 (ACC), D7 en D11 onderaan bij J1 (verlichting, achteruit). Meet op het pad aan de streepkant.",
+  fail:"OL en omgedraaid ≈ 0,6 V: die diode zit verkeerd om. Omgedraaid ook OL: de optocoupler (U2, U3 of U4) of zijn weerstand is niet goed gesoldeerd."},
+ {t:"Handrem-diode D12",setting:"diodestand",red:"pad van D12 zonder streep",black:"J1 pin 2",exp:"≈ 0,5 – 0,7 V",small:"pennen omgedraaid: OL",
+  fail:"OL: D12 zit verkeerd om of is niet gesoldeerd."},
+ {t:"Auto-ingangen niet aan GND",setting:"Ω",red:"J1 pin 1, 2, 3, 6 en 7 om de beurt",black:"GND",exp:"niet 0 Ω",small:"kΩ of hoger is goed",
+  fail:"0 Ω op een pin: brug bij J1 of bij de TVS-diode van die lijn (D5 voor ACC, D13 voor de versterker-remote)."},
+ {t:"USB naar de VIM3",setting:"Ω",red:"J2 pin 7 (D+)",black:"J2 pin 5 (D-)",exp:"hoog / OL",small:"ook elk naar GND: geen 0 Ω",
+  fail:"Brug tussen D+ en D-: kijk bij U13 pinnen 10 en 11."},
+ {t:"Reset-knop",setting:"Ω",red:"J22 pin 4 (RUN)",black:"GND",exp:"hoog; met SW2 ingedrukt 0 Ω",small:"",
+  fail:"Altijd 0 Ω: de MCU zit vast in reset; kijk naar SW2 en C101. Nooit 0 Ω bij indrukken: SW2 slecht gesoldeerd."},
+]},
+  {id:'mainp', name:"Eerste keer voeden", next:"Ga door met \"Modules erop\".", steps:[
+ {t:"Aansluiten op 6 V",info:true,body:`
+  <p>Doe dit pas als alle multimetermetingen van het main board kloppen. Zekering F4 <b>eruit</b>, jumper JP1 <b>eruit</b>, geen modules, geen VIM3, geen scherm.</p>
+  <p>Labvoeding <b>uit</b>. Stel in op <b>6,0 V</b> en een stroomgrens van <b>150 mA</b>. Plus op <b>J1 pin 4</b>, min op <b>J1 pin 8</b> (of H3).</p>
+  <div class="note">Eerst 6 V, net als bij de USB-module: als de 5 V-buck U1 niet regelt, komt er dan hooguit 6 V op de 5 V-rail en niet 12 V. Bij te veel stroom of iets wat warm wordt: meteen uit.</div>`},
+ {t:"Inschakelen (6 V)",setting:"display van de labvoeding",exp:"≈ 30 – 90 mA",small:"lege RP2350B en de hub starten op",
+  fail:"Op de stroomgrens: meteen uit, voel welk onderdeel warm werd (U1, L1, U19, U13, U20) en meld het hier."},
+ {t:"5 V altijd-aan",setting:"V DC",red:"J10 pin 8",black:"GND",exp:"≈ 5,0 – 5,2 V",small:"bij 6 V in kan hij net iets lager zijn",
+  fail:"Rond 6 V (gelijk aan de ingang): U1 regelt niet. Meteen uit; kijk naar R1, R2 en U1 pin 3. 0 V: U1 start niet (pinnen 1, 4, 5, 6, C3)."},
+ {t:"3,3 V voor de MCU",setting:"V DC",red:"J10 pin 1",black:"GND",exp:"3,25 – 3,35 V",small:"U19 AP2112K",
+  fail:"0 V of laag: kijk naar U19 (pin 3 is EN, hoort aan 5 V)."},
+ {t:"1,1 V kern",setting:"V DC",red:"hete pad van C83",black:"GND",exp:"≈ 1,1 V",small:"",
+  fail:"0 V: de interne regelaar van de RP2350B start niet; kijk naar L5 en de VREG-pinnen van U20."},
+ {t:"Hub 3,3 V",setting:"V DC",red:"hete pad van C62",black:"GND",exp:"≈ 3,3 V",small:"",
+  fail:"0 V: kijk eerst of U13 goed om zit (pin 1 linksboven; op het eerste bord zat hij 180° gedraaid). Daarna U13 pin 12 (5 V in) en pin 13."},
+ {t:"GPS-voeding nog uit",setting:"V DC",red:"J27 pin 1",black:"GND",exp:"≈ 0 V",small:"de MCU zet hem pas later aan",
+  fail:"3,3 V: EN van U6 hangt hoog; kijk naar R35 (100 kΩ naar GND)."},
+ {t:"Naar 12 V",setting:"display van de labvoeding",exp:"5 V blijft 5,0 – 5,2 V; stroom ≈ 15 – 50 mA",small:"zet de spanning rustig op 12,0 V",
+  fail:"Loopt de 5 V mee omhoog: meteen uit, U1 regelt niet."},
+ {t:"Accuspanning na D1",setting:"V DC",red:"hete pad van C1",black:"GND",exp:"≈ 11,6 – 11,8 V",small:"12 V min de Schottky D1",
+  fail:"Veel lager: F1 of D1. Meld de waarde."},
+ {t:"Accumeting voor de MCU",setting:"V DC",red:"hete pad van C9",black:"GND",exp:"≈ 2,1 V",small:"deler R10/R11",
+  fail:"0 V of ≈ 11 V: R10 of R11 niet goed gesoldeerd."},
+ {t:"Temperatuursensor",setting:"V DC",red:"hete pad van C103",black:"GND",exp:"≈ 1,5 – 1,9 V",small:"NTC TH1 tegen R93, bij kamertemperatuur",
+  fail:"0 V of 3,3 V: TH1 of R93 los of kortgesloten."},
+ {t:"12 V nog niet naar de VIM3-kant",setting:"V DC",red:"J25 pin 1",black:"GND",exp:"≈ 0 V",small:"F4 zit er nog niet in",
+  fail:"12 V zonder zekering: er is een verbinding om F4 heen. Uitzetten en melden."},
+ {t:"USB naar de PC",info:true,body:`
+  <p>Laat de 12 V aan. Neem een doorgeknipte USB-kabel naar de PC (rode draad <b>niet</b> aansluiten, isoleren):</p>
+  <dl class="row"><dt>Groen (D+)</dt><dd>J2 pin 7</dd><dt>Wit (D-)</dt><dd>J2 pin 5</dd><dt>Zwart (GND)</dt><dd>J2 pin 9</dd></dl>
+  <div class="note">Pinnummers zijn die van de print: pin 1 is het vierkante pad, de oneven pinnen (1, 3, 5, 7, 9) zitten in dezelfde rij. Dat is niet de nummering van de VIM3 zelf. Hub 1 krijgt zijn voeding van het bord, dus de 5 V van de PC is niet nodig.</div>`},
+ {t:"Hub en lege MCU op de PC",setting:"Apparaatbeheer en Verkenner",exp:"USB-hub (WCH, VID 1A86) en een schijf RP2350",small:"de lege RP2350B start zelf in BOOTSEL",
+  fail:"Geen hub: D+ en D- omgewisseld, kristal Y1 of U13 pinnen 10, 11, 15, 16. Wel hub, geen RP2350: kristal Y3, R83/R84 (27 Ω) of de USB-pinnen van U20. Houd anders BOOTSEL (SW1) ingedrukt en tik RESET (SW2)."},
+ {t:"Firmware flashen",setting:"Verkenner",exp:"schijf verdwijnt; hub verdwijnt ook",small:"carradio_mcu.uf2 op de RP2350-schijf zetten",
+  pre:"Het bestand <code>carradio_mcu.uf2</code> bouw je uit <code>mcu/firmware</code> in deze repo (zie de README daar). Na het flashen houdt de firmware hub 1 in reset zolang de VIM3 uit staat, dus het is normaal dat alles van de PC verdwijnt.",
+  fail:"Schijf blijft staan of komt terug als RP2350: de firmware start niet. Meld het; we kunnen dan via SWD (J22) kijken."},
+ {t:"ACC-ingang",setting:"V DC",red:"hete pad van C6",black:"GND",exp:"met ACC ≈ 3 V, zonder ≈ 0 V",small:"draadje van J1 pin 4 naar J1 pin 7",
+  pre:"Leg een draadje van J1 pin 4 (12 V) naar pin 7 (ACC), meet, en haal het weer weg. C6 zit helemaal rechts, naast U2. De firmware ziet nu ACC en probeert de VIM3 aan te zetten; zonder zekering in F4 gebeurt er verder niets.",
+  fail:"Altijd 0 V: meet U2 pin 4 op de poot zelf (hoort 3,3 V); op het eerste bord was dat een open las. Daarna F2, D4, R3 en D6. Altijd 3 V: U2 pin 3/4 overbrugd."},
+ {t:"Verlichtingsingang",setting:"V DC",red:"hete pad van C7",black:"GND",exp:"met 12 V op J1 pin 6 ≈ 3 V",small:"",
+  fail:"Kijk naar R5, U3 en D7."},
+ {t:"Achteruit-ingang",setting:"V DC",red:"hete pad van C10",black:"GND",exp:"met 12 V op J1 pin 1 ≈ 3 V",small:"",
+  fail:"Kijk naar R29, U4 en D11."},
+ {t:"Handrem-ingang",setting:"V DC",red:"hete pad van C11",black:"GND",exp:"ACC aan en J1 pin 2 aan GND: ≈ 3 V",small:"pin 2 los: ≈ 0 V",
+  pre:"De handrem schakelt naar massa. Leg ACC aan (pin 4 naar pin 7) en een tweede draadje van J1 pin 2 naar pin 8.",
+  fail:"Kijk naar R31, U5 en D12 (richting)."},
+ {t:"Zekering en service-jumper",info:true,body:`
+  <p>Voeding <b>uit</b>, ACC-draadjes weg. Zet de steekzekering (7,5 A) in <b>F4</b> en de jumper op <b>JP1</b> (SERVICE).</p>
+  <p>Labvoeding 12,0 V, stroomgrens <b>300 mA</b>. De USB-kabel naar de PC mag blijven zitten.</p>
+  <div class="note">Met JP1 houdt de firmware de VIM3-voeding (TPS55288) altijd aan. Er hangt nog niets aan de 5 V.</div>`},
+ {t:"Inschakelen met zekering",setting:"display van de labvoeding",exp:"minder dan ~100 mA",small:"",
+  fail:"Op de stroomgrens: meteen uit. Voel aan Q10, Q11, Q12, L3 en U12 en meld het hier."},
+ {t:"12 V achter Q10",setting:"V DC",red:"J25 pin 1",black:"GND",exp:"≈ 12 V",small:"via de omgekeerde-polariteits-FET Q10",
+  fail:"0 V: kijk naar F4 (zekering goed?) en Q10. Duidelijk lager dan 12 V: Q10 schakelt niet volledig in (R66, D15)."},
+ {t:"5 V voor de VIM3",setting:"V DC",red:"J18 pin 1",black:"GND",exp:"≈ 5,0 – 5,2 V",small:"TPS55288, door de firmware aangezet",
+  fail:"0 V: meet R72 (VIM3_PWR_EN, 100 kΩ pull-down) aan de niet-GND-kant; ≈ 3 V betekent dat de firmware hem aanzet en U12 niet reageert (I2C, pinnen van U12). Boven 5,5 V: meteen uit en melden."},
+ {t:"5 V-meting voor de MCU",setting:"V DC",red:"hete pad van C102",black:"GND",exp:"≈ 2,5 V",small:"de helft van +5V_SYS",
+  fail:"0 V: R91 of R92 los."},
+ {t:"MCU op de PC",setting:"Apparaatbeheer",exp:"hub plus HID-apparaten 2E8A:CA50",small:"vendor-HID en consumer control",
+  fail:"Alleen de hub: de firmware draait niet goed. Niets: hub 1 blijft in reset; meld het."},
+ {t:"Status-LED D16",setting:"kijken",exp:"D16 (groen) knippert of flitst",small:"2 Hz = opstarten, kort flitsen = VIM3 uit, continu = VHAL-verbinding",
+  pre:"D16 zit midden op het bord, 90° gedraaid. Zonder VIM3 en VHAL brandt hij nooit continu.",
+  fail:"Donker: meet D16 in de diodestand (moet zwak oplichten). Licht hij niet op, dan is hij dood of verkeerd om; vervang door een groene 0805 (KT-0805G, C2297) met de bout, kathode aan de dichte kant van de silkscreen-haak."},
+ {t:"Belasting 0,5 A (optioneel)",setting:"V DC",red:"J18 pin 1",black:"GND",exp:"boven 4,9 V",small:"labvoeding ≈ 0,25 A bij 12 V",
+  pre:"Stroomgrens op 1 A. Belast J18 met 10 Ω (minstens 5 W).",
+  fail:"Zakt de spanning ver weg of wordt U12, L3 of Q11/Q12 heet: uitzetten en melden."},
+]},
+  {id:'mainx', name:"Modules erop (USB en GPS)", next:"Ga door met \"VIM3 en scherm\".", steps:[
+ {t:"USB-module erop",info:true,body:`
+  <p>Doe dit na het tabblad "Main board: eerste keer voeden". Voeding <b>uit</b>. Zekering in <b>F4</b>, jumper op <b>JP1</b> (service), USB-kabel naar de PC op J2 zoals eerder (groen pin 7, wit pin 5, zwart pin 9, rood los).</p>
+  <p>Steek de USB-module op <b>J25</b>: het vierkante pad van J26 op de module boven het vierkante pad van J25. GPS- en audiomodule nog niet. Niets in de USB-poorten.</p>
+  <p>Labvoeding <b>12,0 V</b>, stroomgrens <b>1 A</b>.</p>
+  <div class="note">De USB-module gaat aan via dezelfde lijn als de VIM3-voeding (VIM3_PWR_EN op pin 16). Met JP1 houdt de firmware die aan. De pinnen van J26 kun je aan de bovenkant van de module meten.</div>`},
+ {t:"Inschakelen",setting:"display van de labvoeding",exp:"minder dan ~100 mA",small:"main board alleen was 35 mA",
+  fail:"Op de stroomgrens: meteen uit. Voel aan U15, L4 en U16 op de module en meld het hier."},
+ {t:"5 V van de module",setting:"V DC",red:"hete pad van C68 (module)",black:"GND (J26 pin 3)",exp:"5,1 – 5,2 V",small:"de buck U15 wordt nu door het main board aangezet",
+  fail:"0 V: meet J26 pin 16 (EN), die hoort ≈ 3 V te zijn. Is EN goed maar 5 V niet: U15. Meld de waarde."},
+ {t:"Statuslijnen naar de MCU",setting:"V DC",red:"J26 pin 15, 17 en 18 om de beurt",black:"J26 pin 3",exp:"≈ 3,3 V alle drie",small:"PG en FAULT1/2, pull-ups R89/R87/R88 op het main board",
+  fail:"0 V op pin 15: U15 meldt geen power-good of de pin is niet goed doorverbonden. 0 V op 17 of 18: U16 meldt een fout zonder belasting, kijk naar U16 en de poort."},
+ {t:"Tweede hub op de PC",setting:"PowerShell",exp:"twee hubs met VID_1A86",small:"hub 1 op het main board, hub 2 op de module",
+  pre:"In PowerShell: <code>Get-PnpDevice -PresentOnly | Where-Object InstanceId -match 'VID_1A86' | Format-Table Status,FriendlyName,InstanceId</code>",
+  fail:"Maar één hub: hub 2 komt niet op. Meet de hub 3,3 V op de module (hete pad van C76, ≈ 3,3 V) en kijk naar kristal Y2 en U14 pinnen 10, 11, 15, 16. Het upstream-paar loopt via J25 pin 10 (D+) en 12 (D-)."},
+ {t:"USB-stick in J19 en J20",setting:"Verkenner",exp:"stick verschijnt op beide poorten",small:"",
+  fail:"Niets: kijk naar de datapinnen van J19/J20 en U14 pinnen 5–8. Alleen traag: meld het."},
+ {t:"RTL-SDR in J17",setting:"Apparaatbeheer of SDR-programma",exp:"dongle verschijnt en werkt",small:"gevoed uit +5V_SYS via F5",
+  fail:"Geen spanning op J17: F5. Wel spanning maar niet gezien: U14 pinnen 3 en 4."},
+ {t:"Telefoon laden",setting:"labvoeding of USB-meter",exp:"telefoon laadt op J19 en J20",small:"labvoeding ≈ 0,8 – 1 A bij 12 V voor ~10 W",
+  fail:"Laadt niet: meet VBUS op C73/C74. Zakt de 12 V in: stroomgrens van de labvoeding te laag."},
+ {t:"Stroombegrenzing poort 1",setting:"V DC",red:"J26 pin 18 (FAULT1)",black:"J26 pin 3",exp:"zakt naar ≈ 0 V",small:"U16 begrenst op 1,28 – 1,59 A (typisch 1,44 A); J20 blijft 5 V",
+  pre:"Stroomgrens 2 A. Belast J19 heel kort (enkele seconden) met 2,2 Ω, 5 W tussen VBUS en GND. VBUS van J19 zakt naar ≈ 3 V en FAULT1 gaat na ≈ 9 ms laag. Belasting weg: alles herstelt en FAULT1 gaat weer naar 3,3 V.",
+  fail:"FAULT blijft hoog terwijl VBUS zakt: U16 pin 10 of de verbinding naar J26 pin 18. Zakt VBUS niet en wordt de weerstand heet: U16 begrenst niet, meet R77 (39 kΩ)."},
+ {t:"Stroombegrenzing poort 2",setting:"V DC",red:"J26 pin 17 (FAULT2)",black:"J26 pin 3",exp:"zakt naar ≈ 0 V",small:"zelfde test op J20; J19 blijft 5 V",
+  fail:"FAULT blijft hoog: U16 pin 6 of de verbinding naar J26 pin 17."},
+ {t:"GPS-module erop",info:true,body:`
+  <p>Voeding <b>uit</b>. Steek de GPS-module op <b>J27</b> (vierkant pad op vierkant pad) en sluit de antenne aan. De USB-module mag blijven zitten.</p>
+  <div class="note">De MCU zet de 3,3 V voor de GPS (U6) pas aan als de VIM3-voeding aan staat. Met JP1 is dat meteen na het opstarten.</div>`},
+ {t:"Inschakelen",setting:"display van de labvoeding",exp:"≈ 5 – 10 mA meer dan zonder GPS",small:"NEO-M9N ≈ 30 mA plus antenne bij 3,3 V",
+  fail:"Op de stroomgrens: meteen uit en melden."},
+ {t:"GPS-voeding aan",setting:"V DC",red:"J28 pin 1 (bovenkant GPS-module)",black:"J28 pin 3",exp:"3,25 – 3,35 V",small:"U6 LP5907, aangezet door GPIO9",
+  fail:"0 V: meet de EN-pin van U6 (pin 3): ≈ 3 V betekent dat U6 niet werkt, 0 V dat de firmware hem niet aanzet (is de 5 V voor de VIM3 wel aan?)."},
+ {t:"Backup-voeding",setting:"V DC",red:"J28 pin 4 (V_BCKP)",black:"J28 pin 3",exp:"≈ 3,3 V",small:"altijd aan uit +3V3_MCU",
+  fail:"0 V: J27 pin 4 of de headerpin."},
+ {t:"u-blox op de PC",setting:"PowerShell of Apparaatbeheer",exp:"COM-poort met VID_1546",small:"rechtstreeks aan poort 3 van hub 1",
+  pre:"Zelfde PowerShell-commando als bij de hub, maar met <code>VID_1546</code>.",
+  fail:"Niets: J27 pin 7 (D+) en pin 9 (D-) en R102/R103 op de module. Werkte het los wel, dan zit het in de header of in U13 pinnen 3 en 4."},
+ {t:"Fix",setting:"u-center of u-center 2",exp:"positie binnen ~30 s – enkele min",small:"satellieten rond 35 – 45 dBHz",
+  pre:"Antenne buiten of tegen het raam met vrij zicht op de lucht.",
+  fail:"Zwakke signalen: antenne verplaatsen, pigtail controleren. Geen satellieten: meet de antennevoeding (hete pad van C17, ≈ 3 V)."},
+ {t:"PPS (optioneel)",setting:"V DC of scoop",red:"J28 pin 14",black:"J28 pin 3",exp:"knippert 1× per seconde na de fix",small:"met een multimeter zie je de waarde kort verspringen",
+  fail:"Geen puls met fix: NEO-M9N pin 3 of de verbinding naar R40."},
+]},
+  {id:'vim3', name:"VIM3 en scherm", next:"Het main board is klaar.", steps:[
+ {t:"Lintkabel naar de VIM3",info:true,body:`
+  <p>Alles <b>uit</b>. Gebruik een rechte 40-polige IDC-lintkabel: rode streep aan <b>pin 1</b> aan beide kanten. J2 op het main board is gewone IDC-nummering: J2 pin 2k−1 = VIM3 pin k, J2 pin 2k = VIM3 pin 20+k.</p>
+  <p>Op de VIM3 zit pin 1 tegenover pin 21 (pin 1 en 2 zijn 5 V, pin 21 is GND). De VIM3-kant heeft geen sleutel, dus de stekker kan 180° verkeerd. Daarom eerst drie piepmetingen, met de kabel op beide borden en zonder voeding.</p>
+  <div class="note">Haal de PC-draadjes van J2 af voor je de lintkabel aansluit.</div>`},
+ {t:"GND loopt door",setting:"piepstand",red:"VIM3 pin 21 (achterkant van de VIM3-header of de stekker)",black:"montagegat H3",exp:"piept",small:"",
+  fail:"Geen piep: de stekker zit 180° verkeerd op de VIM3, of de kabel is verkeerd geperst. Draai de stekker op de VIM3 om en meet opnieuw."},
+ {t:"5 V loopt door",setting:"piepstand",red:"VIM3 pin 1",black:"J23 pin 1 (audiosocket, VIM3_5V)",exp:"piept",small:"VIM3 pin 1 → J2 pin 1 → J23 pin 1",
+  fail:"Geen piep: kabel verkeerd om of slecht geperst. Niet voeden."},
+ {t:"5 V niet aan GND",setting:"piepstand",red:"VIM3 pin 1",black:"montagegat H3",exp:"geen piep",small:"loopt langzaam op: condensatoren op de VIM3",
+  fail:"Piept: de 5 V van de VIM3 komt op GND. Zeker niet voeden; kabel omdraaien of opnieuw persen."},
+ {t:"VIM3 voeden",info:true,body:`
+  <p>Sluit <b>J18</b> aan op de DC-ingang van de VIM3 (pin 1 = +5V_SYS = plus) en <b>J5</b> op de twee pads van de power-knop van de VIM3. J5 schakelt via de photoMOS U22, dus geïsoleerd van GND.</p>
+  <p>Zekering in <b>F4</b>, jumper op <b>JP1</b>. Labvoeding <b>12,0 V</b>, stroomgrens <b>3 A</b>. Nog geen scherm.</p>
+  <div class="note">Zet de MCU niet in BOOTSEL, reset of flash hem niet terwijl Android draait (R72 is een 100 kΩ pull-down: de VIM3-voeding valt dan weg).</div>`},
+ {t:"VIM3 start",setting:"kijken en display van de labvoeding",exp:"LED van de VIM3 aan, stroom ruim onder de grens",small:"",
+  fail:"Op de stroomgrens: meteen uit. Geen LED: meet J18 pin 1 (≈ 5 V) en de polariteit van de VIM3-kabel."},
+ {t:"5 V onder belasting",setting:"V DC",red:"J18 pin 1",black:"GND",exp:"4,9 – 5,2 V",small:"terwijl de VIM3 opstart",
+  fail:"Zakt onder 4,8 V: meld de waarde en de stroom van de labvoeding."},
+ {t:"Scherm aansluiten",info:true,body:`
+  <p>Voeding uit. HDMI-kabel van de VIM3 naar <b>J13</b>. De 40-polige FFC van het paneel in <b>J14</b> (rechterrand, pin 1 aan de onderkant richting J1), met dezelfde kant boven als op de Waveshare-adapter.</p>
+  <p>Het Waveshare-kabeltje is type B. Liever één platte vouw dan een draai in de FFC. Controleer met een nieuwe kabel eerst pin 1 aan het losse eind: pos 8–10 horen op GND, pos 4–6 op J18 pin 1 (+5 V).</p>`},
+ {t:"Beeld",setting:"kijken",exp:"beeld op het paneel",small:"VIM3 → J13 → J14",
+  fail:"Wel achtergrondlicht, geen beeld: FFC-kant of richting, of de HDMI-kabel. Geen achtergrondlicht: J14 pin 36/37 (PWM en enable van de MCU) en 5 V op pin 4–6."},
+ {t:"Touch",setting:"Android",exp:"aanraken werkt",small:"touch-USB via J14 pin 33/34 naar hub 1",
+  fail:"Geen touch: kijk in <code>dmesg</code> of er een touch-apparaat bijkomt. Zo niet: J14 pin 33/34 en de hub-poort."},
+ {t:"Audiomodule en geluid",info:true,body:`
+  <p>Ga verder met de wizard van de audiomodule (tabblad "eerste keer voeden", het deel op het main board). Voor I2S-geluid heeft Android TDM-B-ondersteuning nodig in de device tree, de pcm5102a-module en de audio-HAL.</p>`},
+]},
+  ],
+};
