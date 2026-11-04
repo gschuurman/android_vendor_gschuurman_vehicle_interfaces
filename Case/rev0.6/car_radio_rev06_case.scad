@@ -1,0 +1,1315 @@
+// --- MODULAR 1 DIN ENCLOSURE FOR PERIPHERAL BOARD REV 0.6 + KHADAS VIM3 / M2X ---
+//
+// Based on "car_radio improved_0.2.scad" (prototype case). Same parts and style:
+// heat-set inserts everywhere, DIN clip pockets, removal-key slots, front plate with
+// screen tray + flanged spacers, separate side/top/bottom panels, IO back plate.
+//
+// What changed for rev 0.6:
+//  * The slide-in perfboard tray is gone. The rev 0.6 main board (100 x 100 mm, KiCad
+//    PCB/rev0.6/main) sits on four M3 standoffs on the bottom panel, rear right.
+//  * The VIM3 + M2X stack sits on the bottom panel, front left, beside the main board.
+//  * The main board is turned so its USB-module edge (KiCad right edge, x = 100) faces
+//    the REAR: the three USB-A sockets on the USB module come out through the back plate.
+//    Consequences (see README_case.md): the display FPC socket J14 also faces the rear,
+//    so the screen ribbon needs an extension that wraps under the board, and the HDMI
+//    socket J13 faces the VIM3 side, so there is an HDMI bay behind the VIM3 stack.
+//  * Back plate: USB-A x3 (RTL-SDR + 2 external), RCA (reverse camera), 3.5 mm jack
+//    (car microphone), SMA bulkhead (GPS antenna), one cable slit (ISO pigtails = power).
+//    The old audio jack / SPDIF cutouts are removed.
+//
+// Coordinate system (assembly): X = 0 at the centre, +X to the right seen from the
+// front; Y = 0 at the rear face of the front plate (= front end of the side panels),
+// +Y towards the rear; Z = 0 at the underside of the bottom panel.
+// "Body" coordinates used by the board helpers below are the same X/Z with Y measured
+// from the front end of the side panels, i.e. exactly the bottom panel's frame shifted
+// by -inner_plate_w/2 in X.
+//
+// All main-board / USB-module positions are copied from the KiCad files (rev 0.6),
+// not measured from pictures. VIM3 / M2X numbers marked ASSUMPTION need a caliper check.
+
+/* [Print Selection] */
+// Select which part to generate
+part_to_print = "assembly"; // [assembly, din_front_plate, screen_tray, button_bar, button_caps, standoff_spacer, left_side, right_side, bottom, top, back_plate]
+
+/* [Assembly view] */
+explode_dist = 0;
+show_boards = true;      // ghost models of main board, modules, VIM3 stack, plugs and jacks
+show_lid = true;         // hide the top panel to look inside
+
+/* [Screen Interface / Adjustment] */
+mount_spacing_w = 100;
+mount_spacing_h = 30;
+vertical_travel = 10;
+spacer_length = 15;
+mount_screw_diam = 4.2;
+
+/* [Screen Configuration (Waveshare 70H-1024600)] */
+screen_outer_w = 173.00;
+screen_outer_h = 103.00;
+screen_depth = 8.0;         // pocket depth; Waveshare spec: 4.2 mm total (touch), 3.5 mm LCD -> ~3 mm spare behind the panel
+screen_radius = 3.00;
+screen_tolerance = 1.25;   // was 0.5: screen pocket 1.5 mm larger in width and height (Glenn, 2026-11-04)
+
+/* [Tray & Tape Parameters] */
+tray_wall_thickness = 2.0;
+tray_base_thickness = 4.0;
+tray_bottom_rounding = 2.0;
+ledge_depth = 1.5;
+tape_ledge_width = 3.0;
+lcd_wiggle_room = 1.0;
+// The screen sits 180 deg turned compared with the prototype file: ribbon slot at the top,
+// touch relief at the bottom (seen from the front). The part prints the same, just turned.
+screen_features_rot180 = true;
+
+/* [Button Bar (separate front part under the screen)] */
+// Glenn, 2026-11-04: slim bar under the screen, 9 buttons in line, embossed emblems on the caps
+// (paint over the raised icons). The screen tray is one piece; only this bar comes off: solder and
+// assemble the switch strip in it, then screw it to the back of the tray (M2 into tray inserts).
+// Buttons: 6 mm "slim" tactile switches (Kiwi KW-1556 / Adafruit 1489) on a perfboard strip.
+bar_h = 13.0;                // bar height below the tray (front view)
+bar_wall = 2.0;              // bottom + end walls
+bar_skin = 1.6;              // front skin
+bar_back_wall = 1.5;         // back wall of the bar
+tongue_t = 3.5;              // plate behind the tray (bar back face is coplanar with it)
+tongue_h = 14.0;             // tongue height above the tray bottom edge
+tongue_screw_xs = [-80, -40, 40, 80];
+tongue_screw_y = 8.5;        // above the tray bottom edge (into the tray base, M2 inserts)
+// caps: pill shape, flange top + bottom only, icon raised
+cap_w = 10.0;
+cap_h = 6.0;
+cap_clear = 0.2;             // per side, cap to skin hole
+cap_protrude = 1.5;          // cap face in front of the screen / bar face
+cap_flange = 0.9;            // flange lip above and below the cap (keeps it in)
+cap_flange_t = 0.9;
+cap_icon_h = 0.6;            // embossed icon height (paint the tops)
+// Switch: ASSUMPTION, no drawing found for the slim 6 mm part. Check with calipers.
+btn_total_h = 5.0;           // switch body + plunger, above the perfboard
+btn_body = [6.0, 3.5];       // switch footprint (X, Y)
+btn_preload = 0.1;           // cap flange presses the plunger this far when idle
+btn_pcb_t = 1.6;
+// Order seen from the front (left = driver side, LHD): home | vol-, mute, vol+ | screen off |
+// prev, play/pause, next | voice. Positions on the 2.54 mm perfboard grid relative to each other.
+btn_xs = [-78.74, -58.42, -45.72, -33.02, 0, 33.02, 45.72, 58.42, 78.74];
+btn_icons = ["home", "voldown", "mute", "volup", "power", "prev", "play", "next", "mic"];
+bar_rib_xs = [-68.58, -16.5, 68.58];   // supports behind the strip, in the gaps
+bar_wire_slot = [-9, 8, 4];            // x centre, width, height of the wire exit in the back wall
+// BH1750 (GY-302 module 18.5 x 13.9, chip assumed in the centre) between screen-off and prev.
+// It sits behind the skin with its header edge down; its top 2 mm reach into the tray rim.
+bh1750_x = 16.51;
+bh1750_board = [18.5, 13.9];
+bh1750_chip_offset = [0, 0];  // chip position relative to the board centre (check your module)
+bh1750_window_d = 3.0;
+bh1750_front_gap = 1.2;       // chip + parts between board front and skin
+bh1750_sink = 1.2;            // module sinks this far into the bar bottom wall
+
+/* [Heat-Set Insert (Melt Nut) Parameters] */
+// M3 inserts (side panel assembly, screen tray, main board standoffs)
+insert_hole_diameter = 4.2;
+insert_clearance_hole = 3.4;
+insert_hole_depth = 3.5;
+insert_guide_diameter = 5.5;
+
+/* [Side Panel Assembly Inserts] */
+side_insert_hole_depth = 6.2;
+// The side wall + ledge is only 7 mm thick, too thin for a 4.2 mm insert bore (the bore
+// broke through the ledge face). Every insert now sits in a local boss: a 9 mm round
+// pad around the insert axis, blended into the wall, reaching 2.5 mm past the ledge.
+// Walls around the bore: >= 2.1 mm inside, 2.9 mm to the outer face.
+side_boss_d = 9.0;
+side_boss_extra = 1.5;          // boss length beyond the insert depth (vertical inserts)
+front_boss_length = 11.0;       // front bosses carry the front plate + display: longer
+rear_boss_length = 9.0;
+
+/* [Top / Bottom panels] */
+// Panels now run the full chassis width and sit ON the side panels (wall + ledge), so the
+// screws can sit 4.5 mm from the edge: countersunk heads (6 mm) stay 1.5 mm inside the
+// panel edge instead of breaking out of it (they used to sit 1.8 mm from the edge).
+panel_screw_inset = 4.5;     // from the outer face of the side wall
+panel_lip_h = 2.5;           // locating lip along both long edges, against the ledge face
+panel_lip_w = 1.5;
+panel_rib_h = 3.0;           // stiffening ribs under the top panel
+panel_rib_w = 2.0;
+top_rib_xs = [-16, 20, 55];
+// Extra screws from the panels into the front and back plate: a boss on the panel end
+// with a horizontal M3 insert; the screw goes in through the front / back plate.
+// [assembly X, boss height]
+front_top_bosses = [[-25, 9], [70, 9]];
+front_bottom_bosses = [[36, 9], [65, 9]];
+rear_top_bosses = [[-30, 9], [50, 9]];
+rear_bottom_bosses = [[-60, 9], [-30, 9], [55, 7.5]];   // the one at X 55 is under the main board (clears the screen ribbon)
+panel_boss_w = 10.0;
+panel_boss_depth = 9.0;      // along Y
+
+/* [M2 Heat-Set Insert Standoffs (VIM3 / M2X)] */
+m2_insert_hole_diameter = 3.2;
+m2_insert_hole_depth = 3.0;
+m2_insert_guide_diameter = 4.2;
+m2_standoff_outer_diam = 5.5;
+
+/* [Main Ribbon Cutout] */
+ribbon_slot_width = 25.0;
+ribbon_slot_thickness = 3.0;
+ribbon_slot_offset_y = 7.0;
+// Front plate slot and screen tray cutout stay independently adjustable (as before).
+// The screen extension ribbon now arrives from under the main board at about
+// X = +1.4 (J14 centre, see echo output); fold it 45 deg once to reach the slot.
+front_ribbon_slot_offset_x = 12.0;  // follows the tray slot (at +12 now the screen is turned 180 deg); clears the VIM3 post
+tray_ribbon_slot_offset_x = -12.0;
+
+/* [Touch Ribbon Relief] */
+touch_relief_width = 45.0;
+touch_relief_depth = 12.0;
+touch_relief_offset_x = -55.0;
+
+/* [Main Chassis Dimensions] */
+// Deeper than the prototype (110): VIM3 stack (front left) + HDMI bay (rear left)
+// have to fit one behind the other next to the 100 mm main board. See echo check.
+enclosure_depth = 134;
+lid_thickness = 3;
+side_wall_thickness = 3;
+ledge_width = 4;
+
+/* [Front Panel Config] */
+front_wall_thickness = 5;
+bezel_depth = 4;
+bezel_width = 188;
+bezel_height = 58;
+bezel_corner_radius = 5;
+
+/* [Front Slot Settings] */
+add_front_slot = true;
+slot_offset_z = -15.0;
+slot_bevel_size = 1.5;
+
+/* [Front Panel - UART Pogo Connector (Heat Staked)] */
+// rev 0.6 has no UART header yet (planned for the next revision); keep or disable.
+add_uart_pogo = false;     // disabled (Glenn, 2026-11-04)
+pogo_front_hole_w = 18.5;
+pogo_front_hole_h = 4.5;
+pogo_recess_w = 26.0;
+pogo_recess_h = 6.0;
+pogo_peg_spacing = 22.0;
+pogo_peg_diam = 1.5;
+pogo_peg_height = 3.0;
+pogo_face_thickness = 1.5;
+pogo_offset_x = 20.0;
+pogo_offset_z = -18.0;
+
+/* [Main Board rev 0.6 (from KiCad)] */
+mb_size = 100.0;            // Edge.Cuts 0..100 x 0..100, 2 mm corner radius
+mb_corner_r = 2.0;
+mb_thickness = 1.6;
+mb_standoff_height = 8.0;   // floor to board underside; leaves room for the ribbon under the board
+mb_side_clear = 0.75;       // gap between board edge (KiCad y = 100) and the right side ledge
+mb_rear_gap = 1.0;          // gap between board edge (KiCad x = 100) and the back plate
+// EVERY hole on the main board gets a post with a heat-set insert, melted in from the
+// top of the post before the board goes in. Positions and drills checked against the
+// KiCad footprints AND the Gerber drill file (fab/main, PTH): all eight agree.
+// H1-H4: M3 board screws. H5/H6/H7: M2.5, the USB / audio / GNSS module holes land
+// exactly on these (checked by matching the module header pins to the main-board
+// sockets). H8: M2, for the future K-line module on J10.
+// For H5-H8 use an 11 mm male-female standoff: its male thread goes through the main
+// board into the insert, the module sits on top and gets a screw.
+// [KiCad x, KiCad y, insert bore d, insert depth, lead-in d, post OD, screw clearance d, label]
+mb_mounts = [
+    [ 4.5,  4.5, 4.2, 6.0, 5.5, 8.0, 3.4, "H1 M3"],
+    [95.5,  4.5, 4.2, 6.0, 5.5, 8.0, 3.4, "H2 M3"],
+    [ 4.5, 95.5, 4.2, 6.0, 5.5, 8.0, 3.4, "H3 M3"],
+    [95.5, 95.5, 4.2, 6.0, 5.5, 8.0, 3.4, "H4 M3"],
+    [67.8, 83.7, 3.6, 5.0, 4.6, 7.0, 2.9, "H5 M2.5 USB module"],
+    [31.0, 16.5, 3.6, 5.0, 4.6, 7.0, 2.9, "H6 M2.5 audio module"],
+    [ 3.2, 34.3, 3.6, 5.0, 4.6, 7.0, 2.9, "H7 M2.5 GNSS module"],
+    [69.6, 18.5, 3.2, 4.0, 4.2, 6.0, 2.4, "H8 M2 K-line module"]
+];
+// The screw clearance bore continues below the insert so a long screw or a standoff's
+// male thread never bottoms out; it stops this far above the underside of the panel.
+mb_screw_relief_floor = 0.6;
+
+/* [Stacked modules (from KiCad)] */
+module_stack_height = 11.0; // main board top to module underside (8.5 mm socket + 2.5 mm male header body)
+module_thickness = 1.6;
+// USB module rev 0.6: 36 x 55 mm at main-board (64, 32.5), not rotated
+usbmod_origin = [64.0, 32.5];
+usbmod_size = [36.0, 55.0];
+// USB-A (Molex 67643) socket centres along the module's y axis: J17 RTL-SDR, J19 Ext 1, J20 Ext 2
+usb_a_centres_my = [9.63, 27.83, 46.03];
+usb_a_labels = ["SDR", "USB1", "USB2"];
+usb_a_shell_w = 13.2;
+usb_a_shell_h = 5.2;
+usb_a_center_above_module = 2.6; // ASSUMPTION: shell sits on the module PCB; check after stacking
+
+/* [Khadas VIM3 + M2X stack] */
+// M2X: 88.0 x 57.5 x 16.0 mm PCB only, 109 mm with its rigid-flex FPC (Khadas m2x_specs).
+// VIM3: 82 x 58 mm. The Khadas 2D drawing could not be downloaded here, so the hole
+// pattern below is an ASSUMPTION (M2 holes 3.5 mm in from each corner). Measure!
+// (The prototype file had 60.5 x 86.5 mm, which is larger than the VIM3 board itself.)
+vim3_w = 58.0;              // across the car (X)
+vim3_l = 82.0;              // along the car (Y)
+m2x_w = 57.5;
+m2x_l = 88.0;
+m2x_fpc_allow = 6.0;        // extra length at the front end for the folded M2X FPC (ASSUMPTION)
+vim3_side_clear = 2.75;     // gap to the left side ledge (room for the side-panel insert bosses)
+vim3_front_clear = 3.0;     // gap to the front plate
+vim3_hole_spacing_w = 51.0; // ASSUMPTION
+vim3_hole_spacing_l = 75.0; // ASSUMPTION
+vim3_floor_standoff_height = 4.0; // floor to M2X underside
+m2x_to_vim3 = 12.0;         // M2X PCB top to VIM3 PCB underside (ASSUMPTION, supplied M2 standoffs)
+vim3_parts_height = 11.5;   // tallest part above the VIM3 PCB (RJ45); heatsink adds to this
+vim3_heatsink_height = 10.0;
+// VIM3 ports face +X (towards the main board). HDMI centre measured from the VIM3's
+// front edge. Put the HDMI end of the VIM3 forward so the plug lands in the free strip
+// in front of the main board. ASSUMPTION, check on the board.
+vim3_hdmi_from_front = 20.0;
+
+/* [HDMI bay (VIM3 HDMI -> main board J13)] */
+hdmi_plug_w = 21.0;         // plug body width along Y (standard plug ~21, FPV slim head ~15)
+hdmi_plug_reach = 38.0;     // plug + cable bend, from the main board edge towards -X
+hdmi_bay_margin = 1.5;
+
+/* [Backplate (IO) Configuration] */
+add_back_plate = true;
+back_plate_thickness = 3.0;
+io_row_z = 34.0;            // height of the jack row (above the HDMI plug)
+// Panel jacks, X positions (assembly X)
+gps_x = 6.0;     gps_hole_diam = 6.6;  gps_flat = true;  // SMA bulkhead 1/4"-36 with anti-rotation flat
+// GPS sits next to the USB row (left of the SDR port seen from behind), at USB height;
+// behind it is only the low J14 corner of the main board.
+gps_z = -1;                 // -1 = same height as the USB-A centres
+mic_x = -60.0;   mic_hole_diam = 6.2;                     // 3.5 mm panel jack, M6 thread (e.g. PJ-392)
+rca_x = -45.0;   rca_hole_diam = 10.0;                    // RCA panel jack (same size as the prototype)
+// USB-A cutouts
+usb_hole_w = 15.0;
+usb_hole_h = 8.0;
+usb_hole_r = 1.0;
+usb_pocket_web = 1.0;       // plate left at the sockets, so plug overmolds can seat
+usb_pocket_margin = 2.0;
+// Cable slit for the ISO A + C1 pigtails (12 V power and speakers), open to the top
+// edge so the loom can be laid in before the lid goes on.
+wire_slit_x = 76.0;
+wire_slit_w = 8.0;
+wire_slit_h = 16.0;
+// Inner relief for the screen ribbon wrapping around the main board edge at J14
+ffc_relief_w = 28.0;
+ffc_relief_h = 16.0;
+ffc_relief_depth = 2.0;
+// Ribbon route under the main board (assembly X / body Y), folds 45 deg at each corner
+ffc_lane_x = 31.0;          // post-free lane under the board: H7 post ends at X 18.8, H5 starts at X 61
+ffc_turn_y = 118.0;         // first turn, between H8 (Y 102.6) and H2/H4 (Y 128.5)
+ffc_front_y = 20.0;         // second turn, in the free strip in front of the board
+// Text
+io_text_size = 3.0;
+io_text_depth = 0.8;
+
+/* [Global Standoff Settings] */
+standoff_outer_diam = 6.0;
+standoff_screw_diam = 2.8;
+
+/* [Assembly Hardware] */
+assem_screw_diam = 3.2;
+assem_screw_head_diam = 6.0;
+assem_screw_head_height = 3.0;
+front_mount_inset_z = 12;
+// Back plate / rear inserts: the lower one is raised so its boss clears the main board
+// corner (board z 11..12.6 reaches the right-hand ledge at the rear).
+rear_mount_z = [20, 37.5];
+
+/* [DIN Retainer Clip Pockets] */
+add_din_clip_pockets = true;
+clip_length = 130.0;
+clip_width = 10.0;
+clip_thickness = 1.0;
+clip_pocket_clearance = 0.4;
+clip_height_z = 25.0;
+clip_catch_offset_from_front = 15.0;
+
+/* [DIN Removal Key Slots] */
+add_key_slots = false;     // release-key holes removed (Glenn, 2026-11-04)
+key_slot_width = 7.0;
+key_slot_height = 7.0;
+
+/* [Ventilation] */
+add_ventilation = true;      // side slots
+add_lid_vents = true;        // slots in the top panel over the VIM3
+lid_vent_w = 3.0;
+lid_vent_pitch = 7.0;
+
+/* [Fine Tuning] */
+iso_width = 178;
+iso_height = 50;
+fit_tolerance = 0.5;
+
+
+// --- CALCULATIONS & COORDINATE SYSTEM ---
+
+chassis_w = iso_width - fit_tolerance;
+chassis_h = iso_height - fit_tolerance;
+inner_plate_w = chassis_w - (side_wall_thickness * 2) - 0.4;
+clear_interior_w = inner_plate_w - (ledge_width * 2);
+side_total_thickness = side_wall_thickness + ledge_width;
+ledge_face_x = chassis_w/2 - side_total_thickness;   // inner face of the side ledges (+/-)
+
+// Screen tray derived vars
+inner_w = screen_outer_w + (screen_tolerance * 2);
+inner_h = screen_outer_h + (screen_tolerance * 2);
+outer_w = inner_w + (tray_wall_thickness * 2);
+outer_h = inner_h + (tray_wall_thickness * 2);
+outer_d = tray_base_thickness + screen_depth;
+outer_r = screen_radius + tray_wall_thickness;
+
+// Heights
+floor_z = lid_thickness;
+lid_z = chassis_h - lid_thickness;                   // underside of the top panel
+mb_bottom_z = floor_z + mb_standoff_height;
+mb_top_z = mb_bottom_z + mb_thickness;
+module_bottom_z = mb_top_z + module_stack_height;
+module_top_z = module_bottom_z + module_thickness;
+usb_a_z = module_top_z + usb_a_center_above_module;
+gps_zz = (gps_z < 0) ? usb_a_z : gps_z;
+
+// Main board placement: KiCad (bx, by) -> body (X, Y).
+// Rotated 90 deg so KiCad x = 100 (USB / FPC edge) faces the rear and KiCad y = 0
+// (VIM3 ribbon, HDMI, VIN, power key) faces the VIM3 on the left.
+mb_x0 = ledge_face_x - mb_side_clear - mb_size;      // X of KiCad y = 0
+mb_y0 = enclosure_depth - mb_rear_gap - mb_size;     // Y of KiCad x = 0
+function mb2body(p) = [mb_x0 + p[1], mb_y0 + p[0]];
+function usb2body(p) = mb2body([usbmod_origin[0] + p[0], usbmod_origin[1] + p[1]]);
+
+// VIM3 stack placement (body coordinates)
+stack_x0 = -ledge_face_x + vim3_side_clear;
+stack_y0 = vim3_front_clear;
+m2x_x0 = stack_x0;
+m2x_y0 = stack_y0 + m2x_fpc_allow;
+vim3_x0 = stack_x0;
+vim3_y0 = m2x_y0 + (m2x_l - vim3_l) / 2;
+stack_y1 = m2x_y0 + m2x_l;
+m2x_bottom_z = floor_z + vim3_floor_standoff_height;
+vim3_bottom_z = m2x_bottom_z + mb_thickness + m2x_to_vim3;
+vim3_top_z = vim3_bottom_z + mb_thickness;
+vim3_hole_x0 = vim3_x0 + (vim3_w - vim3_hole_spacing_w) / 2;
+vim3_hole_y0 = vim3_y0 + (vim3_l - vim3_hole_spacing_l) / 2;
+
+// HDMI J13 on the main board: footprint body x 70.19..85.19 (KiCad), mouth at y = 0
+j13_centre_y = mb2body([77.69, 0])[1];
+j13_z = mb_top_z + 3.2;
+hdmi_bay_y0 = j13_centre_y - hdmi_plug_w/2 - hdmi_bay_margin;
+
+// Screen FPC J14 (KiCad 94.75..99.66 x 8.64..32.14)
+j14_x_lo = mb2body([0, 8.64])[0];
+j14_x_hi = mb2body([0, 32.14])[0];
+
+// --- FIT CHECKS (printed in the console) ---
+echo(str("Overall depth incl. bezel and back plate: ", bezel_depth + front_wall_thickness + enclosure_depth + back_plate_thickness, " mm"));
+echo(str("Gap VIM3 stack <-> main board: ", mb_x0 - (stack_x0 + max(vim3_w, m2x_w)), " mm"));
+echo(str("VIM3 stack ends at Y=", stack_y1, ", HDMI bay starts at Y=", hdmi_bay_y0,
+         (stack_y1 <= hdmi_bay_y0) ? "  OK" : "  CONFLICT: increase enclosure_depth"));
+echo(str("VIM3 top (with heatsink) z=", vim3_top_z + max(vim3_parts_height, vim3_heatsink_height), ", lid underside z=", lid_z));
+echo(str("Main board z ", mb_bottom_z, "..", mb_top_z, ", modules ", module_bottom_z, "..", module_top_z, ", USB-A centre z=", usb_a_z));
+echo(str("Screen ribbon (J14) leaves the board at X ", j14_x_lo, "..", j14_x_hi));
+for (m = mb_mounts)
+    echo(str("Post ", m[7], ": KiCad (", m[0], ", ", m[1], ") -> assembly X=", mb2body([m[0], m[1]])[0],
+             " Y=", mb2body([m[0], m[1]])[1] + front_wall_thickness, ", insert bore ", m[2], " x ", m[3], " deep, post OD ", m[5]));
+
+
+// --- HELPER MODULES (unchanged from the prototype) ---
+
+module pcb_standoff_custom(h, outer_d, inner_d) {
+    difference() {
+        cylinder(h=h, d=outer_d, $fn=30);
+        translate([0,0,-1]) cylinder(h=h+2, d=inner_d, $fn=30);
+    }
+}
+
+module standoff_post(height, outer_d=m2_standoff_outer_diam) {
+    cylinder(h=height, d=outer_d, $fn=30);
+}
+
+module standoff_insert_cut(height, insert_depth=m2_insert_hole_depth, insert_d=m2_insert_hole_diameter, guide_d=m2_insert_guide_diameter) {
+    translate([0, 0, height])
+        rotate([180, 0, 0])
+        heatset_insert_bore(depth=insert_depth, hole_d=insert_d, guide_d=guide_d);
+}
+
+module rounded_rect_2d(w, h, r) {
+    safe_r = min(r, w/2, h/2);
+    hull() {
+        translate([(w/2) - safe_r, (h/2) - safe_r]) circle(r=safe_r, $fn=30);
+        translate([-(w/2) + safe_r, (h/2) - safe_r]) circle(r=safe_r, $fn=30);
+        translate([(w/2) - safe_r, -(h/2) + safe_r]) circle(r=safe_r, $fn=30);
+        translate([-(w/2) + safe_r, -(h/2) + safe_r]) circle(r=safe_r, $fn=30);
+    }
+}
+
+module rounded_rect_slice(w, h, r) {
+    linear_extrude(height=0.1) rounded_rect_2d(w, h, r);
+}
+
+module rounded_plate(w, h, thk, r) {
+    safe_r = min(r, w/2, h/2);
+    hull() {
+        translate([safe_r, safe_r, 0]) cylinder(h=thk, r=safe_r, $fn=30);
+        translate([w - safe_r, safe_r, 0]) cylinder(h=thk, r=safe_r, $fn=30);
+        translate([safe_r, h - safe_r, 0]) cylinder(h=thk, r=safe_r, $fn=30);
+        translate([w - safe_r, h - safe_r, 0]) cylinder(h=thk, r=safe_r, $fn=30);
+    }
+}
+
+module tray_rounded_rect(w, h, d, r) {
+    translate([-w/2, -h/2, 0])
+    hull() {
+        translate([r, r, 0]) cylinder(h=d, r=r, $fn=40);
+        translate([w-r, r, 0]) cylinder(h=d, r=r, $fn=40);
+        translate([r, h-r, 0]) cylinder(h=d, r=r, $fn=40);
+        translate([w-r, h-r, 0]) cylinder(h=d, r=r, $fn=40);
+    }
+}
+
+module filleted_bottom_rect(w, h, d, r, f) {
+    safe_f = max(0.01, min(f, r, d));
+    translate([-w/2, -h/2, 0])
+    hull() {
+        translate([r, r, safe_f]) cylinder(h=d-safe_f, r=r, $fn=40);
+        translate([w-r, r, safe_f]) cylinder(h=d-safe_f, r=r, $fn=40);
+        translate([r, h-r, safe_f]) cylinder(h=d-safe_f, r=r, $fn=40);
+        translate([w-r, h-r, safe_f]) cylinder(h=d-safe_f, r=r, $fn=40);
+        for (a = [0 : 15 : 90]) {
+            let(z = safe_f - safe_f * sin(a), xy_r = r - safe_f + safe_f * cos(a)) {
+                translate([r, r, z]) cylinder(h=0.01, r=xy_r, $fn=20);
+                translate([w-r, r, z]) cylinder(h=0.01, r=xy_r, $fn=20);
+                translate([r, h-r, z]) cylinder(h=0.01, r=xy_r, $fn=20);
+                translate([w-r, h-r, z]) cylinder(h=0.01, r=xy_r, $fn=20);
+            }
+        }
+    }
+}
+
+module countersunk_hole(thk, thru_d, head_d, angle=90, from_top=false) {
+    cs_depth_raw = (head_d - thru_d) / (2 * tan(angle/2));
+    cs_depth = min(thk, cs_depth_raw);
+    translate([0,0,-1]) cylinder(h=thk+2, d=thru_d, $fn=30);
+    if (!from_top) {
+        translate([0,0,-0.01]) cylinder(h=cs_depth+0.02, d1=head_d, d2=thru_d, $fn=40);
+    } else {
+        translate([0,0,thk - cs_depth + 0.01]) cylinder(h=cs_depth+0.02, d1=thru_d, d2=head_d, $fn=40);
+    }
+}
+
+module heatset_insert_bore(depth=insert_hole_depth, hole_d=insert_hole_diameter, guide_d=insert_guide_diameter) {
+    union() {
+        translate([0, 0, -0.01])
+            cylinder(h=depth + 0.01, d=hole_d, $fn=30);
+        cylinder(h=0.6, d1=guide_d, d2=hole_d, $fn=30);
+    }
+}
+
+module smooth_ribbon_slot_with_guide(w, thk, d) {
+    r = thk / 2;
+    translate([0, 0, -d/2])
+    linear_extrude(d)
+    hull() {
+        translate([-w/2 + r, 0]) circle(r=r, $fn=30);
+        translate([ w/2 - r, 0]) circle(r=r, $fn=30);
+    }
+    translate([0, 0, d/2 - r])
+    hull() {
+        translate([-w/2 + r, 0, 0]) cylinder(r1=r, r2=r*2, h=r+0.01, $fn=30);
+        translate([ w/2 - r, 0, 0]) cylinder(r1=r, r2=r*2, h=r+0.01, $fn=30);
+    }
+    translate([0, 0, -d/2 - 0.01])
+    hull() {
+        translate([-w/2 + r, 0, 0]) cylinder(r1=r*2, r2=r, h=r+0.01, $fn=30);
+        translate([ w/2 - r, 0, 0]) cylinder(r1=r*2, r2=r, h=r+0.01, $fn=30);
+    }
+}
+
+// Side panel / back plate assembly screw positions along the depth
+function side_screw_ys() = [20, enclosure_depth/2, enclosure_depth - 15];
+
+
+// --- 1. SCREEN TRAY (Tape-In Style) + BUTTON BAR ---
+// Tray frame: x to the right and y up as seen from the front, z = 0 at the back (base),
+// z = outer_d at the front face. The bar hangs under the tray: y from tb_y0 to tb_y1.
+tb_y1 = -outer_h/2;                    // tray bottom edge = bar top
+tb_y0 = tb_y1 - bar_h;
+cap_y = tb_y1 - bar_h/2;
+bar_skin_back = outer_d - bar_skin;
+cap_flange_back_z = bar_skin_back - cap_flange_t;
+btn_pcb_front_z = cap_flange_back_z - (btn_total_h - btn_preload);
+btn_pcb_back_z = btn_pcb_front_z - btn_pcb_t;
+bar_cav_back_z = -tongue_t + bar_back_wall;
+bh_y0 = tb_y0 + bar_wall - bh1750_sink + 0.1;           // module bottom edge
+bh_y1 = bh_y0 + bh1750_board[1];                        // module top edge (into the tray rim)
+bh_z1 = bar_skin_back - bh1750_front_gap;               // board front face
+bh_z0 = bh_z1 - btn_pcb_t;
+bh_chip = [bh1750_x + bh1750_chip_offset[0], (bh_y0 + bh_y1)/2 + bh1750_chip_offset[1]];
+
+// tray outline: top corners rounded, bottom corners square (the bar continues below)
+module tray_outline_2d() {
+    hull() {
+        for (sx = [-1, 1]) translate([sx * (outer_w/2 - outer_r), outer_h/2 - outer_r]) circle(r=outer_r, $fn=48);
+        translate([-outer_w/2, -outer_h/2]) square([outer_w, 1]);
+    }
+}
+// bar outline: top square, bottom corners rounded
+module bar_outline_2d() {
+    hull() {
+        for (sx = [-1, 1]) translate([sx * (outer_w/2 - outer_r), tb_y0 + outer_r]) circle(r=outer_r, $fn=48);
+        translate([-outer_w/2, tb_y1 - 1]) square([outer_w, 1]);
+    }
+}
+module pill_2d(w, h) { hull() for (sx = [-1, 1]) translate([sx * (w - h)/2, 0]) circle(d=h, $fn=36); }
+
+// Icons for the caps, about 7.5 x 4.6 mm, lines >= 0.8 mm for a 0.4 nozzle
+module icon_2d(name) {
+    module spk() polygon([[-3.9, -0.9], [-2.7, -0.9], [-1.0, -2.3], [-1.0, 2.3], [-2.7, 0.9], [-3.9, 0.9]]);
+    module tri_l(x) translate([x, 0]) polygon([[1.4, 2.0], [1.4, -2.0], [-1.3, 0]]);
+    module tri_r(x) translate([x, 0]) polygon([[-1.4, 2.0], [-1.4, -2.0], [1.3, 0]]);
+    if (name == "voldown") { spk(); translate([0.6, -0.45]) square([3.2, 0.9]); }
+    else if (name == "volup") { spk(); translate([0.6, -0.45]) square([3.2, 0.9]); translate([1.75, -1.6]) square([0.9, 3.2]); }
+    else if (name == "mute") { spk(); translate([2.2, 0]) for (a = [45, -45]) rotate(a) square([3.6, 0.85], center=true); }
+    else if (name == "prev") { translate([-3.4, -2]) square([0.9, 4]); tri_l(-1.1); tri_l(1.6); }
+    else if (name == "next") { translate([2.5, -2]) square([0.9, 4]); tri_r(1.1); tri_r(-1.6); }
+    else if (name == "play") { tri_r(-1.6); translate([0.6, -2]) square([0.9, 4]); translate([2.2, -2]) square([0.9, 4]); }
+    else if (name == "power") {
+        difference() { circle(r=2.3, $fn=40); circle(r=1.45, $fn=40); translate([-0.9, 0]) square([1.8, 3]); }
+        translate([-0.42, -0.4]) square([0.84, 2.9]);
+    }
+    else if (name == "home") {
+        house = [[-2.5, -2.2], [2.5, -2.2], [2.5, 0.5], [0, 2.5], [-2.5, 0.5]];
+        difference() { offset(r=0.3, $fn=12) polygon(house); offset(delta=-0.55) polygon(house); }
+        translate([-0.6, -2.2]) square([1.2, 1.9]);
+    }
+    else if (name == "mic") {
+        translate([0, 0.9]) hull() { translate([0, 0.9]) circle(d=1.9, $fn=24); translate([0, -0.5]) circle(d=1.9, $fn=24); }
+        difference() { translate([0, 0.2]) circle(r=2.1, $fn=40); translate([0, 0.2]) circle(r=1.3, $fn=40); translate([-3, 0.2]) square([6, 3]); }
+        translate([-0.4, -2.3]) square([0.8, 0.8]);
+        translate([-1.3, -2.4]) square([2.6, 0.75]);
+    }
+}
+
+module screen_tray() {
+    difference() {
+        hull() {
+            translate([0, 0, tray_bottom_rounding]) linear_extrude(outer_d - tray_bottom_rounding) tray_outline_2d();
+            linear_extrude(tray_bottom_rounding) offset(delta=-tray_bottom_rounding) tray_outline_2d();
+        }
+        // ---- screen pocket (as before; turned 180 deg if screen_features_rot180) ----
+        translate([0, 0, outer_d - ledge_depth])
+            tray_rounded_rect(inner_w, inner_h, ledge_depth + 1, screen_radius);
+        translate([0, 0, tray_base_thickness])
+            linear_extrude(outer_d)
+            square([inner_w - (tape_ledge_width * 2) + lcd_wiggle_room,
+                    inner_h - (tape_ledge_width * 2) + lcd_wiggle_room], center=true);
+        for(tx=[-mount_spacing_w/2, mount_spacing_w/2]) {
+            for(ty=[-mount_spacing_h/2, mount_spacing_h/2]) {
+                translate([tx, ty, -1])
+                    cylinder(d=insert_clearance_hole, h=tray_base_thickness + 2, $fn=20);
+                translate([tx, ty, tray_base_thickness - insert_hole_depth])
+                    cylinder(d=insert_hole_diameter, h=insert_hole_depth + 0.1, $fn=30);
+                translate([tx, ty, tray_base_thickness - 0.5])
+                    cylinder(d1=insert_hole_diameter, d2=insert_guide_diameter, h=0.51, $fn=30);
+            }
+        }
+        rotate([0, 0, screen_features_rot180 ? 180 : 0]) {
+            translate([tray_ribbon_slot_offset_x, -inner_h/2 + ribbon_slot_offset_y, tray_base_thickness/2])
+                smooth_ribbon_slot_with_guide(ribbon_slot_width, ribbon_slot_thickness, tray_base_thickness);
+            translate([touch_relief_offset_x, inner_h/2 - touch_relief_depth/2, tray_base_thickness])
+                linear_extrude(outer_d)
+                square([touch_relief_width, touch_relief_depth], center=true);
+        }
+        // ---- M2 inserts in the back for the button bar tongue ----
+        for (x = tongue_screw_xs)
+            translate([x, tb_y1 + tongue_screw_y, 0]) mirror([0, 0, 1]) rotate([180, 0, 0])
+                heatset_insert_bore(depth=m2_insert_hole_depth, hole_d=m2_insert_hole_diameter, guide_d=m2_insert_guide_diameter);
+        // ---- top of the BH1750 module reaches into the tray rim ----
+        translate([bh1750_x - bh1750_board[0]/2 - 0.3, tb_y1 - 1, bh_z0 - 0.3])
+            cube([bh1750_board[0] + 0.6, bh_y1 + 0.2 - tb_y1 + 1, bar_skin_back - bh_z0 + 0.3]);
+    }
+}
+
+module button_bar() {
+    W = outer_w;
+    difference() {
+        union() {
+            translate([0, 0, -tongue_t]) linear_extrude(outer_d + tongue_t) bar_outline_2d();
+            // tongue behind the tray
+            translate([-W/2 + 1, tb_y1 - 1, -tongue_t]) cube([W - 2, tongue_h + 1, tongue_t]);
+        }
+        // cavity, open at the top (closed by the tray bottom face)
+        translate([-W/2 + bar_wall, tb_y0 + bar_wall, bar_cav_back_z])
+            cube([W - 2 * bar_wall, bar_h - bar_wall + 1, bar_skin_back - bar_cav_back_z]);
+        // perfboard strip grooves (bottom wall + both end walls); the strip drops in from the top
+        translate([-W/2 + bar_wall - 0.8, tb_y0 + bar_wall - 0.8, btn_pcb_back_z - 0.15])
+            cube([W - 2 * bar_wall + 1.6, bar_h + 2, btn_pcb_t + 0.3]);
+        // cap holes
+        for (x = btn_xs) translate([x, cap_y, bar_skin_back - 1]) linear_extrude(bar_skin + 2) pill_2d(cap_w + 2 * cap_clear, cap_h + 2 * cap_clear);
+        // BH1750: module pocket (sinks into the bottom wall) + light window
+        translate([bh1750_x - bh1750_board[0]/2 - 0.3, bh_y0 - 0.1, bh_z0 - 0.3])
+            cube([bh1750_board[0] + 0.6, bar_h + 1, bar_skin_back - bh_z0 + 0.3]);
+        translate([bh_chip[0], bh_chip[1], bar_skin_back - 0.01])
+            cylinder(d1=bh1750_window_d, d2=bh1750_window_d + 1.4, h=bar_skin + 0.02, $fn=30);
+        // tongue screws (M2, counterbored from the back)
+        for (x = tongue_screw_xs) translate([x, tb_y1 + tongue_screw_y, -tongue_t - 1]) {
+            cylinder(d=2.4, h=tongue_t + 2, $fn=20);
+            cylinder(d=4.2, h=1 + 1.6, $fn=24);
+        }
+        // wire exit in the back wall
+        translate([bar_wire_slot[0] - bar_wire_slot[1]/2, cap_y - bar_wire_slot[2]/2, -tongue_t - 1])
+            cube([bar_wire_slot[1], bar_wire_slot[2], bar_back_wall + 2]);
+    }
+    // ribs behind the strip (stop it bowing when a button is pressed)
+    for (x = bar_rib_xs)
+        translate([x - 0.6, tb_y0 + bar_wall, bar_cav_back_z - 0.01])
+            cube([1.2, bar_h - bar_wall - 1, btn_pcb_back_z - bar_cav_back_z - 0.1]);
+}
+
+// One cap; z = 0 at the back of the flange (prints flange down, icon up)
+module button_cap(icon) {
+    body_l = bar_skin + cap_protrude;
+    linear_extrude(cap_flange_t) hull() {
+        pill_2d(cap_w, cap_h);
+        square([cap_w - 1.2, cap_h + 2 * cap_flange], center=true);
+    }
+    translate([0, 0, cap_flange_t - 0.01]) hull() {
+        linear_extrude(body_l - 0.4) pill_2d(cap_w, cap_h);
+        linear_extrude(body_l) offset(delta=-0.4) pill_2d(cap_w, cap_h);
+    }
+    translate([0, 0, cap_flange_t + body_l - 0.02]) linear_extrude(cap_icon_h + 0.02) icon_2d(icon);
+}
+module button_caps_placed() {
+    for (i = [0 : len(btn_xs) - 1]) translate([btn_xs[i], cap_y, cap_flange_back_z]) button_cap(btn_icons[i]);
+}
+module button_caps_print() {
+    for (i = [0 : len(btn_xs) - 1]) translate([(i % 3) * 15, floor(i / 3) * 12, 0]) button_cap(btn_icons[i]);
+}
+
+// Ghost boards in the bar (assembly preview)
+module ghost_tray_boards() {
+    color("Tan", 0.9) translate([-outer_w/2 + bar_wall - 0.6, tb_y0 + bar_wall - 0.6, btn_pcb_back_z]) cube([outer_w - 2 * bar_wall + 1.2, bar_h - bar_wall + 0.5, btn_pcb_t]);
+    for (x = btn_xs)
+        color("Black") translate([x - btn_body[0]/2, cap_y - btn_body[1]/2, btn_pcb_front_z]) cube([btn_body[0], btn_body[1], btn_total_h - btn_preload - 0.3]);
+    color("MediumBlue") translate([bh1750_x - bh1750_board[0]/2, bh_y0, bh_z0]) cube([bh1750_board[0], bh1750_board[1], btn_pcb_t]);
+}
+
+echo(str("Front: ", outer_w, " x ", outer_h + bar_h, " mm (tray ", outer_h, " + bar ", bar_h, "); caps ", cap_protrude,
+         " mm proud; strip ", outer_w - 2 * bar_wall + 1.2, " x ", bar_h - bar_wall + 0.5, " mm, front at z=", btn_pcb_front_z));
+
+
+// --- 2. DIN FRONT PLATE (unchanged apart from comments) ---
+module din_front_plate() {
+    union() {
+        difference() {
+            union() {
+                translate([0, -bezel_depth, (chassis_h - bezel_height)/2])
+                hull() {
+                    translate([-(bezel_width/2) + bezel_corner_radius, 0, bezel_corner_radius])
+                        rotate([-90,0,0]) cylinder(r=bezel_corner_radius, h=bezel_depth, $fn=40);
+                    translate([(bezel_width/2) - bezel_corner_radius, 0, bezel_corner_radius])
+                        rotate([-90,0,0]) cylinder(r=bezel_corner_radius, h=bezel_depth, $fn=40);
+                    translate([-(bezel_width/2) + bezel_corner_radius, 0, bezel_height - bezel_corner_radius])
+                        rotate([-90,0,0]) cylinder(r=bezel_corner_radius, h=bezel_depth, $fn=40);
+                    translate([(bezel_width/2) - bezel_corner_radius, 0, bezel_height - bezel_corner_radius])
+                        rotate([-90,0,0]) cylinder(r=bezel_corner_radius, h=bezel_depth, $fn=40);
+                }
+                translate([-(chassis_w/2), 0, 0])
+                    cube([chassis_w, front_wall_thickness, chassis_h]);
+            }
+
+            slot_len = vertical_travel;
+            for(tx = [-mount_spacing_w/2, mount_spacing_w/2]) {
+                for(tz_center = [chassis_h/2 - mount_spacing_h/2, chassis_h/2 + mount_spacing_h/2]) {
+                    translate([tx, -bezel_depth-1, tz_center])
+                    rotate([-90,0,0])
+                    hull() {
+                        translate([0, slot_len/2, 0]) cylinder(h=bezel_depth + front_wall_thickness + 2, d=mount_screw_diam, $fn=20);
+                        translate([0, -slot_len/2, 0]) cylinder(h=bezel_depth + front_wall_thickness + 2, d=mount_screw_diam, $fn=20);
+                    }
+                }
+            }
+
+            if (add_front_slot) {
+                y_front_outer = -bezel_depth - 1;
+                y_front_inner = -bezel_depth + slot_bevel_size;
+                y_back_inner  = front_wall_thickness - slot_bevel_size;
+                y_back_outer  = front_wall_thickness + 1;
+
+                w_small = ribbon_slot_width;
+                h_small = ribbon_slot_thickness + 1.0;
+                r_small = 1.0;
+                w_big = w_small + (slot_bevel_size*2);
+                h_big = h_small + (slot_bevel_size*2);
+                r_big = r_small + slot_bevel_size;
+
+                translate([front_ribbon_slot_offset_x, 0, (chassis_h/2) + slot_offset_z]) {
+                    hull() {
+                        translate([0, y_front_outer, 0]) rotate([90,0,0]) rounded_rect_slice(w_big, h_big, r_big);
+                        translate([0, y_front_inner, 0]) rotate([90,0,0]) rounded_rect_slice(w_small, h_small, r_small);
+                    }
+                    hull() {
+                        translate([0, y_front_inner, 0]) rotate([90,0,0]) rounded_rect_slice(w_small, h_small, r_small);
+                        translate([0, y_back_inner, 0])  rotate([90,0,0]) rounded_rect_slice(w_small, h_small, r_small);
+                    }
+                    hull() {
+                        translate([0, y_back_inner, 0])  rotate([90,0,0]) rounded_rect_slice(w_small, h_small, r_small);
+                        translate([0, y_back_outer, 0])  rotate([90,0,0]) rounded_rect_slice(w_big, h_big, r_big);
+                    }
+                }
+            }
+
+            // DIN Removal Key Slots, aligned with the clip pockets in the side panels
+            if (add_key_slots) {
+                key_x_inset = (key_slot_width/2) + 1.5;
+                for(tx = [-(chassis_w/2) + key_x_inset, (chassis_w/2) - key_x_inset]) {
+                    translate([tx - key_slot_width/2, -bezel_depth - 1, clip_height_z - key_slot_height/2])
+                        cube([key_slot_width, bezel_depth + front_wall_thickness + 2, key_slot_height]);
+                }
+            }
+
+            hole_inset_z = front_mount_inset_z;
+            hole_inset_x = side_wall_thickness + (ledge_width/2);
+            for(tx = [-(chassis_w/2) + hole_inset_x, (chassis_w/2) - hole_inset_x]) {
+                for(tz = [hole_inset_z, chassis_h - hole_inset_z]) {
+                    translate([tx, -bezel_depth-1, tz])
+                        rotate([-90, 0, 0])
+                        cylinder(h=bezel_depth + front_wall_thickness + 2, d=assem_screw_diam, $fn=20);
+                    translate([tx, -bezel_depth-0.01, tz])
+                        rotate([-90, 0, 0])
+                        cylinder(h=assem_screw_head_height + 0.02, d=assem_screw_head_diam, $fn=30);
+                }
+            }
+
+            // Extra screws into the top / bottom panel end bosses
+            for (fbz = concat([for (b = front_top_bosses) [b[0], panel_boss_z(b, true)]],
+                              [for (b = front_bottom_bosses) [b[0], panel_boss_z(b, false)]])) {
+                translate([fbz[0], -bezel_depth-1, fbz[1]])
+                    rotate([-90, 0, 0])
+                    cylinder(h=bezel_depth + front_wall_thickness + 2, d=assem_screw_diam, $fn=20);
+                translate([fbz[0], -bezel_depth-0.01, fbz[1]])
+                    rotate([-90, 0, 0])
+                    cylinder(h=assem_screw_head_height + 0.02, d=assem_screw_head_diam, $fn=30);
+            }
+
+            if (add_uart_pogo) {
+                translate([pogo_offset_x, 0, (chassis_h/2) + pogo_offset_z]) {
+                    translate([0, -bezel_depth - 1, 0])
+                        rotate([-90,0,0])
+                        hull() {
+                            translate([-pogo_front_hole_w/2 + pogo_front_hole_h/2, 0, 0]) cylinder(d=pogo_front_hole_h, h=20, $fn=30);
+                            translate([ pogo_front_hole_w/2 - pogo_front_hole_h/2, 0, 0]) cylinder(d=pogo_front_hole_h, h=20, $fn=30);
+                        }
+                    recess_y = -bezel_depth + pogo_face_thickness;
+                    translate([0, recess_y, 0])
+                        rotate([-90,0,0])
+                        hull() {
+                            translate([-pogo_recess_w/2 + pogo_recess_h/2, 0, 0]) cylinder(d=pogo_recess_h, h=20, $fn=30);
+                            translate([ pogo_recess_w/2 - pogo_recess_h/2, 0, 0]) cylinder(d=pogo_recess_h, h=20, $fn=30);
+                        }
+                    translate([0, -bezel_depth + 0.7, pogo_front_hole_h/2 + 2.0])
+                        rotate([90, 0, 0])
+                        linear_extrude(0.8)
+                        text("5V  TX  RX  GND", size=2.0, halign="center", valign="bottom");
+                }
+            }
+        }
+
+        if (add_uart_pogo) {
+            translate([pogo_offset_x, 0, (chassis_h/2) + pogo_offset_z]) {
+                recess_y = -bezel_depth + pogo_face_thickness;
+                for(dx = [-pogo_peg_spacing/2, pogo_peg_spacing/2]) {
+                    translate([dx, recess_y - 0.1, 0])
+                        rotate([-90,0,0])
+                        cylinder(d=pogo_peg_diam, h=pogo_peg_height + 0.1, $fn=20);
+                }
+            }
+        }
+    }
+}
+
+
+// --- 3. FLANGED STANDOFF (Washer included, unchanged) ---
+module standoff_spacer() {
+    washer_diam = 12;
+    washer_thick = 2;
+    difference() {
+        union() {
+            cylinder(h=spacer_length, d=8, $fn=20);
+            cylinder(h=washer_thick, d=washer_diam, $fn=20);
+        }
+        translate([0,0,-1]) cylinder(h=spacer_length+2, d=mount_screw_diam + 0.2, $fn=20);
+    }
+}
+
+
+// --- 4. BACKPLATE (IO PLATE) ---
+// Local frame: X centred like the assembly, Y = 0 is the inner face (touching the side
+// panels), Y = back_plate_thickness the outside face, Z = 0 at the bottom.
+module back_plate() {
+
+    module round_hole(x, z, d, flat=false) {
+        translate([x, -1, z])
+            rotate([-90, 0, 0])
+            linear_extrude(back_plate_thickness + 2)
+            difference() {
+                circle(d=d, $fn=40);
+                // SMA bulkhead anti-rotation flat (5.8 mm across flats on a 6.35 mm thread)
+                if (flat) translate([-d, (5.8 + (d - 6.35)) / 2]) square([2*d, d]);
+            }
+    }
+
+    // Engraved on the outside face, mirrored so it reads correctly from behind
+    module io_label(x, z, label) {
+        translate([x, back_plate_thickness + 0.01, z])
+            rotate([90, 0, 0])
+            mirror([1, 0, 0])
+            linear_extrude(io_text_depth + 0.01)
+            text(label, size=io_text_size, font="Liberation Sans:style=Bold", halign="center", valign="center");
+    }
+
+    usb_xs = [for (my = usb_a_centres_my) usb2body([0, my])[0]];
+    pocket_x0 = min(usb_xs) - usb_hole_w/2 - usb_pocket_margin;
+    pocket_x1 = max(usb_xs) + usb_hole_w/2 + usb_pocket_margin;
+    pocket_h = usb_hole_h + 2 * usb_pocket_margin + 1;
+
+    // Screen-ribbon wrap relief, behind J14
+    j14_xc = (j14_x_lo + j14_x_hi)/2;
+
+    difference() {
+        translate([-(chassis_w/2), 0, 0])
+            cube([chassis_w, back_plate_thickness, chassis_h]);
+
+        // Side mounting holes (countersunk, as before)
+        hole_inset_x = side_wall_thickness + (ledge_width/2);
+        cs_depth = (assem_screw_head_diam - assem_screw_diam) / 2;
+        for(tx = [-(chassis_w/2) + hole_inset_x, (chassis_w/2) - hole_inset_x]) {
+            for(tz = rear_mount_z) {
+                translate([tx, -1, tz])
+                    rotate([-90, 0, 0])
+                    cylinder(h=back_plate_thickness + 2, d=assem_screw_diam, $fn=20);
+                translate([tx, back_plate_thickness - cs_depth + 0.01, tz])
+                    rotate([-90, 0, 0])
+                    cylinder(h=cs_depth + 0.02, d1=assem_screw_diam, d2=assem_screw_head_diam, $fn=20);
+            }
+        }
+
+        // Extra screws into the top / bottom panel end bosses (countersunk, outside)
+        for (rbz = concat([for (b = rear_top_bosses) [b[0], panel_boss_z(b, true)]],
+                          [for (b = rear_bottom_bosses) [b[0], panel_boss_z(b, false)]])) {
+            translate([rbz[0], -1, rbz[1]])
+                rotate([-90, 0, 0])
+                cylinder(h=back_plate_thickness + 2, d=assem_screw_diam, $fn=20);
+            translate([rbz[0], back_plate_thickness - (assem_screw_head_diam - assem_screw_diam)/2 + 0.01, rbz[1]])
+                rotate([-90, 0, 0])
+                cylinder(h=(assem_screw_head_diam - assem_screw_diam)/2 + 0.02, d1=assem_screw_diam, d2=assem_screw_head_diam, $fn=20);
+        }
+
+        // --- PANEL JACKS ---
+        round_hole(gps_x, gps_zz, gps_hole_diam, gps_flat);
+        io_label(gps_x, gps_zz - 8, "GPS");
+        round_hole(mic_x, io_row_z, mic_hole_diam);
+        io_label(mic_x, io_row_z - 8, "MIC");
+        round_hole(rca_x, io_row_z, rca_hole_diam);
+        io_label(rca_x, io_row_z - 9.5, "CAM");
+
+        // --- USB-A (aligned to the USB module sockets) ---
+        for (i = [0 : len(usb_xs) - 1]) {
+            translate([usb_xs[i], -1, usb_a_z])
+                rotate([-90, 0, 0])
+                linear_extrude(back_plate_thickness + 2)
+                rounded_rect_2d(usb_hole_w, usb_hole_h, usb_hole_r);
+            io_label(usb_xs[i], usb_a_z + pocket_h/2 + 3, usb_a_labels[i]);
+        }
+        // Shared outside pocket: leaves only usb_pocket_web of plate at the sockets
+        translate([pocket_x0, usb_pocket_web, usb_a_z - pocket_h/2])
+            cube([pocket_x1 - pocket_x0, back_plate_thickness, pocket_h]);
+
+        // --- CABLE SLIT (ISO pigtails), open to the top edge ---
+        slit_bottom_z = chassis_h - wire_slit_h;
+        translate([wire_slit_x - wire_slit_w/2, -1, slit_bottom_z])
+            cube([wire_slit_w, back_plate_thickness + 2, wire_slit_h + 2]);
+        translate([wire_slit_x, -1, slit_bottom_z])
+            rotate([-90, 0, 0])
+            cylinder(h=back_plate_thickness + 2, d=wire_slit_w, $fn=30);
+
+        // --- INNER RELIEF for the screen ribbon wrapping round the board edge ---
+        translate([j14_xc - ffc_relief_w/2, -0.01, floor_z])
+            cube([ffc_relief_w, ffc_relief_depth + 0.01, ffc_relief_h]);
+    }
+}
+
+
+// --- 5. SIDE PANELS ---
+// Insert bosses (local side-panel frame: x 0 = outer face, inward +x)
+module side_insert_bosses() {
+    hole_x = side_total_thickness - (ledge_width/2);
+    vhole_x = panel_screw_inset;
+    h_v = side_insert_hole_depth + side_boss_extra;
+    // vertical pad: round boss around the insert axis, hulled to the wall
+    module vpad(ty, z0) {
+        hull() {
+            translate([0, ty - side_boss_d/2, z0]) cube([0.01, side_boss_d, h_v]);
+            translate([vhole_x, ty, z0]) cylinder(d=side_boss_d, h=h_v, $fn=40);
+        }
+    }
+    // horizontal pad along Y
+    module hpad(y0, len, tz) {
+        hull() {
+            translate([0, y0, tz - side_boss_d/2]) cube([0.01, len, side_boss_d]);
+            translate([hole_x, y0, tz]) rotate([-90, 0, 0]) cylinder(d=side_boss_d, h=len, $fn=40);
+        }
+    }
+    for (ty = side_screw_ys()) {
+        vpad(ty, lid_thickness);
+        vpad(ty, chassis_h - lid_thickness - h_v);
+    }
+    for (tz = [front_mount_inset_z, chassis_h - front_mount_inset_z])
+        hpad(0, front_boss_length, tz);
+    for (tz = rear_mount_z)
+        hpad(enclosure_depth - rear_boss_length, rear_boss_length, tz);
+}
+
+module side_panel_gen(is_right=false) {
+    mirror_x = is_right ? 1 : 0;
+    mirror([mirror_x, 0, 0]) {
+        difference() {
+            union() {
+                // wall + ledge between the top and bottom panels (the panels cover them)
+                translate([0, 0, lid_thickness])
+                    cube([side_total_thickness, enclosure_depth, chassis_h - (lid_thickness * 2)]);
+                side_insert_bosses();
+            }
+            if (add_ventilation) {
+                for (i = [45 : 10 : enclosure_depth - 15]) {
+                    translate([-1, i, 12])
+                        cube([side_total_thickness+2, 4, chassis_h - 24]);
+                }
+            }
+
+            if (add_din_clip_pockets) {
+                clip_pocket_depth = clip_thickness + clip_pocket_clearance;
+                clip_pocket_w = clip_width + (clip_pocket_clearance * 2);
+                translate([-1, 0, clip_height_z - clip_pocket_w/2])
+                    cube([clip_pocket_depth + 1, clip_length, clip_pocket_w]);
+            }
+
+            hole_x = side_total_thickness - (ledge_width/2);
+            hole_inset_z = front_mount_inset_z;
+
+            for (ty = side_screw_ys()) {
+                translate([panel_screw_inset, ty, lid_thickness])
+                    heatset_insert_bore(depth=side_insert_hole_depth);
+                translate([panel_screw_inset, ty, chassis_h - lid_thickness])
+                    rotate([180, 0, 0])
+                    heatset_insert_bore(depth=side_insert_hole_depth);
+            }
+            for(tz = [hole_inset_z, chassis_h - hole_inset_z])
+                translate([hole_x, 0, tz])
+                    rotate([-90, 0, 0])
+                    heatset_insert_bore(depth=side_insert_hole_depth);
+            for(tz = rear_mount_z)
+                translate([hole_x, enclosure_depth, tz])
+                    rotate([90, 0, 0])
+                    heatset_insert_bore(depth=side_insert_hole_depth);
+        }
+    }
+}
+
+
+// --- Shared top/bottom panel parts (panel local frame: X 0..inner_plate_w as before,
+// the plate itself now extends (chassis_w - inner_plate_w)/2 further on each side) ---
+panel_x0 = -(chassis_w - inner_plate_w) / 2;
+
+module panel_plate() {
+    translate([panel_x0, 0, 0]) cube([chassis_w, enclosure_depth, lid_thickness]);
+}
+
+// is_top: lips/bosses hang down from the top panel (built in the panel frame, z = 0 is the
+// outer face for the bottom panel and the inner face for the top panel)
+module panel_lips_and_bosses(is_top) {
+    cx = inner_plate_w/2;
+    zin = is_top ? 0 : lid_thickness;          // inner face
+    dir = is_top ? -1 : 1;                     // towards the inside
+    lip_x = chassis_w/2 - side_total_thickness;
+    // locating lips along the long edges, interrupted at the side-panel insert bosses
+    gaps = [for (ty = side_screw_ys()) [ty - side_boss_d/2 - 0.5, ty + side_boss_d/2 + 0.5]];
+    starts = concat([0], [for (g = gaps) g[1]]);
+    ends = concat([for (g = gaps) g[0]], [enclosure_depth]);
+    for (sx = [-1, 1], k = [0 : len(starts) - 1])
+        translate([cx + (sx > 0 ? lip_x - panel_lip_w : -lip_x), starts[k], is_top ? -panel_lip_h : zin])
+            cube([panel_lip_w, ends[k] - starts[k], panel_lip_h]);
+    // end bosses for the front / back plate screws
+    fb = is_top ? front_top_bosses : front_bottom_bosses;
+    rb = is_top ? rear_top_bosses : rear_bottom_bosses;
+    for (b = fb) translate([cx + b[0] - panel_boss_w/2, 0, is_top ? -b[1] : zin]) cube([panel_boss_w, panel_boss_depth, b[1]]);
+    for (b = rb) translate([cx + b[0] - panel_boss_w/2, enclosure_depth - panel_boss_depth, is_top ? -b[1] : zin]) cube([panel_boss_w, panel_boss_depth, b[1]]);
+}
+
+module panel_boss_bores(is_top) {
+    cx = inner_plate_w/2;
+    fb = is_top ? front_top_bosses : front_bottom_bosses;
+    rb = is_top ? rear_top_bosses : rear_bottom_bosses;
+    for (b = fb) translate([cx + b[0], 0, is_top ? -b[1]/2 : lid_thickness + b[1]/2]) rotate([-90, 0, 0]) heatset_insert_bore(depth=side_insert_hole_depth);
+    for (b = rb) translate([cx + b[0], enclosure_depth, is_top ? -b[1]/2 : lid_thickness + b[1]/2]) rotate([90, 0, 0]) heatset_insert_bore(depth=side_insert_hole_depth);
+}
+
+module panel_side_screw_holes(from_top) {
+    cx = inner_plate_w/2;
+    for (sx = [-1, 1], ty = side_screw_ys())
+        translate([cx + sx * (chassis_w/2 - panel_screw_inset), ty, 0])
+            countersunk_hole(lid_thickness, assem_screw_diam, assem_screw_head_diam, 90, from_top=from_top);
+}
+
+// Assembly-Z of each panel boss insert axis (for the front / back plate holes)
+function panel_boss_z(b, is_top) = is_top ? chassis_h - lid_thickness - b[1]/2 : lid_thickness + b[1]/2;
+
+
+// --- 6. BOTTOM PANEL (carries the main board and the VIM3 stack) ---
+// Local frame: X 0..inner_plate_w (body X + inner_plate_w/2), Y 0..enclosure_depth.
+module bottom_panel() {
+    cx = inner_plate_w/2;
+
+    mb_posts = [for (h = mb_mounts) mb2body([h[0], h[1]])];
+    vim3_posts = [for (i = [0, 1], j = [0, 1])
+        [vim3_hole_x0 + i * vim3_hole_spacing_w, vim3_hole_y0 + j * vim3_hole_spacing_l]];
+
+    difference() {
+        union() {
+            panel_plate();
+            panel_lips_and_bosses(false);
+            // Main board: one post per hole (M3, M2.5, M2), with a fillet ring at the foot
+            for (i = [0 : len(mb_mounts) - 1]) {
+                p = mb_posts[i];
+                od = mb_mounts[i][5];
+                translate([cx + p[0], p[1], lid_thickness]) {
+                    standoff_post(mb_standoff_height, od);
+                    cylinder(h=1.5, d1=od + 2, d2=od, $fn=30);
+                }
+            }
+            // VIM3 / M2X: M2 posts
+            for (p = vim3_posts)
+                translate([cx + p[0], p[1], lid_thickness])
+                    standoff_post(vim3_floor_standoff_height, m2_standoff_outer_diam);
+        }
+
+        // Assembly screw holes into the side panels, and the front / back plate inserts
+        panel_side_screw_holes(false);
+        panel_boss_bores(false);
+
+        // Heat-set insert bores
+        for (i = [0 : len(mb_mounts) - 1]) {
+            p = mb_posts[i];
+            m = mb_mounts[i];
+            translate([cx + p[0], p[1], lid_thickness]) {
+                standoff_insert_cut(mb_standoff_height, m[3], m[2], m[4]);
+                // screw relief below the insert
+                translate([0, 0, mb_screw_relief_floor - lid_thickness])
+                    cylinder(h=mb_standoff_height - m[3] + lid_thickness - mb_screw_relief_floor + 0.1, d=m[6], $fn=24);
+            }
+        }
+        for (p = vim3_posts)
+            translate([cx + p[0], p[1], lid_thickness])
+                standoff_insert_cut(vim3_floor_standoff_height);
+
+        // Vent slots under the VIM3 stack (air in at the bottom, out through the lid)
+        if (add_lid_vents) {
+            for (yy = [stack_y0 + 12 : lid_vent_pitch : stack_y1 - 12])
+                translate([cx + stack_x0 + 8, yy, -1])
+                    hull() {
+                        cylinder(d=lid_vent_w, h=lid_thickness + 2, $fn=16);
+                        translate([vim3_w - 16, 0, 0]) cylinder(d=lid_vent_w, h=lid_thickness + 2, $fn=16);
+                    }
+        }
+    }
+}
+
+
+// --- 7. TOP PANEL ---
+module top_panel() {
+    cx = inner_plate_w/2;
+    difference() {
+        union() {
+            panel_plate();
+            panel_lips_and_bosses(true);
+            // stiffening ribs on the inside
+            for (x = top_rib_xs)
+                translate([cx + x - panel_rib_w/2, panel_boss_depth + 1, -panel_rib_h]) cube([panel_rib_w, enclosure_depth - 2 * panel_boss_depth - 2, panel_rib_h + 0.01]);
+            for (y = [enclosure_depth/3, 2 * enclosure_depth/3])
+                translate([cx + min(top_rib_xs), y - panel_rib_w/2, -panel_rib_h]) cube([max(top_rib_xs) - min(top_rib_xs), panel_rib_w, panel_rib_h + 0.01]);
+        }
+        panel_side_screw_holes(true);
+        panel_boss_bores(true);
+        // Vent slots over the VIM3 (heatsink)
+        if (add_lid_vents) {
+            for (yy = [stack_y0 + 8 : lid_vent_pitch : stack_y1 - 8])
+                translate([cx + stack_x0 + 6, yy, -1])
+                    hull() {
+                        cylinder(d=lid_vent_w, h=lid_thickness + 2, $fn=16);
+                        translate([vim3_w - 12, 0, 0]) cylinder(d=lid_vent_w, h=lid_thickness + 2, $fn=16);
+                    }
+        }
+    }
+}
+
+
+// --- 8. GHOST MODELS (assembly preview only, not printed) ---
+module ghost_boards() {
+    // Main board
+    color("ForestGreen", 0.85)
+        translate([mb_x0, mb_y0, mb_bottom_z])
+        linear_extrude(mb_thickness)
+        translate([mb_size/2, mb_size/2]) rounded_rect_2d(mb_size, mb_size, mb_corner_r);
+
+    // Main-board parts that matter for the case (KiCad courtyard boxes, rotated):
+    // [bx0, bx1, by0, by1, height, colour]
+    mb_parts = [
+        [70.19, 85.19, 0.54, 12.00, 6.5, "Silver"],    // J13 HDMI (mouth at y = 0)
+        [94.75, 99.66, 8.64, 32.14, 2.5, "Wheat"],     // J14 display FPC (ribbon leaves at x = 100)
+        [8.04, 67.50, 0.55, 10.45, 9.0, "DimGray"],    // J2 2x20 IDC to VIM3
+        [1.04, 9.45, 11.04, 17.79, 7.0, "White"],      // J18 VIM3 VIN
+        [11.04, 17.95, 11.45, 16.95, 6.0, "White"],    // J5 power key
+        [1.04, 18.20, 81.67, 91.45, 12.0, "Ivory"],    // J1 ISO A Micro-Fit
+        [54.65, 64.42, 85.30, 99.45, 12.0, "Ivory"],   // J8 ISO C1 Micro-Fit
+        [65.24, 78.14, 93.95, 99.45, 6.0, "White"],    // J12 buttons
+        [78.84, 89.75, 93.95, 99.45, 6.0, "White"],    // J7 light sensor
+        [18.84, 36.62, 81.25, 91.16, 13.0, "Yellow"]   // F4 fuse holder
+    ];
+    for (p = mb_parts) {
+        a = mb2body([p[0], p[2]]);
+        b = mb2body([p[1], p[3]]);
+        color(p[5], 0.9)
+            translate([min(a[0], b[0]), min(a[1], b[1]), mb_top_z])
+            cube([abs(b[0] - a[0]), abs(b[1] - a[1]), p[4]]);
+    }
+
+    // Stacked modules: GNSS (x0-26.5, y19-50.5), audio (x27-63.5, y13-54), USB (x64-100, y32.5-87.5)
+    mods = [[0, 26.5, 19, 50.5, "RoyalBlue"], [27, 63.5, 13, 54, "Purple"],
+            [usbmod_origin[0], usbmod_origin[0] + usbmod_size[0], usbmod_origin[1], usbmod_origin[1] + usbmod_size[1], "Teal"]];
+    for (m = mods) {
+        a = mb2body([m[0], m[2]]);
+        b = mb2body([m[1], m[3]]);
+        color(m[4], 0.8)
+            translate([min(a[0], b[0]), min(a[1], b[1]), module_bottom_z])
+            cube([abs(b[0] - a[0]), abs(b[1] - a[1]), module_thickness]);
+    }
+    // USB-A shells, mouth at the module edge (KiCad x = 100)
+    for (my = usb_a_centres_my) {
+        c = usb2body([36.01, my]);
+        color("LightSteelBlue")
+            translate([c[0] - usb_a_shell_w/2, c[1] - 14.0, usb_a_z - usb_a_shell_h/2])
+            cube([usb_a_shell_w, 14.0, usb_a_shell_h]);
+    }
+
+    // VIM3 + M2X stack
+    color("SteelBlue", 0.8)
+        translate([m2x_x0, m2x_y0, m2x_bottom_z]) cube([m2x_w, m2x_l, mb_thickness]);
+    color("SteelBlue", 0.35)
+        translate([m2x_x0, stack_y0, m2x_bottom_z]) cube([m2x_w, m2x_fpc_allow, vim3_bottom_z - m2x_bottom_z]);
+    color("Navy", 0.85)
+        translate([vim3_x0, vim3_y0, vim3_bottom_z]) cube([vim3_w, vim3_l, mb_thickness]);
+    color("Gray", 0.6)
+        translate([vim3_x0 + 4, vim3_y0 + 8, vim3_top_z]) cube([vim3_w - 8, vim3_l - 16, vim3_heatsink_height]);
+    // VIM3 40-pin header on the left edge (ASSUMPTION: opposite the ports)
+    color("Black")
+        translate([vim3_x0 + 1, vim3_y0 + 15, vim3_top_z]) cube([5.1, 50.8, 8.5]);
+
+    // HDMI plugs: VIM3 side (front strip) and main board J13 side (HDMI bay)
+    hdmi_v = [vim3_x0 + vim3_w, vim3_y0 + vim3_hdmi_from_front, vim3_top_z + 3.2];
+    color("Black", 0.7)
+        translate([hdmi_v[0], hdmi_v[1] - hdmi_plug_w/2, hdmi_v[2] - 5.5]) cube([hdmi_plug_reach - 15, hdmi_plug_w, 11]);
+    color("Black", 0.7)
+        translate([mb_x0 - hdmi_plug_reach, j13_centre_y - hdmi_plug_w/2, j13_z - 5.5]) cube([hdmi_plug_reach, hdmi_plug_w, 11]);
+
+    // Panel jacks behind the back plate (body length inside the case)
+    y_in = enclosure_depth;
+    for (j = [[gps_x, 8.0, 10.0, gps_zz], [mic_x, 8.0, 12.0, io_row_z], [rca_x, 12.0, 15.0, io_row_z]])
+        color("Gold")
+            translate([j[0], y_in - j[2], j[3]])
+            rotate([-90, 0, 0]) cylinder(d=j[1], h=j[2], $fn=24);
+
+    // 11 mm standoffs between the main board and the modules (H5-H8)
+    for (i = [4 : len(mb_mounts) - 1]) {
+        p = mb2body([mb_mounts[i][0], mb_mounts[i][1]]);
+        color("Goldenrod")
+            translate([p[0], p[1], mb_top_z]) cylinder(h=module_stack_height, d=mb_mounts[i][6] + 1.6, $fn=6);
+    }
+    // Board screws / standoff threads into the inserts
+    for (m = mb_mounts) {
+        p = mb2body([m[0], m[1]]);
+        color("Silver") translate([p[0], p[1], mb_bottom_z - m[3] + 0.5]) cylinder(h=m[3] + mb_thickness, d=m[6] - 0.4, $fn=16);
+    }
+
+    // Screen extension ribbon: wraps from J14 round the board edge and runs under the
+    // board in the post-free lane (between H7 and H5), then forward to the front slot.
+    xr = (j14_x_lo + j14_x_hi)/2;
+    zr = floor_z + 2;
+    color("Orange", 0.8) {
+        translate([xr - 10.5, mb_y0 + 97, mb_top_z + 1]) cube([21, 3 + mb_rear_gap + 0.5, 0.2]);
+        translate([xr - 10.5, enclosure_depth - 0.5, zr]) cube([21, 0.2, mb_top_z + 1 - zr]);
+        translate([xr - 10.5, ffc_turn_y - 10.5, zr]) cube([21, enclosure_depth - ffc_turn_y + 10.5, 0.2]);
+        translate([xr - 10.5, ffc_turn_y - 10.5, zr]) cube([ffc_lane_x - xr + 21, 21, 0.2]);
+        translate([ffc_lane_x - 10.5, ffc_front_y - 10.5, zr]) cube([21, ffc_turn_y - ffc_front_y + 10.5, 0.2]);
+        translate([front_ribbon_slot_offset_x - 10.5, ffc_front_y - 10.5, zr]) cube([ffc_lane_x - front_ribbon_slot_offset_x + 21, 21, 0.2]);
+        translate([front_ribbon_slot_offset_x - 10.5, 0, zr]) cube([21, ffc_front_y, 0.2]);
+    }
+}
+
+
+// --- RENDER LOGIC ---
+
+if (part_to_print == "assembly") {
+
+        translate([0, -bezel_depth - spacer_length - explode_dist, chassis_h/2])
+        rotate([90, 0, 0]) {
+            color("DarkCyan") screen_tray();
+            color("#20304a") translate([0, 0, outer_d - ledge_depth]) tray_rounded_rect(inner_w - 0.4, inner_h - 0.4, ledge_depth, screen_radius);   // screen glass (preview)
+            color("DimGray") button_bar();
+            color("Gainsboro") button_caps_placed();
+            if (show_boards) ghost_tray_boards();
+        }
+
+    color("White") {
+        for(tx = [-mount_spacing_w/2, mount_spacing_w/2]) {
+            for(tz = [chassis_h/2 - mount_spacing_h/2, chassis_h/2 + mount_spacing_h/2]) {
+                translate([tx, -bezel_depth - spacer_length, tz])
+                    rotate([-90,0,0])
+                    standoff_spacer();
+            }
+        }
+    }
+
+    if (add_back_plate) {
+        color("DarkSlateGray")
+            translate([0, front_wall_thickness + enclosure_depth + explode_dist, 0])
+            back_plate();
+    }
+
+    color("DarkGray") din_front_plate();
+
+    color("LightGray", 0.5) translate([-(chassis_w/2), front_wall_thickness, 0]) side_panel_gen(false);
+    color("LightGray", 0.5) translate([(chassis_w/2), front_wall_thickness, 0]) side_panel_gen(true);
+    color("DarkSlateGray", 0.6) translate([-(inner_plate_w/2), front_wall_thickness, 0]) bottom_panel();
+    if (show_lid)
+        color("DarkSlateGray", 0.4) translate([-(inner_plate_w/2), front_wall_thickness, chassis_h - lid_thickness + explode_dist]) top_panel();
+
+    if (show_boards)
+        translate([0, front_wall_thickness, 0]) ghost_boards();
+
+} else if (part_to_print == "din_front_plate") {
+    rotate([90,0,0]) din_front_plate();
+} else if (part_to_print == "screen_tray") {
+    screen_tray();
+} else if (part_to_print == "button_bar") {
+    translate([0, 0, tongue_t]) button_bar();     // back face down, front face up
+} else if (part_to_print == "button_caps") {
+    button_caps_print();
+} else if (part_to_print == "standoff_spacer") {
+    standoff_spacer();
+} else if (part_to_print == "left_side") {
+    rotate([0, -90, 0]) side_panel_gen(false);
+} else if (part_to_print == "right_side") {
+    rotate([0, 90, 0]) side_panel_gen(true);
+} else if (part_to_print == "bottom") {
+    bottom_panel();
+} else if (part_to_print == "top") {
+    translate([0, 0, lid_thickness]) rotate([180, 0, 0]) top_panel();   // outer face down, ribs up
+} else if (part_to_print == "back_plate") {
+    rotate([90,0,0]) back_plate();
+}
