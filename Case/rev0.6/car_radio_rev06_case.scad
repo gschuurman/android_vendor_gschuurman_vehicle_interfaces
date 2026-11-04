@@ -46,7 +46,6 @@ mount_screw_diam = 4.2;
 /* [Screen Configuration (Waveshare 70H-1024600)] */
 screen_outer_w = 173.00;
 screen_outer_h = 103.00;
-screen_depth = 8.0;         // pocket depth; Waveshare spec: 4.2 mm total (touch), 3.5 mm LCD -> ~3 mm spare behind the panel
 screen_radius = 3.00;
 screen_tolerance = 1.25;   // was 0.5: screen pocket 1.5 mm larger in width and height (Glenn, 2026-11-04)
 
@@ -57,6 +56,12 @@ tray_bottom_rounding = 2.0;
 ledge_depth = 1.5;
 tape_ledge_width = 3.0;
 lcd_wiggle_room = 1.0;
+// Panel depth (Glenn, 2026-11-04: the 8 mm prototype depth let the screen flex). Waveshare spec:
+// 4.2 mm total with touch glass, 3.5 mm LCD body. The LCD back now rests on a foam layer on the
+// tray base instead of hanging free behind the glass.
+panel_lcd_thickness = 3.5;     // LCD body behind the glass seat (spec: 4.2 total - ~0.7 glass)
+screen_back_pad = 1.0;         // double-sided foam tape between LCD back and tray base
+screen_depth = ledge_depth + panel_lcd_thickness + screen_back_pad;   // = 6.0 (was 8.0)
 // The screen sits 180 deg turned compared with the prototype file: ribbon slot at the top,
 // touch relief at the bottom (seen from the front). The part prints the same, just turned.
 screen_features_rot180 = true;

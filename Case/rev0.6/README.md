@@ -124,11 +124,11 @@ Source: the spec table on https://www.waveshare.com/wiki/70H-1024600. The drawin
 |---|---|---|---|
 | Touch screen (cover glass) | 173 x 103 mm | glass seat 175.5 x 105.5 mm, 1.5 mm deep | 1.25 mm per side |
 | Display module (LCD body) | 164 x 97 mm | opening behind the seat 170.5 x 100.5 mm | 3.25 mm (sides), 1.75 mm (top/bottom) |
-| Total thickness, touch version | 4.2 mm | glass seat floor (z 10.5) down to tray base (z 4.0) = 6.5 mm, plus 1.5 mm seat | LCD back at z ~7.0: about 3 mm air behind the panel for the FPC fold |
+| Total thickness, touch version | 4.2 mm | 1.5 mm glass seat + 4.5 mm down to the tray base (`screen_depth` 6.0, was 8.0) | LCD back rests on 1 mm double-sided foam tape on the base (`screen_back_pad`) |
 | Cover glass (4.2 - 3.5) | about 0.7 mm | in a 1.5 mm seat | glass face about 0.3-0.6 mm below the rim with tape: edges protected |
 | Interface | 40-pin 0.5 mm FPC (~21 mm wide) | ribbon slot 25 x 3 mm (top) | ~2 mm per side |
 
 - The BH1750 pocket and the bar inserts stay within the 4.5 mm solid rim / the base under the panel; no interference with the LCD body.
 - The caps stand about 2 mm in front of the glass face.
-- `screen_depth` (8 mm) is much deeper than the 4.2 mm spec. The tray could be about 3 mm thinner if wanted; it has been left as it is because the prototype tray fits this screen.
-- Not checked (no data): touch controller / FPC parts on the back of the panel. Measure the thickest point on the back of your panel; it must stay under about 6 mm from the glass front.
+- The prototype's 8 mm depth left the LCD hanging behind the glass, so the screen flexed (Glenn). `screen_depth` is now computed from the seat, the 3.5 mm LCD and a 1 mm foam pad (6.0 mm), and the tray and button bar are 2 mm thinner. Put the foam on the LCD back away from the FPC path (top) and the touch relief (bottom). If your foam is thicker or thinner, change `screen_back_pad`.
+- Not checked (no data): touch controller / FPC parts on the back of the panel. Measure the thickest point on the back of your panel; it must fit in the 1 mm foam gap, or cut the foam around it.
