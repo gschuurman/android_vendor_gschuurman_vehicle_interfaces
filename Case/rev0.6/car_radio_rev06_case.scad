@@ -29,7 +29,7 @@
 
 /* [Print Selection] */
 // Select which part to generate
-part_to_print = "assembly"; // [assembly, din_front_plate, screen_tray, button_bar, button_caps, standoff_spacer, left_side, right_side, bottom, top, back_plate]
+part_to_print = "assembly"; // [assembly, din_front_plate, screen_tray, button_bar, button_caps, module_spacers, standoff_spacer, left_side, right_side, bottom, top, back_plate]
 
 /* [Assembly view] */
 explode_dist = 0;
@@ -213,8 +213,9 @@ mb_rear_gap = 1.0;          // gap between board edge (KiCad x = 100) and the ba
 // H1-H4: M3 board screws. H5/H6/H7: M2.5, the USB / audio / GNSS module holes land
 // exactly on these (checked by matching the module header pins to the main-board
 // sockets). H8: M2, for the future K-line module on J10.
-// For H5-H8 use an 11 mm male-female standoff: its male thread goes through the main
-// board into the insert, the module sits on top and gets a screw.
+// H5-H8: a printed 11 mm spacer sleeve (part "module_spacers") sits between the main board
+// and the module; one long screw goes through the module, the sleeve and the main board
+// into the insert (M2.5 x 18 for H5-H7, M2 x 18 for H8). An 11 mm M-F brass standoff also works.
 // [KiCad x, KiCad y, insert bore d, insert depth, lead-in d, post OD, screw clearance d, label]
 mb_mounts = [
     [ 4.5,  4.5, 4.2, 6.0, 5.5, 8.0, 3.4, "H1 M3"],
@@ -229,6 +230,10 @@ mb_mounts = [
 // The screw clearance bore continues below the insert so a long screw or a standoff's
 // male thread never bottoms out; it stops this far above the underside of the panel.
 mb_screw_relief_floor = 0.6;
+
+/* [Module spacer sleeves (printed)] */
+// [screw label, inner d, outer d, how many to print (incl. one spare)]
+module_spacer_types = [["M2.5", 2.9, 5.0, 4], ["M2", 2.4, 4.5, 2]];
 
 /* [Stacked modules (from KiCad)] */
 module_stack_height = 11.0; // main board top to module underside (8.5 mm socket + 2.5 mm male header body)
@@ -830,6 +835,20 @@ module din_front_plate() {
 }
 
 
+// --- 2b. MODULE SPACER SLEEVES (between main board and plug-in modules) ---
+module module_spacer(id, od) {
+    difference() {
+        cylinder(d=od, h=module_stack_height, $fn=40);
+        translate([0, 0, -1]) cylinder(d=id, h=module_stack_height + 2, $fn=24);
+        // small chamfers so the ends sit flat on the boards
+        for (z = [0, module_stack_height]) translate([0, 0, z]) cylinder(d1=id + 0.8, d2=id - 0.01, h=0.4, center=true, $fn=24);
+    }
+}
+module module_spacers_print() {
+    for (t = [0 : len(module_spacer_types) - 1]) for (i = [0 : module_spacer_types[t][3] - 1])
+        translate([i * 8, t * 8, 0]) module_spacer(module_spacer_types[t][1], module_spacer_types[t][2]);
+}
+
 // --- 3. FLANGED STANDOFF (Washer included, unchanged) ---
 module standoff_spacer() {
     washer_diam = 12;
@@ -1229,11 +1248,12 @@ module ghost_boards() {
             translate([j[0], y_in - j[2], j[3]])
             rotate([-90, 0, 0]) cylinder(d=j[1], h=j[2], $fn=24);
 
-    // 11 mm standoffs between the main board and the modules (H5-H8)
+    // printed 11 mm spacer sleeves between the main board and the modules (H5-H8)
     for (i = [4 : len(mb_mounts) - 1]) {
         p = mb2body([mb_mounts[i][0], mb_mounts[i][1]]);
+        t = (i == 7) ? 1 : 0;
         color("Goldenrod")
-            translate([p[0], p[1], mb_top_z]) cylinder(h=module_stack_height, d=mb_mounts[i][6] + 1.6, $fn=6);
+            translate([p[0], p[1], mb_top_z]) module_spacer(module_spacer_types[t][1], module_spacer_types[t][2]);
     }
     // Board screws / standoff threads into the inserts
     for (m = mb_mounts) {
@@ -1305,6 +1325,8 @@ if (part_to_print == "assembly") {
     translate([0, 0, tongue_t]) button_bar();     // back face down, front face up
 } else if (part_to_print == "button_caps") {
     button_caps_print();
+} else if (part_to_print == "module_spacers") {
+    module_spacers_print();
 } else if (part_to_print == "standoff_spacer") {
     standoff_spacer();
 } else if (part_to_print == "left_side") {

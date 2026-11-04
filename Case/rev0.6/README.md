@@ -87,7 +87,7 @@ Replaces the 18 mm task bar and the screen-off tab, which were too big.
 - **Switch strip**: perfboard, 176.7 x 11.5 mm, with the 9 Kiwi KW-1556 / Adafruit 1489 switches. The cap pitch is on the 2.54 mm grid: 12.7 mm within a group, 33.02 mm from the screen-off button to each group, and 78.74 mm from the centre to home/voice. The strip drops in from the top of the bar into grooves in the end and bottom walls. The tray holds it once the bar is screwed on, and three ribs behind it stop it bending. Wires leave through a slot in the back wall.
 - **Switch height is still an assumption** (5.0 mm from board to plunger, `btn_total_h`). The cap flange should just touch the plunger (`btn_preload` 0.1 mm). Measure one switch before printing the bar.
 - **BH1750** (GY-302 module) sits between screen off and previous, behind a 3 mm window. Its header edge points down and it sinks 1.2 mm into the bottom wall. The top 2 mm reach into a pocket in the tray rim. Fix it with a dot of hot glue. If the chip is not centred on your module, set `bh1750_chip_offset`.
-- **Home and voice need two more MCU inputs** beyond J12 and J21. They are not mapped yet.
+- **Home and voice** go to J21.6 (GPIO27) and J10.5 (GPIO28). Wiring diagram: `wiring/wiring.png`.
 
 Wiring (rev 0.6 main board):
 
@@ -102,8 +102,8 @@ Wiring (rev 0.6 main board):
 | Play/pause | J21.8 | GPIO25 |
 | Next | J21.7 | GPIO26 |
 | Media GND | J21.10 | |
-| Home | to be chosen | spare GPIO |
-| Voice | to be chosen | spare GPIO |
+| Home | J21.6 | GPIO27 |
+| Voice | J10.5 | GPIO28 (board.h calls it PIN_KLINE_EN; the L9637D K-line chip has no enable pin) |
 | BH1750 | J7: 1 3V3, 2 GND, 3 SCL, 4 SDA | I2C1 |
 
 J12 has pull-ups and RC filters on the board. GPIO24-26 on J21 have nothing, so the firmware has to use internal pull-ups and send them as media keys. The firmware currently parks these pins as unused, so it needs a small change.
@@ -132,3 +132,7 @@ Source: the spec table on https://www.waveshare.com/wiki/70H-1024600. The drawin
 - The caps stand about 2 mm in front of the glass face.
 - The prototype's 8 mm depth left the LCD hanging behind the glass, so the screen flexed (Glenn). `screen_depth` is now computed from the seat, the 3.5 mm LCD and a 1 mm foam pad (6.0 mm), and the tray and button bar are 2 mm thinner. Put the foam on the LCD back away from the FPC path (top) and the touch relief (bottom). If your foam is thicker or thinner, change `screen_back_pad`.
 - Not checked (no data): touch controller / FPC parts on the back of the panel. Measure the thickest point on the back of your panel; it must fit in the 1 mm foam gap, or cut the foam around it.
+
+## Module spacer sleeves (2026-11-04)
+
+Part `module_spacers`: printed 11 mm sleeves that sit between the main board and the plug-in modules on H5-H7 (M2.5: ID 2.9, OD 5.0, 4 printed incl. one spare) and H8 (M2: ID 2.4, OD 4.5, 2 printed). One screw goes through the module, the sleeve and the main board into the insert in the bottom post: M2.5 x 18 (x20 also fits) and M2 x 18. 11 mm matches the stack height of the header sockets (8.5 mm socket + 2.5 mm pin header body); if your stack measures differently, change `module_stack_height`. Print them upright with 3+ perimeters. In the assembly view they replace the brass standoffs; checked against all case parts (0 mm3 overlap).
