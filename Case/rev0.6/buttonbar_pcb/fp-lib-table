@@ -1,0 +1,4 @@
+(fp_lib_table
+  (version 7)
+  (lib (name "buttonbar")(type "KiCad")(uri "${KIPRJMOD}/buttonbar.pretty")(options "")(descr "Button bar project footprints"))
+)

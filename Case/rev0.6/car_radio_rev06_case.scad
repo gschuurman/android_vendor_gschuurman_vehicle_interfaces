@@ -29,7 +29,7 @@
 
 /* [Print Selection] */
 // Select which part to generate
-part_to_print = "assembly"; // [assembly, din_front_plate, screen_tray, button_bar, button_caps, module_spacers, standoff_spacer, left_side, right_side, bottom, top, back_plate]
+part_to_print = "assembly"; // [assembly, din_front_plate, screen_tray, button_bar, button_caps, module_spacers, vim3_retainers, standoff_spacer, left_side, right_side, bottom, top, back_plate]
 
 /* [Assembly view] */
 explode_dist = 0;
@@ -96,8 +96,8 @@ btn_pcb_t = 1.6;
 // prev, play/pause, next | voice. Positions on the 2.54 mm perfboard grid relative to each other.
 btn_xs = [-78.74, -58.42, -45.72, -33.02, 0, 33.02, 45.72, 58.42, 78.74];
 btn_icons = ["home", "voldown", "mute", "volup", "power", "prev", "play", "next", "mic"];
-bar_rib_xs = [-68.58, -16.5, 68.58];   // supports behind the strip, in the gaps
-bar_wire_slot = [-9, 8, 4];            // x centre, width, height of the wire exit in the back wall
+bar_rib_xs = [-68.58, -24, 68.58];    // supports behind the strip, in the gaps
+bar_wire_slot = [-11, 12, 4];           // x centre, width, height of the wire exit in the back wall
 // BH1750 (GY-302 module 18.5 x 13.9, chip assumed in the centre) between screen-off and prev.
 // It sits behind the skin with its header edge down; its top 2 mm reach into the tray rim.
 bh1750_x = 16.51;
@@ -141,7 +141,7 @@ top_rib_xs = [-16, 20, 55];
 front_top_bosses = [[-25, 9], [70, 9]];
 front_bottom_bosses = [[36, 9], [65, 9]];
 rear_top_bosses = [[-30, 9], [50, 9]];
-rear_bottom_bosses = [[-60, 9], [-30, 9], [55, 7.5]];   // the one at X 55 is under the main board (clears the screen ribbon)
+rear_bottom_bosses = [[55, 7.5]];   // under the main board (clears the screen ribbon); X -60/-30 dropped: the M2X runs to the back plate there
 panel_boss_w = 10.0;
 panel_boss_depth = 9.0;      // along Y
 
@@ -204,7 +204,7 @@ pogo_offset_z = -18.0;
 mb_size = 100.0;            // Edge.Cuts 0..100 x 0..100, 2 mm corner radius
 mb_corner_r = 2.0;
 mb_thickness = 1.6;
-mb_standoff_height = 8.0;   // floor to board underside; leaves room for the ribbon under the board
+mb_standoff_min = 8.0;      // floor to board underside (raised further below so the J13 HDMI head clears the VIM3)
 mb_side_clear = 0.75;       // gap between board edge (KiCad y = 100) and the right side ledge
 mb_rear_gap = 1.0;          // gap between board edge (KiCad x = 100) and the back plate
 // EVERY hole on the main board gets a post with a heat-set insert, melted in from the
@@ -248,33 +248,72 @@ usb_a_shell_w = 13.2;
 usb_a_shell_h = 5.2;
 usb_a_center_above_module = 2.6; // ASSUMPTION: shell sits on the module PCB; check after stacking
 
-/* [Khadas VIM3 + M2X stack] */
-// M2X: 88.0 x 57.5 x 16.0 mm PCB only, 109 mm with its rigid-flex FPC (Khadas m2x_specs).
-// VIM3: 82 x 58 mm. The Khadas 2D drawing could not be downloaded here, so the hole
-// pattern below is an ASSUMPTION (M2 holes 3.5 mm in from each corner). Measure!
-// (The prototype file had 60.5 x 86.5 mm, which is larger than the VIM3 board itself.)
-vim3_w = 58.0;              // across the car (X)
-vim3_l = 82.0;              // along the car (Y)
-m2x_w = 57.5;
-m2x_l = 88.0;
-m2x_fpc_allow = 6.0;        // extra length at the front end for the folded M2X FPC (ASSUMPTION)
-vim3_side_clear = 2.75;     // gap to the left side ledge (room for the side-panel insert bosses)
-vim3_front_clear = 3.0;     // gap to the front plate
-vim3_hole_spacing_w = 51.0; // ASSUMPTION
-vim3_hole_spacing_l = 75.0; // ASSUMPTION
-vim3_floor_standoff_height = 4.0; // floor to M2X underside
-m2x_to_vim3 = 12.0;         // M2X PCB top to VIM3 PCB underside (ASSUMPTION, supplied M2 standoffs)
-vim3_parts_height = 11.5;   // tallest part above the VIM3 PCB (RJ45); heatsink adds to this
-vim3_heatsink_height = 10.0;
-// VIM3 ports face +X (towards the main board). HDMI centre measured from the VIM3's
-// front edge. Put the HDMI end of the VIM3 forward so the plug lands in the free strip
-// in front of the main board. ASSUMPTION, check on the board.
-vim3_hdmi_from_front = 20.0;
+/* [Khadas VIM3 + New M2X stack] (from Khadas VIM3 V11 DXF/STEP + New M2X STEP, 2026-11-04) */
+// VIM3 local frame = Khadas DXF top view: lx along the port edge (0..82), ly across
+// (0 = port edge, 56.64 = 40-pin header edge). Placed with the ports facing +X (main
+// board) and lx running to the rear, so header pin 1 is at the FRONT, like J2 pin 1.
+vim3_l = 82.0;              // along Y (lx)
+vim3_w = 56.64;             // across X (ly)
+vim3_pcb_t = 1.2;
+vim3_holes = [[2.5, 53.51], [16.5, 8.01], [65.5, 8.01], [79.5, 53.51]];   // M2, DXF
+vim3_hdr_lx = [7.37, 55.63];       // pin 1 .. pin 20 (row 1-20 inner, 21-40 at the edge)
+vim3_hdr_ly = 52.83;               // header centre line
+vim3_hdmi_lx = 38.5;               // HDMI centre (STEP), opening 0.06..5.66 above PCB top
+vim3_hdmi_z = 2.86;                // HDMI centre above the VIM3 PCB top
+vim3_port_overhang = 2.47;         // USB-A shells stick out past the port edge
+// tallest parts on top: USB-A 7.4 (lx 0-15 and 67-82), RJ45 6.7 (lx 47-64.5)
+vim3_usba_lx = [[0, 15.3], [67.1, 82.4]];
+vim3_usba_h = 7.4;
+vim3_usba_depth = 15.3;
+vim3_heatsink_height = 10.0;       // ASSUMPTION: official heatsink, over the SoC
+// New M2X (93.55 x 56 x 0.8), M.2 sockets + SSD on its UNDERSIDE (away from the VIM3;
+// Glenn's photo of the stack from below, 2026-11-05). The VIM3 sits straight on the
+// M2X bosses (they stick out 1.5 mm on the VIM3 side).
+// Its four bosses land on the VIM3 holes with lx = 94.0 - M2X x, ly = 56.01 - M2X z;
+// then the M2X cut-out (M2X x 17.5-27.5, z 19.5-42) sits exactly under the VIM3's own
+// bottom M.2 slot, which drops into it (Glenn). Front edges flush (lx 0.45), the M.2
+// socket end overhangs 12 mm at the REAR (lx 82..94).
+m2x_l = 93.55;
+m2x_w = 56.0;
+m2x_pcb_t = 0.8;
+m2x_front_lx = 0.45;        // M2X front edge in VIM3 lx
+m2x_vim_gap = 1.5;          // M2X PCB to VIM3 PCB underside = boss height (STEP), no spacers (Glenn)
+m2x_under = 3.7;            // below the M2X: M.2 sockets 3.15 (STEP) and the SSD on 1.5 mm standoffs (~3.7)
+m2x_support_h = 4.5;        // floor to M2X PCB underside (two edge ledges), 0.8 mm under the SSD
+vim3_side_clear = 0.8;      // header edge of the VIM3 to the left side ledge (HDMI head needs the room on the other side)
+// Header alignment: the VIM3 header centre sits exactly opposite the J2 centre (Y)
+vim3_ribbon_offset = 0.0;   // + moves the VIM3 to the rear
+// Pocket + two printed retainer strips, screwed down with M3 into heat-set inserts
+// (Glenn, 2026-11-04: no snap clips; the strips leave 0.3 mm air above the boards)
+pocket_clear = 0.4;
+pocket_wall = 2.0;
+ret_w = 9.0;                // strip width (Y)
+ret_t = 3.0;                // strip thickness
+ret_air = 0.3;              // gap between strip and board top
+ret_overlap = 2.0;          // how far the strip reaches over the board edge
+ret_post_d = 8.0;
+ret_post_gap = 1.0;         // post to board edge
+ret_insert = [4.2, 5.5, 5.5];   // M3 insert bore d, depth, lead-in d
+ret_screw_d = 3.4;
+// strip X span (between the two screws) and where the lip may touch (clear of parts)
+ret_front_xs = [-74.0, -44.0];  // over the VIM3 front edge (clear of the front USB-A)
+// rear: the M2X ends 0.7 mm from the back plate; a tongue on the back plate holds it down
+back_tongue_xs = [-72.0, -40.0];
+back_tongue_depth = 2.5;
 
-/* [HDMI bay (VIM3 HDMI -> main board J13)] */
-hdmi_plug_w = 21.0;         // plug body width along Y (standard plug ~21, FPV slim head ~15)
-hdmi_plug_reach = 38.0;     // plug + cable bend, from the main board edge towards -X
-hdmi_bay_margin = 1.5;
+// Right-angle FPV HDMI heads (ribbon goes up), Glenn's cable "A2"
+fpv_plug_len = 8.0;         // plug length in front of the square head PCB (Glenn)
+fpv_head_t = 3.0;           // head PCB + solder side, behind the plug
+fpv_head_sq = 20.0;         // square head PCB 20 x 20 (Glenn)
+fpv_plug_to_bottom = 1.0;   // plug centre to bottom edge of the head PCB (Glenn: 1 mm down, 10 up)
+fpv_seat_gap = 0.5;         // plug shoulder to the socket face when fully in
+j13_centre_above_pcb = 3.2; // J13 HDMI centre above the main-board top. Glenn measured 2026-11-05: J13 top 6 mm above PCB -> centre ~3.05; with the 1.0 mm margin the FPV head clears the VIM3 USB-A by ~0.85 mm
+
+// Main board height: the FPV head in J13 hangs over the VIM3's rear USB-A, so the
+// board goes up until the head PCB clears it by 0.5 mm.
+mb_standoff_height = max(mb_standoff_min,
+    m2x_support_h + m2x_pcb_t + m2x_vim_gap + vim3_pcb_t + vim3_usba_h + 1.0
+    + fpv_plug_to_bottom - j13_centre_above_pcb - mb_thickness);
 
 /* [Backplate (IO) Configuration] */
 add_back_plate = true;
@@ -322,6 +361,10 @@ front_mount_inset_z = 12;
 // Back plate / rear inserts: the lower one is raised so its boss clears the main board
 // corner (board z 11..12.6 reaches the right-hand ledge at the rear).
 rear_mount_z = [20, 37.5];
+// Raised main board (2026-11-04): its rear right corner now sits where the RIGHT side's
+// lower rear insert pad was. That pad and its back-plate screw are dropped, so the
+// already printed right side can be reused after sawing that pad off.
+right_drop_low_rear = true;
 
 /* [DIN Retainer Clip Pockets] */
 add_din_clip_pockets = true;
@@ -385,23 +428,31 @@ function mb2body(p) = [mb_x0 + p[1], mb_y0 + p[0]];
 function usb2body(p) = mb2body([usbmod_origin[0] + p[0], usbmod_origin[1] + p[1]]);
 
 // VIM3 stack placement (body coordinates)
-stack_x0 = -ledge_face_x + vim3_side_clear;
-stack_y0 = vim3_front_clear;
-m2x_x0 = stack_x0;
-m2x_y0 = stack_y0 + m2x_fpc_allow;
-vim3_x0 = stack_x0;
-vim3_y0 = m2x_y0 + (m2x_l - vim3_l) / 2;
-stack_y1 = m2x_y0 + m2x_l;
-m2x_bottom_z = floor_z + vim3_floor_standoff_height;
-vim3_bottom_z = m2x_bottom_z + mb_thickness + m2x_to_vim3;
-vim3_top_z = vim3_bottom_z + mb_thickness;
-vim3_hole_x0 = vim3_x0 + (vim3_w - vim3_hole_spacing_w) / 2;
-vim3_hole_y0 = vim3_y0 + (vim3_l - vim3_hole_spacing_l) / 2;
+vim3_xr = -ledge_face_x + vim3_side_clear + vim3_w;      // X of the port edge (ly = 0)
+function v2b(lx, ly) = [vim3_xr - ly, vim3_y0 + lx];
+m2x_bottom_z = floor_z + m2x_support_h;                  // M2X PCB underside
+vim3_bottom_z = m2x_bottom_z + m2x_pcb_t + m2x_vim_gap;
+vim3_top_z = vim3_bottom_z + vim3_pcb_t;
+stack_x0 = vim3_xr - vim3_w;
 
 // HDMI J13 on the main board: footprint body x 70.19..85.19 (KiCad), mouth at y = 0
 j13_centre_y = mb2body([77.69, 0])[1];
-j13_z = mb_top_z + 3.2;
-hdmi_bay_y0 = j13_centre_y - hdmi_plug_w/2 - hdmi_bay_margin;
+j13_z = mb_top_z + j13_centre_above_pcb;
+// J2 (2x20 IDC): pin 1 at KiCad (13.64, 6.76), pin 39 at (61.91, 6.77)
+j2_centre_y = mb2body([(13.64 + 61.91)/2, 0])[1];
+vim3_y0 = j2_centre_y - (vim3_hdr_lx[0] + vim3_hdr_lx[1])/2 + vim3_ribbon_offset;
+stack_y0 = vim3_y0 + m2x_front_lx;                      // M2X front edge
+stack_y1 = stack_y0 + m2x_l;                              // M2X rear edge (M.2 sockets)
+vim3_y1 = vim3_y0 + vim3_l;
+vim3_hdmi_c = v2b(vim3_hdmi_lx, -vim3_port_overhang);    // [X, Y] of the socket face
+vim3_hdmi_cz = vim3_top_z + vim3_hdmi_z;
+// FPV head boxes [x0, x1, y0, y1, z0, z1]
+vim3_head = [vim3_xr + 1.31 + fpv_seat_gap, vim3_xr + 1.31 + fpv_seat_gap + fpv_head_t,
+             vim3_hdmi_c[1] - fpv_head_sq/2, vim3_hdmi_c[1] + fpv_head_sq/2,
+             vim3_hdmi_cz - fpv_plug_to_bottom, vim3_hdmi_cz - fpv_plug_to_bottom + fpv_head_sq];
+j13_head = [mb_x0 - fpv_seat_gap - fpv_head_t, mb_x0 - fpv_seat_gap,
+            j13_centre_y - fpv_head_sq/2, j13_centre_y + fpv_head_sq/2,
+            j13_z - fpv_plug_to_bottom, j13_z - fpv_plug_to_bottom + fpv_head_sq];
 
 // Screen FPC J14 (KiCad 94.75..99.66 x 8.64..32.14)
 j14_x_lo = mb2body([0, 8.64])[0];
@@ -409,10 +460,15 @@ j14_x_hi = mb2body([0, 32.14])[0];
 
 // --- FIT CHECKS (printed in the console) ---
 echo(str("Overall depth incl. bezel and back plate: ", bezel_depth + front_wall_thickness + enclosure_depth + back_plate_thickness, " mm"));
-echo(str("Gap VIM3 stack <-> main board: ", mb_x0 - (stack_x0 + max(vim3_w, m2x_w)), " mm"));
-echo(str("VIM3 stack ends at Y=", stack_y1, ", HDMI bay starts at Y=", hdmi_bay_y0,
-         (stack_y1 <= hdmi_bay_y0) ? "  OK" : "  CONFLICT: increase enclosure_depth"));
-echo(str("VIM3 top (with heatsink) z=", vim3_top_z + max(vim3_parts_height, vim3_heatsink_height), ", lid underside z=", lid_z));
+echo(str("VIM3 port edge X=", vim3_xr, ", VIM3 HDMI head back X=", vim3_head[1], ", main board edge X=", mb_x0,
+         (vim3_head[1] <= mb_x0 - 0.3) ? "  OK" : "  CONFLICT: VIM3 HDMI head hits the main board edge"));
+echo(str("VIM3 header edge X=", stack_x0, ", side ledge X=", -ledge_face_x));
+echo(str("Stack Y ", stack_y0, "..", stack_y1, " (M2X overhang at the rear), back plate at, enclosure depth ", enclosure_depth));
+echo(str("Header pin 1 Y=", v2b(vim3_hdr_lx[0], 0)[1], " / J2 pin 1 Y=", mb2body([13.64, 0])[1]));
+echo(str("VIM3 HDMI centre Y=", vim3_hdmi_c[1], " z=", vim3_hdmi_cz, "; J13 centre Y=", j13_centre_y, " z=", j13_z));
+echo(str("J13 head bottom z=", j13_head[4], ", VIM3 USB-A top z=", vim3_top_z + vim3_usba_h));
+echo(str("Main board standoff ", mb_standoff_height, " mm (was 8)"));
+echo(str("VIM3 top (with heatsink) z=", vim3_top_z + vim3_heatsink_height, ", lid underside z=", lid_z));
 echo(str("Main board z ", mb_bottom_z, "..", mb_top_z, ", modules ", module_bottom_z, "..", module_top_z, ", USB-A centre z=", usb_a_z));
 echo(str("Screen ribbon (J14) leaves the board at X ", j14_x_lo, "..", j14_x_hi));
 for (m = mb_mounts)
@@ -897,14 +953,19 @@ module back_plate() {
     j14_xc = (j14_x_lo + j14_x_hi)/2;
 
     difference() {
-        translate([-(chassis_w/2), 0, 0])
-            cube([chassis_w, back_plate_thickness, chassis_h]);
+        union() {
+            translate([-(chassis_w/2), 0, 0])
+                cube([chassis_w, back_plate_thickness, chassis_h]);
+            // tongue over the M2X rear edge (holds the VIM3 stack down at the back)
+            translate([back_tongue_xs[0], -back_tongue_depth, m2x_bottom_z + m2x_pcb_t + ret_air])
+                cube([back_tongue_xs[1] - back_tongue_xs[0], back_tongue_depth + 0.01, 2.0]);
+        }
 
         // Side mounting holes (countersunk, as before)
         hole_inset_x = side_wall_thickness + (ledge_width/2);
         cs_depth = (assem_screw_head_diam - assem_screw_diam) / 2;
         for(tx = [-(chassis_w/2) + hole_inset_x, (chassis_w/2) - hole_inset_x]) {
-            for(tz = rear_mount_z) {
+            for(tz = [for (i = [0 : len(rear_mount_z) - 1]) if (!(tx > 0 && right_drop_low_rear && i == 0)) rear_mount_z[i]]) {
                 translate([tx, -1, tz])
                     rotate([-90, 0, 0])
                     cylinder(h=back_plate_thickness + 2, d=assem_screw_diam, $fn=20);
@@ -962,7 +1023,7 @@ module back_plate() {
 
 // --- 5. SIDE PANELS ---
 // Insert bosses (local side-panel frame: x 0 = outer face, inward +x)
-module side_insert_bosses() {
+module side_insert_bosses(is_right=false) {
     hole_x = side_total_thickness - (ledge_width/2);
     vhole_x = panel_screw_inset;
     h_v = side_insert_hole_depth + side_boss_extra;
@@ -986,8 +1047,9 @@ module side_insert_bosses() {
     }
     for (tz = [front_mount_inset_z, chassis_h - front_mount_inset_z])
         hpad(0, front_boss_length, tz);
-    for (tz = rear_mount_z)
-        hpad(enclosure_depth - rear_boss_length, rear_boss_length, tz);
+    for (i = [0 : len(rear_mount_z) - 1])
+        if (!(is_right && right_drop_low_rear && i == 0))
+            hpad(enclosure_depth - rear_boss_length, rear_boss_length, rear_mount_z[i]);
 }
 
 module side_panel_gen(is_right=false) {
@@ -998,8 +1060,12 @@ module side_panel_gen(is_right=false) {
                 // wall + ledge between the top and bottom panels (the panels cover them)
                 translate([0, 0, lid_thickness])
                     cube([side_total_thickness, enclosure_depth, chassis_h - (lid_thickness * 2)]);
-                side_insert_bosses();
+                side_insert_bosses(is_right);
             }
+            // left side: lower insert pads are cut back where the M2X edge passes
+            if (!is_right)
+                translate([stack_x0 - 0.3 + chassis_w/2, vim3_y0 - 1, lid_thickness - 0.01])
+                    cube([20, stack_y1 - vim3_y0 + 2, vim3_top_z + 0.5 - lid_thickness]);
             if (add_ventilation) {
                 for (i = [45 : 10 : enclosure_depth - 15]) {
                     translate([-1, i, 12])
@@ -1028,8 +1094,8 @@ module side_panel_gen(is_right=false) {
                 translate([hole_x, 0, tz])
                     rotate([-90, 0, 0])
                     heatset_insert_bore(depth=side_insert_hole_depth);
-            for(tz = rear_mount_z)
-                translate([hole_x, enclosure_depth, tz])
+            for(i = [0 : len(rear_mount_z) - 1]) if (!(is_right && right_drop_low_rear && i == 0))
+                translate([hole_x, enclosure_depth, rear_mount_z[i]])
                     rotate([90, 0, 0])
                     heatset_insert_bore(depth=side_insert_hole_depth);
         }
@@ -1091,8 +1157,6 @@ module bottom_panel() {
     cx = inner_plate_w/2;
 
     mb_posts = [for (h = mb_mounts) mb2body([h[0], h[1]])];
-    vim3_posts = [for (i = [0, 1], j = [0, 1])
-        [vim3_hole_x0 + i * vim3_hole_spacing_w, vim3_hole_y0 + j * vim3_hole_spacing_l]];
 
     difference() {
         union() {
@@ -1107,10 +1171,8 @@ module bottom_panel() {
                     cylinder(h=1.5, d1=od + 2, d2=od, $fn=30);
                 }
             }
-            // VIM3 / M2X: M2 posts
-            for (p = vim3_posts)
-                translate([cx + p[0], p[1], lid_thickness])
-                    standoff_post(vim3_floor_standoff_height, m2_standoff_outer_diam);
+            // VIM3 / M2X: pocket with support ledges and retainer clips
+            translate([cx, 0, 0]) vim3_pocket();
         }
 
         // Assembly screw holes into the side panels, and the front / back plate inserts
@@ -1128,9 +1190,8 @@ module bottom_panel() {
                     cylinder(h=mb_standoff_height - m[3] + lid_thickness - mb_screw_relief_floor + 0.1, d=m[6], $fn=24);
             }
         }
-        for (p = vim3_posts)
-            translate([cx + p[0], p[1], lid_thickness])
-                standoff_insert_cut(vim3_floor_standoff_height);
+
+        translate([cx, 0, 0]) ret_insert_cuts();
 
         // Vent slots under the VIM3 stack (air in at the bottom, out through the lid)
         if (add_lid_vents) {
@@ -1144,6 +1205,55 @@ module bottom_panel() {
     }
 }
 
+
+
+// --- VIM3 + New M2X pocket (body coordinates, z = 0 at the underside of the bottom panel) ---
+// The M2X rests on two 1.2 mm ledges along its long edges (the SSD and M.2 sockets hang
+// below it, so nothing under the middle). Low walls locate it; two snap clips hold the
+// stack down: one over the M2X front edge (M.2 end), one over the VIM3 rear edge.
+m2x_x0 = vim3_xr - 56.01;    // M2X edge at the header side
+m2x_x1 = vim3_xr - 0.01;     // M2X edge at the port side
+module vim3_pocket() {
+    c = pocket_clear;
+    ledge = 1.2;               // M2X edge strip free of the SSD / sockets (SSD starts 2 mm in)
+    zt = m2x_bottom_z + m2x_pcb_t + 0.5;   // stays under the VIM3 HDMI socket (it reaches 1.75 below the VIM3 PCB)
+    // support ledges under both long edges of the M2X
+    for (x = [m2x_x0 - c, m2x_x1 - ledge])
+        translate([x, stack_y0, floor_z - 0.01]) cube([ledge + c, m2x_l - 0.5, m2x_support_h + 0.01]);
+    // port-side wall and front wall locate the stack (rear: back plate; header side: side ledge)
+    translate([m2x_x1 + c, stack_y0 + 4, floor_z - 0.01]) cube([1.6, m2x_l - 10, zt - floor_z]);
+    translate([m2x_x0 + 6, vim3_y0 - c - pocket_wall, floor_z - 0.01]) cube([m2x_w - 12, pocket_wall, zt - floor_z]);
+    // retainer posts (M3 inserts are cut in bottom_panel)
+    for (p = ret_posts()) translate([p[0], p[1], floor_z - 0.01]) {
+        cylinder(d=ret_post_d, h=p[2] - floor_z + 0.01, $fn=32);
+        cylinder(d1=ret_post_d + 2, d2=ret_post_d, h=1.5, $fn=32);
+    }
+}
+// [X, Y, top z] of the four retainer posts (body coordinates)
+function ret_front_y() = vim3_y0 - pocket_clear - pocket_wall - ret_post_d/2 - 0.5;
+function ret_posts() = [for (x = ret_front_xs) [x, ret_front_y(), vim3_top_z + ret_air]];
+module ret_insert_cuts() for (p = ret_posts()) translate([p[0], p[1], p[2]])
+    rotate([180, 0, 0]) heatset_insert_bore(depth=ret_insert[1], hole_d=ret_insert[0], guide_d=ret_insert[2]);
+// one retainer strip, in place (body coordinates): flat bar on the two posts, reaching
+// ret_overlap over the board edge; edge_y = board edge, dir = +1 if the board is at +Y
+module retainer_strip(xs, post_y, top_z, edge_y, dir) {
+    y0 = min(post_y - ret_post_d/2 - 0.5, edge_y + dir * ret_overlap);
+    y1 = max(post_y + ret_post_d/2 + 0.5, edge_y + dir * ret_overlap);
+    difference() {
+        translate([xs[0] - ret_post_d/2 - 1, y0, top_z]) cube([xs[1] - xs[0] + ret_post_d + 2, y1 - y0, ret_t]);
+        for (x = xs) translate([x, post_y, top_z - 1]) {
+            cylinder(d=ret_screw_d, h=ret_t + 2, $fn=24);
+            translate([0, 0, ret_t + 1 - 1.8]) cylinder(d=6.2, h=2, $fn=24);   // head recess
+        }
+    }
+}
+module retainers_placed() {
+    retainer_strip(ret_front_xs, ret_front_y(), vim3_top_z + ret_air, vim3_y0, 1);
+}
+module retainers_print() {
+    translate([80, -ret_front_y(), -(vim3_top_z + ret_air)])
+        retainer_strip(ret_front_xs, ret_front_y(), vim3_top_z + ret_air, vim3_y0, 1);
+}
 
 // --- 7. TOP PANEL ---
 module top_panel() {
@@ -1221,25 +1331,23 @@ module ghost_boards() {
             cube([usb_a_shell_w, 14.0, usb_a_shell_h]);
     }
 
-    // VIM3 + M2X stack
-    color("SteelBlue", 0.8)
-        translate([m2x_x0, m2x_y0, m2x_bottom_z]) cube([m2x_w, m2x_l, mb_thickness]);
-    color("SteelBlue", 0.35)
-        translate([m2x_x0, stack_y0, m2x_bottom_z]) cube([m2x_w, m2x_fpc_allow, vim3_bottom_z - m2x_bottom_z]);
-    color("Navy", 0.85)
-        translate([vim3_x0, vim3_y0, vim3_bottom_z]) cube([vim3_w, vim3_l, mb_thickness]);
-    color("Gray", 0.6)
-        translate([vim3_x0 + 4, vim3_y0 + 8, vim3_top_z]) cube([vim3_w - 8, vim3_l - 16, vim3_heatsink_height]);
-    // VIM3 40-pin header on the left edge (ASSUMPTION: opposite the ports)
-    color("Black")
-        translate([vim3_x0 + 1, vim3_y0 + 15, vim3_top_z]) cube([5.1, 50.8, 8.5]);
-
-    // HDMI plugs: VIM3 side (front strip) and main board J13 side (HDMI bay)
-    hdmi_v = [vim3_x0 + vim3_w, vim3_y0 + vim3_hdmi_from_front, vim3_top_z + 3.2];
-    color("Black", 0.7)
-        translate([hdmi_v[0], hdmi_v[1] - hdmi_plug_w/2, hdmi_v[2] - 5.5]) cube([hdmi_plug_reach - 15, hdmi_plug_w, 11]);
-    color("Black", 0.7)
-        translate([mb_x0 - hdmi_plug_reach, j13_centre_y - hdmi_plug_w/2, j13_z - 5.5]) cube([hdmi_plug_reach, hdmi_plug_w, 11]);
+    // VIM3 + New M2X stack (real outlines; parts as boxes)
+    color("SteelBlue", 0.8) translate([m2x_x0, stack_y0, m2x_bottom_z]) cube([m2x_w, m2x_l, m2x_pcb_t]);
+    color("SteelBlue", 0.35) translate([m2x_x0 + 2.0, stack_y0 + 1.5, m2x_bottom_z - m2x_under]) cube([m2x_w - 4.0, m2x_l - 1.5, m2x_under]);   // SSD + M.2 sockets underneath
+    color("Navy", 0.85) translate([stack_x0, vim3_y0, vim3_bottom_z]) cube([vim3_w, vim3_l, vim3_pcb_t]);
+    color("Gray", 0.6) translate([stack_x0 + 14, vim3_y0 + 22, vim3_top_z]) cube([28, 34, vim3_heatsink_height]);
+    for (u = vim3_usba_lx) color("LightSteelBlue")
+        translate([vim3_xr - vim3_usba_depth + vim3_port_overhang, vim3_y0 + u[0], vim3_top_z]) cube([vim3_usba_depth, u[1] - u[0], vim3_usba_h]);
+    color("Silver") translate([vim3_xr - 11.55, vim3_y0 + 47.07, vim3_top_z]) cube([13.22, 17.47, 6.74]);   // RJ45
+    color("Silver") translate([vim3_xr - 7.8, vim3_y0 + 30.4, vim3_top_z - 1.75]) cube([9.11, 16.2, 7.9]);   // HDMI socket
+    // 40-pin header + IDC socket on it, ribbon goes over the VIM3 to J2
+    color("Black") translate([vim3_xr - vim3_hdr_ly - 3.0, v2b(vim3_hdr_lx[0], 0)[1] - 2.5, vim3_top_z]) cube([6.0, vim3_hdr_lx[1] - vim3_hdr_lx[0] + 5.0, 8.5 + 9.0]);
+    color("Tan") retainers_placed();
+    // FPV HDMI heads (plug + square PCB, ribbon up)
+    color("Gold") translate([vim3_xr + 1.31 - fpv_plug_len + fpv_seat_gap, vim3_hdmi_c[1] - 7, vim3_hdmi_cz - 2.25]) cube([fpv_plug_len, 14, 4.5]);
+    color("Gold") translate([mb_x0 - fpv_seat_gap, j13_centre_y - 7, j13_z - 2.25]) cube([fpv_plug_len, 14, 4.5]);
+    for (h = [vim3_head, j13_head]) color("DarkSlateGray")
+        translate([h[0], h[2], h[4]]) cube([h[1] - h[0], h[3] - h[2], h[5] - h[4]]);
 
     // Panel jacks behind the back plate (body length inside the case)
     y_in = enclosure_depth;
@@ -1317,6 +1425,8 @@ if (part_to_print == "assembly") {
     if (show_boards)
         translate([0, front_wall_thickness, 0]) ghost_boards();
 
+} else if (part_to_print == "vim3_retainers") {
+    retainers_print();
 } else if (part_to_print == "din_front_plate") {
     rotate([90,0,0]) din_front_plate();
 } else if (part_to_print == "screen_tray") {
