@@ -73,3 +73,8 @@ display-button (J12) and light-sensor (J7) plugs, about 22 mm up; leave room for
   so rev 0.6 UUIDs stay put).
 - `layout/usb07.py` / `usb07_post.py` and `capture_pcb_1cam.py` / `capture_pcb_2cam.py` / `capture_post.py` do
   placement and post-Freerouting cleanup (KiCad 10 pcbnew Python).
+
+## Bring-up wizards
+
+Step-by-step bench wizards (multimeter first, then first power): `usb/WIZARD.html`, `audio/WIZARD.html`,
+`capture_1cam/WIZARD.html` and `capture_2cam/WIZARD.html`. See `../wizard/README.md`.

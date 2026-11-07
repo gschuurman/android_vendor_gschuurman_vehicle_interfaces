@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>GPS-module rev 0.4</title>
+<style>
+/* Layout: one narrow bench card per step, a multimeter-style readout for the expected value, progress rail on top */
+:root{
+  --bg:#eef1ee; --panel:#ffffff; --fg:#1b2420; --muted:#5d6b64; --line:#d3dbd6;
+  --accent:#0f6e5a; --accent-fg:#ffffff;
+  --lcd-bg:#c9d6a8; --lcd-fg:#1f2a12;
+  --ok:#1f7a3d; --bad:#b3261e; --warn:#8a5a00; --skip:#6b7280;
+  --red:#c62828; --black:#222;
+  --sans:system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#121715; --panel:#1b2220; --fg:#e4ebe7; --muted:#9aa9a1; --line:#2e3a35;
+  --accent:#3fbf9c; --accent-fg:#0b1512; --lcd-bg:#2c3a1c; --lcd-fg:#d6f0a0;
+  --ok:#5cc983; --bad:#ff8a80; --warn:#e8b14a; --skip:#9ca3af; --red:#ff6b6b; --black:#cfd6d2; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#121715; --panel:#1b2220; --fg:#e4ebe7; --muted:#9aa9a1; --line:#2e3a35;
+  --accent:#3fbf9c; --accent-fg:#0b1512; --lcd-bg:#2c3a1c; --lcd-fg:#d6f0a0;
+  --ok:#5cc983; --bad:#ff8a80; --warn:#e8b14a; --skip:#9ca3af; --red:#ff6b6b; --black:#cfd6d2; color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font-family:var(--sans);font-size:16px;line-height:1.5}
+.wrap{max-width:720px;margin:0 auto;padding-block:20px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:16px}
+h1{font-size:1.4rem;margin:0;text-wrap:balance}
+h2{font-size:1.2rem;margin:0;text-wrap:balance}
+p{margin:0}
+.sub{color:var(--muted);font-size:.95rem}
+.tabs{display:flex;gap:8px;flex-wrap:wrap}
+.tab{font:inherit;font-weight:600;padding:8px 14px;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--fg);cursor:pointer}
+.tab[aria-pressed="true"]{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+.rail{display:flex;gap:4px;flex-wrap:wrap}
+.dot{width:22px;height:8px;border-radius:4px;background:var(--line);border:0;padding:0;cursor:pointer}
+.dot.ok{background:var(--ok)}.dot.bad{background:var(--bad)}.dot.skip{background:var(--skip)}
+.dot.cur{outline:2px solid var(--accent);outline-offset:2px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:20px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.eyebrow{font-size:.78rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.row{display:grid;grid-template-columns:120px 1fr;gap:6px 12px;align-items:baseline}
+.row dt{color:var(--muted);font-size:.9rem}
+.row dd{margin:0;min-width:0}
+@media (max-width:480px){.row{grid-template-columns:1fr}.row dt{margin-top:6px}}
+.probe{font-family:var(--mono);font-weight:600;padding:1px 6px;border-radius:4px;border:2px solid currentColor;white-space:nowrap}
+.probe.r{color:var(--red)}.probe.b{color:var(--black)}
+code,.mono{font-family:var(--mono);font-size:.92em}
+.lcd{background:var(--lcd-bg);color:var(--lcd-fg);font-family:var(--mono);border-radius:8px;padding:12px 14px;display:flex;flex-direction:column;gap:2px}
+.lcd .big{font-size:1.35rem;font-weight:600;font-variant-numeric:tabular-nums}
+.lcd .small{font-size:.85rem;opacity:.85}
+.fail{border-left:4px solid var(--bad);padding:8px 12px;background:color-mix(in srgb,var(--bad) 8%,var(--panel));border-radius:0 8px 8px 0}
+.note{border-left:4px solid var(--warn);padding:8px 12px;background:color-mix(in srgb,var(--warn) 8%,var(--panel));border-radius:0 8px 8px 0}
+label{font-size:.9rem;color:var(--muted)}
+input[type=text]{font:inherit;font-family:var(--mono);width:100%;box-sizing:border-box;padding:8px 10px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--fg)}
+.btns{display:flex;gap:8px;flex-wrap:wrap}
+.btn{font:inherit;font-weight:600;padding:10px 16px;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--fg);cursor:pointer}
+.btn.ok{background:var(--ok);border-color:var(--ok);color:#fff}
+.btn.bad{background:var(--bad);border-color:var(--bad);color:#fff}
+.btn:disabled{opacity:.45;cursor:default}
+.meta{font-size:.85rem;color:var(--muted)}
+.meta code{font-size:.85rem;overflow-wrap:anywhere}
+code{overflow-wrap:anywhere}
+@media print{.tabs,.rail,.btns,.nav{display:none}}
+.btn:focus-visible,.tab:focus-visible,.dot:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.nav{display:flex;justify-content:space-between;gap:8px}
+table{border-collapse:collapse;width:100%;font-size:.92rem}
+td,th{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}
+.tw{overflow-x:auto}
+.st-ok{color:var(--ok);font-weight:600}.st-bad{color:var(--bad);font-weight:600}.st-skip{color:var(--skip)}
+pre{white-space:pre-wrap;font-family:var(--mono);font-size:.85rem;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px;margin:0;max-height:240px;overflow:auto}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header style="display:flex;flex-direction:column;gap:6px">
+    <h1 id="title"></h1>
+    <p class="sub" id="sub"></p>
+    <p class="meta" id="meta"></p>
+  </header>
+  <div class="tabs" id="tabs" role="group" aria-label="Fase"></div>
+  <div class="rail" id="rail" aria-label="Stappen"></div>
+  <main id="view"></main>
+</div>
+<script>
+/* Generated by PCB/wizard/build.py from PCB/wizard/boards/gnss_rev04.js -- edit that file, not this one. */
+const P = (c,t)=>`<span class="probe ${c}">${t}</span>`;
+const R = t=>P('r',t), B = t=>P('b',t);
+// out: rev0.4/gnss/WIZARD.html
+// Bring-up wizard data. Rebuild the page with: python3 PCB/wizard/build.py
+const BOARD = {
+  title: 'GPS-module rev 0.4',
+  key: 'gnss-rev04',
+  meta: `Ontwerp: <code>PCB/rev0.4/gnss/carradio_gnss_rev04.kicad_pcb</code> (gebruikt in de rev 0.6-set). Header J28 zit aan de onderkant. Pin 1 is het vierkante pad.`,
+  tabs: [
+  {id:'gps', name:"Multimeter (zonder voeding)", next:"Ga door met \"Eerste keer voeden\", met stroombegrenzing.", steps:[
+ {t:"Voorbereiding",info:true,body:`
+  <p>Module los, geen antenne, niets aangesloten. Header J28 zit aan de <b>onderkant</b>; pin 1 is het <b>vierkante</b> pad.</p>
+  <p>Multimeter op <b>Ω</b>, pennen tegen elkaar: bijna 0 Ω.</p>
+  <div class="note">GND-pinnen: 3, 6, 11, 12 en 16. Deze wizard gebruikt pin 3.</div>`},
+ {t:"GND controleren",setting:"piepstand",red:"J28 pin 3",black:"J28 pin 6",exp:"≈ 0 Ω (piept)",small:"",
+  fail:"Pin 3 of 6 slecht gesoldeerd."},
+ {t:"3,3 V naar GND",setting:"Ω",red:"J28 pin 1 (+3V3_GNSS)",black:"J28 pin 3",exp:"loopt op → hoger dan ~1 kΩ",small:"C14 10 µF laadt",
+  fail:"Onder 100 Ω: kortsluiting. Kijk naar C14, C15 en de VCC-pads van de NEO-M9N (pin 23 en 7)."},
+ {t:"Pin 1 en 2 samen",setting:"piepstand",red:"J28 pin 1",black:"J28 pin 2",exp:"≈ 0 Ω (piept)",small:"",
+  fail:"Pin 1 of 2 slecht gesoldeerd."},
+ {t:"Backup-voeding",setting:"Ω",red:"J28 pin 4 (V_BCKP)",black:"J28 pin 3",exp:"hoger dan ~1 kΩ",small:"",
+  fail:"Kortsluiting bij C16 of NEO-M9N pin 22."},
+ {t:"Antenne-voeding",setting:"Ω (200 Ω-bereik)",red:"middenpin van J11 (U.FL)",black:"pad van C17 dat níet GND is",exp:"≈ 10 Ω",small:"L2 + R41 in serie",
+  pre:"C17 is de 10 nF bij R41. Trek de stand van je meetpennen (stap Voorbereiding) ervan af.",
+  fail:"Open: L2 (0402, klein) of R41 slecht gesoldeerd. Veel lager dan 10 Ω: R41 overbrugd."},
+ {t:"Antenne niet aan GND",setting:"Ω",red:"middenpin van J11",black:"buitenkant (mantel) van J11",exp:"niet 0 Ω",small:"zelfde orde als stap 3",
+  fail:"0 Ω: het middenpad van de U.FL raakt de mantel. Opnieuw solderen."},
+ {t:"USB-datalijnen",setting:"Ω",red:"J28 pin 7 (D+)",black:"J28 pin 9 (D-)",exp:"hoog / OL",small:"ook elk naar pin 3: geen 0 Ω",
+  fail:"Brug tussen D+ en D-: kijk bij R102/R103 en NEO-M9N pin 5 en 6."},
+ {t:"UART-lijnen",setting:"Ω",red:"J28 pin 8 (TXD)",black:"J28 pin 10 (RXD)",exp:"hoog / OL",small:"ook elk naar pin 3: geen 0 Ω",
+  fail:"Brug bij NEO-M9N pin 20 en 21."},
+ {t:"Reset, safeboot, PPS",setting:"Ω",red:"J28 pin 13, 15 en 14 om de beurt",black:"J28 pin 3",exp:"niet 0 Ω",small:"interne pull-ups mogen tientallen kΩ geven",
+  fail:"0 Ω op pin 13: de module staat dan altijd in reset. Kijk bij NEO-M9N pin 8, 1 en 3."},
+]},
+  {id:'gpsp', name:"Eerste keer voeden", next:"Daarna gaat de module op J27 van het main board: wizard main board, \"Modules erop\".", steps:[
+ {t:"Aansluiten",info:true,body:`
+  <p>Doe dit pas als alle multimetermetingen van de GPS-module kloppen. Nog geen antenne.</p>
+  <p>Labvoeding <b>uit</b>. Stel in op <b>3,3 V</b> (meet het eerst na: nooit boven 3,6 V) en een stroomgrens van <b>100 mA</b>. Plus op <b>J28 pin 1</b>, min op <b>J28 pin 3</b>. Leg een draadje van <b>pin 4</b> naar <b>pin 2</b> (backup-voeding aan VCC).</p>
+  <p>Met een Bus Pirate 5 kan het ook: voeding <code>W 3.3 100</code> (3,3 V, 100 mA grens) op J28 pin 1, GND op pin 3, en de UART-bridge op 38400 baud.</p>
+  <div class="note">Nooit 5 V op welke pin dan ook, ook niet de rode draad van een USB-kabel.</div>`},
+ {t:"Inschakelen",setting:"display van de labvoeding",exp:"≈ 20 – 45 mA",small:"de module zoekt satellieten",
+  fail:"Op de stroomgrens: meteen uit en melden. 0 mA: kijk naar pin 1 en de VCC-pads van de NEO-M9N."},
+ {t:"Niet in reset",setting:"V DC",red:"J28 pin 13 (RESET)",black:"J28 pin 3",exp:"≈ 3,3 V",small:"",
+  fail:"Laag: de module staat in reset. Kijk naar NEO-M9N pin 8."},
+ {t:"Antennevoeding",setting:"V DC",red:"pad van C17 dat níet GND is",black:"J28 pin 3",exp:"≈ 3,0 – 3,3 V",small:"VCC_RF voor de actieve antenne",
+  fail:"0 V: kijk naar NEO-M9N pin 9."},
+ {t:"UART aansluiten",info:true,body:`
+  <p>Gebruik een USB-serieel adapter op <b>3,3 V</b>-niveau. Sluit de 3V3- of 5V-pin van de adapter <b>niet</b> aan.</p>
+  <dl class="row"><dt>RX van adapter</dt><dd>J28 pin 8 (TXD)</dd><dt>TX van adapter</dt><dd>J28 pin 10 (RXD)</dd><dt>GND</dt><dd>J28 pin 6</dd></dl>
+  <p>Open een terminal (PuTTY, Arduino Serial Monitor) op <b>38400 8N1</b>.</p>`},
+ {t:"NMEA-tekst",setting:"terminal 38400 8N1",exp:"$GNRMC, $GNGGA … elke seconde",small:"zonder fix met lege velden",
+  fail:"Onleesbare tekens: probeer 9600. Helemaal niets: RX en TX omgewisseld, of pin 8 niet goed gesoldeerd."},
+ {t:"Antenne aansluiten",setting:"display van de labvoeding",exp:"stroom stijgt ~5 – 20 mA",small:"actieve antenne, via U.FL-naar-SMA pigtail",
+  pre:"Klik de U.FL recht op J11, zonder te kantelen.",
+  fail:"Stroom naar de grens: antenne met DC-kortsluiting (passief) of kortsluiting in de pigtail. Antenne los en melden."},
+ {t:"USB",setting:"Apparaatbeheer (Windows)",exp:"COM-poort van u-blox",small:"VID 1546",
+  pre:"Tweede doorgeknipte USB-kabel: groen (D+) op pin 7, wit (D-) op pin 9, zwart op pin 11. Rood NIET aansluiten, isoleer hem. De UART mag aan blijven.",
+  fail:"Niets: controleer D+ en D-, en R102/R103 (27 Ω)."},
+ {t:"Fix",setting:"u-center of u-center 2",exp:"positie binnen ~30 s – enkele min",small:"satellieten rond 35 – 45 dBHz",
+  pre:"Antenne buiten of tegen het raam met vrij zicht op de lucht.",
+  fail:"Satellieten zichtbaar maar zwak (onder 25 dBHz): antenne verplaatsen, pigtail controleren. Geen satellieten: meet de antennevoeding opnieuw met antenne erop."},
+ {t:"PPS (optioneel)",setting:"LED met 1 kΩ naar GND, of scoop",red:"J28 pin 14",black:"J28 pin 3",exp:"1 puls per seconde na de fix",small:"",
+  fail:"Geen puls met fix: kijk naar NEO-M9N pin 3."},
+]},
+  ],
+};
+
+
+const STEPS={}, NAMES={}, NEXT={};
+for(const t of BOARD.tabs){STEPS[t.id]=t.steps;NAMES[t.id]=BOARD.title+' – '+t.name;NEXT[t.id]=t.next||'';}
+document.getElementById('title').textContent=BOARD.title;
+document.getElementById('sub').innerHTML=BOARD.sub||'Per fase één stap per scherm. Eerst de multimeter zonder voeding, daarna pas voeden met stroombegrenzing. Je antwoorden blijven bewaard in deze browser.';
+document.getElementById('meta').innerHTML=BOARD.meta||'';
+document.getElementById('tabs').innerHTML=BOARD.tabs.map(t=>`<button class="tab" data-m="${t.id}">${t.name}</button>`).join('');
+const KEY='wizard-'+BOARD.key;
+let state={m:BOARD.tabs[0].id,i:{},res:{}};
+try{const s=JSON.parse(localStorage.getItem(KEY)||'null');if(s&&s.res)state=Object.assign(state,s);}catch(e){}
+for(const m in STEPS){state.i[m]??=0;state.res[m]??={};}
+if(!STEPS[state.m])state.m=BOARD.tabs[0].id;
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){}};
+
+function rail(){
+  const list=STEPS[state.m], r=state.res[state.m];
+  document.getElementById('rail').innerHTML=list.map((s,k)=>{
+    const st=r[k]?.s||''; return `<button class="dot ${st} ${k===state.i[state.m]?'cur':''}" data-k="${k}" aria-label="Stap ${k+1}: ${s.t}"></button>`}).join('')
+    +`<button class="dot ${state.i[state.m]===list.length?'cur':''}" data-k="${list.length}" aria-label="Overzicht" style="width:34px"></button>`;
+}
+function render(){
+  document.querySelectorAll('.tab').forEach(b=>b.setAttribute('aria-pressed',b.dataset.m===state.m));
+  rail();
+  const list=STEPS[state.m], k=state.i[state.m], v=document.getElementById('view');
+  if(k>=list.length){return summary(v,list)}
+  const s=list[k], r=state.res[state.m][k]||{};
+  const head=`<div class="eyebrow">Stap ${k+1} van ${list.length}</div><h2>${s.t}</h2>`;
+  if(s.info){
+    v.innerHTML=`<section class="card">${head}${s.body}<div class="nav"><button class="btn" id="prev" ${k===0?'disabled':''}>Vorige</button><button class="btn ok" id="next">${k===0?'Begin':'Verder'}</button></div></section>`;
+    document.getElementById('next').onclick=()=>{state.res[state.m][k]={s:'ok'};go(1)};
+    document.getElementById('prev').onclick=()=>go(-1);return;
+  }
+  v.innerHTML=`<section class="card">${head}
+    ${s.pre?`<p class="sub">${s.pre}</p>`:''}
+    <dl class="row">
+      <dt>${s.red?'Meterstand':'Kijk op'}</dt><dd>${s.setting}</dd>
+      ${s.red?`<dt>Rode pen</dt><dd>${R(s.red)}</dd>`:''}
+      ${s.black?`<dt>Zwarte pen</dt><dd>${B(s.black)}</dd>`:''}
+    </dl>
+    <div class="lcd" aria-label="Verwacht"><span class="small">VERWACHT</span><span class="big">${s.exp}</span>${s.small?`<span class="small">${s.small}</span>`:''}</div>
+    <div><label for="val">Gemeten waarde (optioneel)</label><input type="text" id="val" value="${(r.v||'').replace(/"/g,'&quot;')}" placeholder="bijv. 118k of OL"></div>
+    <div class="btns">
+      <button class="btn ok" id="b-ok">Klopt</button>
+      <button class="btn bad" id="b-bad">Wijkt af</button>
+      <button class="btn" id="b-skip">Overslaan</button>
+    </div>
+    <div class="fail" id="failbox" ${r.s==='bad'?'':'hidden'}><b>Wat nu:</b> ${s.fail}<br><span class="sub">Los dit op en meet opnieuw, of ga verder en vermeld het in het overzicht.</span>
+      <div class="btns" style="margin-top:8px"><button class="btn" id="b-cont">Toch verder</button></div></div>
+    <div class="nav"><button class="btn" id="prev" ${k===0?'disabled':''}>Vorige</button><span></span></div>
+  </section>`;
+  const val=document.getElementById('val');
+  const mark=st=>{state.res[state.m][k]={s:st,v:val.value.trim()};save();};
+  val.oninput=()=>{state.res[state.m][k]=Object.assign({},state.res[state.m][k],{v:val.value.trim()});save()};
+  document.getElementById('b-ok').onclick=()=>{mark('ok');go(1)};
+  document.getElementById('b-skip').onclick=()=>{mark('skip');go(1)};
+  document.getElementById('b-bad').onclick=()=>{mark('bad');rail();document.getElementById('failbox').hidden=false};
+  document.getElementById('b-cont').onclick=()=>go(1);
+  document.getElementById('prev').onclick=()=>go(-1);
+}
+function summary(v,list){
+  const r=state.res[state.m], name=NAMES[state.m];
+  const lab={ok:'klopt',bad:'wijkt af',skip:'overgeslagen'};
+  const esc=x=>String(x).replace(/&/g,'&amp;').replace(/</g,'&lt;');
+  const rows=list.map((s,k)=>s.info?'':`<tr><td>${k+1}</td><td>${s.t}</td><td class="st-${r[k]?.s||'skip'}">${lab[r[k]?.s]||'nog niet'}</td><td class="mono">${esc(r[k]?.v||'')}</td></tr>`).join('');
+  const bad=list.filter((s,k)=>!s.info&&r[k]?.s==='bad').length, open=list.filter((s,k)=>!s.info&&!r[k]).length;
+  const txt=`${name}\n`+list.map((s,k)=>s.info?null:`${k+1}. ${s.t}: ${lab[r[k]?.s]||'nog niet'}${r[k]?.v?` (${r[k].v})`:''}`).filter(Boolean).join('\n');
+  const verdict = bad? `${bad} meting(en) wijken af. Los die eerst op voordat je verder gaat.` :
+                 open? `Nog ${open} meting(en) open.` : `Alles klopt. ${NEXT[state.m]}`;
+  v.innerHTML=`<section class="card"><div class="eyebrow">Overzicht</div><h2>${name}</h2><p>${verdict}</p>
+   <div class="tw"><table><thead><tr><th>#</th><th>Meting</th><th>Resultaat</th><th>Waarde</th></tr></thead><tbody>${rows}</tbody></table></div>
+   <p class="sub">Kopieer dit en plak het in de chat, dan kijk ik mee.</p>
+   <pre id="txt">${esc(txt)}</pre>
+   <div class="btns"><button class="btn ok" id="copy">Kopieer resultaten</button><button class="btn" id="reset">Opnieuw beginnen</button><button class="btn" id="back">Vorige</button></div>
+   <p class="sub" id="copied" aria-live="polite"></p></section>`;
+  document.getElementById('copy').onclick=()=>{const t=document.getElementById('txt').textContent;
+    (navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>{document.getElementById('copied').textContent='Gekopieerd.'})
+    .catch(()=>{const rg=document.createRange();rg.selectNodeContents(document.getElementById('txt'));const sel=getSelection();sel.removeAllRanges();sel.addRange(rg);document.getElementById('copied').textContent='Tekst geselecteerd; kopieer met Ctrl+C.'})};
+  document.getElementById('reset').onclick=()=>{state.res[state.m]={};state.i[state.m]=0;save();render()};
+  document.getElementById('back').onclick=()=>go(-1);
+}
+function go(d){const n=STEPS[state.m].length;state.i[state.m]=Math.max(0,Math.min(n,state.i[state.m]+d));save();render();window.scrollTo({top:0})}
+document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{state.m=b.dataset.m;save();render()});
+document.getElementById('rail').onclick=e=>{const k=e.target.dataset?.k;if(k!==undefined){state.i[state.m]=+k;save();render()}};
+render();
+</script>
+</body>
+</html>

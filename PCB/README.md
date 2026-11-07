@@ -23,3 +23,7 @@ The schematics are generated KiCad 7 files, for import into EasyEDA Pro. To rege
 `python3 gen3.py` inside `rev0.3/` (or `gen2.py` inside `rev0.2/`).
 
 Rev 0.3 and later are laid out in KiCad (open with KiCad 10).
+
+## Bring-up wizards
+
+Each board of rev 0.6 and rev 0.7 has a step-by-step bench wizard (`WIZARD.html`) next to its design. See `wizard/README.md`.
