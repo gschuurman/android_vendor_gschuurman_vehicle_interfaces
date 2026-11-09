@@ -29,7 +29,7 @@
 
 /* [Print Selection] */
 // Select which part to generate
-part_to_print = "assembly"; // [assembly, din_front_plate, screen_tray, button_bar, button_caps, module_spacers, vim3_retainers, standoff_spacer, left_side, right_side, bottom, top, back_plate]
+part_to_print = "assembly"; // [assembly, din_front_plate, screen_tray, tray_hatch, front_hook, tray_hook_left, tray_hook_right, tray_bracket, tray_carrier, bar_front, bar_back, switch_plate, button_bar, button_caps, module_spacers, vim3_retainers, standoff_spacer, left_side, right_side, bottom, top, back_plate]
 
 /* [Assembly view] */
 explode_dist = 0;
@@ -59,9 +59,12 @@ lcd_wiggle_room = 1.0;
 // Panel depth (Glenn, 2026-11-04: the 8 mm prototype depth let the screen flex). Waveshare spec:
 // 4.2 mm total with touch glass, 3.5 mm LCD body. The LCD back now rests on a foam layer on the
 // tray base instead of hanging free behind the glass.
-panel_lcd_thickness = 3.5;     // LCD body behind the glass seat (spec: 4.2 total - ~0.7 glass)
+// Waveshare STEP models (IPS-CT and QLED-CT, 2026-11-09): touch glass 0.71, glass front to LCD back 6.43
+// (the wiki's 4.2 mm is wrong). A 46 x 51.5 mm board on the LCD back (ribbon connector on its top
+// edge) sticks out 1.84 mm further; it gets its own opening + screwed hatch in the tray base.
+panel_lcd_thickness = 5.72;    // LCD body behind the glass (6.43 - 0.71)
 screen_back_pad = 1.0;         // double-sided foam tape between LCD back and tray base
-screen_depth = ledge_depth + panel_lcd_thickness + screen_back_pad;   // = 6.0 (was 8.0)
+screen_depth = ledge_depth + panel_lcd_thickness + screen_back_pad;   // = 8.22
 // The screen sits 180 deg turned compared with the prototype file: ribbon slot at the top,
 // touch relief at the bottom (seen from the front). The part prints the same, just turned.
 screen_features_rot180 = true;
@@ -71,7 +74,7 @@ screen_features_rot180 = true;
 // (paint over the raised icons). The screen tray is one piece; only this bar comes off: solder and
 // assemble the switch strip in it, then screw it to the back of the tray (M2 into tray inserts).
 // Buttons: 6 mm "slim" tactile switches (Kiwi KW-1556 / Adafruit 1489) on a perfboard strip.
-bar_h = 13.0;                // bar height below the tray (front view)
+bar_h = 18.5;                // bar height below the tray (was 13; 18.5 for the Adafruit BH1750 board, Glenn 2026-11-09)
 bar_wall = 2.0;              // bottom + end walls
 bar_skin = 1.6;              // front skin
 bar_back_wall = 1.5;         // back wall of the bar
@@ -87,25 +90,106 @@ cap_protrude = 1.5;          // cap face in front of the screen / bar face
 cap_flange = 0.9;            // flange lip above and below the cap (keeps it in)
 cap_flange_t = 0.9;
 cap_icon_h = 0.6;            // embossed icon height (paint the tops)
-// Switch: ASSUMPTION, no drawing found for the slim 6 mm part. Check with calipers.
-btn_total_h = 5.0;           // switch body + plunger, above the perfboard
+// Switch: Kwan Da TC-0120 (W028) drawing from Glenn (2026-11-09): body 6 x 3.5 x 3.6, knob to 4.3,
+// travel 0.25, 2 cranked legs 1.0 x 0.3, 6.8-8.0 mm apart (centre ~7.4).
+btn_total_h = 4.3;           // switch body + plunger, above the board
 btn_body = [6.0, 3.5];       // switch footprint (X, Y)
 btn_preload = 0.1;           // cap flange presses the plunger this far when idle
 btn_pcb_t = 1.6;
 // Order seen from the front (left = driver side, LHD): home | vol-, mute, vol+ | screen off |
 // prev, play/pause, next | voice. Positions on the 2.54 mm perfboard grid relative to each other.
-btn_xs = [-78.74, -58.42, -45.72, -33.02, 0, 33.02, 45.72, 58.42, 78.74];
+btn_xs = [-78.74, -60.96, -48.26, -35.56, 0, 35.56, 48.26, 60.96, 78.74];   // groups 2.54 further out (2026-11-09) so the Adafruit board fits between screen-off and prev
 btn_icons = ["home", "voldown", "mute", "volup", "power", "prev", "play", "next", "mic"];
 bar_rib_xs = [-68.58, -24, 68.58];    // supports behind the strip, in the gaps
 bar_wire_slot = [-11, 12, 4];           // x centre, width, height of the wire exit in the back wall
 // BH1750 (GY-302 module 18.5 x 13.9, chip assumed in the centre) between screen-off and prev.
 // It sits behind the skin with its header edge down; its top 2 mm reach into the tray rim.
-bh1750_x = 16.51;
-bh1750_board = [18.5, 13.9];
+// Adafruit BH1750 (product 4681), from Adafruit's EagleCAD file: board 25.4 x 17.78, IC1 in the centre,
+// STEMMA QT (JST SH4, ~2.95 high) on the chip side at both short edges (x 2.54 / 22.86, y 8.89),
+// 2.5 mm holes 2.54 in from the corners, 0.1" header row along the bottom edge (y 2.54).
+bh1750_x = 17.78;
+bh1750_board = [25.4, 17.78];
 bh1750_chip_offset = [0, 0];  // chip position relative to the board centre (check your module)
 bh1750_window_d = 3.0;
-bh1750_front_gap = 1.2;       // chip + parts between board front and skin
-bh1750_sink = 1.2;            // module sinks this far into the bar bottom wall
+bh1750_front_gap = 3.0;       // STEMMA QT connectors (2.95) between board front and skin
+bh1750_sink = 1.5;            // module sinks this far into the bar bottom wall
+
+/* [Button bar split (Glenn, 2026-11-09)] */
+// The bar is now two printed parts with the switch PCB clamped between them:
+// bar_front (skin, caps, bottom + end walls, PCB pocket; prints face down) and bar_back
+// (flat back plate + the tongue to the tray; prints back face down). 3x M2 x 8 from the back,
+// through bar_back and the PCB into M2 inserts in bar_front. The bar then goes onto the tray
+// with the 4 tongue screws as before.
+bar_split = true;
+bar_screws = [[-86.0, 0.0], [-25.2, 3.4], [86.0, 0.0]];   // [x, y above cap_y] = KiCad (102.35,106.4) (163.15,103.0) (274.35,106.4)
+bar_boss_d = 5.5;
+bar_pcb_size = [176.7, 11.5];
+bar_pcb_clear = 0.25;
+bar_back_ribs = [-68.58, -45.72, 33.02, 58.42];   // extra PCB supports behind the board (between solder joints)
+
+/* [Tray mount: hook-on bracket + carrier (Glenn, 2026-11-09)] */
+// Bracket: screwed once to the front plate with the 4 existing slots (screws from inside the
+// case into M3 inserts in the bracket; 10 mm height adjustment kept). Carrier: plate screwed to
+// the 4 existing M3 inserts in the back of the tray. The carrier's cleat hangs on the bracket's
+// 45 deg cleat; 2 M3 screws from below through the bracket flange into the carrier lugs lock it.
+// Removing the tray: 2 screws out, lift ~5 mm, pull forward, unplug the panel FPC at the joiner.
+use_tray_mount = true;
+// Glenn 2026-11-09: hooks must be modular and fit the existing front plate: 2 identical front_hook
+// parts (each on one pair of the existing front-plate slots) + 2 tray_hook parts (left/right, each on
+// two of the existing tray inserts) instead of the one-piece bracket and carrier.
+hooks_modular = true;
+hook_w = 24.0;                  // width of every hook part (X), centred on the slot / insert column
+brk_t = 6.0;                    // bracket plate, against the bezel
+brk_w = 124.0;
+brk_y = [-40.0, 32.0];          // tray frame (y = 0 at the DIN centre); bottom lowered so the lock lug sits under the insert column
+cleat_d = 4.5;                  // cleat depth = 45 deg rise = lift needed to unhook
+cleat_h = 8.0;
+cleat_gap = 0.3;
+cleat_xs = [[-62.0, -38.0], [38.0, 62.0]];  // on the two hook columns (x +-50), clear of the hatch + ribbon
+carrier_t = 3.0;
+carrier_w = 169.0;
+carrier_bar = 12.0;             // width of the vertical carrier bars at x +-50
+carrier_top_y0 = 26.0;          // top bar of the carrier from here to the tray top
+carrier_bot_y = [-40.0, -18.5];   // (one-piece carrier only) // bottom bar (clears the button-bar tongue at -40.75 and the screen hatch)
+carrier_gap_x = [-22.5, 38.5];  // window in the top bar: screen hatch + panel FPC
+lock_xs = [-50.0, 50.0];        // under the insert columns (modular hooks)
+lock_lug = [10.0, 10.0];        // X, Y of the lugs
+lock_insert = [4.2, 5.8, 5.5];  // M3 insert bore d, depth, lead-in d
+// FPC joiner: dropped (Glenn 2026-11-09: one ribbon straight from J14 to the panel, no extension).
+use_joiner = false;
+joiner_size = [30.0, 14.0];
+joiner_c = [12.0, 5.0];
+joiner_rim = 1.5;
+// Sun-visor mount (Glenn, 2026-11-09): 4 M3 heat-set inserts straight into the left and right side
+// faces of the screen tray, 2 per side, axis along X. The 2 mm side wall is too thin, so each side
+// gets a solid pad on the tray back (also fills the back-edge chamfer there); the insert sits below
+// the LCD pocket floor so it can't break through to the panel.
+visor_hole_ys = [25.0, 45.0];        // hole centres, from the glass centre (tray top edge at +54.75)
+visor_hole_z = 0.5;                  // insert axis height (tray back = 0, pocket floor = 4)
+visor_pad = [10.0, 19.0, 49.5, -3.0];     // X width in from the side face, Y from, Y to, Z of its back face
+visor_insert = [4.2, 6.0, 5.5];      // M3 insert: bore, depth, guide (pad version)
+// Flush version (Glenn, 2026-11-09: no pad, flat tray back prints better): SHORT M3 inserts (3 mm long)
+// in the 4.5 mm solid strip between the LCD pocket and the side face, above the pocket floor.
+visor_flush = true;
+visor_flush_z = 6.0;                 // insert axis height (pocket floor 4.0, glass seat 10.72)
+visor_flush_insert = [4.0, 4.0, 5.0];   // bore, depth (0.5 mm skin to the pocket), guide
+
+/* [Screen hatch in the tray base (Glenn, 2026-11-09)] */
+// Opening over the board on the LCD back (STEP, both versions: x -15.4..31.0, y -11.96..39.6 from the
+// glass centre) + 1 mm, closed from the back by a flush lid (tray_hatch) with M2 x 6 self-tapping screws.
+// Glenn, 2026-11-09: the ribbon slot may sit in the lid, so the opening now reaches up over the old
+// tray slot and the slot is cut in the lid instead of the tray base.
+ribbon_in_hatch = true;
+// Lid slot straight behind the panel's FPC connector (Glenn 13:32: keep the ribbon short). Connector from the
+// Waveshare CT drawing (not a separate STEP body): 28 mm wide incl. tabs, x -6..22, y 33.4..38.85, mouth facing
+// up at the board's top edge (y 39.6). Slot centre 2 mm above the mouth for the bend.
+ribbon_lid_c = [8.0, 41.0];
+hatch_open = [-16.4, 32.0, -13.0, 45.0];   // x0, x1, y0, y1 (tray frame = glass centre)
+hatch_rim = 3.2;
+hatch_t = 1.5;                  // lid thickness = rebate depth
+hatch_clear = 0.2;
+hatch_screws = [[-18.2, -4.0], [33.8, -4.0], [-18.2, 40.0], [33.8, 40.0]];   // 4 now the lid is taller
+hatch_pilot = 1.7;              // M2 self-tapping pilot
 
 /* [Heat-Set Insert (Melt Nut) Parameters] */
 // M3 inserts (side panel assembly, screen tray, main board standoffs)
@@ -296,6 +380,8 @@ ret_post_gap = 1.0;         // post to board edge
 ret_insert = [4.2, 5.5, 5.5];   // M3 insert bore d, depth, lead-in d
 ret_screw_d = 3.4;
 // strip X span (between the two screws) and where the lip may touch (clear of parts)
+use_front_retainer = false;   // Glenn 2026-11-06: strip sits too low and pinches the fan wires; front hold TBD
+rj45_gap = [45.5, 66.0];      // port-side ledge gap, mm from the VIM3 front edge
 ret_front_xs = [-74.0, -44.0];  // over the VIM3 front edge (clear of the front USB-A)
 // rear: the M2X ends 0.7 mm from the back plate; a tongue on the back plate holds it down
 back_tongue_xs = [-72.0, -40.0];
@@ -654,10 +740,19 @@ module icon_2d(name) {
 
 module screen_tray() {
     difference() {
-        hull() {
-            translate([0, 0, tray_bottom_rounding]) linear_extrude(outer_d - tray_bottom_rounding) tray_outline_2d();
-            linear_extrude(tray_bottom_rounding) offset(delta=-tray_bottom_rounding) tray_outline_2d();
+        union() {
+            hull() {
+                translate([0, 0, tray_bottom_rounding]) linear_extrude(outer_d - tray_bottom_rounding) tray_outline_2d();
+                linear_extrude(tray_bottom_rounding) offset(delta=-tray_bottom_rounding) tray_outline_2d();
+            }
+            // sun-visor pads on the back of both side ends
+            if (!visor_flush) for (sx = [-1, 1]) translate([sx > 0 ? outer_w/2 - visor_pad[0] : -outer_w/2, visor_pad[1], visor_pad[3]])
+                cube([visor_pad[0], visor_pad[2] - visor_pad[1], tray_bottom_rounding - visor_pad[3]]);
         }
+        // sun-visor M3 inserts in the side faces
+        vi = visor_flush ? visor_flush_insert : visor_insert;
+        for (sx = [-1, 1]) for (vy = visor_hole_ys) translate([sx * outer_w/2, vy, visor_flush ? visor_flush_z : visor_hole_z]) rotate([0, sx * -90, 0])
+            heatset_insert_bore(depth=vi[1], hole_d=vi[0], guide_d=vi[2]);
         // ---- screen pocket (as before; turned 180 deg if screen_features_rot180) ----
         translate([0, 0, outer_d - ledge_depth])
             tray_rounded_rect(inner_w, inner_h, ledge_depth + 1, screen_radius);
@@ -676,12 +771,18 @@ module screen_tray() {
             }
         }
         rotate([0, 0, screen_features_rot180 ? 180 : 0]) {
-            translate([tray_ribbon_slot_offset_x, -inner_h/2 + ribbon_slot_offset_y, tray_base_thickness/2])
+            if (!ribbon_in_hatch) translate([tray_ribbon_slot_offset_x, -inner_h/2 + ribbon_slot_offset_y, tray_base_thickness/2])
                 smooth_ribbon_slot_with_guide(ribbon_slot_width, ribbon_slot_thickness, tray_base_thickness);
             translate([touch_relief_offset_x, inner_h/2 - touch_relief_depth/2, tray_base_thickness])
                 linear_extrude(outer_d)
                 square([touch_relief_width, touch_relief_depth], center=true);
         }
+        // ---- hatch over the board on the LCD back ----
+        translate([hatch_open[0], hatch_open[2], -1]) cube([hatch_open[1] - hatch_open[0], hatch_open[3] - hatch_open[2], tray_base_thickness + 2]);
+        translate([hatch_open[0] - hatch_rim, hatch_open[2] - hatch_rim, -1]) cube([hatch_open[1] - hatch_open[0] + 2 * hatch_rim, hatch_open[3] - hatch_open[2] + 2 * hatch_rim, hatch_t + 1]);
+        for (h = hatch_screws) translate([h[0], h[1], -1]) cylinder(d=hatch_pilot, h=hatch_t + 1 + 2.3, $fn=16);
+        // pry slot for a small screwdriver at the bottom edge of the hatch
+        translate([(hatch_open[0] + hatch_open[1])/2 - 4, hatch_open[2] - hatch_rim - 1.5, -1]) cube([8, 2.5, hatch_t + 1 + 0.8]);
         // ---- M2 inserts in the back for the button bar tongue ----
         for (x = tongue_screw_xs)
             translate([x, tb_y1 + tongue_screw_y, 0]) mirror([0, 0, 1]) rotate([180, 0, 0])
@@ -726,6 +827,238 @@ module button_bar() {
     for (x = bar_rib_xs)
         translate([x - 0.6, tb_y0 + bar_wall, bar_cav_back_z - 0.01])
             cube([1.2, bar_h - bar_wall - 1, btn_pcb_back_z - bar_cav_back_z - 0.1]);
+}
+
+// Screen hatch lid, in place (tray frame): flush in the rebate of the tray base
+module ghost_panel() {   // Waveshare 70H, from the STEP files
+    gz = outer_d - ledge_depth;
+    color("#20304a") translate([-86.5, -51.5, gz]) cube([173, 103, 0.71]);
+    color("#303030") translate([-80.2, -48.8 - 0.3, gz - panel_lcd_thickness]) cube([163.9, 97.6, panel_lcd_thickness]);
+    color("Green") translate([-15.4, -11.96, gz - panel_lcd_thickness - 1.84]) cube([46.4, 51.56, 3.42]);
+}
+module tray_hatch() {
+    c = hatch_clear;
+    difference() {
+        translate([hatch_open[0] - hatch_rim + c, hatch_open[2] - hatch_rim + c, 0])
+            cube([hatch_open[1] - hatch_open[0] + 2 * hatch_rim - 2 * c, hatch_open[3] - hatch_open[2] + 2 * hatch_rim - 2 * c, hatch_t]);
+        for (h = hatch_screws) translate([h[0], h[1], -1]) {
+            cylinder(d=2.4, h=hatch_t + 2, $fn=20);
+            cylinder(d1=4.4, d2=2.4, h=1 + 1.0, $fn=24);    // countersink from the back (flat-head M2)
+        }
+        // ribbon slot (same place as the old tray-base slot), edges chamfered 0.5 mm
+        if (ribbon_in_hatch) {
+            rc = ribbon_lid_c;
+            r = ribbon_slot_thickness/2;
+            translate([rc[0], rc[1], -1]) linear_extrude(hatch_t + 2) hull() for (sx = [-1, 1]) translate([sx * (ribbon_slot_width/2 - r), 0]) circle(r=r, $fn=30);
+            for (z = [0, hatch_t]) translate([rc[0], rc[1], z]) hull() for (sx = [-1, 1]) translate([sx * (ribbon_slot_width/2 - r), 0, -0.5]) cylinder(r1=z == 0 ? r + 0.5 : r, r2=z == 0 ? r : r + 0.5, h=1.0, $fn=30);
+        }
+    }
+}
+
+// ---- Split button bar (bar_split): bar_front + PCB + bar_back ----
+bar_pcb_c = [0, cap_y + 0.65];                 // KiCad board centre y 105.75 vs switch row 106.4
+module bar_front() {
+    W = outer_w;
+    difference() {
+        translate([0, 0, btn_pcb_back_z]) linear_extrude(outer_d - btn_pcb_back_z) bar_outline_2d();
+        // switch space in front of the PCB, open at the top (closed by the tray bottom face)
+        translate([-W/2 + bar_wall, tb_y0 + bar_wall, btn_pcb_front_z - 0.01])
+            cube([W - 2 * bar_wall, bar_h - bar_wall + 1, bar_skin_back - btn_pcb_front_z + 0.01]);
+        // PCB pocket (open at the top and the back)
+        translate([-bar_pcb_size[0]/2 - bar_pcb_clear, bar_pcb_c[1] - bar_pcb_size[1]/2 - bar_pcb_clear, btn_pcb_back_z - 1])
+            cube([bar_pcb_size[0] + 2 * bar_pcb_clear, bar_h, btn_pcb_front_z - btn_pcb_back_z + 1.01]);
+        for (x = btn_xs) translate([x, cap_y, bar_skin_back - 1]) linear_extrude(bar_skin + 2) pill_2d(cap_w + 2 * cap_clear, cap_h + 2 * cap_clear);
+        translate([bh1750_x - bh1750_board[0]/2 - 0.3, bh_y0 - 0.1, bh_z0 - 0.3])
+            cube([bh1750_board[0] + 0.6, bar_h + 1, bar_skin_back - bh_z0 + 0.3]);
+        translate([bh_chip[0], bh_chip[1], bar_skin_back - 0.01])
+            cylinder(d1=bh1750_window_d, d2=bh1750_window_d + 1.4, h=bar_skin + 0.02, $fn=30);
+        // room for the solder joints of the BH1750 header row; the wires go back past the switch board
+        translate([bh1750_x - bh1750_board[0]/2 + 4.5, bh_y0 - 0.1, btn_pcb_back_z - 1]) cube([16.4, 4.6, bh_z0 - btn_pcb_back_z + 1.01]);
+    }
+    // BH1750: two locating pins through the upper 2.5 mm holes (fix with a dot of hot glue)
+    for (hx = [2.54, 22.86]) translate([bh1750_x - bh1750_board[0]/2 + hx, bh_y0 + 15.24, 0]) {
+        translate([0, 0, bh_z1]) cylinder(d=4.5, h=bar_skin_back - bh_z1 + 0.01, $fn=28);
+        translate([0, 0, bh_z0 + 0.3]) cylinder(d=2.2, h=bh_z1 - bh_z0, $fn=20);
+    }
+    // screw bosses with M2 inserts (pressed in from the PCB side)
+    for (b = bar_screws) translate([b[0], cap_y + b[1], btn_pcb_front_z]) difference() {
+        cylinder(d=bar_boss_d, h=bar_skin_back - btn_pcb_front_z + 0.01, $fn=32);
+        heatset_insert_bore(depth=m2_insert_hole_depth, hole_d=m2_insert_hole_diameter, guide_d=m2_insert_guide_diameter);
+    }
+}
+module bar_back() {
+    W = outer_w;
+    top_wall = 1.0;
+    difference() {
+        union() {
+            difference() {
+                translate([0, 0, -tongue_t]) linear_extrude(btn_pcb_back_z + tongue_t) bar_outline_2d();
+                // solder-side cavity behind the PCB
+                translate([-W/2 + bar_wall, tb_y0 + bar_wall, bar_cav_back_z])
+                    cube([W - 2 * bar_wall, bar_h - bar_wall - top_wall, btn_pcb_back_z - bar_cav_back_z + 1]);
+            }
+            translate([-W/2 + 1, tb_y1 - 1, -tongue_t]) cube([W - 2, tongue_h + 1, tongue_t]);
+            // support pads behind every switch, between its two pins and clear of the diode pads
+            for (x = btn_xs) translate([x - 0.6, cap_y - 1.8, bar_cav_back_z - 0.01]) cube([1.2, 4.2, btn_pcb_back_z - bar_cav_back_z + 0.01]);
+            // standoffs around the screws (d 4.4: clear of the diode solder joints next to the end screws)
+            for (b = bar_screws) translate([b[0], cap_y + b[1], bar_cav_back_z - 0.01]) cylinder(d=4.4, h=btn_pcb_back_z - bar_cav_back_z + 0.01, $fn=28);
+        }
+        for (b = bar_screws) translate([b[0], cap_y + b[1], -tongue_t - 1]) {
+            cylinder(d=2.4, h=tongue_t + btn_pcb_back_z + 2, $fn=20);
+            cylinder(d=4.2, h=1 + 1.6, $fn=24);
+        }
+        for (x = tongue_screw_xs) translate([x, tb_y1 + tongue_screw_y, -tongue_t - 1]) {
+            cylinder(d=2.4, h=tongue_t + 2, $fn=20);
+            cylinder(d=4.2, h=1 + 1.6, $fn=24);
+        }
+        translate([bar_wire_slot[0] - bar_wire_slot[1]/2, cap_y - bar_wire_slot[2]/2, -tongue_t - 1])
+            cube([bar_wire_slot[1], bar_wire_slot[2], bar_back_wall + 2]);
+    }
+}
+// Printed switch plate (Glenn, 2026-11-09): drop-in replacement for the button PCB, same outline
+// and 1.6 mm thickness, so bar_front / bar_back are unchanged. The switch legs go through the
+// plate and are wired point to point on the back (GND to one leg of every switch, J12 lines and
+// BAT85 diodes to the other legs, see wiring/wiring.png). The back is recessed 0.8 mm between the
+// pads round the switches and screws, giving 3.8 mm for wires and diodes.
+sp_leg_pitch = 7.4;       // TC-0120 drawing: legs 6.8-8.0 apart (+-0.5)
+sp_leg_slot = [1.8, 0.8]; // legs are 1.0 x 0.3 strips
+sp_pad = [11.0, 7.0];
+sp_recess = 0.8;
+module switch_plate() {
+    L = bar_pcb_size[0]; H = bar_pcb_size[1];
+    y0 = bar_pcb_c[1] - H/2;
+    difference() {
+        translate([-L/2, y0, btn_pcb_back_z]) cube([L, H, btn_pcb_t]);
+        difference() {
+            translate([-L/2 + 1.2, y0 + 1.0, btn_pcb_back_z - 1]) cube([L - 2.4, H - 2.0, 1 + sp_recess]);
+            for (x = btn_xs) translate([x - sp_pad[0]/2, cap_y - sp_pad[1]/2, btn_pcb_back_z - 2]) cube([sp_pad[0], sp_pad[1], 4]);
+            for (b = bar_screws) translate([b[0], cap_y + b[1], btn_pcb_back_z - 2]) cylinder(d=6.0, h=4, $fn=28);
+        }
+        for (x = btn_xs) for (dx = [-1, 1]) translate([x + dx * sp_leg_pitch/2 - sp_leg_slot[0]/2, cap_y - sp_leg_slot[1]/2, btn_pcb_back_z - 1]) cube([sp_leg_slot[0], sp_leg_slot[1], btn_pcb_t + 2]);
+        for (b = bar_screws) translate([b[0], cap_y + b[1], btn_pcb_back_z - 1]) cylinder(d=2.4, h=btn_pcb_t + 2, $fn=20);
+        // wire notches at the top edge next to the bar_back wire slot
+        for (x = [bar_wire_slot[0] - 3, bar_wire_slot[0] + 3]) translate([x - 1, y0 + H - 1.5, btn_pcb_back_z - 1]) cube([2, 2, btn_pcb_t + 2]);
+    }
+}
+module ghost_bar_pcb() {
+    color("Green", 0.9) translate([-bar_pcb_size[0]/2, bar_pcb_c[1] - bar_pcb_size[1]/2, btn_pcb_back_z]) cube([bar_pcb_size[0], bar_pcb_size[1], btn_pcb_t]);
+    for (x = btn_xs)
+        color("Black") translate([x - btn_body[0]/2, cap_y - btn_body[1]/2, btn_pcb_front_z]) cube([btn_body[0], btn_body[1], btn_total_h - btn_preload - 0.3]);
+    color("MediumBlue") translate([bh1750_x - bh1750_board[0]/2, bh_y0, bh_z0]) cube([bh1750_board[0], bh1750_board[1], btn_pcb_t]);
+    ghost_bh_conn();
+}
+module ghost_bh_conn() for (c = [[0.4, 4.65], [20.75, 25.0]])
+    color("White") translate([bh1750_x - bh1750_board[0]/2 + c[0], bh_y0 + 8.89 - 3.0, bh_z1]) cube([c[1] - c[0], 6.0, 2.95]);
+
+// ---- Tray mount (use_tray_mount), tray frame: z = 0 tray back, z = -spacer_length bezel face ----
+brk_z0 = -spacer_length;             // bracket back face (on the bezel)
+brk_z1 = brk_z0 + brk_t;             // bracket front face
+brk_thin_z1 = brk_z0 + 3.0;          // bracket front face in the lug channels
+cleat_y1 = brk_y[1] - cleat_d;       // top of the bracket cleat at the bracket face
+lock_z = (brk_thin_z1 + (-carrier_t)) / 2;
+lock_flange = [brk_y[0], brk_y[0] + 4.0];
+lock_lug_y = [lock_flange[1] + 0.5, lock_flange[1] + 0.5 + lock_lug[1]];
+module brk_cleat_2d() polygon([[cleat_y1 - cleat_h, brk_z1 - 0.01], [cleat_y1, brk_z1 - 0.01],
+                               [cleat_y1 + cleat_d, brk_z1 + cleat_d], [cleat_y1 + cleat_d - cleat_h, brk_z1 + cleat_d]]);
+car_cleat_yt = cleat_y1 + cleat_d + cleat_gap + cleat_h;
+module car_cleat_2d() polygon([[cleat_y1 + 0.3 + cleat_gap, brk_z1 + 0.3], [cleat_y1 + cleat_d + cleat_gap, brk_z1 + cleat_d],
+                               [cleat_y1 + cleat_d + cleat_gap, -carrier_t + 0.01], [car_cleat_yt, -carrier_t + 0.01], [car_cleat_yt, brk_z1 + 0.3]]);
+// 2D [y, z] profile extruded along x from x0 to x1
+module x_extrude(x0, x1) translate([x0, 0, 0]) rotate([90, 0, 90]) linear_extrude(x1 - x0) children();
+
+module tray_bracket() {
+    difference() {
+        union() {
+            translate([-brk_w/2, brk_y[0], brk_z0]) cube([brk_w, brk_y[1] - brk_y[0], brk_t]);
+            for (cx = cleat_xs) x_extrude(cx[0], cx[1]) brk_cleat_2d();
+            // lock flange along the bottom edge
+            translate([-brk_w/2, lock_flange[0], brk_z0]) cube([brk_w, lock_flange[1] - lock_flange[0], -carrier_t - 0.5 - brk_z0]);
+            // joiner locating rails (fix the joiner board with double-sided tape)
+            if (use_joiner) for (sx = [-1, 1]) translate([joiner_c[0] + sx * (joiner_size[0]/2 + 0.4 + 0.75) - 0.75, joiner_c[1] - joiner_size[1]/2, brk_z1 - 0.01])
+                cube([1.5, joiner_size[1], joiner_rim + 0.01]);
+        }
+        // M3 inserts from the back face, on the 4 front-plate slots
+        for (tx = [-mount_spacing_w/2, mount_spacing_w/2]) for (ty = [-mount_spacing_h/2, mount_spacing_h/2])
+            translate([tx, ty, brk_z0]) heatset_insert_bore(depth=4.5);
+        // channels for the carrier lugs (they rise ~5 mm when the tray is unhooked)
+        for (lx = lock_xs) translate([lx - lock_lug[0]/2 - 1.0, lock_flange[1] - 0.01, brk_thin_z1])
+            cube([lock_lug[0] + 2.0, lock_lug_y[1] + cleat_d + 1.5 - lock_flange[1], brk_t]);
+        // extension FFC into the case (on the front-plate slot)
+        translate([front_ribbon_slot_offset_x, slot_offset_z, brk_z0 - 1])
+            linear_extrude(brk_t + 2) hull() for (sx = [-1, 1]) translate([sx * (ribbon_slot_width/2 + 1.5 - 2.5), 0]) circle(d=5, $fn=24);
+        // lock screws (M3 x 10 from below, head under the flange)
+        for (lx = lock_xs) translate([lx, lock_flange[0] - 1, lock_z]) rotate([-90, 0, 0]) cylinder(d=3.4, h=lock_flange[1] - lock_flange[0] + 2, $fn=20);
+    }
+}
+module tray_carrier() {
+    hw = carrier_w/2;
+    difference() {
+        union() {
+            // top bar (window for the panel FPC), bottom bar, two vertical bars on the tray inserts
+            difference() {
+                intersection() {
+                    translate([-hw, carrier_top_y0, -carrier_t]) cube([carrier_w, outer_h/2 - carrier_top_y0, carrier_t]);
+                    translate([0, 0, -carrier_t - 1]) linear_extrude(carrier_t + 2) tray_outline_2d();
+                }
+                translate([carrier_gap_x[0], carrier_top_y0 - 1, -carrier_t - 1]) cube([carrier_gap_x[1] - carrier_gap_x[0], outer_h, carrier_t + 2]);
+            }
+            translate([-hw, carrier_bot_y[0], -carrier_t]) cube([carrier_w, carrier_bot_y[1] - carrier_bot_y[0], carrier_t]);
+            for (sx = [-1, 1]) translate([sx * mount_spacing_w/2 - carrier_bar/2, carrier_bot_y[0], -carrier_t])
+                cube([carrier_bar, carrier_top_y0 - carrier_bot_y[0] + 0.01, carrier_t]);
+            // cleats
+            for (cx = cleat_xs) x_extrude(cx[0], cx[1]) car_cleat_2d();
+            // lock lugs
+            for (lx = lock_xs) translate([lx - lock_lug[0]/2, lock_lug_y[0], brk_thin_z1 + 0.5]) cube([lock_lug[0], lock_lug[1], -carrier_t - brk_thin_z1 - 0.5 + 0.01]);
+        }
+        // 4 screws into the tray's M3 inserts (M3 x 6, pan head on the carrier back)
+        for (tx = [-mount_spacing_w/2, mount_spacing_w/2]) for (ty = [-mount_spacing_h/2, mount_spacing_h/2])
+            translate([tx, ty, -carrier_t - 1]) cylinder(d=insert_clearance_hole, h=carrier_t + 2, $fn=20);
+        // lock inserts from below
+        for (lx = lock_xs) translate([lx, lock_lug_y[0], lock_z]) rotate([-90, 0, 0])
+            heatset_insert_bore(depth=lock_insert[1], hole_d=lock_insert[0], guide_d=lock_insert[2]);
+    }
+}
+// full carrier plate (source for the modular tray_hook parts)
+module tray_carrier_full() {
+    difference() {
+        union() {
+            intersection() {
+                translate([-carrier_w/2, brk_y[0], -carrier_t]) cube([carrier_w, outer_h/2 - brk_y[0], carrier_t]);
+                translate([0, 0, -carrier_t - 1]) linear_extrude(carrier_t + 2) tray_outline_2d();
+            }
+            for (cx = cleat_xs) x_extrude(cx[0], cx[1]) car_cleat_2d();
+            for (lx = lock_xs) translate([lx - lock_lug[0]/2, lock_lug_y[0], brk_thin_z1 + 0.5]) cube([lock_lug[0], lock_lug[1], -carrier_t - brk_thin_z1 - 0.5 + 0.01]);
+        }
+        for (tx = [-mount_spacing_w/2, mount_spacing_w/2]) for (ty = [-mount_spacing_h/2, mount_spacing_h/2])
+            translate([tx, ty, -carrier_t - 1]) cylinder(d=insert_clearance_hole, h=carrier_t + 2, $fn=20);
+        for (lx = lock_xs) translate([lx, lock_lug_y[0], lock_z]) rotate([-90, 0, 0])
+            heatset_insert_bore(depth=lock_insert[1], hole_d=lock_insert[0], guide_d=lock_insert[2]);
+    }
+}
+// ---- Modular hooks (hooks_modular) ----
+// front_hook: one per slot column (x = sx * 50), identical parts. Two M3 inserts on the existing slots,
+// 45 deg cleat on top, lock flange with one M3 hole at the bottom, channel for the tray_hook lug.
+module front_hook(sx) {
+    cx = sx * mount_spacing_w/2; hw = hook_w/2;
+    intersection() {
+        tray_bracket();
+        translate([cx - hw, brk_y[0] - 1, brk_z0 - 1]) cube([hook_w, brk_y[1] - brk_y[0] + 2, 30]);
+    }
+}
+// tray_hook: on the two tray inserts of one column; cleat and lock lug (identical left/right apart from mirroring).
+module tray_hook(sx) {
+    cx = sx * mount_spacing_w/2; hw = hook_w/2;
+    intersection() {
+        tray_carrier_full();
+        translate([cx - hw, brk_y[0] - 1, -30]) cube([hook_w, outer_h/2 - brk_y[0] + 2, 31]);
+    }
+}
+module front_hooks() for (sx = [-1, 1]) front_hook(sx);
+module tray_hooks() for (sx = [-1, 1]) tray_hook(sx);
+
+module ghost_joiner() {
+    color("SeaGreen") translate([joiner_c[0] - joiner_size[0]/2, joiner_c[1] - joiner_size[1]/2, brk_z1]) cube([joiner_size[0], joiner_size[1], 1.6]);
+    color("Black") for (dy = [-1, 1]) translate([joiner_c[0] - 13, joiner_c[1] + dy * 3.5 - 2, brk_z1 + 1.6]) cube([26, 4, 2.5]);
 }
 
 // One cap; z = 0 at the back of the flange (prints flange down, icon up)
@@ -1191,7 +1524,7 @@ module bottom_panel() {
             }
         }
 
-        translate([cx, 0, 0]) ret_insert_cuts();
+        if (use_front_retainer) translate([cx, 0, 0]) ret_insert_cuts();
 
         // Vent slots under the VIM3 stack (air in at the bottom, out through the lid)
         if (add_lid_vents) {
@@ -1218,12 +1551,18 @@ module vim3_pocket() {
     ledge = 1.2;               // M2X edge strip free of the SSD / sockets (SSD starts 2 mm in)
     zt = m2x_bottom_z + m2x_pcb_t + 0.5;   // stays under the VIM3 HDMI socket (it reaches 1.75 below the VIM3 PCB)
     // support ledges under both long edges of the M2X
-    for (x = [m2x_x0 - c, m2x_x1 - ledge])
-        translate([x, stack_y0, floor_z - 0.01]) cube([ledge + c, m2x_l - 0.5, m2x_support_h + 0.01]);
-    // port-side wall and front wall locate the stack (rear: back plate; header side: side ledge)
-    translate([m2x_x1 + c, stack_y0 + 4, floor_z - 0.01]) cube([1.6, m2x_l - 10, zt - floor_z]);
-    translate([m2x_x0 + 6, vim3_y0 - c - pocket_wall, floor_z - 0.01]) cube([m2x_w - 12, pocket_wall, zt - floor_z]);
+    // header-side ledge full length; port-side ledge with a gap where the RJ45 hangs
+    // 3.7 mm below the VIM3 PCB through the M2X notch (VIM3 STEP: lx 47.1-64.5, 1.4 below the M2X)
+    translate([m2x_x0 - c, stack_y0, floor_z - 0.01]) cube([ledge + c, m2x_l - 0.5, m2x_support_h + 0.01]);
+    for (seg = [[0, rj45_gap[0]], [rj45_gap[1], m2x_l - 0.5 + m2x_front_lx]])
+        translate([m2x_x1 - ledge, vim3_y0 + seg[0], floor_z - 0.01])
+            cube([ledge + c, seg[1] - seg[0], m2x_support_h + 0.01]);
+    // no port-side wall: RJ45 (1.7 out, 3.7 down), HDMI (0.65 out, 1.3 down) and the
+    // USB-A shells (2.5 out, 0.95 down) hang over that edge (Glenn, 2026-11-06)
+    // front wall: kept 1 mm under the USB-A shells, stops 18 mm short of the port edge
+    translate([m2x_x0 + 6, vim3_y0 - c - pocket_wall, floor_z - 0.01]) cube([m2x_w - 6 - 18, pocket_wall, zt - 1.0 - floor_z]);
     // retainer posts (M3 inserts are cut in bottom_panel)
+    if (use_front_retainer)
     for (p = ret_posts()) translate([p[0], p[1], floor_z - 0.01]) {
         cylinder(d=ret_post_d, h=p[2] - floor_z + 0.01, $fn=32);
         cylinder(d1=ret_post_d + 2, d2=ret_post_d, h=1.5, $fn=32);
@@ -1342,7 +1681,7 @@ module ghost_boards() {
     color("Silver") translate([vim3_xr - 7.8, vim3_y0 + 30.4, vim3_top_z - 1.75]) cube([9.11, 16.2, 7.9]);   // HDMI socket
     // 40-pin header + IDC socket on it, ribbon goes over the VIM3 to J2
     color("Black") translate([vim3_xr - vim3_hdr_ly - 3.0, v2b(vim3_hdr_lx[0], 0)[1] - 2.5, vim3_top_z]) cube([6.0, vim3_hdr_lx[1] - vim3_hdr_lx[0] + 5.0, 8.5 + 9.0]);
-    color("Tan") retainers_placed();
+    if (use_front_retainer) color("Tan") retainers_placed();
     // FPV HDMI heads (plug + square PCB, ribbon up)
     color("Gold") translate([vim3_xr + 1.31 - fpv_plug_len + fpv_seat_gap, vim3_hdmi_c[1] - 7, vim3_hdmi_cz - 2.25]) cube([fpv_plug_len, 14, 4.5]);
     color("Gold") translate([mb_x0 - fpv_seat_gap, j13_centre_y - 7, j13_z - 2.25]) cube([fpv_plug_len, 14, 4.5]);
@@ -1393,12 +1732,20 @@ if (part_to_print == "assembly") {
         rotate([90, 0, 0]) {
             color("DarkCyan") screen_tray();
             color("#20304a") translate([0, 0, outer_d - ledge_depth]) tray_rounded_rect(inner_w - 0.4, inner_h - 0.4, ledge_depth, screen_radius);   // screen glass (preview)
-            color("DimGray") button_bar();
+            if (bar_split) { color("DimGray") bar_front(); color("SlateGray") bar_back(); }
+            else color("DimGray") button_bar();
             color("Gainsboro") button_caps_placed();
-            if (show_boards) ghost_tray_boards();
+            if (show_boards) { if (bar_split) ghost_bar_pcb(); else ghost_tray_boards(); }
+            if (use_tray_mount) {
+                if (hooks_modular) color("Peru") tray_hooks(); else color("Peru") tray_carrier();
+                color("Sienna") tray_hatch();
+                if (hooks_modular) color("SaddleBrown") translate([0, 0, explode_dist]) front_hooks();
+                else color("SaddleBrown") translate([0, 0, explode_dist]) tray_bracket();
+                if (show_boards && use_joiner) translate([0, 0, explode_dist]) ghost_joiner();
+            }
         }
 
-    color("White") {
+    if (!use_tray_mount) color("White") {
         for(tx = [-mount_spacing_w/2, mount_spacing_w/2]) {
             for(tz = [chassis_h/2 - mount_spacing_h/2, chassis_h/2 + mount_spacing_h/2]) {
                 translate([tx, -bezel_depth - spacer_length, tz])
@@ -1433,6 +1780,24 @@ if (part_to_print == "assembly") {
     screen_tray();
 } else if (part_to_print == "button_bar") {
     translate([0, 0, tongue_t]) button_bar();     // back face down, front face up
+} else if (part_to_print == "bar_front") {
+    translate([0, 0, outer_d]) rotate([0, 180, 0]) bar_front();     // face down
+} else if (part_to_print == "bar_back") {
+    translate([0, 0, tongue_t]) bar_back();                         // back face down
+} else if (part_to_print == "front_hook") {
+    translate([mount_spacing_w/2, 0, -brk_z0]) front_hook(-1);      // print 2; back face down
+} else if (part_to_print == "tray_hook_left") {
+    translate([mount_spacing_w/2, 0, 0]) rotate([180, 0, 0]) tray_hook(-1);   // tray-side face down
+} else if (part_to_print == "tray_hook_right") {
+    translate([-mount_spacing_w/2, 0, 0]) rotate([180, 0, 0]) tray_hook(1);
+} else if (part_to_print == "tray_hatch") {
+    tray_hatch();
+} else if (part_to_print == "switch_plate") {
+    translate([0, 0, btn_pcb_back_z + btn_pcb_t]) rotate([180, 0, 0]) switch_plate();   // front face down
+} else if (part_to_print == "tray_bracket") {
+    translate([0, 0, -brk_z0]) tray_bracket();                      // back face down
+} else if (part_to_print == "tray_carrier") {
+    rotate([180, 0, 0]) tray_carrier();                             // tray-side face down
 } else if (part_to_print == "button_caps") {
     button_caps_print();
 } else if (part_to_print == "module_spacers") {

@@ -164,3 +164,41 @@ The first version guessed the VIM3 and M2X sizes; the M2X did not fit, the J2 ri
 | top, din_front_plate, screen_tray, button_bar | keep as printed |
 
 `stl/reference_only/` holds the side and top panels as the current model exports them, for reference only; the printed ones with the changes above are equivalent.
+
+## Tray mount, sun-visor holes and split button bar (2026-11-09)
+
+Goal (Glenn): the screen tray comes off without opening the case, the screen ribbon can be unplugged, and the bar is easier to print and assemble.
+
+- **`tray_bracket`** replaces the 4 flanged spacers. It is screwed once to the front plate through the same 4 slots (M3 x 12 from inside the case into 4 M3 inserts in the bracket), so the 10 mm height adjustment stays. It carries a 45 degree cleat along the top, a flange with 2 lock-screw holes along the bottom, a slot over the front-plate ribbon slot, and two rails that locate the FPC joiner board.
+- **`tray_carrier`** is screwed to the 4 existing M3 inserts in the tray back (M3 x 6). Its cleat hangs on the bracket cleat; gravity pulls the tray against the bracket. Two lugs with M3 inserts sit above the bracket flange: **2x M3 x 10 from below** lock the tray. To remove the tray: take out the 2 screws, lift the tray about 5 mm, pull it forward, unplug the panel FPC at the joiner. Checked in OpenSCAD: hung = no overlap; lifted 2 or 5 mm and pulled forward = free.
+- **Screen ribbon**: panel FPC from the tray slot down to a 40-pin 0.5 mm FFC-to-FFC joiner on the bracket front (double-sided tape between the rails), extension FFC from the joiner through the slot into the case to J14.
+- **Sun visor** (changed 2026-11-09, flush since 13:25): 4 SHORT M3 heat-set inserts (3 mm long; bore 4.0 x 4.0 deep) straight into the left and right side faces of the screen tray, 2 per side at y = +25 and +45 mm from the glass centre, 6 mm in front of the tray back, in the 4.5 mm solid strip beside the LCD pocket (0.5 mm skin). The tray back stays flat. Standard 5.7 mm M3 inserts do NOT fit here; the old 3 mm back-pad version is still in the model (`visor_flush = false`).
+- **Button bar in two parts** (`bar_split`): `bar_front` (skin, cap holes, BH1750 window, bottom and end walls, PCB pocket, 3 bosses with M2 inserts; prints face down) and `bar_back` (flat back plate with the tongue, support pads behind every switch, wire slot; prints back face down). The button PCB is clamped between them by **3x M2 x 8 from the back**. The bar then goes onto the tray with the 4 tongue screws as before. The PCB got 3 x 2.2 mm NPTH holes for this (KiCad (102.35, 106.4), (163.15, 103.0), (274.35, 106.4)); DRC 0, Gerbers regenerated.
+- Renders: `render/traymount/`.
+
+**Not known yet (no STLs exported for these parts):** joiner board size (`joiner_size`, assumed 30 x 14 mm), the panel FPC length past the panel edge (it must reach from the tray slot to the joiner, about 50 mm), the switch height (`btn_total_h`, assumed 5.0 mm) and whether there is room under the tray in the dash for the lock screws.
+- **Without a PCB** (`switch_plate`): a printed plate with the same outline and 1.6 mm thickness replaces the button PCB, so `bar_front` and `bar_back` stay the same. The switch legs go through 1.3 mm holes; wire them on the back: one leg of every switch to GND, the other leg to its J12 line (single buttons) or through two BAT85s to two lines (combo buttons), as in `wiring/wiring.png`. The back is recessed 0.8 mm between the pads, which leaves 3.8 mm for wires and diodes. Leg pitch 5.08 mm is an assumption (`sp_leg_pitch`): measure it. Prints front face down.
+- **Screen (Waveshare STEP, 2026-11-09)**: the panel is 6.43 mm from glass front to LCD back (not 4.2 as the wiki says), so `panel_lcd_thickness` is 5.72 and the tray is 12.2 mm deep (was 10). A 46 x 51.5 mm board on the LCD back, with the ribbon connector on its top edge, sticks out another 1.84 mm. The tray base has an opening over it, closed from the back by a flush lid (`tray_hatch`, 1.5 mm) with 4x M2 x 6 flat-head self-tapping screws, plus a pry slot. Since 2026-11-09 the 25 x 3 mm ribbon slot sits in the lid (opening up to y +45), right behind the panel FPC connector (slot centre x +8, y +41; connector x -6..22, y 33.4..38.85 from the CT drawing), not in the tray base. Render: `render/visor_lid/tray_rear_lid_slot.png`. With the tray off the bracket you open the hatch and unplug the ribbon at the panel. The carrier and both cleats leave the hatch area free. Source files: `reference/waveshare_70H/` in the project folder (vendor files, not in git).
+- There is **no FPC joiner / extension**: one ribbon runs from J14 to the panel (Glenn).
+- **Modular hooks (Glenn, 2026-11-09)**: the one-piece bracket and carrier are replaced by small parts (`hooks_modular`). `front_hook` (print 2, identical): 24 mm wide, on one pair of the existing front-plate slots (2 M3 inserts, M3 x 12 from inside), 45 degree cleat on top, lock flange with an M3 hole at the bottom. `tray_hook_left` / `tray_hook_right`: on the 2 tray inserts of their column (M3 x 6), with the matching cleat, the lock lug (M3 insert, M3 x 10 from below) (no visor arm any more; the visor inserts are in the tray sides). Checked: hung = no overlap, lifted 5 mm and pulled forward = free.
+
+## Print list (exported 2026-11-09)
+
+New or changed parts in `stl/`:
+
+| File | Qty | Notes |
+|---|---|---|
+| `screen_tray.stl` | 1 | Back face down (flat back). Hatch opening, 4 short M3 side inserts for a sun visor (3 mm long), 4 M3 inserts for the tray hooks, 3 M2 inserts for the button bar. |
+| `tray_hatch.stl` | 1 | 1.5 mm lid with the ribbon slot, 4x M2 x 6 flat-head self-tappers. |
+| `front_hook.stl` | 2 | Identical. On the existing front-plate slots, 2 M3 inserts each (M3 x 12 from inside the case), M3 lock-screw hole at the bottom. |
+| `tray_hook_left.stl`, `tray_hook_right.stl` | 1 each | On the 4 tray inserts (M3 x 6). Lock lug with an M3 insert, M3 x 10 from below. Lift about 5 mm to unhook. |
+| `bar_front.stl`, `bar_back.stl` | 1 each | Split button bar, 3x M2 x 8 from the back into M2 inserts in `bar_front`. Adafruit BH1750 held on 2 pins. |
+| `switch_plate.stl` | 1 | Only for the wired option (instead of the button-bar PCB). |
+| `button_caps.stl` | 1 set | |
+| `bottom.stl` | 1 | VIM3 pocket fixed for RJ45/HDMI below the PCB. Only needed for a new print; the 2026-11-06 print can be cut to match (see VIM3 section). The VIM3 front hold-down is still open. |
+
+Moved: the old one-piece `button_bar`, `standoff_spacer` (replaced by the hooks), `vim3_retainers` (would pinch the fan wires) and the old `screen_tray`/`button_caps` are in `stl/obsolete_2026-11-09/`. The 2026-11-06 bottom is in `stl/printed_2026-11-06/`.
+
+**Do not order the button-bar PCB yet:** its switch footprint still has 5.08 mm leg pitch, the TC-0120 switches need about 7.4 mm. The wired `switch_plate` already uses 7.4.
+
+Distance from the front plate to the tray back is still 15 mm (`spacer_length`). It can probably drop to about 11 mm with thinner hooks if the DIN mount gets a spacer.

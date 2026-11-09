@@ -309,6 +309,21 @@
     )
   )
 
+  (footprint "buttonbar:MountingHole_2.2mm_M2" (layer "F.Cu")
+    (tstamp 3ecfce89-a5c4-425f-92d1-4da230c3c6ed)
+    (at 163.15 103)
+    (attr board_only exclude_from_pos_files exclude_from_bom)
+    (fp_text reference "H2" (at 0 0) (layer "F.SilkS") hide
+        (effects (font (size 1.27 1.27) (thickness 0.15)))
+      (tstamp 663d2ea6-e561-425d-95ff-e89b32f3006f)
+    )
+    (fp_text value "M2 hole" (at 0 0) (layer "F.SilkS") hide
+        (effects (font (size 1.27 1.27) (thickness 0.15)))
+      (tstamp 95981f08-e008-49b3-a363-fe4f526bfa10)
+    )
+    (pad "" np_thru_hole circle (at 0 0) (size 2.2 2.2) (drill 2.2) (layers "F&B.Cu" "*.Mask") (tstamp 9afd7b04-ec45-4213-94f8-6a992d78b140))
+  )
+
   (footprint "buttonbar:SW_Tactile_6x3.5mm_2pin_P5.08mm" (layer "F.Cu")
     (tstamp 4eeddfd0-38b0-4b5b-8c2d-76811d6a83ad)
     (at 142.63 106.4)
@@ -367,6 +382,21 @@
       (net 1 "GND") (tstamp 62c13ce1-325b-4c5f-b3f9-8f7dea2a00a7))
     (pad "2" thru_hole circle (at 2.54 0) (size 1.9 1.9) (drill 1) (layers "*.Cu" "*.Mask")
       (net 9 "/N_SW8") (tstamp 062a3b81-f84a-4ae2-863f-9631a8741b88))
+  )
+
+  (footprint "buttonbar:MountingHole_2.2mm_M2" (layer "F.Cu")
+    (tstamp 53eb0ef6-5076-4506-9806-8c0e75a7f5c5)
+    (at 102.35 106.4)
+    (attr board_only exclude_from_pos_files exclude_from_bom)
+    (fp_text reference "H1" (at 0 0) (layer "F.SilkS") hide
+        (effects (font (size 1.27 1.27) (thickness 0.15)))
+      (tstamp e9117a48-a9a1-43f3-901b-cdfc49e855d8)
+    )
+    (fp_text value "M2 hole" (at 0 0) (layer "F.SilkS") hide
+        (effects (font (size 1.27 1.27) (thickness 0.15)))
+      (tstamp 022c5695-4c09-4970-bdb6-7ee16de928d4)
+    )
+    (pad "" np_thru_hole circle (at 0 0) (size 2.2 2.2) (drill 2.2) (layers "F&B.Cu" "*.Mask") (tstamp 6b6286ec-c682-43d6-a2ff-9b4141f2bc9f))
   )
 
   (footprint "buttonbar:SW_Tactile_6x3.5mm_2pin_P5.08mm" (layer "F.Cu")
@@ -765,6 +795,21 @@
       (scale (xyz 1 1 1))
       (rotate (xyz 0 0 0))
     )
+  )
+
+  (footprint "buttonbar:MountingHole_2.2mm_M2" (layer "F.Cu")
+    (tstamp 8f3119ff-a9fd-478f-954f-4f4c1c5ded87)
+    (at 274.35 106.4)
+    (attr board_only exclude_from_pos_files exclude_from_bom)
+    (fp_text reference "H3" (at 0 0) (layer "F.SilkS") hide
+        (effects (font (size 1.27 1.27) (thickness 0.15)))
+      (tstamp 5c8dab80-e9e7-4f93-bf7f-e128b9b67720)
+    )
+    (fp_text value "M2 hole" (at 0 0) (layer "F.SilkS") hide
+        (effects (font (size 1.27 1.27) (thickness 0.15)))
+      (tstamp a3676297-f7ca-42aa-9ccf-60b206bcdc8e)
+    )
+    (pad "" np_thru_hole circle (at 0 0) (size 2.2 2.2) (drill 2.2) (layers "F&B.Cu" "*.Mask") (tstamp dead9c1d-2d83-49d7-8b42-236a50ef96dd))
   )
 
   (footprint "buttonbar:D_DO-34_SOD68_P7.62mm_Horizontal" (layer "F.Cu")
