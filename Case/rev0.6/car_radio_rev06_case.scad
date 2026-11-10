@@ -29,7 +29,7 @@
 
 /* [Print Selection] */
 // Select which part to generate
-part_to_print = "assembly"; // [assembly, din_front_plate, screen_tray, tray_hatch, front_hook, tray_hook_left, tray_hook_right, tray_bracket, tray_carrier, bar_front, bar_back, switch_plate, button_bar, button_caps, module_spacers, vim3_retainers, standoff_spacer, left_side, right_side, bottom, top, back_plate]
+part_to_print = "assembly"; // [assembly, din_front_plate, screen_tray, tray_hatch, front_hook, tray_hook_left, tray_hook_right, tray_bracket, tray_carrier, bar_front, bar_back, switch_plate, tape_plate, tape_mold, button_bar, button_caps, module_spacers, vim3_retainers, standoff_spacer, left_side, right_side, bottom, top, back_plate]
 
 /* [Assembly view] */
 explode_dist = 0;
@@ -940,6 +940,65 @@ module switch_plate() {
         for (x = [bar_wire_slot[0] - 3, bar_wire_slot[0] + 3]) translate([x - 1, y0 + H - 1.5, btn_pcb_back_z - 1]) cube([2, 2, btn_pcb_t + 2]);
     }
 }
+// ---- Copper-tape switch plate (Glenn 2026-11-10, method of PCB Forge / Hackaday 2026-02-19) ----
+// Same outline/holes as switch_plate. Back face (solder side, toward bar_back) carries 1.0 mm channels
+// 0.3 deep, each closed off by 0.6 mm ridges 0.4 high. Stick copper tape over the back, press it into the
+// channels with tape_mold, sand the ridges flat: the copper left in the channels is the circuit.
+// Plate frame: x as the bar, y relative to the switch row (cap_y).
+tp_w = 1.0; tp_ridge = 0.6; tp_depth = 0.3; tp_ridge_h = 0.4; tp_tape = 0.1;   // tape incl. glue: ASSUMED
+tp_bus = [["GND", 1.6], ["U", 3.2], ["S", 4.8], ["D", -2.6], ["M", -4.2]];    // [net, lower edge y]
+tp_bus_x = [-83.0, 83.0];
+tp_upper_gap = [-27.0, -23.4];          // middle bar screw (-25.2, +3.4): upper buses bridged by wire jumpers
+tp_lines = ["SD", "D", "M", "U", "S", "DM", "UD", "UM", "SU"];   // per btn_xs: J12 lines of each button
+tp_gnd_left = [true, false, false, false, false, false, false, false, false];  // home turned: GND on its left leg
+function tp_rects() = concat(
+    // buses (upper ones split at the middle screw)
+    [for (b = tp_bus) for (seg = (b[1] > 0 ? [[tp_bus_x[0], tp_upper_gap[0]], [tp_upper_gap[1], tp_bus_x[1]]] : [tp_bus_x]))
+        [seg[0], seg[1], b[1], b[1] + tp_w]],
+    // leg pads
+    [for (x = btn_xs) for (dx = [-1, 1]) [x + dx * sp_leg_pitch/2 - 1.3, x + dx * sp_leg_pitch/2 + 1.3, -1.0, 1.0]],
+    // GND stubs from the GND leg up to the GND bus
+    [for (i = [0 : len(btn_xs) - 1]) let(gx = btn_xs[i] + (tp_gnd_left[i] ? -1 : 1) * sp_leg_pitch/2) [gx - 0.5, gx + 0.5, 0.9, 1.7]],
+    // single-line button on the inner lower bus (vol-, D): direct stub down
+    [for (i = [0 : len(btn_xs) - 1]) if (tp_lines[i] == "D") let(nx = btn_xs[i] - sp_leg_pitch/2) [nx - 0.5, nx + 0.5, -1.7, -0.9]],
+    // both diodes on the same side (prev D+M, voice S+U): node pad 2.5 mm longer, away from the switch,
+    // so the two diode leads land 2.5 mm apart
+    [for (i = [0 : len(btn_xs) - 1]) if (tp_lines[i] == "DM" || tp_lines[i] == "SU") let(nx = btn_xs[i] - sp_leg_pitch/2) [nx - 1.3 - 2.5, nx, -1.0, 1.0]]);
+module tp_channels_2d() for (r = tp_rects()) translate([r[0], r[2]]) square([r[1] - r[0], r[3] - r[2]]);
+module tp_outline_2d() translate([-bar_pcb_size[0]/2, bar_pcb_c[1] - cap_y - bar_pcb_size[1]/2]) square(bar_pcb_size);
+module tp_holes_2d() {
+    for (x = btn_xs) for (dx = [-1, 1]) translate([x + dx * sp_leg_pitch/2, 0]) square(sp_leg_slot, center=true);
+    for (b = bar_screws) translate([b[0], b[1]]) circle(d=2.4, $fn=20);
+}
+module tape_plate() {
+    T = btn_pcb_t;
+    translate([0, cap_y, btn_pcb_back_z]) difference() {
+        union() {
+            linear_extrude(T) tp_outline_2d();
+            translate([0, 0, -tp_ridge_h]) linear_extrude(tp_ridge_h + 0.01) intersection() {
+                difference() { offset(delta=tp_ridge) tp_channels_2d(); tp_channels_2d(); }
+                tp_outline_2d();
+            }
+        }
+        translate([0, 0, -tp_ridge_h - 1]) linear_extrude(tp_ridge_h + 1 + tp_depth) tp_channels_2d();
+        translate([0, 0, -2]) linear_extrude(T + 4) tp_holes_2d();
+        // copper keep-out ring is automatic: no channel within 0.6 of the screw holes (checked)
+    }
+}
+// Press mold: lay it on the taped plate (back face), tongues push the tape into the channels.
+// Aligned with M2 screws / 2.2 mm pins through the three bar-screw holes.
+tm_t = 3.0;
+module tape_mold() {
+    tongue_h = tp_ridge_h + tp_depth - tp_tape;      // from the ridge tops down to the tape in the channel floor
+    translate([0, cap_y, btn_pcb_back_z - tp_ridge_h]) mirror([0, 0, 1]) difference() {
+        union() {
+            translate([0, 0, 0]) linear_extrude(tm_t) offset(delta=1.0) tp_outline_2d();
+            translate([0, 0, -tongue_h]) linear_extrude(tongue_h + 0.01) offset(delta=-(0.15 + tp_tape)) tp_channels_2d();
+        }
+        for (b = bar_screws) translate([b[0], b[1], -2]) cylinder(d=2.4, h=tm_t + 4, $fn=20);
+        // relief over the leg slots so the tape is not punched before the legs go in
+    }
+}
 module ghost_bar_pcb() {
     color("Green", 0.9) translate([-bar_pcb_size[0]/2, bar_pcb_c[1] - bar_pcb_size[1]/2, btn_pcb_back_z]) cube([bar_pcb_size[0], bar_pcb_size[1], btn_pcb_t]);
     for (x = btn_xs)
@@ -1062,23 +1121,39 @@ module ghost_joiner() {
 }
 
 // One cap; z = 0 at the back of the flange (prints flange down, icon up)
-module button_cap(icon) {
+// Glenn 2026-11-10: caps 1 % narrower (X only) (printed caps were tight in the bar) and a notch in the
+// flange wherever an insert boss or a BH1750 pin boss of the bar comes close.
+cap_scale = 0.99;
+cap_notch_clear = 0.4;
+// obstacles behind the skin, in the bar frame: [x, y, radius]
+function cap_obstacles() = concat(
+    [for (b = bar_screws) [b[0], cap_y + b[1], bar_boss_d/2]],
+    [for (hx = [2.54, 22.86]) [bh1750_x - bh1750_board[0]/2 + hx, bh_y0 + 15.24, 4.5/2]]);
+module button_cap(icon, bx=undef) {
     body_l = bar_skin + cap_protrude;
-    linear_extrude(cap_flange_t) hull() {
-        pill_2d(cap_w, cap_h);
-        square([cap_w - 1.2, cap_h + 2 * cap_flange], center=true);
+    difference() {
+        scale([cap_scale, 1, 1]) union() {   // width only (Glenn: height was right)
+            linear_extrude(cap_flange_t) hull() {
+                pill_2d(cap_w, cap_h);
+                square([cap_w - 1.2, cap_h + 2 * cap_flange], center=true);
+            }
+            translate([0, 0, cap_flange_t - 0.01]) hull() {
+                linear_extrude(body_l - 0.4) pill_2d(cap_w, cap_h);
+                linear_extrude(body_l) offset(delta=-0.4) pill_2d(cap_w, cap_h);
+            }
+            translate([0, 0, cap_flange_t + body_l - 0.02]) linear_extrude(cap_icon_h + 0.02) icon_2d(icon);
+        }
+        // notches in the flange next to the bosses (only the flange sits behind the skin)
+        if (bx != undef) for (o = cap_obstacles())
+            if (abs(o[0] - bx) < cap_w/2 + cap_flange + o[2] + 1 && abs(o[1] - cap_y) < cap_h/2 + cap_flange + o[2] + 1)
+                translate([o[0] - bx, o[1] - cap_y, -1]) cylinder(r=o[2] + cap_notch_clear, h=1 + cap_flange_t + 1.0, $fn=32);   // flange + 1 mm of the body (stays inside the skin, room for the press travel)
     }
-    translate([0, 0, cap_flange_t - 0.01]) hull() {
-        linear_extrude(body_l - 0.4) pill_2d(cap_w, cap_h);
-        linear_extrude(body_l) offset(delta=-0.4) pill_2d(cap_w, cap_h);
-    }
-    translate([0, 0, cap_flange_t + body_l - 0.02]) linear_extrude(cap_icon_h + 0.02) icon_2d(icon);
 }
 module button_caps_placed() {
-    for (i = [0 : len(btn_xs) - 1]) translate([btn_xs[i], cap_y, cap_flange_back_z]) button_cap(btn_icons[i]);
+    for (i = [0 : len(btn_xs) - 1]) translate([btn_xs[i], cap_y, cap_flange_back_z]) button_cap(btn_icons[i], btn_xs[i]);
 }
 module button_caps_print() {
-    for (i = [0 : len(btn_xs) - 1]) translate([(i % 3) * 15, floor(i / 3) * 12, 0]) button_cap(btn_icons[i]);
+    for (i = [0 : len(btn_xs) - 1]) translate([(i % 3) * 15, floor(i / 3) * 12, 0]) button_cap(btn_icons[i], btn_xs[i]);
 }
 
 // Ghost boards in the bar (assembly preview)
@@ -1792,6 +1867,10 @@ if (part_to_print == "assembly") {
     translate([-mount_spacing_w/2, 0, 0]) rotate([180, 0, 0]) tray_hook(1);
 } else if (part_to_print == "tray_hatch") {
     tray_hatch();
+} else if (part_to_print == "tape_plate") {
+    translate([0, 0, btn_pcb_back_z + btn_pcb_t]) mirror([0, 0, 1]) tape_plate();   // front face down, ridges up
+} else if (part_to_print == "tape_mold") {
+    translate([0, 0, -(btn_pcb_back_z - tp_ridge_h) + tm_t]) tape_mold();   // flat back down, tongues up
 } else if (part_to_print == "switch_plate") {
     translate([0, 0, btn_pcb_back_z + btn_pcb_t]) rotate([180, 0, 0]) switch_plate();   // front face down
 } else if (part_to_print == "tray_bracket") {

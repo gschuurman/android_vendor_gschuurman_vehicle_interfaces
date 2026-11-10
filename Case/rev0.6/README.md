@@ -202,3 +202,18 @@ Moved: the old one-piece `button_bar`, `standoff_spacer` (replaced by the hooks)
 **Do not order the button-bar PCB yet:** its switch footprint still has 5.08 mm leg pitch, the TC-0120 switches need about 7.4 mm. The wired `switch_plate` already uses 7.4.
 
 Distance from the front plate to the tray back is still 15 mm (`spacer_length`). It can probably drop to about 11 mm with thinner hooks if the DIN mount gets a spacer.
+
+
+## Button caps (2026-11-10)
+
+`button_caps.stl`: 1 % narrower (width only; height unchanged, Glenn), plus a notch in the flange and 1 mm of the body where a bar insert boss comes close (home and voice). Pressed 0.5 mm: no contact with the bar. The bar itself is unchanged.
+
+## Copper-tape switch plate (2026-11-10, not printed yet)
+
+Alternative to the button-bar PCB, made the PCB Forge way (Hackaday 2026-02-19): `tape_plate.stl` + `tape_mold.stl`. Same outline, leg slots and screw holes as `switch_plate`, drops into the same bar.
+
+- Back face (solder side): 1.0 mm channels, 0.3 mm deep, each closed off by 0.6 mm ridges that are 0.4 mm high. There are 5 buses, GND/U/S above the switch row and D/M below it, plus pads around every switch leg.
+- Steps: stick copper tape over the back. Press it into the channels with `tape_mold`, aligned with M2 screws or 2.2 mm pins through the 3 screw holes. Sand the ridges flat, then peel off the loose tape.
+- Parts on the back, lap-soldered onto the tape: 10x BAT85 with the cathode ring on the button side, 3 wire links (screen-off to S, vol+ to U, mute to M) and 3 wire jumpers over the middle screw (GND, U, S). Vol- has a direct stub to D. Home is turned around, so its GND is on the left leg. The 5 wires to J12 land straight on the buses.
+- Wiring diagram (seen from the back): `render/tape_pcb/tape_plate_wiring_back.png`.
+- ASSUMED: tape + glue 0.1 mm thick (sets the mold tongue height). Ridges stick into the bar_back pads until they are sanded flat.
