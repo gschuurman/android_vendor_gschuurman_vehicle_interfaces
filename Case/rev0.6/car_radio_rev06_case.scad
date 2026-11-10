@@ -945,7 +945,7 @@ module switch_plate() {
 // 0.3 deep, each closed off by 0.6 mm ridges 0.4 high. Stick copper tape over the back, press it into the
 // channels with tape_mold, sand the ridges flat: the copper left in the channels is the circuit.
 // Plate frame: x as the bar, y relative to the switch row (cap_y).
-tp_w = 1.0; tp_ridge = 0.6; tp_depth = 0.3; tp_ridge_h = 0.4; tp_tape = 0.1;   // tape incl. glue: ASSUMED
+tp_w = 1.0; tp_ridge = 0.6; tp_depth = 0.3; tp_ridge_h = 0.4; tp_tape = 0.05;   // Glenn's copper tape: 0.05 mm (2026-11-10)
 tp_bus = [["GND", 1.6], ["U", 3.2], ["S", 4.8], ["D", -2.6], ["M", -4.2]];    // [net, lower edge y]
 tp_bus_x = [-83.0, 83.0];
 tp_upper_gap = [-27.0, -23.4];          // middle bar screw (-25.2, +3.4): upper buses bridged by wire jumpers

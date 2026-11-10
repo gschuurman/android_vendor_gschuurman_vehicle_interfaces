@@ -216,4 +216,4 @@ Alternative to the button-bar PCB, made the PCB Forge way (Hackaday 2026-02-19):
 - Steps: stick copper tape over the back. Press it into the channels with `tape_mold`, aligned with M2 screws or 2.2 mm pins through the 3 screw holes. Sand the ridges flat, then peel off the loose tape.
 - Parts on the back, lap-soldered onto the tape: 10x BAT85 with the cathode ring on the button side, 3 wire links (screen-off to S, vol+ to U, mute to M) and 3 wire jumpers over the middle screw (GND, U, S). Vol- has a direct stub to D. Home is turned around, so its GND is on the left leg. The 5 wires to J12 land straight on the buses.
 - Wiring diagram (seen from the back): `render/tape_pcb/tape_plate_wiring_back.png`.
-- ASSUMED: tape + glue 0.1 mm thick (sets the mold tongue height). Ridges stick into the bar_back pads until they are sanded flat.
+- Tape: 0.05 mm (Glenn's tape; sets the mold tongue height, 0.2 mm side clearance). Ridges stick into the bar_back pads until they are sanded flat.
