@@ -1868,7 +1868,7 @@ if (part_to_print == "assembly") {
 } else if (part_to_print == "tray_hatch") {
     tray_hatch();
 } else if (part_to_print == "tape_plate") {
-    translate([0, 0, btn_pcb_back_z + btn_pcb_t]) mirror([0, 0, 1]) tape_plate();   // front face down, ridges up
+    translate([0, 0, btn_pcb_back_z + btn_pcb_t]) rotate([180, 0, 0]) tape_plate();   // front face down, ridges up (rotate, NOT mirror: the 2026-11-10 export was mirrored)
 } else if (part_to_print == "tape_mold") {
     translate([0, 0, -(btn_pcb_back_z - tp_ridge_h) + tm_t]) tape_mold();   // flat back down, tongues up
 } else if (part_to_print == "switch_plate") {
