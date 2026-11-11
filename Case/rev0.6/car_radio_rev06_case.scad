@@ -92,6 +92,8 @@ cap_flange_t = 0.9;
 cap_icon_h = 0.6;            // embossed icon height (paint the tops)
 // Switch: Kwan Da TC-0120 (W028) drawing from Glenn (2026-11-09): body 6 x 3.5 x 3.6, knob to 4.3,
 // travel 0.25, 2 cranked legs 1.0 x 0.3, 6.8-8.0 mm apart (centre ~7.4).
+btn_real_h = 6.3;            // Glenn 2026-11-11: his switches are 6.3 mm above the PCB (long plunger)
+btn_plunger_hole = [4.0, 2.6];   // recess in the cap over the plunger; generous on purpose (Glenn OK 2026-11-11)
 btn_total_h = 4.3;           // switch body + plunger, above the board
 btn_body = [6.0, 3.5];       // switch footprint (X, Y)
 btn_preload = 0.1;           // cap flange presses the plunger this far when idle
@@ -113,6 +115,13 @@ bh1750_chip_offset = [0, 0];  // chip position relative to the board centre (che
 bh1750_window_d = 3.0;
 bh1750_front_gap = 3.0;       // STEMMA QT connectors (2.95) between board front and skin
 bh1750_sink = 1.5;            // module sinks this far into the bar bottom wall
+// 2026-11-11: Glenn's sensor is NOT the Adafruit 4681 but a szfydosh BH1750 module (datasheet PDF):
+// 14.86 x 11.50 x 1.0 (Glenn measured), 2x4 pads/holes (2.54) on the two 11.5 mm edges, chip ~ centre on
+// the component side (centre, Glenn confirmed). It slides down into a slot in bar_front; the tray closes the top.
+bhm_board = [14.86, 11.50, 1.0];
+bhm_slot_w = 1.6;             // groove width for the 1.0 board (Glenn: some room)
+bhm_lip = 0.6;                // how far the grooves reach over the board edges (clear of the pad holes)
+bhm_front_gap = 1.5;          // components on the front face (LDO, level shifter ~1.2) to the skin
 
 /* [Button bar split (Glenn, 2026-11-09)] */
 // The bar is now two printed parts with the switch PCB clamped between them:
@@ -693,6 +702,10 @@ bh_y1 = bh_y0 + bh1750_board[1];                        // module top edge (into
 bh_z1 = bar_skin_back - bh1750_front_gap;               // board front face
 bh_z0 = bh_z1 - btn_pcb_t;
 bh_chip = [bh1750_x + bh1750_chip_offset[0], (bh_y0 + bh_y1)/2 + bh1750_chip_offset[1]];
+bhm_c = [bh1750_x, bh_chip[1]];                          // board centre = light window (same hole as before)
+bhm_y0 = bhm_c[1] - bhm_board[1]/2;                      // board bottom edge (rests on a ledge)
+bhm_z1 = bar_skin_back - bhm_front_gap;                  // board front face
+bhm_z0 = bhm_z1 - bhm_board[2];
 
 // tray outline: top corners rounded, bottom corners square (the bar continues below)
 module tray_outline_2d() {
@@ -868,17 +881,24 @@ module bar_front() {
         translate([-bar_pcb_size[0]/2 - bar_pcb_clear, bar_pcb_c[1] - bar_pcb_size[1]/2 - bar_pcb_clear, btn_pcb_back_z - 1])
             cube([bar_pcb_size[0] + 2 * bar_pcb_clear, bar_h, btn_pcb_front_z - btn_pcb_back_z + 1.01]);
         for (x = btn_xs) translate([x, cap_y, bar_skin_back - 1]) linear_extrude(bar_skin + 2) pill_2d(cap_w + 2 * cap_clear, cap_h + 2 * cap_clear);
-        translate([bh1750_x - bh1750_board[0]/2 - 0.3, bh_y0 - 0.1, bh_z0 - 0.3])
-            cube([bh1750_board[0] + 0.6, bar_h + 1, bar_skin_back - bh_z0 + 0.3]);
         translate([bh_chip[0], bh_chip[1], bar_skin_back - 0.01])
             cylinder(d1=bh1750_window_d, d2=bh1750_window_d + 1.4, h=bar_skin + 0.02, $fn=30);
-        // room for the solder joints of the BH1750 header row; the wires go back past the switch board
-        translate([bh1750_x - bh1750_board[0]/2 + 4.5, bh_y0 - 0.1, btn_pcb_back_z - 1]) cube([16.4, 4.6, bh_z0 - btn_pcb_back_z + 1.01]);
+        // (BH1750 wire channels under the switch strip removed 2026-11-11, Glenn: not needed)
     }
-    // BH1750: two locating pins through the upper 2.5 mm holes (fix with a dot of hot glue)
-    for (hx = [2.54, 22.86]) translate([bh1750_x - bh1750_board[0]/2 + hx, bh_y0 + 15.24, 0]) {
-        translate([0, 0, bh_z1]) cylinder(d=4.5, h=bar_skin_back - bh_z1 + 0.01, $fn=28);
-        translate([0, 0, bh_z0 + 0.3]) cylinder(d=2.2, h=bh_z1 - bh_z0, $fn=20);
+    // BH1750 slide-in slot: two rails with 1.6 mm grooves for the board edges + a ledge it stands on
+    difference() {
+        union() {
+            for (sx = [-1, 1]) translate([bhm_c[0] + sx * (bhm_board[0]/2 + 0.2) - (sx > 0 ? bhm_lip + 0.2 : 2.0 - 0.0), bhm_y0 - 0.01, bhm_z0 - 1.0])
+                cube([2.0 + bhm_lip + 0.2, tb_y1 - bhm_y0 + 0.01, bar_skin_back - bhm_z0 + 1.0 + 0.01]);
+            translate([bhm_c[0] - bhm_board[0]/2 + 2.6, tb_y0 + bar_wall - 0.01, bhm_z0 - 1.0])
+                cube([bhm_board[0] - 5.2, bhm_y0 - (tb_y0 + bar_wall) - 0.2 + 0.01, bar_skin_back - bhm_z0 + 1.0 + 0.01]);
+        }
+        // the board itself (grooves): full width + 0.2 each side, 1.6 thick slot centred on the board
+        translate([bhm_c[0] - bhm_board[0]/2 - 0.2, bhm_y0 - 0.2, (bhm_z0 + bhm_z1)/2 - bhm_slot_w/2])
+            cube([bhm_board[0] + 0.4, bar_h, bhm_slot_w]);
+        // open window between the lips (component side up to the skin, back side for the wires)
+        translate([bhm_c[0] - bhm_board[0]/2 + bhm_lip, bhm_y0 - 0.2, bhm_z0 - 2])
+            cube([bhm_board[0] - 2 * bhm_lip, bar_h, bar_skin_back - bhm_z0 + 2 + 0.01]);
     }
     // screw bosses with M2 inserts (pressed in from the PCB side)
     for (b = bar_screws) translate([b[0], cap_y + b[1], btn_pcb_front_z]) difference() {
@@ -1124,11 +1144,12 @@ module ghost_joiner() {
 // Glenn 2026-11-10: caps 1 % narrower (X only) (printed caps were tight in the bar) and a notch in the
 // flange wherever an insert boss or a BH1750 pin boss of the bar comes close.
 cap_scale = 0.99;
+cap_recess_d = btn_pcb_front_z + btn_real_h - btn_preload - cap_flange_back_z;   // = 2.0 (plunger top touches the ceiling)
 cap_notch_clear = 0.4;
 // obstacles behind the skin, in the bar frame: [x, y, radius]
 function cap_obstacles() = concat(
     [for (b = bar_screws) [b[0], cap_y + b[1], bar_boss_d/2]],
-    [for (hx = [2.54, 22.86]) [bh1750_x - bh1750_board[0]/2 + hx, bh_y0 + 15.24, 4.5/2]]);
+    []);   // (Adafruit BH1750 pins gone since 2026-11-11)
 module button_cap(icon, bx=undef) {
     body_l = bar_skin + cap_protrude;
     difference() {
@@ -1143,6 +1164,8 @@ module button_cap(icon, bx=undef) {
             }
             translate([0, 0, cap_flange_t + body_l - 0.02]) linear_extrude(cap_icon_h + 0.02) icon_2d(icon);
         }
+        // hollow underneath: the long plunger reaches into the cap (2026-11-11)
+        translate([0, 0, -1]) linear_extrude(1 + cap_recess_d) square(btn_plunger_hole, center=true);
         // notches in the flange next to the bosses (only the flange sits behind the skin)
         if (bx != undef) for (o = cap_obstacles())
             if (abs(o[0] - bx) < cap_w/2 + cap_flange + o[2] + 1 && abs(o[1] - cap_y) < cap_h/2 + cap_flange + o[2] + 1)

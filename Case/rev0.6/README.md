@@ -217,3 +217,10 @@ Alternative to the button-bar PCB, made the PCB Forge way (Hackaday 2026-02-19):
 - Parts on the back, lap-soldered onto the tape: 10x BAT85 with the cathode ring on the button side, 3 wire links (screen-off to S, vol+ to U, mute to M) and 3 wire jumpers over the middle screw (GND, U, S). Vol- has a direct stub to D. Home is turned around, so its GND is on the left leg. The 5 wires to J12 land straight on the buses.
 - Wiring diagram (seen from the back): `render/tape_pcb/tape_plate_wiring_back.png`.
 - Tape: 0.05 mm (Glenn's tape; sets the mold tongue height, 0.2 mm side clearance). Ridges stick into the bar_back pads until they are sanded flat.
+
+## Button bar v3 (2026-11-11): long-plunger switches, BH1750 module slot
+
+- Glenn's switches are 6.3 mm tall above the PCB (long plunger), not the 4.3 mm of the TC-0120 datasheet. The bar and PCB position stay the same. The caps are now hollow underneath (4.0 x 2.6 mm, 2.0 mm deep), so the plunger reaches into the cap. The recess is deliberately generous (Glenn OK). With the switch body top 0.6 mm behind the cap flange, there is room for the press travel.
+- Light sensor: a szfydosh BH1750 module, 14.86 x 11.50 x 1.0 mm, pads on both 11.5 mm edges. `bar_front` has a slide-in slot: two rails with 1.6 mm grooves (0.6 mm over the board edges, clear of the pad holes) and a ledge it stands on. The tray closes the top. No wire channels under the switch strip (Glenn: not needed). The light window sits at the board centre; the chip is in the centre (Glenn confirmed).
+- Reprint `bar_front` and `button_caps`. `bar_back` is unchanged.
+- Render: `render/bar_v3/bh1750_slot.png`.
