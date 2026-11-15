@@ -1188,7 +1188,8 @@ module button_caps_print() {
 //   bosses (d 7.6) in bar_front.  - bar_back: 2.5 mm base + two full-length ribs + cross ribs = stiff.
 // - Loose caps held by a clamp plate (cap_plate): 2x M3x6 countersunk (max M3x6!) from behind into pillars of
 //   bar_front; the screw ears reach through 6.6 holes in the PCB. Swap a cap: plate off, cap out.
-// - JST plugs held by a screwed strap (jst_retainer), 2x M3x8 countersunk (max M3x8).
+// - JST plugs: no strap (Glenn 2026-11-15: the headers are soldered to the PCB and the PHR plugs hold by
+//   themselves). jst_retainer is kept behind b4_jst_strap = false; the two bosses stay solid as PCB supports.
 // - Only M3 (Glenn 2026-11-15): tongue to the tray also M3x6 countersunk, M3 short inserts in the tray.
 include <pcb4_data.scad>
 bar_v4 = true;
@@ -1203,6 +1204,7 @@ b4_ribB = [7.6, 8.7];                     //   and between legs and lower diode 
 b4_jwin = [5.35, 30.45, 3.2, 8.3];        // JST window x0, x1, ky0, ky1 (housings 5.85..29.95 x 3.5..8.0)
 b4_jst_h = 6.0;                           // B#B-PH-K header height above the board
 b4_jst_mated = 8.0;                       // header + PHR plug (JST: 8 mm mounting height) -- NOT MEASURED
+b4_jst_strap = false;                     // Glenn 2026-11-15: no jst_retainer; true brings strap + screw holes back
 b4_ret_screws = [[18.9, -0.3], [18.9, 12.2]];  // strap screws (M3x8 countersunk), x + PCB local ky; outside the window
 b4_ret = [4.35, 31.45, -2.8, 15.6, 2.2];  // strap x0, x1, ky0, ky1, thickness
 // clamp plate
@@ -1310,7 +1312,7 @@ module bar_back_v4() {
         }
         // JST window: headers stick into it, the plugs come out at the back
         translate([b4_jwin[0], b4y(b4_jwin[3]), -tongue_t - 1]) cube([b4_jwin[1] - b4_jwin[0], b4_jwin[3] - b4_jwin[2], tongue_t + btn_pcb_back_z + 2]);
-        for (s = b4_ret_screws) translate([s[0], b4y(s[1]), -tongue_t - 1]) cylinder(d=2.5, h=1 + 6.5, $fn=20);
+        if (b4_jst_strap) for (s = b4_ret_screws) translate([s[0], b4y(s[1]), -tongue_t - 1]) cylinder(d=2.5, h=1 + 6.5, $fn=20);
     }
 }
 
@@ -2022,7 +2024,7 @@ if (part_to_print == "assembly") {
             color("DarkCyan") screen_tray();
             color("#20304a") translate([0, 0, outer_d - ledge_depth]) tray_rounded_rect(inner_w - 0.4, inner_h - 0.4, ledge_depth, screen_radius);   // screen glass (preview)
             if (bar_split) { color("DimGray") bar_front(); color("SlateGray") bar_back();
-                if (bar_v4) { color("Khaki") cap_plate(); color("Orange") jst_retainer(); } }
+                if (bar_v4) { color("Khaki") cap_plate(); if (b4_jst_strap) color("Orange") jst_retainer(); } }
             else color("DimGray") button_bar();
             color("Gainsboro") button_caps_placed();
             if (show_boards) { if (bar_v4) pcb4_ghost(); else if (bar_split) ghost_bar_pcb(); else ghost_tray_boards(); }

@@ -36,8 +36,7 @@ Only M3 screws (Glenn 2026-11-15), all countersunk (DIN 7991):
 |---|---|---|---|
 | bar_back + PCB -> bar_front | M3x12 | 3 | M3 heat inserts in bar_front (pressed in from the PCB side) |
 | cap_plate -> bar_front | M3x6, NOT longer (M3x8 comes through the front) | 2 | straight into the printed pillars (2.5 pilot) |
-| jst_retainer -> bar_back | M3x8, not longer (M3x10 hits the PCB) | 2 | printed bosses (2.5 pilot) |
 | bar tongue -> screen tray | M3x6 | 4 | M3 short inserts in the tray: on the printed tray drill the 4 M2 insert holes to 4.0 |
 
 bar_front: M3 bosses 7.6 mm. bar_back: 2.5 mm base, 2 full-length ribs + cross ribs. cap_plate holds the loose caps
-(current v3 caps). jst_retainer: strap over both plugs, wire slots open at the bottom.
+(current v3 caps). No JST strap: the headers are soldered to the PCB and the PHR plugs hold by themselves.
