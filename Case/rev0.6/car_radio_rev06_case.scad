@@ -1199,7 +1199,8 @@ b4_m3_clear = 3.5;                        // printed holes come out small (Glenn
 b4_csk_d = 6.6;                           // countersink at the back face (M3 head 6.0 + 0.6)
 b4_base_top = -1.0;                       // bar_back base -3.5..-1.0 (2.5 thick; was 1.5)
 b4_ribA = [3.2, 4.9];                     // long ribs, PCB local y (from top edge): between diode row and legs
-b4_ribB = [7.6, 8.7];                     //   and between legs and lower diode row
+b4_ribB = [7.6, 8.5];                     //   and between legs and lower diode row
+b4_d_cut = 3.0;                           // rib gap +-3.0 around each SS14 (body 4.3 long)
 b4_jwin = [5.35, 30.45, 3.2, 8.3];        // JST window x0, x1, ky0, ky1 (housings 5.85..29.95 x 3.5..8.0)
 b4_jst_h = 6.0;                           // B#B-PH-K header height above the board
 b4_jst_mated = 8.0;                       // header + PHR plug (JST: 8 mm mounting height) -- NOT MEASURED
@@ -1213,9 +1214,9 @@ b4_cp_ear = 1.2;                          // ear under the screw: back..back+1.2
 b4_cp_hole = [9.2, 4.4];                  // switch body 6 x 3.5 + legs/cranks; flange (y +-3.9) rests on the plate
 b4_cp_pillar_d = 5.5;
 b4_cp_screw = [2.5, 3.5, 3.4];            // M3 into the printed pillar: pilot d, pilot depth, clearance d in the ear
-b4_cp_ear_d = 6.3;                        // ear boss reaches through a 6.6 PCB hole, countersunk from below
+b4_cp_ear_d = 6.0;                        // ear boss reaches through a 6.6 PCB hole, countersunk from below
 b4_cp_ear_z0 = btn_pcb_back_z + 0.4;      // 4.32: bottom of the ear (stays inside the PCB hole)
-b4_csk3 = 6.0;                            // M3 DIN 7991 head
+b4_csk3 = 5.6;                            // M3 DIN 7991 head
 tongue_m3 = true;                         // Glenn 2026-11-15: only M3. Tongue: M3x6 countersunk into M3 short inserts in the tray
 b4_bh_win = [3.5, 7.0];                   // light window d front / d back (flared)
 function b4y(ky) = b4_pcb_top - ky;
@@ -1288,8 +1289,12 @@ module bar_back_v4() {
             }
             translate([-W/2 + 1, tb_y1 - 1, -tongue_t]) cube([W - 2, tongue_h + 1, tongue_t]);
             // two long ribs under the PCB (interrupted at the JST window)
-            for (r = [b4_ribA, b4_ribB]) for (seg = [[-W/2 + bar_wall - 0.01, b4_jwin[0] - 0.4], [b4_jwin[1] + 0.4, W/2 - bar_wall + 0.01]])
-                translate([seg[0], b4y(r[1]), b4_base_top - 0.01]) cube([seg[1] - seg[0], r[1] - r[0], btn_pcb_back_z - b4_base_top + 0.01]);
+            // (cut out over every SS14: SMA body 2.5-2.9 wide would sit right against the rib)
+            difference() {
+                for (r = [b4_ribA, b4_ribB]) for (seg = [[-W/2 + bar_wall - 0.01, b4_jwin[0] - 0.4], [b4_jwin[1] + 0.4, W/2 - bar_wall + 0.01]])
+                    translate([seg[0], b4y(r[1]), b4_base_top - 0.01]) cube([seg[1] - seg[0], r[1] - r[0], btn_pcb_back_z - b4_base_top + 0.01]);
+                for (d = pcb4_diodes) translate([d[0] - b4_d_cut, cap_y + d[1] - 4, b4_base_top - 1]) cube([2 * b4_d_cut, 8, 10]);
+            }
             // cross ribs behind every switch (between its legs)
             for (x = btn_xs) translate([x - 0.6, b4y(b4_ribB[1]), b4_base_top - 0.01]) cube([1.2, b4_ribB[1] - b4_ribA[0], btn_pcb_back_z - b4_base_top + 0.01]);
             // M3 standoffs
