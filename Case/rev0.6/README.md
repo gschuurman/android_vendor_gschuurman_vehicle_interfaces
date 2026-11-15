@@ -243,6 +243,6 @@ Screws, only M3 countersunk (DIN 7991):
 - 4x M3x6: bar tongue to the screen tray, into M3 short inserts (on the already printed tray: drill the M2 insert holes to 4.0)
 
 Assembly: caps into bar_front, cap_plate on with 2x M3x6, PCB in, bar_back on with 3x M3x12, plug the cables in,
-jst_retainer on, then the bar onto the tray.
+jst_retainer on (thread both cables through its slots BEFORE crimping the PHR housings), then the bar onto the tray.
 Not measured: JST PH header + plug height (8.0 mm assumed from the JST catalogue). If the strap does not press the
 plugs, put a strip of foam tape under it.

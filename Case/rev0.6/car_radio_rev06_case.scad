@@ -1203,8 +1203,8 @@ b4_ribB = [7.6, 8.7];                     //   and between legs and lower diode 
 b4_jwin = [5.35, 30.45, 3.2, 8.3];        // JST window x0, x1, ky0, ky1 (housings 5.85..29.95 x 3.5..8.0)
 b4_jst_h = 6.0;                           // B#B-PH-K header height above the board
 b4_jst_mated = 8.0;                       // header + PHR plug (JST: 8 mm mounting height) -- NOT MEASURED
-b4_ret_screws = [[18.9, -0.3], [18.9, 12.6]];  // strap screws (M3x8 countersunk), x + PCB local ky; outside the window
-b4_ret = [4.35, 31.45, -2.8, 15.4, 2.2];  // strap x0, x1, ky0, ky1, thickness
+b4_ret_screws = [[18.9, -0.3], [18.9, 12.2]];  // strap screws (M3x8 countersunk), x + PCB local ky; outside the window
+b4_ret = [4.35, 31.45, -2.8, 15.6, 2.2];  // strap x0, x1, ky0, ky1, thickness
 // clamp plate
 b4_cp_front = btn_pcb_front_z + 3.6;      // = switch body top (9.12); cap flange back 9.72 -> 0.6 travel room
 b4_cp_back = btn_pcb_front_z + 1.0;       // 6.52 (plate 2.6 thick)
@@ -1314,7 +1314,7 @@ module bar_back_v4() {
     }
 }
 
-// strap over the two JST plugs; wire slots open to the bottom so it goes on after plugging in
+// strap over the two JST plugs; closed wire slots (open ones cut into the lower screw), thread the cable first
 module jst_retainer() {
     t = b4_ret[4]; zb = -tongue_t;     // sits on the back face
     plug_top = btn_pcb_back_z - b4_jst_mated;
@@ -1324,7 +1324,7 @@ module jst_retainer() {
         translate([b4_jwin[0] - 0.2, b4y(b4_jwin[3]) - 0.2, zb - recess]) cube([b4_jwin[1] - b4_jwin[0] + 0.4, b4_jwin[3] - b4_jwin[2] + 0.4, recess + 0.01]);
         for (j = pcb4_j) {
             x0 = j[0] - 1.0; x1 = j[0] + 2 * (j[1] - 1) + 1.0;
-            ys = b4y(b4_ret[3]) - 1; ye = cap_y + pcb4_j_dy + 0.9;    // from the bottom edge up to just past the pin row
+            ys = cap_y + pcb4_j_dy - 0.9; ye = cap_y + pcb4_j_dy + 0.9;  // closed slot over the wire row (thread the wires through before crimping)
             translate([x0, ys, zb - t - 1]) cube([x1 - x0, ye - ys, t + 2]);
         }
         for (s = b4_ret_screws) translate([s[0], b4y(s[1]), zb - t - 1]) {
@@ -2093,7 +2093,7 @@ if (part_to_print == "assembly") {
 } else if (part_to_print == "tray_carrier") {
     rotate([180, 0, 0]) tray_carrier();                             // tray-side face down
 } else if (part_to_print == "cap_plate") {
-    translate([0, 0, -b4_cp_back]) cap_plate();                    // back face down (ears on the bed)
+    translate([0, 0, b4_cp_front]) rotate([0, 180, 0]) cap_plate();   // front face down, screw ears up (rotation, not mirror)
 } else if (part_to_print == "jst_retainer") {
     translate([0, 0, tongue_t + b4_ret[4]]) jst_retainer();         // outer face down
 } else if (part_to_print == "button_caps") {
