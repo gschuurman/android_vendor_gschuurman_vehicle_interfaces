@@ -224,3 +224,25 @@ Alternative to the button-bar PCB, made the PCB Forge way (Hackaday 2026-02-19):
 - Light sensor: a szfydosh BH1750 module, 14.86 x 11.50 x 1.0 mm, pads on both 11.5 mm edges. `bar_front` has a slide-in slot: two rails with 1.6 mm grooves (0.6 mm over the board edges, clear of the pad holes) and a ledge it stands on. The tray closes the top. No wire channels under the switch strip (Glenn: not needed). The light window sits at the board centre; the chip is in the centre (Glenn confirmed).
 - Reprint `bar_front` and `button_caps`. `bar_back` is unchanged.
 - Render: `render/bar_v3/bh1750_slot.png`.
+
+## Button bar v4 (2026-11-15): one PCB, JST plugs, only M3
+
+v3 did not work in the build (hand wiring, caps falling out, weak bosses, small holes, flexible back), so v4 puts
+everything on one 2-layer PCB: `buttonbar_pcb_v4/` (KiCad, gerbers zip, README with the full parts table).
+Switches (7.4 legs), SS14 diodes, the szfydosh BH1750 soldered flat on the front, and 2 vertical JST PH headers on
+the back: J1 -> main board J12 (5-pin), J2 -> J7 (4-pin), straight PHR cables pin 1 to pin 1.
+The plugs come out through a window in bar_back, so the bar can be unplugged without opening it.
+
+Print (in `stl/`): `bar_front`, `bar_back`, `cap_plate`, `jst_retainer`. Caps: the current `button_caps` (v3).
+Old v3 bar parts are in `stl/obsolete_2026-11-15/`.
+
+Screws, only M3 countersunk (DIN 7991):
+- 3x M3x12: bar_back + PCB into M3 heat inserts in bar_front (bosses 7.6 mm, inserts from the PCB side)
+- 2x M3x6 (not longer): cap_plate into the printed pillars of bar_front; the plate holds the loose caps
+- 2x M3x8 (not longer): jst_retainer over the two plugs
+- 4x M3x6: bar tongue to the screen tray, into M3 short inserts (on the already printed tray: drill the M2 insert holes to 4.0)
+
+Assembly: caps into bar_front, cap_plate on with 2x M3x6, PCB in, bar_back on with 3x M3x12, plug the cables in,
+jst_retainer on, then the bar onto the tray.
+Not measured: JST PH header + plug height (8.0 mm assumed from the JST catalogue). If the strap does not press the
+plugs, put a strip of foam tape under it.

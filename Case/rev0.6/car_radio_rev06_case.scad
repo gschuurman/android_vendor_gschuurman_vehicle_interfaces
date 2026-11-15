@@ -29,7 +29,7 @@
 
 /* [Print Selection] */
 // Select which part to generate
-part_to_print = "assembly"; // [assembly, din_front_plate, screen_tray, tray_hatch, front_hook, tray_hook_left, tray_hook_right, tray_bracket, tray_carrier, bar_front, bar_back, switch_plate, tape_plate, tape_mold, button_bar, button_caps, module_spacers, vim3_retainers, standoff_spacer, left_side, right_side, bottom, top, back_plate]
+part_to_print = "assembly"; // [assembly, din_front_plate, screen_tray, tray_hatch, front_hook, tray_hook_left, tray_hook_right, tray_bracket, tray_carrier, bar_front, bar_back, cap_plate, jst_retainer, switch_plate, tape_plate, tape_mold, button_bar, button_caps, module_spacers, vim3_retainers, standoff_spacer, left_side, right_side, bottom, top, back_plate]
 
 /* [Assembly view] */
 explode_dist = 0;
@@ -799,7 +799,8 @@ module screen_tray() {
         // ---- M2 inserts in the back for the button bar tongue ----
         for (x = tongue_screw_xs)
             translate([x, tb_y1 + tongue_screw_y, 0]) mirror([0, 0, 1]) rotate([180, 0, 0])
-                heatset_insert_bore(depth=m2_insert_hole_depth, hole_d=m2_insert_hole_diameter, guide_d=m2_insert_guide_diameter);
+                if (tongue_m3) heatset_insert_bore(depth=3.4, hole_d=visor_flush_insert[0], guide_d=visor_flush_insert[2]);   // M3 short insert (printed trays: drill the M2 holes to 4.0)
+                else heatset_insert_bore(depth=m2_insert_hole_depth, hole_d=m2_insert_hole_diameter, guide_d=m2_insert_guide_diameter);
         // ---- top of the BH1750 module reaches into the tray rim ----
         translate([bh1750_x - bh1750_board[0]/2 - 0.3, tb_y1 - 1, bh_z0 - 0.3])
             cube([bh1750_board[0] + 0.6, bh_y1 + 0.2 - tb_y1 + 1, bar_skin_back - bh_z0 + 0.3]);
@@ -870,7 +871,7 @@ module tray_hatch() {
 
 // ---- Split button bar (bar_split): bar_front + PCB + bar_back ----
 bar_pcb_c = [0, cap_y + 0.65];                 // KiCad board centre y 105.75 vs switch row 106.4
-module bar_front() {
+module bar_front_v3() {
     W = outer_w;
     difference() {
         translate([0, 0, btn_pcb_back_z]) linear_extrude(outer_d - btn_pcb_back_z) bar_outline_2d();
@@ -906,7 +907,7 @@ module bar_front() {
         heatset_insert_bore(depth=m2_insert_hole_depth, hole_d=m2_insert_hole_diameter, guide_d=m2_insert_guide_diameter);
     }
 }
-module bar_back() {
+module bar_back_v3() {
     W = outer_w;
     top_wall = 1.0;
     difference() {
@@ -1178,6 +1179,196 @@ module button_caps_placed() {
 module button_caps_print() {
     for (i = [0 : len(btn_xs) - 1]) translate([(i % 3) * 15, floor(i / 3) * 12, 0]) button_cap(btn_icons[i], btn_xs[i]);
 }
+
+// ===================== Button bar v4 (Glenn 2026-11-14/15) =====================
+// One 2-layer PCB with everything on it (bb4/design.py -> pcb4_data.scad): 9 TC-0120 switches (legs 7.4),
+// SS14 diodes on the back, the szfydosh BH1750 soldered flat on the front (castellated pads), 2x JST PH
+// vertical on the back (J12 5-pin, J7 4-pin) whose plugs come out through the back of bar_back.
+// - 3x M3 countersunk from the back (M3x12, DIN 7991) through bar_back + PCB into M3 heat inserts in
+//   bosses (d 7.6) in bar_front.  - bar_back: 2.5 mm base + two full-length ribs + cross ribs = stiff.
+// - Loose caps held by a clamp plate (cap_plate): 2x M3x6 countersunk (max M3x6!) from behind into pillars of
+//   bar_front; the screw ears reach through 6.6 holes in the PCB. Swap a cap: plate off, cap out.
+// - JST plugs held by a screwed strap (jst_retainer), 2x M3x8 countersunk (max M3x8).
+// - Only M3 (Glenn 2026-11-15): tongue to the tray also M3x6 countersunk, M3 short inserts in the tray.
+include <pcb4_data.scad>
+bar_v4 = true;
+b4_pcb_top = cap_y + 6.4;                 // PCB top edge (bar y); PCB local ky -> bar y = b4_pcb_top - ky
+b4_boss_d = 7.6;
+b4_insert = [insert_hole_diameter, 5.0, insert_guide_diameter];   // M3 insert bore d, depth, guide
+b4_m3_clear = 3.5;                        // printed holes come out small (Glenn: holes too small)
+b4_csk_d = 6.6;                           // countersink at the back face (M3 head 6.0 + 0.6)
+b4_base_top = -1.0;                       // bar_back base -3.5..-1.0 (2.5 thick; was 1.5)
+b4_ribA = [3.2, 4.9];                     // long ribs, PCB local y (from top edge): between diode row and legs
+b4_ribB = [7.6, 8.7];                     //   and between legs and lower diode row
+b4_jwin = [5.35, 30.45, 3.2, 8.3];        // JST window x0, x1, ky0, ky1 (housings 5.85..29.95 x 3.5..8.0)
+b4_jst_h = 6.0;                           // B#B-PH-K header height above the board
+b4_jst_mated = 8.0;                       // header + PHR plug (JST: 8 mm mounting height) -- NOT MEASURED
+b4_ret_screws = [[18.9, -0.3], [18.9, 12.6]];  // strap screws (M3x8 countersunk), x + PCB local ky; outside the window
+b4_ret = [4.35, 31.45, -2.8, 15.4, 2.2];  // strap x0, x1, ky0, ky1, thickness
+// clamp plate
+b4_cp_front = btn_pcb_front_z + 3.6;      // = switch body top (9.12); cap flange back 9.72 -> 0.6 travel room
+b4_cp_back = btn_pcb_front_z + 1.0;       // 6.52 (plate 2.6 thick)
+b4_cp_ear = 1.2;                          // ear under the screw: back..back+1.2
+b4_cp_hole = [9.2, 4.4];                  // switch body 6 x 3.5 + legs/cranks; flange (y +-3.9) rests on the plate
+b4_cp_pillar_d = 5.5;
+b4_cp_screw = [2.5, 3.5, 3.4];            // M3 into the printed pillar: pilot d, pilot depth, clearance d in the ear
+b4_cp_ear_d = 6.3;                        // ear boss reaches through a 6.6 PCB hole, countersunk from below
+b4_cp_ear_z0 = btn_pcb_back_z + 0.4;      // 4.32: bottom of the ear (stays inside the PCB hole)
+b4_csk3 = 6.0;                            // M3 DIN 7991 head
+tongue_m3 = true;                         // Glenn 2026-11-15: only M3. Tongue: M3x6 countersunk into M3 short inserts in the tray
+b4_bh_win = [3.5, 7.0];                   // light window d front / d back (flared)
+function b4y(ky) = b4_pcb_top - ky;
+// cap envelope (cap + flange + clearance), 2D, at a cap position
+module b4_cap_env_2d(c=0.4) offset(delta=c) hull() { pill_2d(cap_w, cap_h); square([cap_w - 1.2, cap_h + 2 * cap_flange], center=true); }
+
+module bar_front_v4() {
+    W = outer_w;
+    difference() {
+        union() {
+            difference() {
+                translate([0, 0, btn_pcb_back_z]) linear_extrude(outer_d - btn_pcb_back_z) bar_outline_2d();
+                translate([-W/2 + bar_wall, tb_y0 + bar_wall, btn_pcb_front_z - 0.01])
+                    cube([W - 2 * bar_wall, bar_h - bar_wall + 1, bar_skin_back - btn_pcb_front_z + 0.01]);
+                translate([-bar_pcb_size[0]/2 - bar_pcb_clear, bar_pcb_c[1] - bar_pcb_size[1]/2 - bar_pcb_clear, btn_pcb_back_z - 1])
+                    cube([bar_pcb_size[0] + 2 * bar_pcb_clear, bar_h, btn_pcb_front_z - btn_pcb_back_z + 1.01]);
+            }
+            // M3 bosses (end ones merged into the end walls)
+            for (h = pcb4_m3) {
+                translate([h[0], cap_y + h[1], btn_pcb_front_z]) cylinder(d=b4_boss_d, h=bar_skin_back - btn_pcb_front_z + 0.01, $fn=40);
+                if (abs(h[0]) > 80) hull() {
+                    translate([h[0], cap_y + h[1], btn_pcb_front_z]) cylinder(d=b4_boss_d, h=bar_skin_back - btn_pcb_front_z + 0.01, $fn=40);
+                    translate([sign(h[0]) * (W/2 - bar_wall) - (h[0] > 0 ? 0.01 : -0.01) - (h[0] > 0 ? 1 : 0), cap_y + h[1] - b4_boss_d/2, btn_pcb_front_z]) cube([1, b4_boss_d, bar_skin_back - btn_pcb_front_z + 0.01]);
+                }
+            }
+            // pillars for the cap clamp plate
+            for (p = pcb4_head) translate([p[0], cap_y + p[1], b4_cp_back + b4_cp_ear]) cylinder(d=b4_cp_pillar_d, h=bar_skin_back - b4_cp_back - b4_cp_ear + 0.01, $fn=32);
+        }
+        for (x = btn_xs) translate([x, cap_y, bar_skin_back - 1]) linear_extrude(bar_skin + 2) pill_2d(cap_w + 2 * cap_clear, cap_h + 2 * cap_clear);
+        // caps and their press travel stay free of the bosses
+        for (x = btn_xs) translate([x, cap_y, cap_flange_back_z - 0.8]) linear_extrude(bar_skin_back - cap_flange_back_z + 0.8 + 0.01) b4_cap_env_2d();
+        // M3 heat inserts, pressed in from the PCB side
+        for (h = pcb4_m3) translate([h[0], cap_y + h[1], btn_pcb_front_z]) heatset_insert_bore(depth=b4_insert[1], hole_d=b4_insert[0], guide_d=b4_insert[2]);
+        for (p = pcb4_head) translate([p[0], cap_y + p[1], b4_cp_back + b4_cp_ear - 0.01]) cylinder(d=b4_cp_screw[0], h=b4_cp_screw[1], $fn=16);
+        // light window over the BH1750 chip (module centre)
+        translate([pcb4_bh[0], cap_y + pcb4_bh[1], bar_skin_back - 0.01]) cylinder(d1=b4_bh_win[1], d2=b4_bh_win[0], h=bar_skin + 0.02, $fn=40);
+    }
+}
+
+module cap_plate() {
+    L = outer_w - 2 * bar_wall - 0.6;
+    y0 = tb_y0 + bar_wall + 0.3; y1 = tb_y1 - 0.3;
+    difference() {
+        union() {
+            translate([-L/2, y0, b4_cp_back]) cube([L, y1 - y0, b4_cp_front - b4_cp_back]);
+            for (p = pcb4_head) translate([p[0], cap_y + p[1], b4_cp_ear_z0]) cylinder(d=b4_cp_ear_d, h=b4_cp_back - b4_cp_ear_z0 + 0.01, $fn=40);
+        }
+        for (x = btn_xs) translate([x - b4_cp_hole[0]/2, cap_y - b4_cp_hole[1]/2, b4_cp_back - 1]) cube([b4_cp_hole[0], b4_cp_hole[1], 5]);
+        for (h = pcb4_m3) translate([h[0], cap_y + h[1], b4_cp_back - 1]) cylinder(d=b4_boss_d + 0.6, h=5, $fn=40);
+        // pillar pockets + screw holes (ears)
+        for (p = pcb4_head) translate([p[0], cap_y + p[1], 0]) {
+            translate([0, 0, b4_cp_back + b4_cp_ear]) cylinder(d=b4_cp_pillar_d + 0.6, h=5, $fn=32);
+            translate([0, 0, b4_cp_ear_z0 - 1]) cylinder(d=b4_cp_screw[2], h=10, $fn=20);
+            translate([0, 0, b4_cp_ear_z0 - 0.01]) cylinder(d1=b4_csk3, d2=b4_cp_screw[2], h=(b4_csk3 - b4_cp_screw[2])/2, $fn=40);
+        }
+        // windows: BH1750 module (light + its parts) and the JST pin tails on the front
+        translate([pcb4_bh[0] - 15.6/2, b4y(11.5) - 0.3, b4_cp_back - 1]) cube([15.6, 12.1, 5]);
+        translate([b4_jwin[0], b4y(b4_jwin[3]), b4_cp_back - 1]) cube([b4_jwin[1] - b4_jwin[0], b4_jwin[3] - b4_jwin[2], 5]);
+    }
+}
+
+module bar_back_v4() {
+    W = outer_w;
+    ytop = tb_y1 - 1.0;  // top wall 1.0 (tray closes the rest)
+    difference() {
+        union() {
+            difference() {
+                translate([0, 0, -tongue_t]) linear_extrude(btn_pcb_back_z + tongue_t) bar_outline_2d();
+                translate([-W/2 + bar_wall, tb_y0 + bar_wall, b4_base_top]) cube([W - 2 * bar_wall, ytop - (tb_y0 + bar_wall), btn_pcb_back_z - b4_base_top + 1]);
+            }
+            translate([-W/2 + 1, tb_y1 - 1, -tongue_t]) cube([W - 2, tongue_h + 1, tongue_t]);
+            // two long ribs under the PCB (interrupted at the JST window)
+            for (r = [b4_ribA, b4_ribB]) for (seg = [[-W/2 + bar_wall - 0.01, b4_jwin[0] - 0.4], [b4_jwin[1] + 0.4, W/2 - bar_wall + 0.01]])
+                translate([seg[0], b4y(r[1]), b4_base_top - 0.01]) cube([seg[1] - seg[0], r[1] - r[0], btn_pcb_back_z - b4_base_top + 0.01]);
+            // cross ribs behind every switch (between its legs)
+            for (x = btn_xs) translate([x - 0.6, b4y(b4_ribB[1]), b4_base_top - 0.01]) cube([1.2, b4_ribB[1] - b4_ribA[0], btn_pcb_back_z - b4_base_top + 0.01]);
+            // M3 standoffs
+            for (h = pcb4_m3) translate([h[0], cap_y + h[1], b4_base_top - 0.01]) cylinder(d=b4_boss_d, h=btn_pcb_back_z - b4_base_top + 0.01, $fn=40);
+            // strap screw bosses
+            for (s = b4_ret_screws) translate([s[0], b4y(s[1]), b4_base_top - 0.01]) cylinder(d=5.0, h=btn_pcb_back_z - b4_base_top + 0.01, $fn=32);
+        }
+        // M3 countersunk from the back
+        for (h = pcb4_m3) translate([h[0], cap_y + h[1], -tongue_t - 1]) {
+            cylinder(d=b4_m3_clear, h=tongue_t + btn_pcb_back_z + 2, $fn=24);
+            translate([0, 0, 1 - 0.01]) cylinder(d1=b4_csk_d, d2=b4_m3_clear, h=(b4_csk_d - b4_m3_clear)/2, $fn=40);
+            cylinder(d=b4_csk_d, h=1.01, $fn=40);
+        }
+        // tongue screws: M3x6 countersunk into M3 short inserts in the tray (Glenn: only M3)
+        for (x = tongue_screw_xs) translate([x, tb_y1 + tongue_screw_y, -tongue_t - 1]) {
+            cylinder(d=b4_m3_clear, h=tongue_t + 2, $fn=24);
+            translate([0, 0, 1 - 0.01]) cylinder(d1=b4_csk_d, d2=b4_m3_clear, h=(b4_csk_d - b4_m3_clear)/2, $fn=40);
+            cylinder(d=b4_csk_d, h=1.01, $fn=40);
+        }
+        // JST window: headers stick into it, the plugs come out at the back
+        translate([b4_jwin[0], b4y(b4_jwin[3]), -tongue_t - 1]) cube([b4_jwin[1] - b4_jwin[0], b4_jwin[3] - b4_jwin[2], tongue_t + btn_pcb_back_z + 2]);
+        for (s = b4_ret_screws) translate([s[0], b4y(s[1]), -tongue_t - 1]) cylinder(d=2.5, h=1 + 6.5, $fn=20);
+    }
+}
+
+// strap over the two JST plugs; wire slots open to the bottom so it goes on after plugging in
+module jst_retainer() {
+    t = b4_ret[4]; zb = -tongue_t;     // sits on the back face
+    plug_top = btn_pcb_back_z - b4_jst_mated;
+    recess = max(0, zb - plug_top - 0.1);      // press the plugs 0.1 mm
+    difference() {
+        translate([b4_ret[0], b4y(b4_ret[3]), zb - t]) cube([b4_ret[1] - b4_ret[0], b4_ret[3] - b4_ret[2], t]);
+        translate([b4_jwin[0] - 0.2, b4y(b4_jwin[3]) - 0.2, zb - recess]) cube([b4_jwin[1] - b4_jwin[0] + 0.4, b4_jwin[3] - b4_jwin[2] + 0.4, recess + 0.01]);
+        for (j = pcb4_j) {
+            x0 = j[0] - 1.0; x1 = j[0] + 2 * (j[1] - 1) + 1.0;
+            ys = b4y(b4_ret[3]) - 1; ye = cap_y + pcb4_j_dy + 0.9;    // from the bottom edge up to just past the pin row
+            translate([x0, ys, zb - t - 1]) cube([x1 - x0, ye - ys, t + 2]);
+        }
+        for (s = b4_ret_screws) translate([s[0], b4y(s[1]), zb - t - 1]) {
+            cylinder(d=b4_m3_clear, h=t + 2, $fn=24);
+            translate([0, 0, 1 - 0.01]) cylinder(d1=b4_csk_d, d2=b4_m3_clear, h=(b4_csk_d - b4_m3_clear)/2, $fn=40);
+            cylinder(d=b4_csk_d, h=1.01, $fn=40);
+        }
+    }
+}
+
+// PCB v4 ghost with its parts (for collision checks and renders)
+module pcb4_ghost(parts=true) {
+    color("DarkGreen") difference() {
+        translate([-bar_pcb_size[0]/2, b4y(11.5), btn_pcb_back_z]) cube([bar_pcb_size[0], 11.5, btn_pcb_t]);
+        for (h = pcb4_m3) translate([h[0], cap_y + h[1], btn_pcb_back_z - 1]) cylinder(d=3.4, h=4, $fn=24);
+        for (h = pcb4_head) translate([h[0], cap_y + h[1], btn_pcb_back_z - 1]) cylinder(d=6.6, h=4, $fn=40);
+    }
+    if (parts) pcb4_parts();
+}
+module pcb4_parts() {
+    F = btn_pcb_front_z; B = btn_pcb_back_z;
+    for (x = pcb4_sw) {
+        color("Black") translate([x - 3, cap_y - 1.75, F]) cube([6, 3.5, 3.6]);
+        color("White") translate([x - 1.5, cap_y - 1.0, F + 3.6]) cube([3, 2, btn_real_h - 3.6 - btn_preload]);
+        for (dx = [-3.7, 3.7]) {
+            color("Silver") translate([x + dx - 0.6, cap_y - 0.3, F]) cube([1.2, 0.6, 1.0]);              // cranked leg above the board
+            color("Silver") translate([x + dx, cap_y, B - 1.6]) cylinder(d=2.4, h=1.6, $fn=16);         // solder joint + tail
+        }
+    }
+    for (d = pcb4_diodes) {
+        color("DimGray") translate([d[0] - 2.15, cap_y + d[1] - 1.3, B - 2.3]) cube([4.3, 2.6, 2.3]);
+        color("Silver") translate([d[0] - 4.25, cap_y + d[1] - 0.9, B - 0.6]) cube([8.5, 1.8, 0.6]);
+    }
+    color("RoyalBlue") translate([pcb4_bh[0] - 7.43, cap_y + pcb4_bh[1] - 5.75, F + 0.1]) cube([14.86, 11.5, 1.0]);
+    color("Black") translate([pcb4_bh[0] - 6.0, cap_y + pcb4_bh[1] - 4.8, F + 1.1]) cube([12.0, 9.6, 1.2]);
+    for (j = pcb4_j) {
+        w = 2 * (j[1] - 1) + 3.9; x0 = j[0] - 1.95;
+        color("Ivory") translate([x0, b4y(8.0), B - b4_jst_h]) cube([w, 4.5, b4_jst_h]);
+        color("Beige") translate([x0 + 0.05, b4y(7.95), B - b4_jst_mated]) cube([w - 0.1, 4.4, b4_jst_mated - b4_jst_h + 0.01]);
+        for (k = [0 : j[1] - 1]) color("Silver") translate([j[0] + 2 * k, cap_y + pcb4_j_dy, F]) cylinder(d=1.2, h=1.9, $fn=12);
+    }
+}
+module bar_front() { if (bar_v4) bar_front_v4(); else bar_front_v3(); }
+module bar_back() { if (bar_v4) bar_back_v4(); else bar_back_v3(); }
 
 // Ghost boards in the bar (assembly preview)
 module ghost_tray_boards() {
@@ -1830,10 +2021,11 @@ if (part_to_print == "assembly") {
         rotate([90, 0, 0]) {
             color("DarkCyan") screen_tray();
             color("#20304a") translate([0, 0, outer_d - ledge_depth]) tray_rounded_rect(inner_w - 0.4, inner_h - 0.4, ledge_depth, screen_radius);   // screen glass (preview)
-            if (bar_split) { color("DimGray") bar_front(); color("SlateGray") bar_back(); }
+            if (bar_split) { color("DimGray") bar_front(); color("SlateGray") bar_back();
+                if (bar_v4) { color("Khaki") cap_plate(); color("Orange") jst_retainer(); } }
             else color("DimGray") button_bar();
             color("Gainsboro") button_caps_placed();
-            if (show_boards) { if (bar_split) ghost_bar_pcb(); else ghost_tray_boards(); }
+            if (show_boards) { if (bar_v4) pcb4_ghost(); else if (bar_split) ghost_bar_pcb(); else ghost_tray_boards(); }
             if (use_tray_mount) {
                 if (hooks_modular) color("Peru") tray_hooks(); else color("Peru") tray_carrier();
                 color("Sienna") tray_hatch();
@@ -1900,6 +2092,10 @@ if (part_to_print == "assembly") {
     translate([0, 0, -brk_z0]) tray_bracket();                      // back face down
 } else if (part_to_print == "tray_carrier") {
     rotate([180, 0, 0]) tray_carrier();                             // tray-side face down
+} else if (part_to_print == "cap_plate") {
+    translate([0, 0, -b4_cp_back]) cap_plate();                    // back face down (ears on the bed)
+} else if (part_to_print == "jst_retainer") {
+    translate([0, 0, tongue_t + b4_ret[4]]) jst_retainer();         // outer face down
 } else if (part_to_print == "button_caps") {
     button_caps_print();
 } else if (part_to_print == "module_spacers") {

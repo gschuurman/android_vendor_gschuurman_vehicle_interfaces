@@ -1,0 +1,98 @@
+** Drc report for buttonbar_v4/buttonbar_v4.kicad_pcb **
+** Created on 2026-11-15 09:33:01 **
+
+** Found 25 DRC violations **
+[silk_over_copper]: Silkscreen clipped by solder mask
+    Local override; Severity: warning
+    @(106.6100 mm, 104.6500 mm): Rect on F.Silkscreen
+[silk_over_copper]: Silkscreen clipped by solder mask
+    Local override; Severity: warning
+    @(137.0900 mm, 104.6500 mm): Rect on F.Silkscreen
+[silk_over_copper]: Silkscreen clipped by solder mask
+    Local override; Severity: warning
+    @(166.9200 mm, 100.0000 mm): Rect on F.Silkscreen
+[silk_over_copper]: Silkscreen clipped by solder mask
+    Local override; Severity: warning
+    @(185.3500 mm, 104.6500 mm): Rect on F.Silkscreen
+[silk_over_copper]: Silkscreen clipped by solder mask
+    Local override; Severity: warning
+    @(124.3900 mm, 104.6500 mm): Rect on F.Silkscreen
+[silk_over_copper]: Silkscreen clipped by solder mask
+    Local override; Severity: warning
+    @(233.6100 mm, 104.6500 mm): Rect on F.Silkscreen
+[silk_over_copper]: Silkscreen clipped by solder mask
+    Local override; Severity: warning
+    @(264.0900 mm, 104.6500 mm): Rect on F.Silkscreen
+[silk_over_copper]: Silkscreen clipped by solder mask
+    Local override; Severity: warning
+    @(246.3100 mm, 104.6500 mm): Rect on F.Silkscreen
+[silk_over_copper]: Silkscreen clipped by solder mask
+    Local override; Severity: warning
+    @(149.7900 mm, 104.6500 mm): Rect on F.Silkscreen
+[silk_over_copper]: Silkscreen clipped by solder mask
+    Local override; Severity: warning
+    @(220.9100 mm, 104.6500 mm): Rect on F.Silkscreen
+[silk_over_copper]: Silkscreen clipped by solder mask
+    Local override; Severity: warning
+    @(115.6200 mm, 108.3500 mm): Line on B.Silkscreen
+[silk_over_copper]: Silkscreen clipped by solder mask
+    Local override; Severity: warning
+    @(115.6200 mm, 108.3500 mm): Line on B.Silkscreen
+[silk_edge_clearance]: Silkscreen clipped by board edge
+    Rule: board setup constraints silk; Severity: warning
+    @(100.0000 mm, 100.0000 mm): Line on Edge.Cuts
+    @(274.3500 mm, 102.5000 mm): Circle on F.Silkscreen
+[silk_edge_clearance]: Silkscreen clipped by board edge
+    Rule: board setup constraints silk; Severity: warning
+    @(276.7000 mm, 111.5000 mm): Line on Edge.Cuts
+    @(166.9200 mm, 100.0000 mm): Rect on F.Silkscreen
+[silk_edge_clearance]: Silkscreen clipped by board edge
+    Rule: board setup constraints silk; Severity: warning
+    @(100.0000 mm, 100.0000 mm): Line on Edge.Cuts
+    @(102.3500 mm, 102.5000 mm): Circle on F.Silkscreen
+[silk_edge_clearance]: Silkscreen clipped by board edge
+    Rule: board setup constraints silk; Severity: warning
+    @(276.7000 mm, 111.5000 mm): Line on Edge.Cuts
+    @(253.8200 mm, 108.3500 mm): Line on B.Silkscreen
+[silk_edge_clearance]: Silkscreen clipped by board edge
+    Rule: board setup constraints silk; Severity: warning
+    @(100.0000 mm, 100.0000 mm): Line on Edge.Cuts
+    @(115.6200 mm, 99.9000 mm): Line on B.Silkscreen
+[silk_edge_clearance]: Silkscreen clipped by board edge
+    Rule: board setup constraints silk; Severity: warning
+    @(276.7000 mm, 111.5000 mm): Line on Edge.Cuts
+    @(241.1200 mm, 108.3500 mm): Line on B.Silkscreen
+[silk_edge_clearance]: Silkscreen clipped by board edge
+    Rule: board setup constraints silk; Severity: warning
+    @(100.0000 mm, 100.0000 mm): Line on Edge.Cuts
+    @(241.1200 mm, 99.9000 mm): Line on B.Silkscreen
+[silk_edge_clearance]: Silkscreen clipped by board edge
+    Rule: board setup constraints silk; Severity: warning
+    @(276.7000 mm, 111.5000 mm): Line on Edge.Cuts
+    @(270.1000 mm, 108.3500 mm): Line on B.Silkscreen
+[silk_edge_clearance]: Silkscreen clipped by board edge
+    Rule: board setup constraints silk; Severity: warning
+    @(100.0000 mm, 100.0000 mm): Line on Edge.Cuts
+    @(270.1000 mm, 99.9000 mm): Line on B.Silkscreen
+[silk_edge_clearance]: Silkscreen clipped by board edge
+    Rule: board setup constraints silk; Severity: warning
+    @(276.7000 mm, 111.5000 mm): Line on Edge.Cuts
+    @(115.6200 mm, 108.3500 mm): Line on B.Silkscreen
+[silk_edge_clearance]: Silkscreen clipped by board edge
+    Rule: board setup constraints silk; Severity: warning
+    @(100.0000 mm, 100.0000 mm): Line on Edge.Cuts
+    @(228.4200 mm, 99.9000 mm): Line on B.Silkscreen
+[silk_edge_clearance]: Silkscreen clipped by board edge
+    Rule: board setup constraints silk; Severity: warning
+    @(276.7000 mm, 111.5000 mm): Line on Edge.Cuts
+    @(228.4200 mm, 108.3500 mm): Line on B.Silkscreen
+[silk_edge_clearance]: Silkscreen clipped by board edge
+    Rule: board setup constraints silk; Severity: warning
+    @(100.0000 mm, 100.0000 mm): Line on Edge.Cuts
+    @(253.8200 mm, 99.9000 mm): Line on B.Silkscreen
+
+** Found 0 unconnected pads **
+
+** Found 0 Footprint errors **
+
+** End of Report **
