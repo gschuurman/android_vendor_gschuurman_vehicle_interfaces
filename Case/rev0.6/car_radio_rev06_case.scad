@@ -1188,7 +1188,7 @@ module button_caps_print() {
 //   bosses (d 7.6) in bar_front.  - bar_back: 2.5 mm base + two full-length ribs + cross ribs = stiff.
 // - Loose caps held by a clamp plate (cap_plate): 2x M3x6 countersunk (max M3x6!) from behind into pillars of
 //   bar_front; the screw ears reach through 6.6 holes in the PCB. Swap a cap: plate off, cap out.
-// - JST plugs held by a screwed strap (jst_retainer), 2x M3x8 countersunk (max M3x8).
+// - JST plugs: no retainer (Glenn: PH plugs hold by themselves); jst_retainer kept, off (use_jst_retainer).
 // - Only M3 (Glenn 2026-11-15): tongue to the tray also M3x6 countersunk, M3 short inserts in the tray.
 include <pcb4_data.scad>
 bar_v4 = true;
@@ -1205,6 +1205,7 @@ b4_jst_h = 6.0;                           // B#B-PH-K header height above the bo
 b4_jst_mated = 8.0;                       // header + PHR plug (JST: 8 mm mounting height) -- NOT MEASURED
 b4_ret_screws = [[18.9, -0.3], [18.9, 12.2]];  // strap screws (M3x8 countersunk), x + PCB local ky; outside the window
 b4_ret = [4.35, 31.45, -2.8, 15.6, 2.2];  // strap x0, x1, ky0, ky1, thickness
+use_jst_retainer = false;                 // Glenn 2026-11-15: not needed, the PH plugs hold by themselves
 // clamp plate
 b4_cp_front = btn_pcb_front_z + 3.6;      // = switch body top (9.12); cap flange back 9.72 -> 0.6 travel room
 b4_cp_back = btn_pcb_front_z + 1.0;       // 6.52 (plate 2.6 thick)
@@ -1294,7 +1295,7 @@ module bar_back_v4() {
             // M3 standoffs
             for (h = pcb4_m3) translate([h[0], cap_y + h[1], b4_base_top - 0.01]) cylinder(d=b4_boss_d, h=btn_pcb_back_z - b4_base_top + 0.01, $fn=40);
             // strap screw bosses
-            for (s = b4_ret_screws) translate([s[0], b4y(s[1]), b4_base_top - 0.01]) cylinder(d=5.0, h=btn_pcb_back_z - b4_base_top + 0.01, $fn=32);
+            if (use_jst_retainer) for (s = b4_ret_screws) translate([s[0], b4y(s[1]), b4_base_top - 0.01]) cylinder(d=5.0, h=btn_pcb_back_z - b4_base_top + 0.01, $fn=32);
         }
         // M3 countersunk from the back
         for (h = pcb4_m3) translate([h[0], cap_y + h[1], -tongue_t - 1]) {
@@ -1310,7 +1311,7 @@ module bar_back_v4() {
         }
         // JST window: headers stick into it, the plugs come out at the back
         translate([b4_jwin[0], b4y(b4_jwin[3]), -tongue_t - 1]) cube([b4_jwin[1] - b4_jwin[0], b4_jwin[3] - b4_jwin[2], tongue_t + btn_pcb_back_z + 2]);
-        for (s = b4_ret_screws) translate([s[0], b4y(s[1]), -tongue_t - 1]) cylinder(d=2.5, h=1 + 6.5, $fn=20);
+        if (use_jst_retainer) for (s = b4_ret_screws) translate([s[0], b4y(s[1]), -tongue_t - 1]) cylinder(d=2.5, h=1 + 6.5, $fn=20);
     }
 }
 
@@ -2022,7 +2023,7 @@ if (part_to_print == "assembly") {
             color("DarkCyan") screen_tray();
             color("#20304a") translate([0, 0, outer_d - ledge_depth]) tray_rounded_rect(inner_w - 0.4, inner_h - 0.4, ledge_depth, screen_radius);   // screen glass (preview)
             if (bar_split) { color("DimGray") bar_front(); color("SlateGray") bar_back();
-                if (bar_v4) { color("Khaki") cap_plate(); color("Orange") jst_retainer(); } }
+                if (bar_v4) { color("Khaki") cap_plate(); if (use_jst_retainer) color("Orange") jst_retainer(); } }
             else color("DimGray") button_bar();
             color("Gainsboro") button_caps_placed();
             if (show_boards) { if (bar_v4) pcb4_ghost(); else if (bar_split) ghost_bar_pcb(); else ghost_tray_boards(); }

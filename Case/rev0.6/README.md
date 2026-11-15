@@ -233,16 +233,13 @@ Switches (7.4 legs), SS14 diodes, the szfydosh BH1750 soldered flat on the front
 the back: J1 -> main board J12 (5-pin), J2 -> J7 (4-pin), straight PHR cables pin 1 to pin 1.
 The plugs come out through a window in bar_back, so the bar can be unplugged without opening it.
 
-Print (in `stl/`): `bar_front`, `bar_back`, `cap_plate`, `jst_retainer`. Caps: the current `button_caps` (v3).
+Print (in `stl/`): `bar_front`, `bar_back`, `cap_plate`. No JST retainer: the PH plugs hold by themselves (Glenn). Caps: the current `button_caps` (v3).
 Old v3 bar parts are in `stl/obsolete_2026-11-15/`.
 
 Screws, only M3 countersunk (DIN 7991):
 - 3x M3x12: bar_back + PCB into M3 heat inserts in bar_front (bosses 7.6 mm, inserts from the PCB side)
 - 2x M3x6 (not longer): cap_plate into the printed pillars of bar_front; the plate holds the loose caps
-- 2x M3x8 (not longer): jst_retainer over the two plugs
 - 4x M3x6: bar tongue to the screen tray, into M3 short inserts (on the already printed tray: drill the M2 insert holes to 4.0)
 
 Assembly: caps into bar_front, cap_plate on with 2x M3x6, PCB in, bar_back on with 3x M3x12, plug the cables in,
-jst_retainer on (thread both cables through its slots BEFORE crimping the PHR housings), then the bar onto the tray.
-Not measured: JST PH header + plug height (8.0 mm assumed from the JST catalogue). If the strap does not press the
-plugs, put a strip of foam tape under it.
+then the bar onto the tray.
