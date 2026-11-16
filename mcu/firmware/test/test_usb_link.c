@@ -32,6 +32,8 @@ void app_on_snapshot_request(void) {
 }
 void app_on_bootsel_request(void) {}
 void app_fill_info(void *p) { ((mcu_info_msg_t *)p)->board_rev = 6; }
+static uint64_t fake_us;
+uint64_t app_time_us(void) { return fake_us; }
 
 static void host_write(const void *msg, size_t len) {
     uint8_t buf[64] = {0};
@@ -83,6 +85,26 @@ int main(void) {
     host_write(&h, sizeof h);
     usb_link_task(t += 10);
     assert(snapshots == 2);
+
+    // PPS goes out first, alone, with the edge-to-report delay; queued props follow.
+    nsent = 0;
+    usb_link_send_prop(MCU_PROP_LUX, 123, 0);
+    fake_us = 5000000;
+    usb_link_send_pps(42, 4999250);
+    usb_link_task(t += 1);
+    usb_link_task(t += 1);
+    assert(nsent == 2);
+    {
+        mcu_props_msg_t *m = (mcu_props_msg_t *)sent[0];
+        assert(m->type == MCU_MSG_PROPS && m->count == 1);
+        assert(m->props[0].prop == MCU_PROP_GNSS_PPS);
+        assert(m->props[0].v0 == 42 && m->props[0].v1 == 750);
+        m = (mcu_props_msg_t *)sent[1];
+        int lux = 0;
+        for (int k = 0; k < m->count; k++)
+            if (m->props[k].prop == MCU_PROP_LUX && m->props[k].v0 == 123) lux = 1;
+        assert(lux);
+    }
 
     usb_link_consumer_key(0xE9);
     usb_link_task(t += 10);

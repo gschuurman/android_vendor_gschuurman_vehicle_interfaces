@@ -22,6 +22,10 @@ void usb_link_begin_snapshot(void);
 void usb_link_end_snapshot(void);
 void usb_link_log(const char *fmt, ...) __attribute__((format(printf, 1, 2)));
 
+// GNSS PPS edge (count, edge time from app_time_us()). Sent before anything else; the
+// edge-to-report delay is filled in right before the report is queued.
+void usb_link_send_pps(uint32_t count, uint64_t edge_us);
+
 // Media key (HID consumer usage, e.g. 0xE9 volume up). 0 = released.
 void usb_link_consumer_key(uint16_t usage);
 
@@ -30,3 +34,4 @@ void app_on_host_set(uint32_t prop, int32_t v0, int32_t v1);
 void app_on_snapshot_request(void);  // fill the queue between begin/end_snapshot
 void app_on_bootsel_request(void);
 void app_fill_info(void *info /* mcu_info_msg_t */);
+uint64_t app_time_us(void);  // free-running microsecond clock (time_us_64)

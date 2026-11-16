@@ -50,6 +50,7 @@ const Name kNames[] = {
         {MCU_PROP_OFF_DELAY_S, "off_delay_s"},
         {MCU_PROP_GNSS_CMD, "gnss_cmd"},
         {MCU_PROP_GNSS_FIX, "gnss_fix"},
+        {MCU_PROP_GNSS_PPS, "gnss_pps"},
 };
 
 const char* propName(uint32_t prop) {

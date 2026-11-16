@@ -182,6 +182,9 @@ void McuLink::loop() {
         } else if (ret > 0 && (pfd.revents & POLLIN)) {
             uint8_t buf[MCU_REPORT_SIZE + 1];
             ssize_t n = read(fd, buf, sizeof(buf));
+            struct timespec ts;
+            clock_gettime(CLOCK_BOOTTIME, &ts);
+            mLastReadNs.store(static_cast<int64_t>(ts.tv_sec) * 1000000000LL + ts.tv_nsec);
             if (n < 0 && errno != EAGAIN && errno != EINTR) {
                 lost = true;
             } else if (n > 0) {

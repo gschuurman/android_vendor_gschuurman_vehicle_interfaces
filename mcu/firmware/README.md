@@ -22,10 +22,18 @@ Not yet run on hardware: the rev 0.6 boards are on order.
   Android handles them as normal keys.
 - **Audio.** DAC soft mute (XSMT) and the amp remote output (ISO A3), sequenced against pops: DACs
   unmute when the VHAL link is up (or 30 s after the VIM3 starts), the amp follows 0.5 s later and
-  goes off first. Amp mode off / on / auto.
+  goes off first. Amp mode off / on / auto. `MCU_PROP_AUDIO_MUTE` (host mute) is written by
+  Android's AudioControl service when every output bus of the primary zone is muted (all volume
+  groups muted, or audio disabled by the power policy); a muted media group alone keeps the DACs
+  on so navigation prompts still play.
 - **GNSS.** Switches the GNSS module supply (off while the VIM3 sleeps; V_BCKP stays on), reset and
   safeboot, and reads the module's NMEA on UART1 (autobaud 38400/9600/115200/230400) for
   `PERF_VEHICLE_SPEED` and the fix state. Android uses the module itself over its own USB port.
+  The timepulse (PPS, 1 Hz, rising edge at the top of the UTC second) is timestamped in a GPIO
+  interrupt and sent as `MCU_PROP_GNSS_PPS` {count, µs from the edge to the report}, ahead of
+  everything else. The VHAL turns it into `vendor.vehicle.gnss_pps` (CLOCK_BOOTTIME of the edge)
+  and the GNSS HAL dates each NAV-PVT fix by it, so Android's GNSS time is good to ~1 ms instead
+  of the NAV-PVT output latency (tens to hundreds of ms).
 - **Monitoring.** Battery voltage, the 5 V rail, board temperature (NTC), BH1750 light level, USB
   phone-port power-good and over-current flags, TPS55288 fault flags.
 - **USB hub.** Hub 1 is held in reset while the VIM3 is off.

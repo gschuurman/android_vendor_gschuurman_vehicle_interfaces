@@ -109,6 +109,7 @@ class SchuurmanVehicleHardware : public IVehicleHardware {
     std::atomic<int32_t> mNightMode;
     std::atomic<float> mSpeed;
     std::atomic<int32_t> mLux;
+    std::atomic<bool> mPpsSeen{false};
 
     // Handbrake: the MG F wire may not reach the radio (ISO A2 left open reads "released").
     // persist.vendor.vehicle.handbrake = auto (default) | wired | gnss. In auto mode the

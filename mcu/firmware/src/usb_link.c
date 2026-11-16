@@ -28,6 +28,9 @@ static bool hello_edge;
 static mcu_log_msg_t log_queue[4];
 static int log_n;
 
+static bool pps_pending;
+static uint32_t pps_count;
+static uint64_t pps_edge_us;
 static uint16_t consumer_pending;
 static bool consumer_dirty;
 
@@ -89,6 +92,12 @@ void usb_link_log(const char *fmt, ...) {
     log_n++;
 }
 
+void usb_link_send_pps(uint32_t count, uint64_t edge_us) {
+    pps_count = count;
+    pps_edge_us = edge_us;
+    pps_pending = true;
+}
+
 void usb_link_consumer_key(uint16_t usage) {
     consumer_pending = usage;
     consumer_dirty = true;
@@ -99,6 +108,22 @@ static void send_vendor(void) {
     uint8_t buf[MCU_REPORT_SIZE];
     memset(buf, 0, sizeof(buf));
 
+    if (pps_pending && hello_seen) {
+        // Timing first: one property, the delay measured as late as possible. The report
+        // goes out at the host's next IN poll (bInterval 1 ms).
+        mcu_props_msg_t *m = (mcu_props_msg_t *)buf;
+        m->type = MCU_MSG_PROPS;
+        m->seq = seq;
+        m->count = 1;
+        m->props[0].prop = MCU_PROP_GNSS_PPS;
+        m->props[0].v0 = (int32_t)pps_count;
+        m->props[0].v1 = (int32_t)(app_time_us() - pps_edge_us);
+        if (tud_hid_n_report(USB_ITF_VENDOR, 0, buf, sizeof(buf))) {
+            seq++;
+            pps_pending = false;
+        }
+        return;
+    }
     if (info_pending) {
         mcu_info_msg_t *info = (mcu_info_msg_t *)buf;
         app_fill_info(info);

@@ -23,3 +23,6 @@ allow hal_gnss_usb usb_serial_device:chr_file rw_file_perms;
 
 # 8. persist.vendor.gnss.device / ro.vendor.gnss.device: optional port override.
 get_prop(hal_gnss_usb, vendor_gnss_prop)
+
+# 9. vendor.vehicle.gnss_pps: GNSS PPS edge timestamps published by the VHAL.
+get_prop(hal_gnss_usb, vendor_vehicle_prop)

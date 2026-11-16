@@ -209,6 +209,32 @@ static void gnss_uart_irq(void) {
     }
 }
 
+// GNSS PPS: the NEO-M9N timepulse (1 Hz, rising edge at the top of the UTC second) on
+// PIN_GNSS_PPS. The edge is timestamped here and reported by the main loop.
+static volatile bool pps_flag;
+static volatile uint32_t pps_count;
+static volatile uint64_t pps_edge_us;
+
+static void gpio_edge_irq(uint gpio, uint32_t events) {
+    if (gpio == PIN_GNSS_PPS && (events & GPIO_IRQ_EDGE_RISE)) {
+        pps_edge_us = time_us_64();
+        pps_count++;
+        pps_flag = true;
+    }
+}
+
+uint64_t app_time_us(void) { return time_us_64(); }
+
+static void pps_task(void) {
+    if (!pps_flag) return;
+    uint32_t irq = save_and_disable_interrupts();
+    uint32_t count = pps_count;
+    uint64_t edge = pps_edge_us;
+    pps_flag = false;
+    restore_interrupts(irq);
+    usb_link_send_pps(count, edge);
+}
+
 static void board_init(void) {
     // VIM3 supply enable first. With R72 as a pull-up the pin reads high here and the
     // TPS55288 kept running through this reset, so keep driving it high.
@@ -238,6 +264,7 @@ static void board_init(void) {
     in_init(PIN_USBP_FAULT1);
     in_init(PIN_USBP_FAULT2);
     in_init(PIN_GNSS_PPS);
+    gpio_set_irq_enabled_with_callback(PIN_GNSS_PPS, GPIO_IRQ_EDGE_RISE, true, &gpio_edge_irq);
 
     static const uint8_t unused[] = UNUSED_PINS;
     for (unsigned i = 0; i < sizeof(unused); i++) park_unused(unused[i]);
@@ -670,6 +697,7 @@ int main(void) {
     while (true) {
         watchdog_update();
         now_ms = to_ms_since_boot(get_absolute_time());
+        pps_task();
         usb_link_task(now_ms);
 
         bool changed[IN_COUNT];

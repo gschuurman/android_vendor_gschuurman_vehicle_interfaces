@@ -579,8 +579,24 @@ static int16_t I2(const std::vector<uint8_t>& p, size_t off) {
     return static_cast<int16_t>(p[off] | (p[off + 1] << 8));
 }
 
+// GNSS PPS edge published by the VHAL (the MCU timestamps the NEO-M9N timepulse):
+// "<CLOCK_BOOTTIME ns of the edge>,<count>". Returns the edge of the UTC second that a
+// NAV-PVT received at `arrivalNs` belongs to: the pulse must precede the message by
+// less than a second (NAV-PVT for second S is output shortly after the pulse of S).
+static std::optional<int64_t> PpsEdgeFor(int64_t arrivalNs) {
+    const std::string v = ::android::base::GetProperty("vendor.vehicle.gnss_pps", "");
+    if (v.empty()) return std::nullopt;
+    char* end = nullptr;
+    const long long edgeNs = std::strtoll(v.c_str(), &end, 10);
+    if (end == v.c_str() || *end != ',') return std::nullopt;
+    const int64_t delta = arrivalNs - edgeNs;
+    if (delta < 0 || delta >= 1000000000LL) return std::nullopt;
+    return edgeNs;
+}
+
 void GnssUsb::HandleUbx(uint8_t cls, uint8_t id, const std::vector<uint8_t>& p) {
     if (cls == 0x01 && id == 0x07 && p.size() >= 92) {  // NAV-PVT
+        const int64_t arrivalNs = ::android::elapsedRealtimeNano();
         lastPvtMs_ = NowMillis();
         const uint8_t valid = p[11];
         const uint8_t fixType = p[20];
@@ -609,7 +625,9 @@ void GnssUsb::HandleUbx(uint8_t cls, uint8_t id, const std::vector<uint8_t>& p) 
         }
 
         // UTC from the receiver when date and time are valid and fully resolved.
-        if ((valid & 0x07) == 0x07) {
+        const bool utcValid = (valid & 0x07) == 0x07;
+        const int32_t nanoNs = I4(p, 16);  // epoch = UTC second + nano
+        if (utcValid) {
             std::tm t{};
             t.tm_year = (p[4] | (p[5] << 8)) - 1900;
             t.tm_mon = p[6] - 1;
@@ -617,12 +635,27 @@ void GnssUsb::HandleUbx(uint8_t cls, uint8_t id, const std::vector<uint8_t>& p) 
             t.tm_hour = p[8];
             t.tm_min = p[9];
             t.tm_sec = p[10];
-            loc.timestampMillis = static_cast<int64_t>(timegm(&t)) * 1000 + I4(p, 16) / 1000000;
+            loc.timestampMillis = static_cast<int64_t>(timegm(&t)) * 1000 + nanoNs / 1000000;
         } else {
             loc.timestampMillis = NowMillis();
         }
+        // When was that epoch on Android's clock? The message arrives tens to hundreds of
+        // ms after the epoch, so use the PPS edge of the same UTC second when we have it
+        // (MCU timestamp + USB frame: ~1 ms). GnssTimeUpdateService takes the system time
+        // from timestampMillis and this elapsedRealtime.
         loc.elapsedRealtime.flags = ElapsedRealtime::HAS_TIMESTAMP_NS;
-        loc.elapsedRealtime.timestampNs = ::android::elapsedRealtimeNano();
+        loc.elapsedRealtime.timestampNs = arrivalNs;
+        if (const auto edgeNs = utcValid ? PpsEdgeFor(arrivalNs) : std::nullopt) {
+            loc.elapsedRealtime.timestampNs = *edgeNs + nanoNs;
+            loc.elapsedRealtime.flags |= ElapsedRealtime::HAS_TIME_UNCERTAINTY_NS;
+            loc.elapsedRealtime.timeUncertaintyNs = 1e6;
+            static bool logged = false;
+            if (!logged) {
+                logged = true;
+                LOG(INFO) << "PPS timing active: NAV-PVT arrives "
+                          << (arrivalNs - *edgeNs) / 1000000 << " ms after the pulse";
+            }
+        }
 
         PublishLocation(loc);
 

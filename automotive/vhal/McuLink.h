@@ -42,6 +42,10 @@ class McuLink {
 
     std::string devicePath() const;
 
+    // CLOCK_BOOTTIME (elapsedRealtime) of the most recent report, taken right after
+    // read() returned. Valid inside the callbacks, which run on the reader thread.
+    int64_t lastReadBoottimeNs() const { return mLastReadNs.load(); }
+
     // Scan /dev/hidraw* for the MCU's vendor interface. Returns an open O_RDWR fd or -1.
     static int findDevice(std::string* path);
 
@@ -55,6 +59,7 @@ class McuLink {
     ConnectCallback mOnConnect;
     std::atomic<bool> mRunning{false};
     std::atomic<int> mFd{-1};
+    std::atomic<int64_t> mLastReadNs{0};
     std::thread mThread;
     mutable std::mutex mWriteMutex;
     std::string mPath;

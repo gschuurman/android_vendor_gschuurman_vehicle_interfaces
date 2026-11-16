@@ -137,6 +137,8 @@ static constexpr char kAmpModeProp[] = "persist.vendor.vehicle.amp_mode";
 static constexpr char kOffDelayProp[] = "persist.vendor.vehicle.off_delay_s";
 static constexpr char kLuxMaxProp[] = "ro.vendor.vehicle.lux_max";
 static constexpr char kAutoBrightnessProp[] = "persist.vendor.vehicle.auto_brightness";
+// GNSS PPS edge for the GNSS HAL: "<CLOCK_BOOTTIME ns of the edge>,<pulse count>".
+static constexpr char kGnssPpsProp[] = "vendor.vehicle.gnss_pps";
 
 static const std::vector<int32_t> kDistanceUnits = {
         static_cast<int32_t>(VehicleUnit::KILOMETER), static_cast<int32_t>(VehicleUnit::MILE)};
@@ -422,6 +424,16 @@ void SchuurmanVehicleHardware::onMcuProps(const std::vector<mcu_prop_t>& props, 
             case MCU_PROP_LUX:
                 mLux.store(p.v0);
                 break;
+            case MCU_PROP_GNSS_PPS: {
+                // v1 = microseconds the MCU held the edge before queueing the report.
+                // A late report (e.g. a backlog after reconnect) says nothing precise.
+                if (p.v1 < 0 || p.v1 > 20000) break;
+                const int64_t edgeNs = mMcu.lastReadBoottimeNs() - int64_t{p.v1} * 1000;
+                android::base::SetProperty(kGnssPpsProp, std::to_string(edgeNs) + "," +
+                                                                 std::to_string(p.v0));
+                if (!mPpsSeen.exchange(true)) LOG(INFO) << "GNSS PPS from the MCU";
+                break;
+            }
             case MCU_PROP_INPUTS: {
                 bool raw = p.v0 & MCU_IN_HANDBRAKE;
                 mHandbrakeRaw.store(raw);

@@ -120,6 +120,11 @@ typedef struct __attribute__((packed)) {
 #define MCU_PROP_OFF_DELAY_S     0x2140060A  // RW: suspend -> full power off delay, seconds
 #define MCU_PROP_GNSS_CMD        0x2140060B  // W: MCU_GNSS_CMD_*
 #define MCU_PROP_GNSS_FIX        0x2141060C  // INT32_VEC {fix 0/1, satellites used}
+// INT32_VEC {PPS count, microseconds from the GNSS PPS rising edge to the moment the
+// report was queued on the USB endpoint} (MCU -> host). Sent as its own report ahead of
+// everything else, once per pulse. The host subtracts v1 from its read() timestamp
+// (plus up to one 1 ms USB frame) to date the top of the UTC second. Not a VHAL property.
+#define MCU_PROP_GNSS_PPS        0x2141060D
 
 #define MCU_PROP_IS_FLOAT(p) (((p) & 0x00FF0000u) == 0x00600000u)
 
