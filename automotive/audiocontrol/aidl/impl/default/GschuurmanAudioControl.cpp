@@ -26,8 +26,8 @@ namespace aidl::android::hardware::automotive::audiocontrol::impl {
 
 // Automotive Volume Curve Configuration
 // These should roughly match what is defined in audio_policy_configuration.xml or valid ranges
-static constexpr int32_t kStepValueMB = 100;   // 100 Millibels = 1 dB per step
-static constexpr int32_t kMinValueMB = -6000;  // -6000 Millibels = -60 dB (Min Volume)
+static constexpr int32_t kStepValueMB = 60;    // 0.6 dB per step (61 steps)
+static constexpr int32_t kMinValueMB = -3600;  // -36 dB (min volume)
 
 // Helper to convert index to dB
 static float indexToDb(int32_t index) {
@@ -154,7 +154,7 @@ bool GschuurmanAudioControl::setHardwareMute(bool mute) {
         const std::string& address = gainInfo.devicePortAddress;
         int32_t index = gainInfo.volumeIndex;
 
-        // Convert the UI Index (0..Max) to dB (-60..0)
+        // Convert the UI index (0..60) to dB (-36..0)
         float valueDB = indexToDb(index);
 
         LOG(INFO) << "AudioControl: Setting gain for port '" << address 
