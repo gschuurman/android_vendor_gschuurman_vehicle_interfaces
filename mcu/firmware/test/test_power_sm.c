@@ -219,6 +219,26 @@ static void test_wake_fails(void) {
     printf("wake fails -> cut ok\n");
 }
 
+// 2026-11-15/16 in the car: Android reported DEEP_SLEEP_ENTRY but never suspended (it waited for
+// FINISHED), so the link stayed up. After the off delay the MCU pressed the key to wake it for
+// the shutdown and then waited in WAKING forever: the VIM3 stayed on all night.
+static void test_sleep_entry_without_suspend(void) {
+    boot_to_running();
+    in.acc = false;
+    run(3000);
+    assert(sm.state == MCU_PWR_SHUTDOWN_PREP);
+    report(REP_DEEP_SLEEP_ENTRY);
+    assert(sm.state == MCU_PWR_SUSPENDED);
+    uint32_t p = presses;
+    run(15u * 60u * 1000u + 1000);  // off delay; link still up, USB not suspended
+    assert(sm.state == MCU_PWR_WAKING && presses == p + 1);
+    run(60000);  // Android never answers (it never slept, so no DEEP_SLEEP_EXIT)
+    assert(sm.state == MCU_PWR_SHUTDOWN_PREP);
+    assert(last_req == REQ_SHUTDOWN_PREPARE && last_param == PARAM_SHUTDOWN_ONLY);
+    run(5u * 60u * 1000u + 1000);  // still no shutdown: the prepare timeout cuts the power
+    assert(sm.state == MCU_PWR_OFF && !power);
+}
+
 int main(void) {
     test_drive_suspend_resume();
     test_suspend_then_full_off();
@@ -229,6 +249,7 @@ int main(void) {
     test_low_battery();
     test_service_mode();
     test_wake_fails();
+    test_sleep_entry_without_suspend();
     printf("test_power_sm: ok\n");
     return 0;
 }

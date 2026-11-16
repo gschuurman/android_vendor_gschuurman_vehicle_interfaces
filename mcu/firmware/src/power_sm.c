@@ -294,7 +294,14 @@ pwr_actions_t pwr_step(pwr_sm_t *sm, uint32_t now, const pwr_inputs_t *in) {
             }
             break;
         }
-        if (!in->usb_suspended && !in->link_up && since(now, sm->state_since) >= c->wake_nolink_ms) {
+        if (!in->usb_suspended && since(now, sm->state_since) >= c->wake_nolink_ms) {
+            if (in->link_up) {
+                // Awake with the VHAL link up, but Android never reported back: it was never
+                // asleep (no DEEP_SLEEP_EXIT, no link edge). Ask again; if the request goes
+                // unanswered the SHUTDOWN_PREP timeout cuts the power.
+                answer_android(sm, in);
+                break;
+            }
             // Awake but no VHAL link (old software): run on, or cut when shutting down.
             if (in->acc && !sm->wake_for_shutdown) enter_running(sm);
             else cut_power(sm, MCU_PWR_OFF);
