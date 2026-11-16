@@ -27,7 +27,7 @@
 #define FW_PATCH 0
 
 #define BL_PWM_HZ 32768u        // same period (30518 ns) the VHAL used on the VIM3 PWM
-#define LOW_BATT_MV 11600       // shut down from suspend below this...
+#define LOW_BATT_MV 12200       // shut down from suspend below this (~50% charge at rest: the car must still start)...
 #define LOW_BATT_HOLD_MS 60000  // ...for this long
 #define HOT_DECI_C 850          // MCU_ST_HOT above 85 degC
 #define AMP_AFTER_DAC_MS 500
