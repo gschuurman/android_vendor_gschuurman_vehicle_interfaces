@@ -30,7 +30,6 @@
 #define LOW_BATT_MV 11600       // shut down from suspend below this...
 #define LOW_BATT_HOLD_MS 60000  // ...for this long
 #define HOT_DECI_C 850          // MCU_ST_HOT above 85 degC
-#define DAC_NOLINK_UNMUTE_MS 30000
 #define AMP_AFTER_DAC_MS 500
 #define DAC_AFTER_AMP_MS 150
 
@@ -119,7 +118,10 @@ static bool en_pullup;        // R72 fitted as a pull-up: VIM3 supply survives M
 static int32_t brightness = 50;     // 0..100
 static bool screen_on = true;
 static int32_t amp_mode = 2;        // 0 off, 1 on, 2 auto
-static bool host_mute;
+// Audio mute from the VHAL. Starts muted and falls back to muted whenever the link drops or
+// a new drive starts: only the VHAL releases it, once Android's audio output runs (the DACs
+// are clocked). The DACs float without their clocks and the amp would amplify that.
+static bool host_mute = true;
 static uint32_t off_delay_s = 15 * 60;
 
 // Outputs as driven
@@ -129,8 +131,7 @@ static uint32_t tps_retry_at;
 static bool amp_on;
 static bool dac_unmuted;
 static uint32_t dac_changed_at, amp_changed_at;
-static bool link_seen_this_run;
-static uint32_t running_since;
+static bool link_was_up;
 static bool display_on;
 static bool gnss_powered;
 static bool gnss_safeboot;
@@ -347,10 +348,15 @@ static void apply_display(bool allowed) {
     display_on = on;
 }
 
+static void set_host_mute(void) {
+    if (host_mute) return;
+    host_mute = true;
+    usb_link_send_prop(MCU_PROP_AUDIO_MUTE, host_mute, 0);
+}
+
 static void apply_audio(void) {
     bool allowed = pwr_audio_allowed(&psm);
-    bool dac_want = allowed && !host_mute &&
-                    (link_seen_this_run || now_ms - running_since >= DAC_NOLINK_UNMUTE_MS);
+    bool dac_want = allowed && usb_link_up() && !host_mute;
     bool amp_want;
     switch (amp_mode) {
     case 0: amp_want = false; break;
@@ -684,7 +690,6 @@ int main(void) {
         supply_on = true;
         tps_ok = true;
         od_set(PIN_HUB_RST, false);
-        running_since = now_ms;
     } else {
         gpio_put(PIN_VIM3_PWR_EN, 0);
         od_set(PIN_HUB_RST, true);
@@ -724,12 +729,14 @@ int main(void) {
         pwr_actions_t act = pwr_step(&psm, now_ms, &in);
 
         if (psm.state == MCU_PWR_RUNNING && before != MCU_PWR_RUNNING) {
-            running_since = now_ms;
-            link_seen_this_run = false;
+            set_host_mute();
             screen_on = true;  // every drive starts with the screen on
             usb_link_send_prop(MCU_PROP_SCREEN_POWER, screen_on, 0);
         }
-        if (link) link_seen_this_run = true;
+        if (link != link_was_up) {
+            link_was_up = link;
+            if (!link) set_host_mute();  // the VHAL must release it again after reconnecting
+        }
 
         set_supply(act.power_en);
         service_supply();

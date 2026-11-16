@@ -21,11 +21,14 @@ Not yet run on hardware: the rev 0.6 boards are on order.
 - **Media keys.** Volume up/down and mute buttons are a standard USB HID consumer-control interface, so
   Android handles them as normal keys.
 - **Audio.** DAC soft mute (XSMT) and the amp remote output (ISO A3), sequenced against pops: DACs
-  unmute when the VHAL link is up (or 30 s after the VIM3 starts), the amp follows 0.5 s later and
-  goes off first. Amp mode off / on / auto. `MCU_PROP_AUDIO_MUTE` (host mute) is written by
-  Android's AudioControl service when every output bus of the primary zone is muted (all volume
-  groups muted, or audio disabled by the power policy); a muted media group alone keeps the DACs
-  on so navigation prompts still play.
+  unmute only while the VHAL link is up and the VHAL has released `MCU_PROP_AUDIO_MUTE` (host
+  mute), the amp follows 0.5 s later and goes off first. The host mute starts set and is set again
+  whenever the link drops or a drive starts, so the amp never runs over unclocked (floating) DACs;
+  the VHAL releases it once the audio HAL reports `vendor.audio.output_running` and Android's own
+  mute is off. Android's AudioControl service mutes when every output bus of the primary zone is
+  muted (all volume groups muted, or audio disabled by the power policy); a muted media group alone
+  keeps the DACs on so navigation prompts still play. Amp mode off / on / auto; "on" is a manual
+  override that ignores the DACs.
 - **GNSS.** Switches the GNSS module supply (off while the VIM3 sleeps; V_BCKP stays on), reset and
   safeboot, and reads the module's NMEA on UART1 (autobaud 38400/9600/115200/230400) for
   `PERF_VEHICLE_SPEED` and the fix state. Android uses the module itself over its own USB port.
