@@ -338,7 +338,7 @@ void SchuurmanVehicleHardware::pushSettingsToMcu() {
     std::vector<mcu_prop_t> props = {
             {MCU_PROP_DISPLAY_BRIGHTNESS, brightness, 0},
             {MCU_PROP_AMP_MODE, android::base::GetIntProperty(kAmpModeProp, 2, 0, 2), 0},
-            {MCU_PROP_OFF_DELAY_S, android::base::GetIntProperty(kOffDelayProp, 15 * 60, 0,
+            {MCU_PROP_OFF_DELAY_S, android::base::GetIntProperty(kOffDelayProp, 12 * 3600, 0,
                                                                  7 * 24 * 3600), 0},
     };
     // In the first batch after the link comes up: the MCU unmutes the DACs as soon as it

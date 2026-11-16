@@ -122,7 +122,7 @@ static int32_t amp_mode = 2;        // 0 off, 1 on, 2 auto
 // a new drive starts: only the VHAL releases it, once Android's audio output runs (the DACs
 // are clocked). The DACs float without their clocks and the amp would amplify that.
 static bool host_mute = true;
-static uint32_t off_delay_s = 15 * 60;
+static uint32_t off_delay_s = 12 * 3600;  // suspend -> full off; the low battery guard ends it earlier
 
 // Outputs as driven
 static bool supply_on;
