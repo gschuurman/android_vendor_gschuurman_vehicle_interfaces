@@ -10,6 +10,11 @@ cc_binary {
         "GschuurmanAudioControl.cpp",
     ],
 
+    header_libs: ["gschuurman_mcu_protocol_headers"],
+    // Hardware mute: MCU_PROP_AUDIO_MUTE is written through the VHAL.
+    static_libs: ["libvhalclient"],
+    defaults: ["vhalclient_defaults"],
+
     shared_libs: [
         "libbase",
         "liblog",
@@ -32,4 +37,4 @@ cc_binary {
         "-Werror",
         "-Wno-unused-parameter", // [Optional] Suppress unused param errors for empty callbacks
     ],
-}
+}

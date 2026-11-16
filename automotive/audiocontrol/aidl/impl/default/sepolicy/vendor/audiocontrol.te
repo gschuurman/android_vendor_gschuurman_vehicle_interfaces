@@ -13,3 +13,6 @@ add_service(audiocontrol_service, hal_audiocontrol_service)
 binder_use(audiocontrol_service)
 allow audiocontrol_service audioserver_service:service_manager find;
 allow audiocontrol_service audioserver:binder call;
+
+# Hardware mute of the car audio module: writes MCU_PROP_AUDIO_MUTE through the VHAL.
+hal_client_domain(audiocontrol_service, hal_vehicle)

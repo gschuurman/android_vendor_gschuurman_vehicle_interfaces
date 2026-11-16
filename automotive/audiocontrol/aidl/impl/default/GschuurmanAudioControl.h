@@ -3,8 +3,12 @@
 #include <aidl/android/hardware/automotive/audiocontrol/BnAudioControl.h>
 
 #include <memory>
+#include <mutex>
+#include <set>
 #include <string>
 #include <vector>
+
+#include <IVhalClient.h>
 
 namespace aidl::android::hardware::automotive::audiocontrol::impl {
 
@@ -45,6 +49,18 @@ public:
 
 private:
     void sendParameter(const char* key, float value);
+    // Hard-mutes (or releases) the DACs on the car audio module through the VHAL
+    // (MCU_PROP_AUDIO_MUTE). Returns false if the VHAL isn't reachable yet.
+    bool setHardwareMute(bool mute);
+    void updateHardwareMuteLocked();
+
+    std::mutex mLock;
+    // Primary zone output buses CarAudioService told us about, and the muted ones.
+    std::set<std::string> mKnownDevices;
+    std::set<std::string> mMutedDevices;
+    bool mHwMuteSent = false;  // mHwMute reflects what the MCU was last told
+    bool mHwMute = false;
+    std::shared_ptr<::android::frameworks::automotive::vhal::IVhalClient> mVhal;
 };
 
 }  // namespace aidl::android::hardware::automotive::audiocontrol::impl

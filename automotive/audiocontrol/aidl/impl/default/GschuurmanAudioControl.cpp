@@ -20,6 +20,8 @@
 #include <media/AudioSystem.h>
 #include <utils/String8.h>
 
+#include <mcu_protocol.h>
+
 namespace aidl::android::hardware::automotive::audiocontrol::impl {
 
 // Automotive Volume Curve Configuration
@@ -63,10 +65,60 @@ static float indexToDb(int32_t index) {
     return ::ndk::ScopedAStatus::ok();
 }
 
+// CarAudioService mutes per volume group (useCarVolumeGroupMuting): the mute key
+// usually mutes only the media group while navigation stays audible, so the DACs
+// can only be hard-muted when every output bus of the primary zone is muted, i.e.
+// when nothing may sound at all (all groups muted, or audio disabled by the power
+// policy). The MCU sequences it pop-free (amp off first, then the DACs).
 ::ndk::ScopedAStatus GschuurmanAudioControl::onDevicesToMuteChange(
         const std::vector<MutingInfo>& in_mutingInfos) {
-    LOG(VERBOSE) << "AudioControl: onDevicesToMuteChange " << in_mutingInfos.size();
+    std::lock_guard l(mLock);
+    for (const auto& info : in_mutingInfos) {
+        if (info.zoneId != 0) continue;  // PRIMARY_AUDIO_ZONE
+        for (const auto& address : info.deviceAddressesToMute) {
+            mKnownDevices.insert(address);
+            mMutedDevices.insert(address);
+        }
+        for (const auto& address : info.deviceAddressesToUnmute) {
+            mKnownDevices.insert(address);
+            mMutedDevices.erase(address);
+        }
+    }
+    LOG(DEBUG) << "AudioControl: onDevicesToMuteChange: " << mMutedDevices.size() << " of "
+               << mKnownDevices.size() << " buses muted";
+    updateHardwareMuteLocked();
     return ::ndk::ScopedAStatus::ok();
+}
+
+void GschuurmanAudioControl::updateHardwareMuteLocked() {
+    const bool allMuted = !mKnownDevices.empty() && mMutedDevices.size() == mKnownDevices.size();
+    if (mHwMuteSent && allMuted == mHwMute) return;
+    if (setHardwareMute(allMuted)) {
+        mHwMuteSent = true;
+        mHwMute = allMuted;
+    }
+}
+
+bool GschuurmanAudioControl::setHardwareMute(bool mute) {
+    using ::android::frameworks::automotive::vhal::IVhalClient;
+    if (mVhal == nullptr) {
+        // Our own binder thread pool is already running (Main.cpp).
+        mVhal = IVhalClient::tryCreate(/*startThreadPool=*/false);
+        if (mVhal == nullptr) {
+            LOG(WARNING) << "AudioControl: VHAL not available, hardware mute not applied";
+            return false;
+        }
+    }
+    auto value = mVhal->createHalPropValue(static_cast<int32_t>(MCU_PROP_AUDIO_MUTE));
+    value->setInt32Values({mute ? 1 : 0});
+    if (auto result = mVhal->setValueSync(*value); !result.ok()) {
+        LOG(ERROR) << "AudioControl: setting MCU_PROP_AUDIO_MUTE=" << mute
+                   << " failed: " << result.error().message();
+        mVhal.reset();  // reconnect next time (the VHAL may have restarted)
+        return false;
+    }
+    LOG(INFO) << "AudioControl: car audio module DACs " << (mute ? "muted" : "unmuted");
+    return true;
 }
 
 ::ndk::ScopedAStatus GschuurmanAudioControl::registerFocusListener(
@@ -92,6 +144,12 @@ static float indexToDb(int32_t index) {
     
     (void)in_reasons; // Unused for now
 
+    {
+        std::lock_guard l(mLock);
+        for (const auto& gainInfo : in_gains) {
+            if (gainInfo.zoneId == 0) mKnownDevices.insert(gainInfo.devicePortAddress);
+        }
+    }
     for (const auto& gainInfo : in_gains) {
         const std::string& address = gainInfo.devicePortAddress;
         int32_t index = gainInfo.volumeIndex;
@@ -134,4 +192,4 @@ void GschuurmanAudioControl::sendParameter(const char* key, float value) {
     }
 }
 
-}  // namespace aidl::android::hardware::automotive::audiocontrol::impl
+}  // namespace aidl::android::hardware::automotive::audiocontrol::impl
