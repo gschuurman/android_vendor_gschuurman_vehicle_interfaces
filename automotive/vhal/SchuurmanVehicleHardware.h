@@ -171,6 +171,9 @@ class SchuurmanVehicleHardware : public IVehicleHardware {
     std::atomic<int32_t> mLastApPowerStateReport;
     std::atomic<int32_t> mLastApPowerStateReportParam;
     std::atomic<bool> mReportPending;      // report not yet delivered to the MCU
+    // Android reported DEEP_SLEEP_ENTRY / HIBERNATION_ENTRY / SHUTDOWN_START and waits
+    // (WAIT_FOR_FINISH) for AP_POWER_STATE_REQ FINISHED before it suspends or powers off.
+    std::atomic<bool> mFinishPending{false};
     std::atomic<int64_t> mFallbackOnAtNs;  // publish ON ourselves if the MCU stays away
 
     std::string mCurrentPolicyGroup;

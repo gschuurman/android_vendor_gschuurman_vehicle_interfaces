@@ -557,6 +557,10 @@ void SchuurmanVehicleHardware::housekeepingLoop() {
             publishApPowerStateReq(static_cast<int32_t>(VehicleApPowerStateReq::ON));
         }
 
+        if (mFinishPending.exchange(false)) {
+            publishApPowerStateReq(static_cast<int32_t>(VehicleApPowerStateReq::FINISHED));
+        }
+
         updateParkingBrake(false);
         updateAudioMute();
 
@@ -707,8 +711,17 @@ void SchuurmanVehicleHardware::handleApPowerStateReport(
 
         case VehicleApPowerStateReport::DEEP_SLEEP_ENTRY:
         case VehicleApPowerStateReport::HIBERNATION_ENTRY:
-        case VehicleApPowerStateReport::SHUTDOWN_PREPARE:
         case VehicleApPowerStateReport::SHUTDOWN_START:
+            applyScreenPower(false, false);
+            // CarPowerManagementService now sits in WAIT_FOR_FINISH until the VHAL answers
+            // FINISHED; only then does it suspend (or power off). Without it Android stayed
+            // awake all night after ACC off while the MCU took it for suspended. The MCU
+            // follows by itself (USB suspend, or the VIM3 rail dropping). Published from
+            // the housekeeping thread, not from inside this set call.
+            mFinishPending.store(true);
+            break;
+
+        case VehicleApPowerStateReport::SHUTDOWN_PREPARE:
             applyScreenPower(false, false);
             break;
 
