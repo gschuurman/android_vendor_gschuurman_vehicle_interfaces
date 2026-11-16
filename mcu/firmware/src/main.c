@@ -23,13 +23,13 @@
 #include "usb_link.h"
 
 #define FW_MAJOR 0
-#define FW_MINOR 1
+#define FW_MINOR 2
 #define FW_PATCH 0
 
 #define BL_PWM_HZ 32768u        // same period (30518 ns) the VHAL used on the VIM3 PWM
 #define LOW_BATT_MV 12200       // shut down from suspend below this (~50% charge at rest: the car must still start)...
 #define LOW_BATT_HOLD_MS 60000  // ...for this long
-#define HUB_PARK_AFTER_MS 60000 // hub 1 into reset this long into a suspend
+#define SUSPEND_SAVE_AFTER_MS 10000 // MCU_SAVE_* this long into a suspend (Android done suspending)
 #define HOT_DECI_C 850          // MCU_ST_HOT above 85 degC
 #define AMP_AFTER_DAC_MS 500
 #define DAC_AFTER_AMP_MS 150
@@ -123,6 +123,7 @@ static int32_t amp_mode = 2;        // 0 off, 1 on, 2 auto
 // a new drive starts: only the VHAL releases it, once Android's audio output runs (the DACs
 // are clocked). The DACs float without their clocks and the amp would amplify that.
 static bool host_mute = true;
+static uint32_t suspend_save;       // MCU_SAVE_*, set by the VHAL (default off)
 static uint32_t off_delay_s = 12 * 3600;  // suspend -> full off; the low battery guard ends it earlier
 
 // Outputs as driven
@@ -308,21 +309,44 @@ static void set_supply(bool on) {
     }
 }
 
-// Hub 1 (CH334R: this MCU's own USB, the touch controller, the GNSS module and hub 2
-// with the phone ports) is held in reset while the VIM3 is unpowered and, to save
-// power, from a minute into a suspend: none of it is needed while the radio is off.
-// It is released as soon as the suspend ends (the same step that presses the power key
-// to wake the VIM3), so the hub is up again by the time the VIM3 resumes and the MCU's
-// link comes back, which is how the MCU sees that the wake worked.
+// Extra savings in suspend, each enabled by the VHAL (MCU_PROP_SUSPEND_SAVE, default off)
+// so it can be validated on the car and switched off without a reflash. They start
+// SUSPEND_SAVE_AFTER_MS into a suspend and are undone in the same step that leaves
+// SUSPENDED (and presses the power key to wake the VIM3):
+// - MCU_SAVE_HUB_PARK: hub 1 (CH334R: this MCU's own USB, the touch controller, the GNSS
+//   module and hub 2 with the phone ports) is held in reset, as while the VIM3 is
+//   unpowered. Released before the VIM3 resumes, so the MCU link comes back, which is how
+//   WAKING sees that the wake worked.
+// - MCU_SAVE_TPS_PFM: the TPS55288 runs PFM at light load instead of the forced PWM of
+//   its MODE pin (FPWM keeps the switching noise out of the audio while playing).
 static bool hub_parked;
+static bool tps_pfm;
+static uint8_t tps_mode = 0xFF;  // last MODE register read
+
+static bool suspend_saving(uint32_t bit) {
+    return (suspend_save & bit) && psm.state == MCU_PWR_SUSPENDED &&
+           now_ms - psm.state_since >= SUSPEND_SAVE_AFTER_MS;
+}
 
 static void apply_hub(void) {
-    bool park = !supply_on || (psm.state == MCU_PWR_SUSPENDED &&
-                               now_ms - psm.state_since >= HUB_PARK_AFTER_MS);
+    bool park = !supply_on || suspend_saving(MCU_SAVE_HUB_PARK);
     if (park == hub_parked) return;
     hub_parked = park;
     od_set(PIN_HUB_RST, park);
     if (supply_on) usb_link_log("hub 1 %s", park ? "parked (suspend)" : "released");
+}
+
+static void apply_tps_mode(void) {
+    if (!supply_on || !tps_ok) {
+        tps_pfm = false;  // the MODE pin applies again after EN
+        return;
+    }
+    bool pfm = suspend_saving(MCU_SAVE_TPS_PFM);
+    if (pfm == tps_pfm) return;
+    if (tps_set_pfm(pfm)) {
+        tps_pfm = pfm;
+        usb_link_log("TPS55288 %s", pfm ? "PFM (suspend)" : "forced PWM");
+    }
 }
 
 static void service_supply(void) {
@@ -481,6 +505,7 @@ static void measure(void) {
         tps_next = now_ms + 1000;
         uint8_t st;
         if (tps_read(TPS_REG_STATUS, &st)) tps_status = st;
+        if (tps_read(TPS_REG_MODE, &st)) tps_mode = st;
     }
 }
 
@@ -590,6 +615,11 @@ static void report_changes(bool force) {
         usb_link_send_prop(MCU_PROP_GNSS_FIX, fix, sats);
         sent_fix = (fix << 8) | sats;
     }
+    static int sent_tps_mode = -1;
+    if (force || sent_tps_mode != tps_mode) {
+        usb_link_send_prop(MCU_PROP_TPS_MODE, tps_mode, 0);
+        sent_tps_mode = tps_mode;
+    }
     static int sent_amp = -1;
     if (force || sent_amp != (int)amp_on) {
         usb_link_send_prop(MCU_PROP_AMP_ON, amp_on, 0);
@@ -603,6 +633,7 @@ static void report_changes(bool force) {
         usb_link_send_prop(MCU_PROP_AMP_MODE, amp_mode, 0);
         usb_link_send_prop(MCU_PROP_AUDIO_MUTE, host_mute, 0);
         usb_link_send_prop(MCU_PROP_OFF_DELAY_S, (int32_t)off_delay_s, 0);
+        usb_link_send_prop(MCU_PROP_SUSPEND_SAVE, (int32_t)suspend_save, 0);
     }
 }
 
@@ -653,6 +684,10 @@ void app_on_host_set(uint32_t prop, int32_t v0, int32_t v1) {
         break;
     case MCU_PROP_GNSS_CMD:
         gnss_command(v0);
+        break;
+    case MCU_PROP_SUSPEND_SAVE:
+        suspend_save = (uint32_t)v0 & (MCU_SAVE_HUB_PARK | MCU_SAVE_TPS_PFM);
+        usb_link_send_prop(MCU_PROP_SUSPEND_SAVE, (int32_t)suspend_save, 0);
         break;
     default:
         usb_link_log("unknown prop 0x%08lx", (unsigned long)prop);
@@ -759,6 +794,7 @@ int main(void) {
         set_supply(act.power_en);
         service_supply();
         apply_hub();
+        apply_tps_mode();
         if (act.key_press_ms && !key_down) {
             key_down = true;
             key_release_at = now_ms + act.key_press_ms;

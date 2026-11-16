@@ -140,6 +140,9 @@ class SchuurmanVehicleHardware : public IVehicleHardware {
     std::map<int32_t, std::pair<int32_t, int32_t>> mMcuValues GUARDED_BY(mMcuMutex);
     std::string mMcuVersion GUARDED_BY(mMcuMutex);
     bool mMcuEnPullup GUARDED_BY(mMcuMutex) = false;
+    // MCU firmware as major*10000 + minor*100 + patch, -1 until its info arrives.
+    std::atomic<int> mMcuFwCode{-1};
+    int32_t offDelayForMcu() const;
 
     std::atomic<bool> mShuttingDown;
 

@@ -34,6 +34,16 @@ bool tps_set_output(bool on) {
     return tps_read(TPS_REG_MODE, &check) && check == want;
 }
 
+bool tps_set_pfm(bool pfm) {
+    uint8_t mode;
+    if (!tps_read(TPS_REG_MODE, &mode)) return false;
+    uint8_t want = (uint8_t)((mode & ~TPS_MODE_LIGHTLOAD_MASK) |
+                             (pfm ? TPS_MODE_REG_PFM : TPS_MODE_REG_FPWM));
+    if (want != mode && !tps_write(TPS_REG_MODE, want)) return false;
+    uint8_t check;
+    return tps_read(TPS_REG_MODE, &check) && check == want;
+}
+
 bool tps_output_enabled(void) {
     uint8_t mode;
     return tps_read(TPS_REG_MODE, &mode) && (mode & TPS_MODE_OE);

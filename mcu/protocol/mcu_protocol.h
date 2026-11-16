@@ -125,6 +125,8 @@ typedef struct __attribute__((packed)) {
 // everything else, once per pulse. The host subtracts v1 from its read() timestamp
 // (plus up to one 1 ms USB frame) to date the top of the UTC second. Not a VHAL property.
 #define MCU_PROP_GNSS_PPS        0x2141060D
+#define MCU_PROP_SUSPEND_SAVE    0x2140060E  // RW: MCU_SAVE_* bits, extra power savings in suspend (default 0)
+#define MCU_PROP_TPS_MODE        0x2140060F  // R: TPS55288 MODE register (06h), raw
 
 #define MCU_PROP_IS_FLOAT(p) (((p) & 0x00FF0000u) == 0x00600000u)
 
@@ -139,6 +141,10 @@ typedef struct __attribute__((packed)) {
 #define MCU_IN_BTN_VOLUP  (1u << 9)
 #define MCU_IN_BTN_VOLDN  (1u << 10)
 #define MCU_IN_BTN_MUTE   (1u << 11)
+
+// MCU_PROP_SUSPEND_SAVE bits (from SUSPEND_SAVE_AFTER_MS into a suspend, undone when it ends)
+#define MCU_SAVE_HUB_PARK    (1u << 0)   // hold hub 1 in reset (this MCU's USB, touch, GNSS, hub 2)
+#define MCU_SAVE_TPS_PFM     (1u << 1)   // TPS55288 PFM at light load instead of forced PWM
 
 // MCU_PROP_STATUS bits
 #define MCU_ST_USBP_PG       (1u << 0)   // phone-port 5V supply power good

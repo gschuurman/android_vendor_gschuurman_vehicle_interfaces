@@ -94,6 +94,8 @@ static const McuVendorProp kMcuVendorProps[] = {
         {static_cast<int32_t>(MCU_PROP_OFF_DELAY_S), true},
         {static_cast<int32_t>(MCU_PROP_GNSS_CMD), true},
         {static_cast<int32_t>(MCU_PROP_GNSS_FIX), false},
+        {static_cast<int32_t>(MCU_PROP_SUSPEND_SAVE), true},
+        {static_cast<int32_t>(MCU_PROP_TPS_MODE), false},
 };
 
 static bool isMcuVendorProp(int32_t prop) {
@@ -135,6 +137,12 @@ static constexpr char kHandbrakeModeProp[] = "persist.vendor.vehicle.handbrake";
 static constexpr char kHandbrakeSeenProp[] = "persist.vendor.vehicle.handbrake_seen";
 static constexpr char kAmpModeProp[] = "persist.vendor.vehicle.amp_mode";
 static constexpr char kOffDelayProp[] = "persist.vendor.vehicle.off_delay_s";
+static constexpr char kSuspendSaveProp[] = "persist.vendor.vehicle.suspend_save";
+// Long suspends (12 h) only with firmware that shuts down at 12.2 V (0.2.0); older firmware
+// (11.6 V) keeps the 15 min off delay so a long sleep can't leave the car unable to start.
+static constexpr int kMcuFwLongSleep = 200;  // 0.2.0
+static constexpr int32_t kOffDelayLongS = 12 * 3600;
+static constexpr int32_t kOffDelayShortS = 15 * 60;
 static constexpr char kLuxMaxProp[] = "ro.vendor.vehicle.lux_max";
 static constexpr char kAutoBrightnessProp[] = "persist.vendor.vehicle.auto_brightness";
 // GNSS PPS edge for the GNSS HAL: "<CLOCK_BOOTTIME ns of the edge>,<pulse count>".
@@ -314,6 +322,7 @@ void SchuurmanVehicleHardware::emitInitialStatesLocked() {
 void SchuurmanVehicleHardware::onMcuConnect(bool connected) {
     if (!connected) {
         LOG(INFO) << "MCU disconnected (VIM3 suspend, MCU restart or unplugged)";
+        mMcuFwCode.store(-1);  // may come back with other firmware
         // Don't hold a stale reverse (rear view camera stuck on) while the MCU is away; its
         // snapshot on reconnect brings the real gear back.
         const int32_t park = static_cast<int32_t>(VehicleGear::GEAR_PARK);
@@ -338,8 +347,8 @@ void SchuurmanVehicleHardware::pushSettingsToMcu() {
     std::vector<mcu_prop_t> props = {
             {MCU_PROP_DISPLAY_BRIGHTNESS, brightness, 0},
             {MCU_PROP_AMP_MODE, android::base::GetIntProperty(kAmpModeProp, 2, 0, 2), 0},
-            {MCU_PROP_OFF_DELAY_S, android::base::GetIntProperty(kOffDelayProp, 12 * 3600, 0,
-                                                                 7 * 24 * 3600), 0},
+            {MCU_PROP_OFF_DELAY_S, offDelayForMcu(), 0},
+            {MCU_PROP_SUSPEND_SAVE, android::base::GetIntProperty(kSuspendSaveProp, 0, 0, 3), 0},
     };
     // In the first batch after the link comes up: the MCU unmutes the DACs as soon as it
     // sees the link and switches the amp on 500 ms later, so a later write could be late.
@@ -352,6 +361,13 @@ void SchuurmanVehicleHardware::pushSettingsToMcu() {
     } else {
         mSentAudioMute.store(-1);
     }
+}
+
+int32_t SchuurmanVehicleHardware::offDelayForMcu() const {
+    const bool longOk = mMcuFwCode.load() >= kMcuFwLongSleep;
+    const int32_t want = android::base::GetIntProperty(
+            kOffDelayProp, longOk ? kOffDelayLongS : kOffDelayShortS, 0, 7 * 24 * 3600);
+    return longOk ? want : std::min(want, kOffDelayShortS);
 }
 
 bool SchuurmanVehicleHardware::effectiveAudioMute(std::string* why) const {
@@ -396,9 +412,18 @@ void SchuurmanVehicleHardware::onMcuInfo(const mcu_info_msg_t& info) {
         LOG(ERROR) << "MCU protocol " << int(info.proto_version) << " != VHAL protocol "
                    << MCU_PROTO_VERSION << "; update the MCU firmware or the VHAL";
     }
-    std::lock_guard<std::mutex> lk(mMcuMutex);
-    mMcuVersion = v;
-    mMcuEnPullup = info.flags & MCU_INFO_FLAG_EN_PULLUP;
+    {
+        std::lock_guard<std::mutex> lk(mMcuMutex);
+        mMcuVersion = v;
+        mMcuEnPullup = info.flags & MCU_INFO_FLAG_EN_PULLUP;
+    }
+    const int code = info.fw_major * 10000 + info.fw_minor * 100 + info.fw_patch;
+    if (mMcuFwCode.exchange(code) != code) {
+        // The off delay depends on the firmware (low battery guard): resend it.
+        const int32_t offDelay = offDelayForMcu();
+        mMcu.set(MCU_PROP_OFF_DELAY_S, offDelay);
+        LOG(INFO) << "MCU off delay " << offDelay << " s";
+    }
 }
 
 void SchuurmanVehicleHardware::onMcuProps(const std::vector<mcu_prop_t>& props, bool snapshot) {
@@ -830,7 +855,14 @@ StatusCode SchuurmanVehicleHardware::setValueInternal(
     } else if (request.prop == static_cast<int32_t>(MCU_PROP_AMP_MODE)) {
         return setMcuSetting(request, 0, 2, kAmpModeProp);
     } else if (request.prop == static_cast<int32_t>(MCU_PROP_OFF_DELAY_S)) {
+        if (request.value.int32Values.empty()) return StatusCode::INVALID_ARG;
+        if (mMcuFwCode.load() < kMcuFwLongSleep && request.value.int32Values[0] > kOffDelayShortS) {
+            LOG(WARNING) << "Off delay above " << kOffDelayShortS << " s needs MCU firmware 0.2.0";
+            return StatusCode::INVALID_ARG;
+        }
         return setMcuSetting(request, 0, 7 * 24 * 3600, kOffDelayProp);
+    } else if (request.prop == static_cast<int32_t>(MCU_PROP_SUSPEND_SAVE)) {
+        return setMcuSetting(request, 0, 3, kSuspendSaveProp);
     } else if (request.prop == static_cast<int32_t>(MCU_PROP_AUDIO_MUTE)) {
         // Android's mute; the MCU gets it combined with the audio output state.
         if (request.value.int32Values.empty()) return StatusCode::INVALID_ARG;
