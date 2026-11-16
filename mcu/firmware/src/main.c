@@ -29,6 +29,7 @@
 #define BL_PWM_HZ 32768u        // same period (30518 ns) the VHAL used on the VIM3 PWM
 #define LOW_BATT_MV 12200       // shut down from suspend below this (~50% charge at rest: the car must still start)...
 #define LOW_BATT_HOLD_MS 60000  // ...for this long
+#define HUB_PARK_AFTER_MS 60000 // hub 1 into reset this long into a suspend
 #define HOT_DECI_C 850          // MCU_ST_HOT above 85 degC
 #define AMP_AFTER_DAC_MS 500
 #define DAC_AFTER_AMP_MS 150
@@ -305,6 +306,23 @@ static void set_supply(bool on) {
         od_set(PIN_HUB_RST, true);  // hub off the unpowered VIM3, lower parked current
         tps_ok = false;
     }
+}
+
+// Hub 1 (CH334R: this MCU's own USB, the touch controller, the GNSS module and hub 2
+// with the phone ports) is held in reset while the VIM3 is unpowered and, to save
+// power, from a minute into a suspend: none of it is needed while the radio is off.
+// It is released as soon as the suspend ends (the same step that presses the power key
+// to wake the VIM3), so the hub is up again by the time the VIM3 resumes and the MCU's
+// link comes back, which is how the MCU sees that the wake worked.
+static bool hub_parked;
+
+static void apply_hub(void) {
+    bool park = !supply_on || (psm.state == MCU_PWR_SUSPENDED &&
+                               now_ms - psm.state_since >= HUB_PARK_AFTER_MS);
+    if (park == hub_parked) return;
+    hub_parked = park;
+    od_set(PIN_HUB_RST, park);
+    if (supply_on) usb_link_log("hub 1 %s", park ? "parked (suspend)" : "released");
 }
 
 static void service_supply(void) {
@@ -740,6 +758,7 @@ int main(void) {
 
         set_supply(act.power_en);
         service_supply();
+        apply_hub();
         if (act.key_press_ms && !key_down) {
             key_down = true;
             key_release_at = now_ms + act.key_press_ms;
