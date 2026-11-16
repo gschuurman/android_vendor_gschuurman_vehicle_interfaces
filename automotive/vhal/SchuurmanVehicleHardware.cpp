@@ -139,6 +139,10 @@ static constexpr char kLuxMaxProp[] = "ro.vendor.vehicle.lux_max";
 static constexpr char kAutoBrightnessProp[] = "persist.vendor.vehicle.auto_brightness";
 // GNSS PPS edge for the GNSS HAL: "<CLOCK_BOOTTIME ns of the edge>,<pulse count>".
 static constexpr char kGnssPpsProp[] = "vendor.vehicle.gnss_pps";
+// Set by the audio HAL while the primary output PCM runs (DACs clocked).
+static constexpr char kOutputRunningProp[] = "vendor.audio.output_running";
+// If the audio HAL never reports a running output, release the mute anyway after this.
+static constexpr int64_t kOutputRunningFallbackNs = 60'000'000'000LL;
 
 static const std::vector<int32_t> kDistanceUnits = {
         static_cast<int32_t>(VehicleUnit::KILOMETER), static_cast<int32_t>(VehicleUnit::MILE)};
@@ -183,6 +187,7 @@ SchuurmanVehicleHardware::SchuurmanVehicleHardware()
       mFallbackOnAtNs(0),
       mCurrentPolicyGroup("default_group"),
       mCurrentPolicyReq("") {
+    mStartNs = elapsedRealtimeNano();
     LOG(INFO) << "Initializing SchuurmanVehicleHardware (MCU link, protocol "
               << MCU_PROTO_VERSION << ")";
 
@@ -336,7 +341,46 @@ void SchuurmanVehicleHardware::pushSettingsToMcu() {
             {MCU_PROP_OFF_DELAY_S, android::base::GetIntProperty(kOffDelayProp, 15 * 60, 0,
                                                                  7 * 24 * 3600), 0},
     };
-    mMcu.set(props);
+    // In the first batch after the link comes up: the MCU unmutes the DACs as soon as it
+    // sees the link and switches the amp on 500 ms later, so a later write could be late.
+    std::string why;
+    const bool mute = effectiveAudioMute(&why);
+    props.push_back({MCU_PROP_AUDIO_MUTE, mute ? 1 : 0, 0});
+    if (mMcu.set(props)) {
+        mSentAudioMute.store(mute ? 1 : 0);
+        LOG(INFO) << "MCU audio mute " << mute << " (" << why << ", link up)";
+    } else {
+        mSentAudioMute.store(-1);
+    }
+}
+
+bool SchuurmanVehicleHardware::effectiveAudioMute(std::string* why) const {
+    const std::string out = android::base::GetProperty(kOutputRunningProp, "");
+    bool running = out == "true";
+    if (running) mOutputSeenRunning.store(true);
+    std::string state = out.empty() ? "unknown" : out;
+    if (!running && !mOutputSeenRunning.load() &&
+        elapsedRealtimeNano() - mStartNs >= kOutputRunningFallbackNs) {
+        running = true;  // the audio HAL doesn't report it (older HAL, no card)
+        state += ", fallback";
+    }
+    const bool user = mUserAudioMute.load();
+    if (why) *why = std::string("user ") + (user ? "1" : "0") + ", output " + state;
+    return user || !running;
+}
+
+void SchuurmanVehicleHardware::updateAudioMute() {
+    if (!mMcu.connected()) {
+        mSentAudioMute.store(-1);
+        return;
+    }
+    std::string why;
+    const int mute = effectiveAudioMute(&why) ? 1 : 0;
+    if (mSentAudioMute.load() == mute) return;
+    if (mMcu.set(MCU_PROP_AUDIO_MUTE, mute)) {
+        mSentAudioMute.store(mute);
+        LOG(INFO) << "MCU audio mute " << mute << " (" << why << ")";
+    }
 }
 
 void SchuurmanVehicleHardware::onMcuInfo(const mcu_info_msg_t& info) {
@@ -424,6 +468,14 @@ void SchuurmanVehicleHardware::onMcuProps(const std::vector<mcu_prop_t>& props, 
             case MCU_PROP_LUX:
                 mLux.store(p.v0);
                 break;
+            case MCU_PROP_AUDIO_MUTE:
+                // The MCU echoes the effective mute (see updateAudioMute); Android's own
+                // value is mUserAudioMute.
+                if (p.v0 != mSentAudioMute.load()) {
+                    LOG(INFO) << "MCU reports audio mute " << p.v0;
+                    mSentAudioMute.store(-1);  // resend on the next tick if it differs
+                }
+                continue;
             case MCU_PROP_GNSS_PPS: {
                 // v1 = microseconds the MCU held the edge before queueing the report.
                 // A late report (e.g. a backlog after reconnect) says nothing precise.
@@ -506,6 +558,7 @@ void SchuurmanVehicleHardware::housekeepingLoop() {
         }
 
         updateParkingBrake(false);
+        updateAudioMute();
 
         // Auto brightness from the MCU's light sensor (it probes for a BH1750 every 5 s, so a sensor
         // connected later takes over by itself).
@@ -766,7 +819,12 @@ StatusCode SchuurmanVehicleHardware::setValueInternal(
     } else if (request.prop == static_cast<int32_t>(MCU_PROP_OFF_DELAY_S)) {
         return setMcuSetting(request, 0, 7 * 24 * 3600, kOffDelayProp);
     } else if (request.prop == static_cast<int32_t>(MCU_PROP_AUDIO_MUTE)) {
-        return setMcuSetting(request, 0, 1, nullptr);
+        // Android's mute; the MCU gets it combined with the audio output state.
+        if (request.value.int32Values.empty()) return StatusCode::INVALID_ARG;
+        const int32_t value = request.value.int32Values[0];
+        if (value < 0 || value > 1) return StatusCode::INVALID_ARG;
+        mUserAudioMute.store(value == 1);
+        updateAudioMute();
     } else if (request.prop == static_cast<int32_t>(MCU_PROP_GNSS_CMD)) {
         return setMcuSetting(request, MCU_GNSS_CMD_RESET, MCU_GNSS_CMD_NORMAL, nullptr);
     } else {
@@ -872,6 +930,10 @@ StatusCode SchuurmanVehicleHardware::getValueInternal(
         std::lock_guard<std::mutex> lk(mMcuMutex);
         if (mMcuVersion.empty()) return StatusCode::NOT_AVAILABLE;
         response->value.stringValue = mMcuVersion;
+        return StatusCode::OK;
+    }
+    if (request.prop == static_cast<int32_t>(MCU_PROP_AUDIO_MUTE)) {
+        response->value.int32Values = {mUserAudioMute.load() ? 1 : 0};
         return StatusCode::OK;
     }
     if (isMcuVendorProp(request.prop)) {

@@ -67,6 +67,11 @@ class SchuurmanVehicleHardware : public IVehicleHardware {
     void onMcuInfo(const mcu_info_msg_t& info);
     void onMcuConnect(bool connected);
     void pushSettingsToMcu();
+    // Audio mute sent to the MCU: Android's (user) mute, or the primary audio output not
+    // running yet (vendor.audio.output_running), so the amp never comes on over
+    // unclocked DACs. Returns the value and fills `why` for the log.
+    bool effectiveAudioMute(std::string* why) const;
+    void updateAudioMute();
 
     void housekeepingLoop();
     void updateParkingBrake(bool force);
@@ -110,6 +115,10 @@ class SchuurmanVehicleHardware : public IVehicleHardware {
     std::atomic<float> mSpeed;
     std::atomic<int32_t> mLux;
     std::atomic<bool> mPpsSeen{false};
+    std::atomic<bool> mUserAudioMute{false};
+    std::atomic<int> mSentAudioMute{-1};             // -1: not sent on this link
+    mutable std::atomic<bool> mOutputSeenRunning{false};
+    int64_t mStartNs = 0;  // elapsedRealtimeNano() at construction
 
     // Handbrake: the MG F wire may not reach the radio (ISO A2 left open reads "released").
     // persist.vendor.vehicle.handbrake = auto (default) | wired | gnss. In auto mode the
