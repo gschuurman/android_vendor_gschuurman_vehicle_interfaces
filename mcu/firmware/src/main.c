@@ -25,7 +25,7 @@
 
 #define FW_MAJOR 0
 #define FW_MINOR 2
-#define FW_PATCH 2
+#define FW_PATCH 3
 
 #define BL_PWM_HZ 32768u        // same period (30518 ns) the VHAL used on the VIM3 PWM
 #define LOW_BATT_MV 12200       // shut down from suspend below this (~50% charge at rest: the car must still start)...
@@ -288,7 +288,8 @@ static void kline_task(void) {
     if (a.frame) usb_link_send_kline(MCU_KLINE_ECU_MEMS19, a.frame_data, a.frame_len, now_ms);
     if (a.state_changed) {
         usb_link_send_prop(MCU_PROP_KLINE_STATE, kl_public_state(&ksm), (int32_t)ksm.ecu_id);
-        usb_link_log("kline state %d", kl_public_state(&ksm));
+        // Only with the link up: while the VIM3 sleeps the retries would fill the log queue.
+        if (usb_link_up()) usb_link_log("kline state %d", kl_public_state(&ksm));
     }
 }
 
@@ -720,6 +721,21 @@ void app_fill_info(void *p) {
     snprintf(info->build, sizeof(info->build), "%s %s", __DATE__, __TIME__);
 }
 
+// Power-relevant input edges, for the sleep/wake post-mortem after the link returns.
+static void log_power_inputs(const pwr_inputs_t *in) {
+    static bool init;
+    static pwr_inputs_t last;
+    if (init && in->acc == last.acc && in->sbc_on == last.sbc_on && in->service == last.service &&
+        in->usb_suspended == last.usb_suspended && in->low_battery == last.low_battery) {
+        return;
+    }
+    init = true;
+    last = *in;
+    usb_link_log("t%lu in acc %d vim3 %d svc %d usbsusp %d lowbat %d vbat %ld",
+                 (unsigned long)(now_ms / 1000), in->acc, in->sbc_on, in->service,
+                 in->usb_suspended, in->low_battery, (long)vbat_mv);
+}
+
 static int32_t pending_report = -1, pending_report_param;
 
 void app_on_host_set(uint32_t prop, int32_t v0, int32_t v1) {
@@ -855,6 +871,7 @@ int main(void) {
             pwr_on_report(&psm, pending_report, pending_report_param, &in);
             pending_report = -1;
         }
+        log_power_inputs(&in);
         mcu_power_state_t before = psm.state;
         pwr_actions_t act = pwr_step(&psm, now_ms, &in);
 
@@ -876,7 +893,8 @@ int main(void) {
             key_down = true;
             key_release_at = now_ms + act.key_press_ms;
             gpio_put(PIN_PWR_KEY, 1);
-            usb_link_log("power key %lu ms", (unsigned long)act.key_press_ms);
+            usb_link_log("t%lu power key %lu ms", (unsigned long)(now_ms / 1000),
+                         (unsigned long)act.key_press_ms);
         }
         if (key_down && (int32_t)(now_ms - key_release_at) >= 0) {
             key_down = false;
@@ -885,7 +903,8 @@ int main(void) {
         if (act.send_req) usb_link_send_prop(MCU_PROP_AP_POWER_STATE_REQ, act.req, act.req_param);
         if (act.state_changed) {
             usb_link_send_prop(MCU_PROP_POWER_STATE, psm.state, 0);
-            usb_link_log("power %s", pwr_state_name(psm.state));
+            usb_link_log("t%lu power %s vbat %ld", (unsigned long)(now_ms / 1000), pwr_state_name(psm.state),
+                         (long)vbat_mv);
         }
 
         apply_display(pwr_display_allowed(&psm) && supply_on);

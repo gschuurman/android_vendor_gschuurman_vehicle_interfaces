@@ -25,7 +25,9 @@ static uint32_t now_ms;
 static uint32_t last_hello_ms;
 static bool hello_seen;
 static bool hello_edge;
-static mcu_log_msg_t log_queue[4];
+// Logs wait for the VHAL (hello): the host polls the endpoint before anyone reads hidraw,
+// so lines sent earlier are lost. 16 deep so a whole sleep/wake cycle survives the link gap.
+static mcu_log_msg_t log_queue[16];
 static int log_n;
 static mcu_kline_frame_msg_t kline_queue[4];
 static int kline_n;
@@ -183,7 +185,7 @@ static void send_vendor(void) {
         }
         return;
     }
-    if (log_n > 0) {
+    if (log_n > 0 && usb_link_up()) {
         memcpy(buf, &log_queue[0], sizeof(log_queue[0]));
         if (tud_hid_n_report(USB_ITF_VENDOR, 0, buf, sizeof(buf))) {
             memmove(&log_queue[0], &log_queue[1], sizeof(log_queue[0]) * (size_t)(log_n - 1));
