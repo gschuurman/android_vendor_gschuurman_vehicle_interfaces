@@ -24,7 +24,7 @@
 
 #define FW_MAJOR 0
 #define FW_MINOR 2
-#define FW_PATCH 0
+#define FW_PATCH 1
 
 #define BL_PWM_HZ 32768u        // same period (30518 ns) the VHAL used on the VIM3 PWM
 #define LOW_BATT_MV 12200       // shut down from suspend below this (~50% charge at rest: the car must still start)...
