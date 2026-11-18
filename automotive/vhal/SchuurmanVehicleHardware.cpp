@@ -59,6 +59,15 @@ static const int32_t VENDOR_SCREEN_POWER = MCU_PROP_SCREEN_POWER;  // 0x21400555
 // VENDOR | GLOBAL | STRING: MCU firmware version and build, read-only.
 static const int32_t VENDOR_MCU_FW_VERSION = 0x2110060D;
 
+// MEMS 1.9 engine data from the K-line module (see MemsDecoder.h).
+// VENDOR | GLOBAL | FLOAT_VEC: decoded values, index = MemsField. At most 10 Hz.
+static const int32_t VENDOR_MEMS_LIVE = 0x21610614;
+// VENDOR | GLOBAL | BYTES: every raw ECU answer, for session logs:
+// {ecu, MCU frame seq, MCU t_ms (4 bytes LE), command echo, response bytes...}
+static const int32_t VENDOR_MEMS_RAW = 0x21700615;
+static constexpr int64_t kMemsStaleNs = 3'000'000'000LL;
+static constexpr int64_t kMemsLiveIntervalNs = 100'000'000LL;
+
 // SYSTEM | GLOBAL | STRING — VHAL → CarPowerPolicyService
 static const int32_t POWER_POLICY_REQ       = 0x11100F21;
 static const int32_t POWER_POLICY_GROUP_REQ = 0x11100F22;
@@ -96,6 +105,9 @@ static const McuVendorProp kMcuVendorProps[] = {
         {static_cast<int32_t>(MCU_PROP_GNSS_FIX), false},
         {static_cast<int32_t>(MCU_PROP_SUSPEND_SAVE), true},
         {static_cast<int32_t>(MCU_PROP_TPS_MODE), false},
+        {static_cast<int32_t>(MCU_PROP_KLINE_STATE), false},
+        {static_cast<int32_t>(MCU_PROP_KLINE_MODE), true},
+        {static_cast<int32_t>(MCU_PROP_KLINE_CMD), true},
 };
 
 static bool isMcuVendorProp(int32_t prop) {
@@ -138,6 +150,7 @@ static constexpr char kHandbrakeSeenProp[] = "persist.vendor.vehicle.handbrake_s
 static constexpr char kAmpModeProp[] = "persist.vendor.vehicle.amp_mode";
 static constexpr char kOffDelayProp[] = "persist.vendor.vehicle.off_delay_s";
 static constexpr char kSuspendSaveProp[] = "persist.vendor.vehicle.suspend_save";
+static constexpr char kKlineModeProp[] = "persist.vendor.vehicle.kline_mode";
 // Long suspends (12 h) only with firmware that shuts down at 12.2 V (0.2.0); older firmware
 // (11.6 V) keeps the 15 min off delay so a long sleep can't leave the car unable to start.
 static constexpr int kMcuFwLongSleep = 200;  // 0.2.0
@@ -212,6 +225,7 @@ SchuurmanVehicleHardware::SchuurmanVehicleHardware()
     mTouchWakeThreadRunning.store(true);
     mTouchWakeThread = std::thread(&SchuurmanVehicleHardware::touchWakeLoop, this);
 
+    mMcu.setKlineCallback([this](const mcu_kline_frame_msg_t& f) { onMcuKline(f); });
     mMcu.start([this](const std::vector<mcu_prop_t>& p, bool s) { onMcuProps(p, s); },
                [this](const mcu_info_msg_t& info) { onMcuInfo(info); },
                [this](bool c) { onMcuConnect(c); });
@@ -349,6 +363,7 @@ void SchuurmanVehicleHardware::pushSettingsToMcu() {
             {MCU_PROP_AMP_MODE, android::base::GetIntProperty(kAmpModeProp, 2, 0, 2), 0},
             {MCU_PROP_OFF_DELAY_S, offDelayForMcu(), 0},
             {MCU_PROP_SUSPEND_SAVE, android::base::GetIntProperty(kSuspendSaveProp, 0, 0, 3), 0},
+            {MCU_PROP_KLINE_MODE, android::base::GetIntProperty(kKlineModeProp, 1, 0, 1), 0},
     };
     // In the first batch after the link comes up: the MCU unmutes the DACs as soon as it
     // sees the link and switches the amp on 500 ms later, so a later write could be late.
@@ -360,6 +375,66 @@ void SchuurmanVehicleHardware::pushSettingsToMcu() {
         LOG(INFO) << "MCU audio mute " << mute << " (" << why << ", link up)";
     } else {
         mSentAudioMute.store(-1);
+    }
+}
+
+bool SchuurmanVehicleHardware::memsFresh() const {
+    return mMemsLastNs != 0 && elapsedRealtimeNano() - mMemsLastNs < kMemsStaleNs;
+}
+
+void SchuurmanVehicleHardware::onMcuKline(const mcu_kline_frame_msg_t& f) {
+    if (f.ecu != MCU_KLINE_ECU_MEMS19 || f.len == 0) return;
+    const int64_t now = elapsedRealtimeNano();
+
+    // Raw frame first: the session log wants every one of them.
+    VehiclePropValue raw;
+    raw.prop = VENDOR_MEMS_RAW;
+    raw.areaId = GLOBAL_AREA_ID;
+    raw.timestamp = now;
+    raw.value.byteValues = {f.ecu, f.seq, static_cast<uint8_t>(f.t_ms), static_cast<uint8_t>(f.t_ms >> 8),
+                            static_cast<uint8_t>(f.t_ms >> 16), static_cast<uint8_t>(f.t_ms >> 24)};
+    raw.value.byteValues.insert(raw.value.byteValues.end(), f.data, f.data + f.len);
+
+    bool decoded80 = false, emitLive = false;
+    float coolant = NAN, rpm = NAN;
+    std::vector<float> live;
+    {
+        std::lock_guard<std::mutex> lk(mMemsMutex);
+        if (mMemsLastSeq >= 0 && static_cast<uint8_t>(mMemsLastSeq + 1) != f.seq) mMemsGaps++;
+        mMemsLastSeq = f.seq;
+        mMemsFrames++;
+        mMemsLastRaw = raw.value.byteValues;
+        if (memsDecode(f.data, f.len, &mMems)) {
+            mMemsLastNs = now;
+            decoded80 = f.data[0] == 0x80;
+            coolant = mMems.v[MEMS_COOLANT_C];
+            rpm = mMems.v[MEMS_RPM];
+            if (now - mMemsLiveEmittedNs >= kMemsLiveIntervalNs) {
+                mMemsLiveEmittedNs = now;
+                emitLive = true;
+                live.assign(mMems.v, mMems.v + MEMS_FIELD_COUNT);
+            }
+        }
+    }
+    emitPropChange(raw);
+    if (decoded80) {
+        VehiclePropValue v;
+        v.areaId = GLOBAL_AREA_ID;
+        v.timestamp = now;
+        v.prop = static_cast<int32_t>(VehicleProperty::ENGINE_COOLANT_TEMP);
+        v.value.floatValues = {coolant};
+        emitPropChange(v);
+        v.prop = static_cast<int32_t>(VehicleProperty::ENGINE_RPM);
+        v.value.floatValues = {rpm};
+        emitPropChange(v);
+    }
+    if (emitLive) {
+        VehiclePropValue v;
+        v.prop = VENDOR_MEMS_LIVE;
+        v.areaId = GLOBAL_AREA_ID;
+        v.timestamp = now;
+        v.value.floatValues = std::move(live);
+        emitPropChange(v);
     }
 }
 
@@ -872,6 +947,10 @@ StatusCode SchuurmanVehicleHardware::setValueInternal(
         updateAudioMute();
     } else if (request.prop == static_cast<int32_t>(MCU_PROP_GNSS_CMD)) {
         return setMcuSetting(request, MCU_GNSS_CMD_RESET, MCU_GNSS_CMD_NORMAL, nullptr);
+    } else if (request.prop == static_cast<int32_t>(MCU_PROP_KLINE_MODE)) {
+        return setMcuSetting(request, 0, 1, kKlineModeProp);
+    } else if (request.prop == static_cast<int32_t>(MCU_PROP_KLINE_CMD)) {
+        return setMcuSetting(request, MCU_KLINE_CMD_CLEAR_FAULTS, MCU_KLINE_CMD_CLEAR_FAULTS, nullptr);
     } else {
         return StatusCode::INVALID_ARG;
     }
@@ -923,6 +1002,16 @@ StatusCode SchuurmanVehicleHardware::getValueInternal(
         case VehicleProperty::PERF_VEHICLE_SPEED:
             response->value.floatValues = {mSpeed.load()};
             return StatusCode::OK;
+        case VehicleProperty::ENGINE_COOLANT_TEMP:
+        case VehicleProperty::ENGINE_RPM: {
+            std::lock_guard<std::mutex> lk(mMemsMutex);
+            if (!memsFresh() || !mMems.have80) return StatusCode::NOT_AVAILABLE;
+            response->value.floatValues = {
+                    mMems.v[request.prop == static_cast<int32_t>(VehicleProperty::ENGINE_RPM)
+                                    ? MEMS_RPM
+                                    : MEMS_COOLANT_C]};
+            return StatusCode::OK;
+        }
         case VehicleProperty::IGNITION_STATE:
             response->value.int32Values = {mIgnitionState.load()};
             return StatusCode::OK;
@@ -977,12 +1066,25 @@ StatusCode SchuurmanVehicleHardware::getValueInternal(
         response->value.stringValue = mMcuVersion;
         return StatusCode::OK;
     }
+    if (request.prop == VENDOR_MEMS_LIVE) {
+        std::lock_guard<std::mutex> lk(mMemsMutex);
+        if (!memsFresh()) return StatusCode::NOT_AVAILABLE;
+        response->value.floatValues.assign(mMems.v, mMems.v + MEMS_FIELD_COUNT);
+        return StatusCode::OK;
+    }
+    if (request.prop == VENDOR_MEMS_RAW) {
+        std::lock_guard<std::mutex> lk(mMemsMutex);
+        if (mMemsLastRaw.empty()) return StatusCode::NOT_AVAILABLE;
+        response->value.byteValues = mMemsLastRaw;
+        return StatusCode::OK;
+    }
     if (request.prop == static_cast<int32_t>(MCU_PROP_AUDIO_MUTE)) {
         response->value.int32Values = {mUserAudioMute.load() ? 1 : 0};
         return StatusCode::OK;
     }
     if (isMcuVendorProp(request.prop)) {
-        if (request.prop == static_cast<int32_t>(MCU_PROP_GNSS_CMD)) {
+        if (request.prop == static_cast<int32_t>(MCU_PROP_GNSS_CMD) ||
+            request.prop == static_cast<int32_t>(MCU_PROP_KLINE_CMD)) {
             response->value.int32Values = {0};
             return StatusCode::OK;
         }
@@ -1147,6 +1249,20 @@ std::vector<VehiclePropConfig> SchuurmanVehicleHardware::getAllPropertyConfigs()
     }
     addGlobalRO(VENDOR_MCU_FW_VERSION, static_cast<int32_t>(VehiclePropertyChangeMode::ON_CHANGE));
 
+    // Engine (MEMS 1.9 over the K-line module). Emitted per ECU frame (~5-15 Hz).
+    for (auto prop : {VehicleProperty::ENGINE_COOLANT_TEMP, VehicleProperty::ENGINE_RPM}) {
+        VehiclePropConfig c;
+        c.prop = static_cast<int32_t>(prop);
+        c.access = VehiclePropertyAccess::READ;
+        c.changeMode = VehiclePropertyChangeMode::CONTINUOUS;
+        c.minSampleRate = 1.0f;
+        c.maxSampleRate = 10.0f;
+        c.areaConfigs = {{.areaId = GLOBAL_AREA_ID}};
+        configs.push_back(c);
+    }
+    addGlobalRO(VENDOR_MEMS_LIVE, static_cast<int32_t>(VehiclePropertyChangeMode::ON_CHANGE));
+    addGlobalRO(VENDOR_MEMS_RAW, static_cast<int32_t>(VehiclePropertyChangeMode::ON_CHANGE));
+
     return configs;
 }
 
@@ -1247,6 +1363,16 @@ DumpResult SchuurmanVehicleHardware::dump(const std::vector<std::string>&) {
                                        autoBrightnessActive() ? "active" : "no light sensor",
                                        mAutoTargetBrightness.load(), mManualBrightness.load(),
                                        mCurrentBrightness.load());
+    {
+        std::lock_guard<std::mutex> lk(mMemsMutex);
+        out += android::base::StringPrintf(
+                "  MEMS: %llu frames, %llu gaps, %s, coolant %.0f C, rpm %.0f, battery %.1f V, "
+                "fans %.0f/%.0f\n",
+                static_cast<unsigned long long>(mMemsFrames),
+                static_cast<unsigned long long>(mMemsGaps), memsFresh() ? "fresh" : "stale",
+                mMems.v[MEMS_COOLANT_C], mMems.v[MEMS_RPM], mMems.v[MEMS_BATTERY_V],
+                mMems.v[MEMS_FAN1], mMems.v[MEMS_FAN2]);
+    }
     out += android::base::StringPrintf("  AP_POWER_STATE_REQ %d/%d, REPORT %d/%d\n",
                                        mLastApPowerStateReq.load(),
                                        mLastApPowerStateReqParam.load(),

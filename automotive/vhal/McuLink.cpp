@@ -169,7 +169,10 @@ void McuLink::loop() {
             loggedMissing = false;
             LOG(INFO) << "MCU connected on " << path;
             if (mOnConnect) mOnConnect(true);
-            sendHello();  // the MCU answers with MCU_MSG_INFO and a full snapshot
+            sendHello();  // the MCU answers with MCU_MSG_INFO and a full snapshot...
+            // ...but only when it saw the link down; a VHAL restart can be quicker than its
+            // 3.5 s link timeout, so ask explicitly.
+            requestSnapshot();
             lastHello = Clock::now();
         }
 
@@ -202,6 +205,13 @@ void McuLink::loop() {
                         memcpy(&info, buf, std::min<size_t>(n, sizeof(info)));
                         info.build[sizeof(info.build) - 1] = 0;
                         if (mOnInfo) mOnInfo(info);
+                        break;
+                    }
+                    case MCU_MSG_KLINE_FRAME: {
+                        mcu_kline_frame_msg_t m{};
+                        memcpy(&m, buf, std::min<size_t>(n, sizeof(m)));
+                        if (m.len > MCU_KLINE_FRAME_MAX) m.len = MCU_KLINE_FRAME_MAX;
+                        if (mOnKline) mOnKline(m);
                         break;
                     }
                     case MCU_MSG_LOG: {

@@ -25,12 +25,15 @@ class McuLink {
     using PropsCallback = std::function<void(const std::vector<mcu_prop_t>& props, bool snapshot)>;
     using InfoCallback = std::function<void(const mcu_info_msg_t& info)>;
     using ConnectCallback = std::function<void(bool connected)>;
+    using KlineCallback = std::function<void(const mcu_kline_frame_msg_t& frame)>;
 
     McuLink() = default;
     ~McuLink();
 
     void start(PropsCallback onProps, InfoCallback onInfo, ConnectCallback onConnect);
     void stop();
+    // Raw ECU answers from the K-line module (reader thread). Set before start().
+    void setKlineCallback(KlineCallback onKline) { mOnKline = std::move(onKline); }
 
     bool connected() const { return mFd.load() >= 0; }
 
@@ -57,6 +60,7 @@ class McuLink {
     PropsCallback mOnProps;
     InfoCallback mOnInfo;
     ConnectCallback mOnConnect;
+    KlineCallback mOnKline;
     std::atomic<bool> mRunning{false};
     std::atomic<int> mFd{-1};
     std::atomic<int64_t> mLastReadNs{0};

@@ -16,6 +16,7 @@ cc_binary {
     srcs: [
         "Main.cpp",
         "McuLink.cpp",
+        "MemsDecoder.cpp",
         "SchuurmanVehicleHardware.cpp",
     ],
 
@@ -58,6 +59,17 @@ cc_binary {
         "libbase",
         "liblog",
     ],
+    cflags: ["-Wall", "-Wextra", "-Werror"],
+}
+
+// Host test for the MEMS 1.x frame decoder: atest mems_decoder_test (or m + run on host)
+cc_test_host {
+    name: "mems_decoder_test",
+    srcs: [
+        "MemsDecoder.cpp",
+        "MemsDecoderTest.cpp",
+    ],
+    local_include_dirs: ["."],
     cflags: ["-Wall", "-Wextra", "-Werror"],
 }
 

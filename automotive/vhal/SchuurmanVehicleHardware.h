@@ -15,6 +15,7 @@
 #include <vector>
 
 #include "McuLink.h"
+#include "MemsDecoder.h"
 
 namespace android {
 namespace hardware {
@@ -66,6 +67,9 @@ class SchuurmanVehicleHardware : public IVehicleHardware {
     void onMcuProps(const std::vector<mcu_prop_t>& props, bool snapshot);
     void onMcuInfo(const mcu_info_msg_t& info);
     void onMcuConnect(bool connected);
+    void onMcuKline(const mcu_kline_frame_msg_t& frame);
+    // Engine values from the K-line, NOT_AVAILABLE when no frame came for kMemsStaleNs.
+    bool memsFresh() const REQUIRES(mMemsMutex);
     void pushSettingsToMcu();
     // Audio mute sent to the MCU: Android's (user) mute, or the primary audio output not
     // running yet (vendor.audio.output_running), so the amp never comes on over
@@ -145,6 +149,16 @@ class SchuurmanVehicleHardware : public IVehicleHardware {
     int32_t offDelayForMcu() const;
 
     std::atomic<bool> mShuttingDown;
+
+    // MEMS 1.9 engine data (K-line module), decoded from the MCU's raw frames.
+    mutable std::mutex mMemsMutex;
+    MemsValues mMems GUARDED_BY(mMemsMutex);
+    int64_t mMemsLastNs GUARDED_BY(mMemsMutex) = 0;
+    int64_t mMemsLiveEmittedNs GUARDED_BY(mMemsMutex) = 0;
+    std::vector<uint8_t> mMemsLastRaw GUARDED_BY(mMemsMutex);
+    uint64_t mMemsFrames GUARDED_BY(mMemsMutex) = 0;
+    uint64_t mMemsGaps GUARDED_BY(mMemsMutex) = 0;
+    int mMemsLastSeq GUARDED_BY(mMemsMutex) = -1;
 
     // Auto brightness from the MCU's BH1750 (MCU_PROP_LUX). Enabled by default and kept in
     // persist.vendor.vehicle.auto_brightness, but only active while the sensor reports a value; without
