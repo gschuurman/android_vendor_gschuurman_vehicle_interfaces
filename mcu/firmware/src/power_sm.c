@@ -21,6 +21,7 @@ void pwr_default_config(pwr_config_t *c) {
     c->wake_nolink_ms = 45000;
     c->shutdown_timeout_ms = 120000;
     c->cut_settle_ms = 3000;
+    c->hung_after_wake_ms = 3u * 60u * 1000u;
 }
 
 static void set_state(pwr_sm_t *sm, mcu_power_state_t s) {
@@ -48,6 +49,7 @@ static void send_req(pwr_sm_t *sm, int32_t req, int32_t param) {
 static void cut_power(pwr_sm_t *sm, mcu_power_state_t next) {
     sm->act.power_en = false;
     sm->deep_sleep = false;
+    sm->await_link = false;
     sm->cut_holding = true;
     sm->cut_since = sm->now;
     sm->req = REQ_ON;
@@ -205,6 +207,16 @@ pwr_actions_t pwr_step(pwr_sm_t *sm, uint32_t now, const pwr_inputs_t *in) {
 
     case MCU_PWR_RUNNING:
         sm->act.power_en = true;
+        if (sm->await_link) {
+            if (in->link_up) {
+                sm->await_link = false;
+            } else if (!in->service && since(now, sm->state_since) >= c->hung_after_wake_ms) {
+                // 2026-11-18: a deep resume hung in the kernel (USB host back, no thaw); the MCU
+                // ran on without a link and the VIM3 stayed dead until its reset button.
+                cut_power(sm, MCU_PWR_OFF);  // OFF boots it again when ACC is on
+                break;
+            }
+        }
         if (sbc_off && !in->service) {
             // Android shut down by itself (power menu) or crashed off.
             cut_power(sm, in->acc ? MCU_PWR_LATCHED_OFF : MCU_PWR_OFF);
@@ -293,9 +305,8 @@ pwr_actions_t pwr_step(pwr_sm_t *sm, uint32_t now, const pwr_inputs_t *in) {
             if (sm->wake_attempt < c->wake_attempts) {
                 sm->wake_attempt++;
                 press(sm, in, c->key_short_ms);
-            } else if (sm->wake_for_shutdown || !in->acc || sm->deep_sleep) {
-                // Will not wake: nothing left to save. Still deep asleep with ACC on: cut,
-                // and OFF boots it again from cold.
+            } else {
+                // Will not wake: nothing left to save. With ACC on, OFF boots it again from cold.
                 cut_power(sm, MCU_PWR_OFF);
             }
             break;
@@ -308,9 +319,14 @@ pwr_actions_t pwr_step(pwr_sm_t *sm, uint32_t now, const pwr_inputs_t *in) {
                 answer_android(sm, in);
                 break;
             }
-            // Awake but no VHAL link (old software): run on, or cut when shutting down.
-            if (in->acc && !sm->wake_for_shutdown) enter_running(sm);
-            else cut_power(sm, MCU_PWR_OFF);
+            // Awake but no VHAL link: old software, or a resume that hung. Run on (cut after
+            // hung_after_wake_ms if the link never comes), or cut when shutting down.
+            if (in->acc && !sm->wake_for_shutdown) {
+                enter_running(sm);
+                sm->await_link = true;
+            } else {
+                cut_power(sm, MCU_PWR_OFF);
+            }
         }
         break;
 

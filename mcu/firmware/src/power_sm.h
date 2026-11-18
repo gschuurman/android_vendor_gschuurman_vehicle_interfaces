@@ -47,6 +47,7 @@ typedef struct {
     uint32_t wake_nolink_ms;      // VIM3 awake but no VHAL link: assume legacy software
     uint32_t shutdown_timeout_ms; // SHUTTING_DOWN -> cut even if the rail stays up
     uint32_t cut_settle_ms;       // supply stays off at least this long
+    uint32_t hung_after_wake_ms;  // awake after a wake but the VHAL never came: hung, cold boot
 } pwr_config_t;
 
 typedef struct {
@@ -93,6 +94,9 @@ typedef struct {
     bool wake_for_shutdown;
     uint32_t wake_attempt;
     uint32_t last_key;
+    // RUNNING entered from WAKING without a VHAL link: if it never comes the VIM3 hung
+    // while resuming (USB host back, Android not), so cut and boot it from cold.
+    bool await_link;
     // last request sent to Android
     int32_t req, req_param;
     bool link_was_up;

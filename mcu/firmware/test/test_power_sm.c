@@ -307,6 +307,67 @@ static void test_deep_sleep_wake_fails_acc_on(void) {
     printf("deep sleep wake fails, ACC on -> cold boot ok\n");
 }
 
+// 2026-11-18 bench: ACC on after a deep sleep, the VIM3 resumed far enough for USB to come back
+// but hung in the kernel; no VHAL. Must end in a cold boot, not RUNNING forever.
+static void test_resume_hangs_acc_on(void) {
+    enter_deep_sleep();
+    run(10000);
+    in.acc = true;
+    run(100);
+    assert(sm.state == MCU_PWR_WAKING);
+    in.sbc_on = true;
+    in.usb_suspended = false;  // USB host back, Android never comes
+    run(46000);
+    assert(sm.state == MCU_PWR_RUNNING && sm.await_link && power);
+    run(3u * 60u * 1000u - 2000);
+    assert(sm.state == MCU_PWR_RUNNING);
+    run(2100);
+    assert(sm.state == MCU_PWR_OFF && !power);  // cut
+    in.sbc_on = false;  // supply gone: the rail drops
+    in.usb_suspended = true;
+    run(4000);
+    assert(sm.state == MCU_PWR_BOOTING && power);  // ACC on: cold boot
+    printf("resume hangs, ACC on -> cold boot ok\n");
+}
+
+// The same, but the VHAL turns up late: no cut.
+static void test_resume_slow_link(void) {
+    enter_deep_sleep();
+    run(10000);
+    in.acc = true;
+    run(100);
+    in.sbc_on = true;
+    in.usb_suspended = false;
+    run(46000);
+    assert(sm.state == MCU_PWR_RUNNING && sm.await_link);
+    run(60000);
+    in.link_up = true;
+    report(REP_DEEP_SLEEP_EXIT);
+    run(5u * 60u * 1000u);
+    assert(sm.state == MCU_PWR_RUNNING && !sm.await_link && power);
+    printf("resume with a late VHAL -> keeps running ok\n");
+}
+
+// s2idle wake with ACC on where the VIM3 never answers the key (USB stays suspended): cut too.
+static void test_wake_fails_acc_on_shallow(void) {
+    boot_to_running();
+    in.acc = false;
+    run(3000);
+    report(REP_DEEP_SLEEP_ENTRY);
+    sm.deep_sleep = false;  // s2idle: rail stays up
+    in.link_up = false;
+    in.usb_suspended = true;
+    run(10000);
+    in.acc = true;
+    run(100);
+    assert(sm.state == MCU_PWR_WAKING);
+    run(44000);
+    assert(sm.state == MCU_PWR_WAKING);
+    run(2000);
+    assert(sm.state == MCU_PWR_OFF && !power);  // 3 presses, then cut; ACC on boots it again
+    printf("shallow wake fails, ACC on -> cold boot ok\n");
+}
+
 int main(void) {
     test_drive_suspend_resume();
     test_suspend_then_full_off();
@@ -321,6 +382,9 @@ int main(void) {
     test_deep_sleep_rail_off_resume();
     test_deep_sleep_rail_off_full_off();
     test_deep_sleep_wake_fails_acc_on();
+    test_resume_hangs_acc_on();
+    test_resume_slow_link();
+    test_wake_fails_acc_on_shallow();
     printf("test_power_sm: ok\n");
     return 0;
 }
