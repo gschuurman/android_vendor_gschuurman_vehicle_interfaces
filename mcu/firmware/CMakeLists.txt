@@ -44,4 +44,10 @@ target_link_libraries(carradio_mcu
 pico_enable_stdio_usb(carradio_mcu 0)
 pico_enable_stdio_uart(carradio_mcu 0)
 
+# Bootrom IMAGE_DEF version, inverted (0xFFFF - x) like the A/B update work on top of 0.3.0:
+# on an MCU that carries the A/B partition table a BOOTSEL install of this image lands in the
+# other slot, and with the inverted version a normal boot picks it over a newer 0.3.x there.
+# Keep in sync with FW_MAJOR/FW_MINOR/FW_PATCH in src/main.c.
+pico_set_binary_version(carradio_mcu MAJOR 65535 MINOR 65022)  # 0.2.1
+pico_hash_binary(carradio_mcu)
 pico_add_extra_outputs(carradio_mcu)
