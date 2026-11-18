@@ -61,6 +61,13 @@ cc_binary {
     cflags: ["-Wall", "-Wextra", "-Werror"],
 }
 
+// Install MCU firmware over its BOOTSEL drive (adb root shell): mcu_flash FILE.uf2
+sh_binary {
+    name: "mcu_flash",
+    vendor: true,
+    src: "mcu_flash.sh",
+}
+
 // Not needed with the rev 0.6 peripheral board: the BH1750 sits on the MCU's I2C bus and
 // reaches the VHAL as MCU_PROP_LUX.
 cc_binary {
