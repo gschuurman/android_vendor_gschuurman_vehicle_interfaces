@@ -61,14 +61,29 @@ ECU ──K-line── L9637D (module, J10) ── UART0 GP32/33, EN GP28 ──
    thresholds. Read-only towards the ECU apart from an optional "clear faults".
 4. **Alarm service in the same APK, persistent priv-app** (`android:persistent`, started at boot,
    restarted by the system), independent of whether the dashboard is open:
-   - thresholds with hysteresis (defaults to confirm: coolant caution 105 °C / alarm 110 °C; oil
+   - thresholds with hysteresis (coolant caution 105 °C / alarm 110 °C, confirmed by the user 2026-11-18; oil
      alarm per sender, e.g. 130 °C) + the plausibility rules above;
    - pause music: take transient audio focus with an emergency/safety usage (pauses media and AA
      audio) and also pause active MediaSessions explicitly (MEDIA_CONTENT_CONTROL, priv-app);
    - big full-screen overlay (TYPE_APPLICATION_OVERLAY, also above Android Auto projection) with the
      value, trend and "pull over, stop the engine"; chime; acknowledge button; re-alarm if it keeps
      rising; log every event (Room) so it can be reviewed later.
-5. **Optional MCU-side backstop:** the firmware can still read byte 3 of the 0x80 frame and drive a
+5. **Session logging (on request)** in the CarStatus app, for analysing a drive afterwards (e.g.
+   coolant behaviour before a head gasket failure):
+   - start/stop from the dashboard (optionally "auto-start every drive" as a setting); a small
+     recording indicator while active; recording survives the dashboard closing (foreground service).
+   - records every decoded field from both frames at full poll rate (~5-10 Hz) plus the **raw frames**
+     (so a later decoder fix can re-decode old sessions), GNSS position/speed, battery, ambient/lux,
+     and alarm/plausibility events as markers. User can add a marker ("steam", "gauge dropped").
+   - storage: one Room/SQLite DB per session (or one DB, sessions table) on /data; a 1 h drive at
+     10 Hz is a few MB. Retention setting (keep last N / auto-delete after N days).
+   - on-device review: session list, graphs over time with zoom (coolant, IAT, RPM, fans, MAP,
+     lambda, trims) and event markers; coolant vs fan-state view is the useful one for cooling issues.
+   - export: CSV (one row per sample) + the raw-frame log, shared to USB stick / adb pull / share
+     sheet, for analysis on the PC.
+   - ACC off / deep sleep: close the session cleanly on SHUTDOWN_PREPARE; a new drive starts a new
+     session.
+6. **Optional MCU-side backstop:** the firmware can still read byte 3 of the 0x80 frame and drive a
    buzzer/LED on a spare pin if coolant passes a hard limit, so an Android hang doesn't silence it.
 
 ## Steps
@@ -77,5 +92,5 @@ ECU ──K-line── L9637D (module, J10) ── UART0 GP32/33, EN GP28 ──
 2. MCU: `kline.c` (5-baud wake via GPIO, then UART0), protocol msg, host test with a fake ECU.
 3. VHAL: MemsDecoder + props + tests; HeadUnitDebug page with raw frames.
 4. Capture real frames from the car (idle, warm-up, fan on) to confirm offsets.
-5. CarStatus app: alarm service first, then the dashboard.
-6. Bench test of the alarm with injected values (mcutool/VHAL debug inject), then in the car.
+5. CarStatus app: alarm service first, then the dashboard, then session logging + export.
+7. Bench test of the alarm with injected values (mcutool/VHAL debug inject), then in the car.
