@@ -239,6 +239,74 @@ static void test_sleep_entry_without_suspend(void) {
     assert(sm.state == MCU_PWR_OFF && !power);
 }
 
+// PSCI SYSTEM_SUSPEND: the VIM3's bl301 switches its 5V/3V3 rails off while asleep, so the rail
+// sense goes low and the USB device disappears (tud_mounted false = usb_suspended).
+static void enter_deep_sleep(void) {
+    boot_to_running();
+    in.acc = false;
+    run(3000);
+    report(REP_DEEP_SLEEP_ENTRY);
+    in.link_up = false;
+    in.usb_suspended = true;
+    in.sbc_on = false;
+}
+
+static void test_deep_sleep_rail_off_resume(void) {
+    enter_deep_sleep();
+    run(60000);
+    assert(sm.state == MCU_PWR_SUSPENDED && power);  // low rail is not an off
+    uint32_t p = presses;
+    in.acc = true;
+    run(100);
+    assert(sm.state == MCU_PWR_WAKING && presses == p + 1);
+    run(3000);  // rail low for longer than sbc_off_confirm_ms while resuming
+    assert(sm.state == MCU_PWR_WAKING && power);
+    in.sbc_on = true;
+    run(3000);
+    in.usb_suspended = false;
+    in.link_up = true;
+    run(20);
+    assert(sm.state == MCU_PWR_RUNNING && last_req == REQ_ON && power);
+    // Afterwards a rail drop is a real power-off again.
+    in.sbc_on = false;
+    run(2500);
+    assert(sm.state == MCU_PWR_LATCHED_OFF && !power);
+    printf("deep sleep rail off -> resume ok\n");
+}
+
+static void test_deep_sleep_rail_off_full_off(void) {
+    enter_deep_sleep();
+    uint32_t p = presses;
+    run(15u * 60u * 1000u + 100);
+    assert(sm.state == MCU_PWR_WAKING && presses == p + 1 && power);
+    run(2000);
+    in.sbc_on = true;
+    run(3000);
+    in.usb_suspended = false;
+    in.link_up = true;
+    run(20);
+    assert(sm.state == MCU_PWR_SHUTDOWN_PREP && last_param == PARAM_SHUTDOWN_ONLY);
+    report(REP_SHUTDOWN_START);
+    run(5000);
+    in.sbc_on = false;
+    in.link_up = false;
+    run(2500);
+    assert(sm.state == MCU_PWR_OFF && !power);
+    printf("deep sleep rail off -> full off ok\n");
+}
+
+static void test_deep_sleep_wake_fails_acc_on(void) {
+    enter_deep_sleep();
+    run(10000);
+    in.acc = true;
+    run(100);
+    assert(sm.state == MCU_PWR_WAKING);
+    run(60000);  // never resumes: cut, then boot from cold because ACC is on
+    assert(sm.state == MCU_PWR_BOOTING || sm.state == MCU_PWR_OFF);
+    assert(sm.boot_attempt <= 1);
+    printf("deep sleep wake fails, ACC on -> cold boot ok\n");
+}
+
 int main(void) {
     test_drive_suspend_resume();
     test_suspend_then_full_off();
@@ -250,6 +318,9 @@ int main(void) {
     test_service_mode();
     test_wake_fails();
     test_sleep_entry_without_suspend();
+    test_deep_sleep_rail_off_resume();
+    test_deep_sleep_rail_off_full_off();
+    test_deep_sleep_wake_fails_acc_on();
     printf("test_power_sm: ok\n");
     return 0;
 }

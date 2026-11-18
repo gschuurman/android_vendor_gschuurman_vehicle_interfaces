@@ -47,6 +47,7 @@ static void send_req(pwr_sm_t *sm, int32_t req, int32_t param) {
 // Cut the VIM3 supply and hold it off for cut_settle_ms.
 static void cut_power(pwr_sm_t *sm, mcu_power_state_t next) {
     sm->act.power_en = false;
+    sm->deep_sleep = false;
     sm->cut_holding = true;
     sm->cut_since = sm->now;
     sm->req = REQ_ON;
@@ -58,6 +59,7 @@ static void enter_running(pwr_sm_t *sm) {
     sm->acc_low_pending = false;
     sm->sbc_low_pending = false;
     sm->boot_attempt = 0;
+    sm->deep_sleep = false;
     set_state(sm, MCU_PWR_RUNNING);
 }
 
@@ -139,6 +141,7 @@ void pwr_on_report(pwr_sm_t *sm, int32_t report, int32_t param, const pwr_inputs
     case REP_HIBERNATION_ENTRY:
         if (sm->state == MCU_PWR_SHUTDOWN_PREP || sm->state == MCU_PWR_RUNNING) {
             sm->suspend_since = sm->now;
+            sm->deep_sleep = true;
             set_state(sm, MCU_PWR_SUSPENDED);
         }
         break;
@@ -262,7 +265,7 @@ pwr_actions_t pwr_step(pwr_sm_t *sm, uint32_t now, const pwr_inputs_t *in) {
         break;
 
     case MCU_PWR_SUSPENDED:
-        if (sbc_off) {
+        if (sbc_off && !sm->deep_sleep) {
             cut_power(sm, MCU_PWR_OFF);
             break;
         }
@@ -276,7 +279,8 @@ pwr_actions_t pwr_step(pwr_sm_t *sm, uint32_t now, const pwr_inputs_t *in) {
         break;
 
     case MCU_PWR_WAKING:
-        if (sbc_off) {
+        if (sm->deep_sleep && in->sbc_on) sm->deep_sleep = false;  // rail back: resumed
+        if (sbc_off && !sm->deep_sleep) {
             cut_power(sm, in->acc ? MCU_PWR_LATCHED_OFF : MCU_PWR_OFF);
             break;
         }
@@ -289,8 +293,10 @@ pwr_actions_t pwr_step(pwr_sm_t *sm, uint32_t now, const pwr_inputs_t *in) {
             if (sm->wake_attempt < c->wake_attempts) {
                 sm->wake_attempt++;
                 press(sm, in, c->key_short_ms);
-            } else if (sm->wake_for_shutdown || !in->acc) {
-                cut_power(sm, MCU_PWR_OFF);  // will not wake; nothing left to save
+            } else if (sm->wake_for_shutdown || !in->acc || sm->deep_sleep) {
+                // Will not wake: nothing left to save. Still deep asleep with ACC on: cut,
+                // and OFF boots it again from cold.
+                cut_power(sm, MCU_PWR_OFF);
             }
             break;
         }

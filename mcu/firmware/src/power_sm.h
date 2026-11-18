@@ -9,7 +9,8 @@
 //   start by itself -> RUNNING once the VIM3 3.3V rail is up.
 //   ACC off for longer than the crank window -> SHUTDOWN_PREP: AP_POWER_STATE_REQ
 //   SHUTDOWN_PREPARE/CAN_SLEEP over USB (or a short key press if the VHAL link is down).
-//   Android reports DEEP_SLEEP_ENTRY -> SUSPENDED (supply stays on, VIM3 in RAM).
+//   Android reports DEEP_SLEEP_ENTRY -> SUSPENDED (supply stays on, VIM3 in RAM). In deep
+//   suspend the VIM3 switches its own 3.3V rail off: that is not a power-off here.
 //   ACC on again -> key press wakes the VIM3 (GPIOAO_7 is its wakeup source) -> WAKING
 //   -> AP_POWER_STATE_REQ ON once the VHAL is back -> RUNNING.
 //   Off delay expired or battery low -> key press -> WAKING -> SHUTDOWN_PREPARE/
@@ -85,6 +86,9 @@ typedef struct {
     uint32_t prep_deadline;
     uint32_t suspend_since;
     bool suspend_pending;
+    // Android reported DEEP_SLEEP_ENTRY: with PSCI SYSTEM_SUSPEND the VIM3's bl301 switches its
+    // 5V/3V3 rails off, so a low rail and a gone USB device mean "asleep", not "off".
+    bool deep_sleep;
     // waking
     bool wake_for_shutdown;
     uint32_t wake_attempt;
