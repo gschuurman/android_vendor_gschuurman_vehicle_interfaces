@@ -1,0 +1,40 @@
+package {
+    default_applicable_licenses: ["Android-Apache-2.0"],
+}
+
+// Car status: engine dashboard (MEMS 1.9 over the K-line module) and the always-on overheat /
+// coolant-loss alarm (persistent, system user). Plan: mcu/kline-mems-plan.md.
+android_app {
+    name: "CarStatus",
+    srcs: ["src/**/*.java"],
+    resource_dirs: ["res"],
+    manifest: "AndroidManifest.xml",
+    platform_apis: true,
+    certificate: "platform",
+    // android:persistent only works for privileged apps
+    privileged: true,
+
+    libs: ["android.car"],
+
+    required: ["privapp_permissions_com.gschuurman.carstatus"],
+}
+
+prebuilt_etc {
+    name: "privapp_permissions_com.gschuurman.carstatus",
+    src: "permissions/privapp-permissions-com.gschuurman.carstatus.xml",
+    sub_dir: "permissions",
+    filename_from_src: true,
+}
+
+// Alarm rules (plain Java): atest CarStatusAlarmLogicTests
+java_test_host {
+    name: "CarStatusAlarmLogicTests",
+    srcs: [
+        "src/com/gschuurman/carstatus/alarm/AlarmLogic.java",
+        "tests/src/**/*.java",
+    ],
+    static_libs: ["junit"],
+    test_options: {
+        unit_test: true,
+    },
+}

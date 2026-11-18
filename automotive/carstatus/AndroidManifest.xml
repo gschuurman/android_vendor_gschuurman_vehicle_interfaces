@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Car status: engine dashboard (MEMS 1.9 over the K-line module) and the always-on overheat /
+     coolant-loss alarm. Plan: mcu/kline-mems-plan.md. -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.gschuurman.carstatus">
+
+    <!-- VENDOR_MEMS_*, MCU K-line properties -->
+    <uses-permission android:name="android.car.permission.CAR_VENDOR_EXTENSION" />
+    <!-- ENGINE_COOLANT_TEMP, ENGINE_RPM -->
+    <uses-permission android:name="android.car.permission.CAR_ENGINE_DETAILED" />
+    <!-- IGNITION_STATE -->
+    <uses-permission android:name="android.car.permission.CAR_POWERTRAIN" />
+    <!-- The alarm overlay on every user's screen, on top of the system bars -->
+    <uses-permission android:name="android.permission.INTERNAL_SYSTEM_WINDOW" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <!-- Pausing the driver's media from the system user -->
+    <uses-permission android:name="android.permission.MEDIA_CONTENT_CONTROL" />
+    <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS" />
+    <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS_FULL" />
+    <uses-permission android:name="android.permission.MANAGE_USERS" />
+
+    <application
+        android:name=".CarStatusApp"
+        android:persistent="true"
+        android:icon="@drawable/ic_launcher"
+        android:label="@string/app_name"
+        android:theme="@style/Theme.CarStatus">
+
+        <service
+            android:name=".alarm.AlarmService"
+            android:exported="false"
+            android:singleUser="true" />
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:launchMode="singleTask">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>

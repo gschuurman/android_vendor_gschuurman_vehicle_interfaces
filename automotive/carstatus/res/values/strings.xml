@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Car Status</string>
+
+    <string name="alarm_title">ENGINE TEMPERATURE</string>
+    <string name="caution_title">Engine temperature</string>
+    <string name="alarm_ack">Acknowledge</string>
+    <string name="coolant_value">%1$d °C</string>
+    <string name="value_unknown">--</string>
+    <string name="msg_coolant_high">Coolant too hot. Pull over safely and stop the engine.</string>
+    <string name="msg_coolant_drop">Coolant reading dropped sharply: possible coolant loss. Pull over safely, stop the engine and check the coolant level when cold.</string>
+    <string name="msg_coolant_warm">Coolant running hot. Watch the temperature.</string>
+    <string name="msg_coolant_rising">Coolant temperature rising fast.</string>
+    <string name="msg_sensor_fault">The ECU reports a coolant sensor fault.</string>
+    <string name="msg_data_lost">Engine data stopped while the engine was running.</string>
+
+    <string name="tile_coolant">Coolant</string>
+    <string name="tile_rpm">RPM</string>
+    <string name="tile_battery">Battery</string>
+    <string name="tile_intake">Intake air</string>
+    <string name="tile_ambient">Ambient</string>
+    <string name="tile_map">Manifold pressure</string>
+    <string name="tile_throttle">Throttle</string>
+    <string name="tile_fans">Radiator fans</string>
+    <string name="tile_faults">ECU faults</string>
+    <string name="faults_none">none</string>
+    <string name="link_connected">ECU connected</string>
+    <string name="link_waking">Connecting to the ECU…</string>
+    <string name="link_retry">No answer from the ECU</string>
+    <string name="link_off">K-line off (ignition off)</string>
+    <string name="link_unknown">No K-line module</string>
+</resources>
