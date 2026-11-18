@@ -25,7 +25,7 @@
 
 #define FW_MAJOR 0
 #define FW_MINOR 2
-#define FW_PATCH 3
+#define FW_PATCH 4
 
 #define BL_PWM_HZ 32768u        // same period (30518 ns) the VHAL used on the VIM3 PWM
 #define LOW_BATT_MV 12200       // shut down from suspend below this (~50% charge at rest: the car must still start)...
@@ -219,7 +219,35 @@ static volatile bool pps_flag;
 static volatile uint32_t pps_count;
 static volatile uint64_t pps_edge_us;
 
+// VIM3 3V3 dips, timed in the edge IRQ: the debounced input (100 ms) misses short ones, e.g. a
+// rail the VIM3 sleep firmware cuts only briefly before it wakes again.
+#define SBC_DIP_RING 8
+static volatile uint64_t sbc_fall_us;
+static volatile bool sbc_low;
+static volatile uint32_t sbc_dip_at_ms[SBC_DIP_RING], sbc_dip_us[SBC_DIP_RING];
+static volatile uint32_t sbc_dip_head, sbc_dip_tail, sbc_dip_lost;
+
 static void gpio_edge_irq(uint gpio, uint32_t events) {
+    if (gpio == PIN_SBC_SENSE) {
+        uint64_t t = time_us_64();
+        if (events & GPIO_IRQ_EDGE_FALL) {
+            sbc_fall_us = t;
+            sbc_low = true;
+        }
+        if ((events & GPIO_IRQ_EDGE_RISE) && sbc_low) {
+            sbc_low = false;
+            uint32_t h = sbc_dip_head;
+            if (h - sbc_dip_tail < SBC_DIP_RING) {
+                sbc_dip_at_ms[h % SBC_DIP_RING] = (uint32_t)(sbc_fall_us / 1000);
+                uint64_t w = t - sbc_fall_us;
+                sbc_dip_us[h % SBC_DIP_RING] = w > 0xffffffffu ? 0xffffffffu : (uint32_t)w;
+                sbc_dip_head = h + 1;
+            } else {
+                sbc_dip_lost++;
+            }
+        }
+        return;
+    }
     if (gpio == PIN_GNSS_PPS && (events & GPIO_IRQ_EDGE_RISE)) {
         pps_edge_us = time_us_64();
         pps_count++;
@@ -333,6 +361,7 @@ static void board_init(void) {
     in_init(PIN_USBP_FAULT2);
     in_init(PIN_GNSS_PPS);
     gpio_set_irq_enabled_with_callback(PIN_GNSS_PPS, GPIO_IRQ_EDGE_RISE, true, &gpio_edge_irq);
+    gpio_set_irq_enabled(PIN_SBC_SENSE, GPIO_IRQ_EDGE_FALL | GPIO_IRQ_EDGE_RISE, true);
 
     static const uint8_t unused[] = UNUSED_PINS;
     for (unsigned i = 0; i < sizeof(unused); i++) park_unused(unused[i]);
@@ -721,8 +750,23 @@ void app_fill_info(void *p) {
     snprintf(info->build, sizeof(info->build), "%s %s", __DATE__, __TIME__);
 }
 
+static void log_sbc_dips(void) {
+    static uint32_t lost_logged;
+    while (sbc_dip_tail != sbc_dip_head) {
+        uint32_t i = sbc_dip_tail % SBC_DIP_RING;
+        usb_link_log("t%lu vim3 3v3 dip %lu us", (unsigned long)(sbc_dip_at_ms[i] / 1000),
+                     (unsigned long)sbc_dip_us[i]);
+        sbc_dip_tail++;
+    }
+    if (sbc_dip_lost != lost_logged) {
+        lost_logged = sbc_dip_lost;
+        usb_link_log("vim3 3v3 dips lost %lu", (unsigned long)lost_logged);
+    }
+}
+
 // Power-relevant input edges, for the sleep/wake post-mortem after the link returns.
 static void log_power_inputs(const pwr_inputs_t *in) {
+    log_sbc_dips();
     static bool init;
     static pwr_inputs_t last;
     if (init && in->acc == last.acc && in->sbc_on == last.sbc_on && in->service == last.service &&
