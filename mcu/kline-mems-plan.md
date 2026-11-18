@@ -93,4 +93,4 @@ ECU ──K-line── L9637D (module, J10) ── UART0 GP32/33, EN GP28 ──
 3. VHAL: MemsDecoder + props + tests; HeadUnitDebug page with raw frames.
 4. Capture real frames from the car (idle, warm-up, fan on) to confirm offsets.
 5. CarStatus app: alarm service first, then the dashboard, then session logging + export.
-7. Bench test of the alarm with injected values (mcutool/VHAL debug inject), then in the car.
+6. Bench test of the alarm with injected values (mcutool/VHAL debug inject), then in the car.
