@@ -2,3 +2,6 @@ test/test_power_sm
 test/test_nmea
 build/
 test/test_usb_link
+test/test_kline_sm
+build-*/
+test/test_fw_update

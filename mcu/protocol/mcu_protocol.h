@@ -32,6 +32,7 @@ enum {
     MCU_MSG_PROPS = 0x01,       // mcu_props_msg_t: property updates
     MCU_MSG_INFO = 0x02,        // mcu_info_msg_t: firmware and board info
     MCU_MSG_LOG = 0x03,         // mcu_log_msg_t: one line of text
+    MCU_MSG_KLINE_FRAME = 0x04, // mcu_kline_frame_msg_t: one raw ECU response (K-line module)
     // host -> MCU
     MCU_MSG_HOST_HELLO = 0x81,  // mcu_hello_msg_t: heartbeat, send every second
     MCU_MSG_HOST_SET = 0x82,    // mcu_props_msg_t: property writes
@@ -87,6 +88,23 @@ typedef struct __attribute__((packed)) {
     uint32_t host_uptime_s;
 } mcu_hello_msg_t;
 
+// One complete ECU answer from the K-line module, undecoded: data[0] is the command the MCU
+// sent (= the ECU's echo of it), then the ECU's response bytes. For the MEMS 1.x data frames
+// (0x80, 0x7D) data[1] is the frame length including itself, so len = data[1] + 1. The VHAL
+// decodes it; the firmware only does the transport, so a decoding fix needs no MCU update.
+#define MCU_KLINE_FRAME_MAX 56
+
+typedef struct __attribute__((packed)) {
+    uint8_t type;      // MCU_MSG_KLINE_FRAME
+    uint8_t seq;       // increments per frame (gaps = frames dropped on the MCU)
+    uint8_t len;       // valid bytes in data
+    uint8_t ecu;       // MCU_KLINE_ECU_*
+    uint32_t t_ms;     // MCU clock when the last byte arrived
+    uint8_t data[MCU_KLINE_FRAME_MAX];
+} mcu_kline_frame_msg_t;
+
+enum { MCU_KLINE_ECU_MEMS19 = 1 };
+
 #define MCU_BOOTSEL_MAGIC 0xB007CAFEu
 
 typedef struct __attribute__((packed)) {
@@ -127,6 +145,10 @@ typedef struct __attribute__((packed)) {
 #define MCU_PROP_GNSS_PPS        0x2141060D
 #define MCU_PROP_SUSPEND_SAVE    0x2140060E  // RW: MCU_SAVE_* bits, extra power savings in suspend (default 0)
 #define MCU_PROP_TPS_MODE        0x2140060F  // R: TPS55288 MODE register (06h), raw
+// K-line module (J10). INT32_VEC {MCU_KLINE_ST_*, ECU id (the 4 bytes after 0xD0, little endian)}
+#define MCU_PROP_KLINE_STATE     0x21410610
+#define MCU_PROP_KLINE_MODE      0x21400611  // RW: 0 off, 1 auto (default: poll while ACC is on)
+#define MCU_PROP_KLINE_CMD       0x21400612  // W: MCU_KLINE_CMD_*
 
 #define MCU_PROP_IS_FLOAT(p) (((p) & 0x00FF0000u) == 0x00600000u)
 
@@ -162,6 +184,15 @@ typedef struct __attribute__((packed)) {
 #define MCU_ST_HOT           (1u << 12)  // board above the derating temperature
 #define MCU_ST_DAC_UNMUTED   (1u << 13)
 
+enum {
+    MCU_KLINE_ST_OFF = 0,        // mode off or ACC off: module unpowered
+    MCU_KLINE_ST_WAKING = 1,     // 5-baud wake-up / init in progress
+    MCU_KLINE_ST_CONNECTED = 2,  // session up, frames flowing
+    MCU_KLINE_ST_RETRY = 3,      // no answer (ECU off, no module, wiring): waiting to retry
+};
+
+enum { MCU_KLINE_CMD_CLEAR_FAULTS = 1 };  // send 0xCC once in the running session
+
 typedef enum {
     MCU_PWR_OFF = 0,          // VIM3 unpowered, waiting for ACC
     MCU_PWR_BOOTING = 1,      // VIM3 supply on, waiting for its 3.3V rail
@@ -193,5 +224,6 @@ MCU_STATIC_ASSERT(sizeof(mcu_info_msg_t) == MCU_REPORT_SIZE, "mcu_info_msg_t lay
 MCU_STATIC_ASSERT(sizeof(mcu_log_msg_t) == MCU_REPORT_SIZE, "mcu_log_msg_t layout");
 MCU_STATIC_ASSERT(sizeof(mcu_hello_msg_t) <= MCU_REPORT_SIZE, "mcu_hello_msg_t layout");
 MCU_STATIC_ASSERT(sizeof(mcu_bootsel_msg_t) <= MCU_REPORT_SIZE, "mcu_bootsel_msg_t layout");
+MCU_STATIC_ASSERT(sizeof(mcu_kline_frame_msg_t) == MCU_REPORT_SIZE, "mcu_kline_frame_msg_t layout");
 
 #endif  // MCU_PROTOCOL_H

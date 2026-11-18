@@ -60,11 +60,12 @@
 #define ADC_CH_5VSYS       1
 #define ADC_CH_TEMP        2
 
-// ---- K-line module socket J10 (not used by this firmware yet) ----
-#define PIN_KLINE_TX      32  // /EXP_GP32 UART0 TX
-#define PIN_KLINE_RX      33  // /EXP_GP33 UART0 RX
-#define PIN_KLINE_EN      28  // /EXP_GP28
+// ---- K-line module socket J10 (PCB/kline_module_r01: L9637D on 3.3 V, no level shifting) ----
+#define PIN_KLINE_TX      32  // /EXP_GP32 UART0 TX -> L9637D TX (low = K-line low)
+#define PIN_KLINE_RX      33  // /EXP_GP33 UART0 RX <- L9637D RX (echoes our own TX too)
+#define PIN_KLINE_EN      28  // /EXP_GP28 high = K-line side powered (Q2/Q1, green LED); R4 pull-down
+#define KLINE_UART        uart0
 
 // Pins with nothing on them or only on expansion headers (J21: GPIO24..27).
 // RP2350-E9: these are parked as inputs with the input buffer off and no pulls.
-#define UNUSED_PINS {11, 12, 13, 24, 25, 26, 27, 28, 29, 32, 33, 34, 44, 45, 46, 47}
+#define UNUSED_PINS {11, 12, 13, 24, 25, 26, 27, 29, 34, 44, 45, 46, 47}

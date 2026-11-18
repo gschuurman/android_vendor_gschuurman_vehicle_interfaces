@@ -26,6 +26,10 @@ void usb_link_log(const char *fmt, ...) __attribute__((format(printf, 1, 2)));
 // edge-to-report delay is filled in right before the report is queued.
 void usb_link_send_pps(uint32_t count, uint64_t edge_us);
 
+// One raw ECU answer from the K-line (MCU_MSG_KLINE_FRAME). Dropped while the VHAL link is down;
+// the newest frames win when the host falls behind (seq shows the gaps).
+void usb_link_send_kline(uint8_t ecu, const uint8_t *data, uint8_t len, uint32_t t_ms);
+
 // Media key (HID consumer usage, e.g. 0xE9 volume up). 0 = released.
 void usb_link_consumer_key(uint16_t usage);
 

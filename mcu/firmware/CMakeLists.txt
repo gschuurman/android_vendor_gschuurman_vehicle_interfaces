@@ -16,6 +16,7 @@ pico_sdk_init()
 add_executable(carradio_mcu
     src/main.c
     src/power_sm.c
+    src/kline_sm.c
     src/nmea.c
     src/periph.c
     src/usb_link.c
@@ -48,6 +49,6 @@ pico_enable_stdio_uart(carradio_mcu 0)
 # on an MCU that carries the A/B partition table a BOOTSEL install of this image lands in the
 # other slot, and with the inverted version a normal boot picks it over a newer 0.3.x there.
 # Keep in sync with FW_MAJOR/FW_MINOR/FW_PATCH in src/main.c.
-pico_set_binary_version(carradio_mcu MAJOR 65535 MINOR 65022)  # 0.2.1
+pico_set_binary_version(carradio_mcu MAJOR 65535 MINOR 65021)  # 0.2.2
 pico_hash_binary(carradio_mcu)
 pico_add_extra_outputs(carradio_mcu)

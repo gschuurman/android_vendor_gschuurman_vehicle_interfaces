@@ -27,6 +27,9 @@ static bool hello_seen;
 static bool hello_edge;
 static mcu_log_msg_t log_queue[4];
 static int log_n;
+static mcu_kline_frame_msg_t kline_queue[4];
+static int kline_n;
+static uint8_t kline_seq;
 
 static bool pps_pending;
 static uint32_t pps_count;
@@ -92,6 +95,24 @@ void usb_link_log(const char *fmt, ...) {
     log_n++;
 }
 
+void usb_link_send_kline(uint8_t ecu, const uint8_t *data, uint8_t len, uint32_t t_ms) {
+    uint8_t s = kline_seq++;
+    if (!usb_link_up()) return;
+    const int cap = (int)(sizeof(kline_queue) / sizeof(kline_queue[0]));
+    if (kline_n == cap) {  // host behind: drop the oldest
+        memmove(&kline_queue[0], &kline_queue[1], sizeof(kline_queue[0]) * (size_t)(cap - 1));
+        kline_n--;
+    }
+    mcu_kline_frame_msg_t *m = &kline_queue[kline_n++];
+    memset(m, 0, sizeof(*m));
+    m->type = MCU_MSG_KLINE_FRAME;
+    m->seq = s;
+    m->ecu = ecu;
+    m->t_ms = t_ms;
+    m->len = len < MCU_KLINE_FRAME_MAX ? len : MCU_KLINE_FRAME_MAX;
+    memcpy(m->data, data, m->len);
+}
+
 void usb_link_send_pps(uint32_t count, uint64_t edge_us) {
     pps_count = count;
     pps_edge_us = edge_us;
@@ -151,6 +172,14 @@ static void send_vendor(void) {
             memmove(&queue[0], &queue[n], sizeof(queue[0]) * (size_t)(queue_n - n));
             queue_n -= n;
             if (m->flags & MCU_PROPS_FLAG_SNAPSHOT_END) snapshot_open = snapshot_closing = false;
+        }
+        return;
+    }
+    if (kline_n > 0) {
+        memcpy(buf, &kline_queue[0], sizeof(kline_queue[0]));
+        if (tud_hid_n_report(USB_ITF_VENDOR, 0, buf, sizeof(buf))) {
+            memmove(&kline_queue[0], &kline_queue[1], sizeof(kline_queue[0]) * (size_t)(kline_n - 1));
+            kline_n--;
         }
         return;
     }

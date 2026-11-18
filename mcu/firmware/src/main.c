@@ -19,12 +19,13 @@
 #include "periph.h"
 #include "pico/bootrom.h"
 #include "pico/stdlib.h"
+#include "kline_sm.h"
 #include "power_sm.h"
 #include "usb_link.h"
 
 #define FW_MAJOR 0
 #define FW_MINOR 2
-#define FW_PATCH 1
+#define FW_PATCH 2
 
 #define BL_PWM_HZ 32768u        // same period (30518 ns) the VHAL used on the VIM3 PWM
 #define LOW_BATT_MV 12200       // shut down from suspend below this (~50% charge at rest: the car must still start)...
@@ -228,6 +229,69 @@ static void gpio_edge_irq(uint gpio, uint32_t events) {
 
 uint64_t app_time_us(void) { return time_us_64(); }
 
+// ---------------------------------------------------------------- K-line (MEMS 1.9)
+
+static kl_sm_t ksm;
+static int32_t kline_mode = 1;  // MCU_PROP_KLINE_MODE: 0 off, 1 auto
+static volatile uint8_t kline_rx[128];
+static volatile uint8_t kline_head, kline_tail;
+static bool kline_uart_fn;      // TX pin currently on the UART
+
+static void kline_uart_irq(void) {
+    while (uart_is_readable(KLINE_UART)) {
+        uint8_t c = (uint8_t)uart_getc(KLINE_UART);
+        uint8_t next = (uint8_t)((kline_head + 1) % sizeof(kline_rx));
+        if (next != kline_tail) {
+            kline_rx[kline_head] = c;
+            kline_head = next;
+        }
+    }
+}
+
+static void kline_init(void) {
+    out_init(PIN_KLINE_EN, 0);
+    out_init(PIN_KLINE_TX, 1);  // idle high (recessive) while driven as a GPIO
+    gpio_set_drive_strength(PIN_KLINE_TX, GPIO_DRIVE_STRENGTH_4MA);
+    uart_init(KLINE_UART, 9600);
+    uart_set_format(KLINE_UART, 8, 1, UART_PARITY_NONE);
+    uart_set_fifo_enabled(KLINE_UART, true);
+    gpio_set_function(PIN_KLINE_RX, GPIO_FUNC_UART);
+    gpio_pull_up(PIN_KLINE_RX);  // RX floats while the module is absent
+    irq_set_exclusive_handler(UART0_IRQ, kline_uart_irq);
+    irq_set_enabled(UART0_IRQ, true);
+    uart_set_irq_enables(KLINE_UART, true, false);
+    kl_init(&ksm, to_ms_since_boot(get_absolute_time()));
+}
+
+static void kline_task(void) {
+    while (kline_tail != kline_head) {
+        uint8_t c = kline_rx[kline_tail];
+        kline_tail = (uint8_t)((kline_tail + 1) % sizeof(kline_rx));
+        kl_rx(&ksm, c, now_ms);
+    }
+    kl_inputs_t in = {.acc = inputs[IN_ACC].stable, .enabled = kline_mode != 0};
+    kl_actions_t a = kl_step(&ksm, now_ms, &in);
+
+    gpio_put(PIN_KLINE_EN, a.power);
+    if (a.uart != kline_uart_fn) {
+        // UART for 9600 baud traffic, plain GPIO for the 5-baud address
+        if (!a.uart) uart_tx_wait_blocking(KLINE_UART);  // last byte fully shifted out
+        gpio_set_function(PIN_KLINE_TX, a.uart ? GPIO_FUNC_UART : GPIO_FUNC_SIO);
+        kline_uart_fn = a.uart;
+    }
+    if (!a.uart) gpio_put(PIN_KLINE_TX, a.power ? a.line_high : true);
+    if (a.flush_rx) {
+        while (uart_is_readable(KLINE_UART)) (void)uart_getc(KLINE_UART);
+        kline_tail = kline_head;
+    }
+    if (a.tx >= 0) uart_putc_raw(KLINE_UART, (char)a.tx);
+    if (a.frame) usb_link_send_kline(MCU_KLINE_ECU_MEMS19, a.frame_data, a.frame_len, now_ms);
+    if (a.state_changed) {
+        usb_link_send_prop(MCU_PROP_KLINE_STATE, kl_public_state(&ksm), (int32_t)ksm.ecu_id);
+        usb_link_log("kline state %d", kl_public_state(&ksm));
+    }
+}
+
 static void pps_task(void) {
     if (!pps_flag) return;
     uint32_t irq = save_and_disable_interrupts();
@@ -280,6 +344,7 @@ static void board_init(void) {
     adc_gpio_init(PIN_TEMP_ADC);
 
     periph_i2c_init();
+    kline_init();
 
     // GNSS UART RX only.
     uart_init(GNSS_UART, gnss_bauds[0]);
@@ -637,7 +702,11 @@ static void report_changes(bool force) {
     }
 }
 
-void app_on_snapshot_request(void) { report_changes(true); }
+void app_on_snapshot_request(void) {
+    report_changes(true);
+    usb_link_send_prop(MCU_PROP_KLINE_STATE, kl_public_state(&ksm), (int32_t)ksm.ecu_id);
+    usb_link_send_prop(MCU_PROP_KLINE_MODE, kline_mode, 0);
+}
 
 void app_fill_info(void *p) {
     mcu_info_msg_t *info = p;
@@ -684,6 +753,13 @@ void app_on_host_set(uint32_t prop, int32_t v0, int32_t v1) {
         break;
     case MCU_PROP_GNSS_CMD:
         gnss_command(v0);
+        break;
+    case MCU_PROP_KLINE_MODE:
+        if (v0 == 0 || v0 == 1) kline_mode = v0;
+        usb_link_send_prop(MCU_PROP_KLINE_MODE, kline_mode, 0);
+        break;
+    case MCU_PROP_KLINE_CMD:
+        if (v0 == MCU_KLINE_CMD_CLEAR_FAULTS) kl_request_clear_faults(&ksm);
         break;
     case MCU_PROP_SUSPEND_SAVE:
         suspend_save = (uint32_t)v0 & (MCU_SAVE_HUB_PARK | MCU_SAVE_TPS_PFM);
@@ -764,6 +840,7 @@ int main(void) {
         measure();
         lux_task();
         gnss_task();
+        kline_task();
 
         bool link = usb_link_up();
         pwr_inputs_t in = {
