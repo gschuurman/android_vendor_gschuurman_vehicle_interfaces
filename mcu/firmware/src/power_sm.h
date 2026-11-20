@@ -37,6 +37,7 @@ typedef struct {
     uint32_t boot_timeout_ms;     // give up on a boot attempt, cut power and retry
     uint32_t boot_attempts;       // attempts before latching off until ACC cycles
     uint32_t key_short_ms;        // wake / sleep press
+    uint32_t key_deep_wake_ms;    // wake press out of deep suspend: bl301 polls the key line slowly
     uint32_t key_on_ms;           // power-on press
     uint32_t sbc_off_confirm_ms;  // VIM3 rail must stay low this long to count as off
     uint32_t prep_timeout_ms;     // SHUTDOWN_PREP without suspend or shutdown -> cut

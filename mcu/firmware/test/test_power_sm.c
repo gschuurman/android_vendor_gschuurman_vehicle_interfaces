@@ -259,6 +259,7 @@ static void test_deep_sleep_rail_off_resume(void) {
     in.acc = true;
     run(100);
     assert(sm.state == MCU_PWR_WAKING && presses == p + 1);
+    assert(last_press_ms == 500);  // long enough for bl301's slow key poll
     run(3000);  // rail low for longer than sbc_off_confirm_ms while resuming
     assert(sm.state == MCU_PWR_WAKING && power);
     in.sbc_on = true;
@@ -381,6 +382,32 @@ static void test_service_no_rail_sense(void) {
     printf("service jumper, no rail sense -> stays powered ok\n");
 }
 
+// Car board 2026-11-20: the VIM3 3V3 rail stays up in deep suspend. Every wake press out of
+// deep must be the long one (bl301 polls slowly), also the retries.
+static void test_deep_sleep_rail_stays_long_presses(void) {
+    boot_to_running();
+    in.acc = false;
+    run(3000);
+    report(REP_DEEP_SLEEP_ENTRY);
+    in.link_up = false;
+    in.usb_suspended = true;  // rail (sbc_on) stays true
+    run(60000);
+    assert(sm.state == MCU_PWR_SUSPENDED);
+    uint32_t p = presses;
+    in.acc = true;
+    run(100);
+    assert(sm.state == MCU_PWR_WAKING && presses == p + 1 && last_press_ms == 500);
+    run(15100);
+    assert(presses == p + 2 && last_press_ms == 500);
+    run(15000);
+    assert(presses == p + 3 && last_press_ms == 500);
+    in.usb_suspended = false;
+    in.link_up = true;
+    report(REP_DEEP_SLEEP_EXIT);
+    assert(sm.state == MCU_PWR_RUNNING && !sm.deep_sleep);
+    printf("deep sleep, rail stays up -> long presses ok\n");
+}
+
 int main(void) {
     test_drive_suspend_resume();
     test_suspend_then_full_off();
@@ -399,6 +426,7 @@ int main(void) {
     test_resume_slow_link();
     test_wake_fails_acc_on_shallow();
     test_service_no_rail_sense();
+    test_deep_sleep_rail_stays_long_presses();
     printf("test_power_sm: ok\n");
     return 0;
 }

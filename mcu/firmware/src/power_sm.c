@@ -11,6 +11,9 @@ void pwr_default_config(pwr_config_t *c) {
     c->boot_timeout_ms = 90000;
     c->boot_attempts = 3;
     c->key_short_ms = 150;
+    // bl301 (deep suspend) checks that GPIOAO_7 is still low when its poll task runs: 150 ms
+    // presses were missed on the car board 2026-11-20, the VIM3 power button (longer) worked.
+    c->key_deep_wake_ms = 500;
     c->key_on_ms = 1000;
     c->sbc_off_confirm_ms = 2000;
     c->prep_timeout_ms = 5u * 60u * 1000u;
@@ -79,10 +82,14 @@ static void request_sleep(pwr_sm_t *sm, const pwr_inputs_t *in, int32_t param) {
     set_state(sm, MCU_PWR_SHUTDOWN_PREP);
 }
 
+static uint32_t wake_press_ms(const pwr_sm_t *sm) {
+    return sm->deep_sleep ? sm->cfg.key_deep_wake_ms : sm->cfg.key_short_ms;
+}
+
 static void start_wake(pwr_sm_t *sm, const pwr_inputs_t *in, bool for_shutdown) {
     sm->wake_for_shutdown = for_shutdown;
     sm->wake_attempt = 1;
-    press(sm, in, sm->cfg.key_short_ms);
+    press(sm, in, wake_press_ms(sm));
     set_state(sm, MCU_PWR_WAKING);
 }
 
@@ -292,7 +299,9 @@ pwr_actions_t pwr_step(pwr_sm_t *sm, uint32_t now, const pwr_inputs_t *in) {
         break;
 
     case MCU_PWR_WAKING:
-        if (sm->deep_sleep && in->sbc_on) sm->deep_sleep = false;  // rail back: resumed
+        // deep_sleep stays until Android is back (enter_running) or the supply is cut: on the car
+        // board the VIM3 3V3 rail does not drop in deep suspend, so "rail back" proves nothing,
+        // and the retries must keep the long press.
         if (sbc_off && !sm->deep_sleep) {
             cut_power(sm, in->acc ? MCU_PWR_LATCHED_OFF : MCU_PWR_OFF);
             break;
@@ -305,7 +314,7 @@ pwr_actions_t pwr_step(pwr_sm_t *sm, uint32_t now, const pwr_inputs_t *in) {
         if (in->usb_suspended && since(now, sm->last_key) >= c->wake_retry_ms) {
             if (sm->wake_attempt < c->wake_attempts) {
                 sm->wake_attempt++;
-                press(sm, in, c->key_short_ms);
+                press(sm, in, wake_press_ms(sm));
             } else {
                 // Will not wake: nothing left to save. With ACC on, OFF boots it again from cold.
                 cut_power(sm, MCU_PWR_OFF);
