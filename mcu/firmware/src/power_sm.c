@@ -200,7 +200,8 @@ pwr_actions_t pwr_step(pwr_sm_t *sm, uint32_t now, const pwr_inputs_t *in) {
             // VIM3 not set to start on power: press its key.
             sm->boot_key_pressed = true;
             press(sm, in, c->key_on_ms);
-        } else if (since(now, sm->state_since) >= c->boot_timeout_ms) {
+        } else if (!in->service && since(now, sm->state_since) >= c->boot_timeout_ms) {
+            // (service jumper: never cut, also when the rail sense is not connected)
             cut_power(sm, sm->boot_attempt >= c->boot_attempts ? MCU_PWR_LATCHED_OFF : MCU_PWR_OFF);
         }
         break;

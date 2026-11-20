@@ -368,6 +368,19 @@ static void test_wake_fails_acc_on_shallow(void) {
     printf("shallow wake fails, ACC on -> cold boot ok\n");
 }
 
+// Bench 2026-11-20: VIM3 ribbon unplugged (no rail sense), service jumper fitted: the boot timeout
+// cut the supply every 90 s. Service mode must never cut.
+static void test_service_no_rail_sense(void) {
+    in = (pwr_inputs_t){0};
+    reset(false);
+    in.service = true;
+    run(100);
+    assert(sm.state == MCU_PWR_BOOTING && power);
+    run(10u * 60u * 1000u);
+    assert(sm.state == MCU_PWR_BOOTING && power && presses == 0);
+    printf("service jumper, no rail sense -> stays powered ok\n");
+}
+
 int main(void) {
     test_drive_suspend_resume();
     test_suspend_then_full_off();
@@ -385,6 +398,7 @@ int main(void) {
     test_resume_hangs_acc_on();
     test_resume_slow_link();
     test_wake_fails_acc_on_shallow();
+    test_service_no_rail_sense();
     printf("test_power_sm: ok\n");
     return 0;
 }
