@@ -71,6 +71,7 @@ class SchuurmanVehicleHardware : public IVehicleHardware {
     // Engine values from the K-line, NOT_AVAILABLE when no frame came for kMemsStaleNs.
     bool memsFresh() const REQUIRES(mMemsMutex);
     void pushSettingsToMcu();
+    void syncPersistedMcuSettings();
     // Audio mute sent to the MCU: Android's (user) mute, or the primary audio output not
     // running yet (vendor.audio.output_running), so the amp never comes on over
     // unclocked DACs. Returns the value and fills `why` for the log.

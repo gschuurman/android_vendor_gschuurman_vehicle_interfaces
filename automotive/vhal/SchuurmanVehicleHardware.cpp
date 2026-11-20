@@ -355,6 +355,34 @@ void SchuurmanVehicleHardware::onMcuConnect(bool connected) {
     }
 }
 
+// The persisted MCU settings as they should be on the MCU now. pushSettingsToMcu() sends them when the
+// link comes up, but the VHAL starts before init loads the persist.* properties from /data, so right
+// after boot (and after an MCU restart in that window) it read the defaults: the MCU then ran with a
+// 12 h off delay and no suspend savings although the properties said 1800 s / 3 (2026-11-20). The
+// housekeeping loop calls this every 2 s: whatever the MCU reports back that differs from the property
+// is sent again, so the MCU converges on the persisted values whatever the order of events.
+void SchuurmanVehicleHardware::syncPersistedMcuSettings() {
+    if (!mMcu.connected()) return;
+    const std::pair<uint32_t, int32_t> want[] = {
+            {MCU_PROP_AMP_MODE, android::base::GetIntProperty(kAmpModeProp, 2, 0, 2)},
+            {MCU_PROP_OFF_DELAY_S, offDelayForMcu()},
+            {MCU_PROP_SUSPEND_SAVE, android::base::GetIntProperty(kSuspendSaveProp, 0, 0, 3)},
+            {MCU_PROP_KLINE_MODE, android::base::GetIntProperty(kKlineModeProp, 1, 0, 1)},
+    };
+    std::vector<mcu_prop_t> resend;
+    {
+        std::lock_guard<std::mutex> lk(mMcuMutex);
+        for (const auto& [prop, value] : want) {
+            auto it = mMcuValues.find(static_cast<int32_t>(prop));
+            if (it == mMcuValues.end() || it->second.first == value) continue;  // unknown yet or in sync
+            LOG(INFO) << "MCU setting 0x" << std::hex << prop << std::dec << " is " << it->second.first
+                      << ", persisted " << value << ": resending";
+            resend.push_back({prop, value, 0});
+        }
+    }
+    if (!resend.empty()) mMcu.set(resend);
+}
+
 void SchuurmanVehicleHardware::pushSettingsToMcu() {
     int brightness = mLastNonZeroBrightness.load();
     if (brightness <= 0) brightness = 50;
@@ -645,6 +673,7 @@ void SchuurmanVehicleHardware::housekeepingLoop() {
     double ema = -1.0;
     const double alpha = 0.25;
     const int maxLux = android::base::GetIntProperty(kLuxMaxProp, 100000);
+    int settingsTick = 0;
 
     while (!mShuttingDown.load()) {
         std::this_thread::sleep_for(std::chrono::milliseconds(250));
@@ -663,6 +692,10 @@ void SchuurmanVehicleHardware::housekeepingLoop() {
 
         updateParkingBrake(false);
         updateAudioMute();
+        if (++settingsTick >= 8) {  // every 2 s
+            settingsTick = 0;
+            syncPersistedMcuSettings();
+        }
 
         // Auto brightness from the MCU's light sensor (it probes for a BH1750 every 5 s, so a sensor
         // connected later takes over by itself).
