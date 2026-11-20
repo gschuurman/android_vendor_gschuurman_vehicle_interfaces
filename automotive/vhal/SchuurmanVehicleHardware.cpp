@@ -151,10 +151,10 @@ static constexpr char kAmpModeProp[] = "persist.vendor.vehicle.amp_mode";
 static constexpr char kOffDelayProp[] = "persist.vendor.vehicle.off_delay_s";
 static constexpr char kSuspendSaveProp[] = "persist.vendor.vehicle.suspend_save";
 static constexpr char kKlineModeProp[] = "persist.vendor.vehicle.kline_mode";
-// Long suspends (12 h) only with firmware that shuts down at 12.2 V (0.2.0); older firmware
+// Long suspends (over 15 min) only with firmware that shuts down at 12.2 V (0.2.0); older firmware
 // (11.6 V) keeps the 15 min off delay so a long sleep can't leave the car unable to start.
 static constexpr int kMcuFwLongSleep = 200;  // 0.2.0
-static constexpr int32_t kOffDelayLongS = 12 * 3600;
+static constexpr int32_t kOffDelayLongS = 3600;  // 1 h (2026-11-20: ~2.3 W in deep, a stop costs ~0.2 Ah)
 static constexpr int32_t kOffDelayShortS = 15 * 60;
 static constexpr char kLuxMaxProp[] = "ro.vendor.vehicle.lux_max";
 static constexpr char kAutoBrightnessProp[] = "persist.vendor.vehicle.auto_brightness";

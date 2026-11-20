@@ -25,7 +25,7 @@
 
 #define FW_MAJOR 0
 #define FW_MINOR 2
-#define FW_PATCH 7
+#define FW_PATCH 8
 
 #define BL_PWM_HZ 32768u        // same period (30518 ns) the VHAL used on the VIM3 PWM
 #define LOW_BATT_MV 12200       // shut down from suspend below this (~50% charge at rest: the car must still start)...
@@ -125,7 +125,7 @@ static int32_t amp_mode = 2;        // 0 off, 1 on, 2 auto
 // are clocked). The DACs float without their clocks and the amp would amplify that.
 static bool host_mute = true;
 static uint32_t suspend_save;       // MCU_SAVE_*, set by the VHAL (default off)
-static uint32_t off_delay_s = 12 * 3600;  // suspend -> full off; the low battery guard ends it earlier
+static uint32_t off_delay_s = 3600;  // suspend -> full off (1 h); the low battery guard ends it earlier
 
 // Outputs as driven
 static bool supply_on;
